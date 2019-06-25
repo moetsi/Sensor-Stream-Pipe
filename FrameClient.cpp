@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 
       for (;;)
       {
-        std::vector<unsigned char> buf(5);
+        std::vector<unsigned char> buf(256);
         asio::error_code error;
 
         size_t len = socket.read_some(asio::buffer(buf), error);
@@ -54,7 +54,6 @@ int main(int argc, char* argv[])
 
         for (uint i = 0; i < buf.size(); i++)
           std::cout << buf[i];
-        std::cout << std::endl;
       }
 
       std::this_thread::sleep_for(std::chrono::milliseconds(1000));
