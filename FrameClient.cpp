@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
         else if (error)
           throw asio::system_error(error); // Some other error.
 
-        for (uint i = 0; i < buf.size(); i++)
+        for (uint i = 0; i < len; i++)
           std::cout << buf[i];
       }
 
