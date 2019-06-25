@@ -1,6 +1,6 @@
 
 all:
-	g++ -o reader FrameReader.cpp
-	g++ -pthread -o client FrameClient.cpp
-	g++ -pthread -o server FrameServer.cpp
+	g++ -o bin/reader FrameReader.cpp
+	g++ -pthread -o bin/client FrameClient.cpp
+	g++ -pthread -o bin/server FrameServer.cpp
 
