@@ -12,6 +12,8 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/base_class.hpp>
 #include <cereal/archives/binary.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/highgui.hpp>
 
 struct FrameStruct {
     unsigned short messageType;
@@ -25,6 +27,14 @@ struct FrameStruct {
     template<class Archive>
     void serialize(Archive &ar) {
         ar(messageType, colorFrame, depthFrame, sensorId, deviceId, frameId, timestamp);
+    }
+
+    cv::Mat getColorFrame() {
+        return cv::imdecode(colorFrame, CV_LOAD_IMAGE_ANYDEPTH);
+    }
+
+    cv::Mat getDepthFrame() {
+        return cv::imdecode(depthFrame, CV_LOAD_IMAGE_ANYDEPTH);
     }
 
 

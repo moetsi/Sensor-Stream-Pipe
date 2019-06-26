@@ -70,12 +70,11 @@ FrameStruct parseFrameStruct(std::vector<unsigned char> &data, size_t dataSize) 
 
 FrameStruct parseFrameStruct(asio::streambuf &data) {
     FrameStruct frameIn;
-    std::istream is(&data);
 
+    std::istream is(&data);
     {
         cereal::BinaryInputArchive iarchive(is);
         iarchive(frameIn);
     }
     return frameIn;
 }
-

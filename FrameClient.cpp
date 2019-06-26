@@ -32,12 +32,11 @@ int main(int argc, char *argv[]) {
         tcp::socket socket(io_context);
         asio::error_code error = asio::error::host_unreachable;
         asio::streambuf streamBuffer;
-        asio::streambuf::mutable_buffers_type mutableBuffer =
-                streamBuffer.prepare(BUFFER_SIZE);
 
         uint64_t last_time = current_time_ms();
         uint64_t start_time = last_time;
         uint64_t rec_frames = 0;
+        size_t paclet_len = 0;
         for (;;) {
             while (error)
                 asio::connect(socket, endpoints, error);
@@ -48,8 +47,9 @@ int main(int argc, char *argv[]) {
             }
 
             for (;;) {
-                size_t len = socket.read_some(asio::buffer(mutableBuffer), error);
+                size_t len = socket.read_some(streamBuffer.prepare(BUFFER_SIZE), error);
                 streamBuffer.commit(len);
+                paclet_len += len;
 
                 if (error == asio::error::eof) {
                     rec_frames += 1;
@@ -61,10 +61,13 @@ int main(int argc, char *argv[]) {
                     else
                         avg_fps = 1000 / diff_start_time;
 
-                    std::cout << "EOF received, took " << diff_time << " ms; avg " << avg_fps << " fps" << std::endl;
+                    std::cout << "Message received, took " << diff_time << " ms; size " << paclet_len << "; avg " << avg_fps << " fps" << std::endl;
                     last_time = current_time_ms();
                     FrameStruct f = parseFrameStruct(streamBuffer);
-                    //streamBuffer.consume(streamBuffer.in_avail());
+                    cv::Mat color = f.getColorFrame();
+                    cv::Mat depth = f.getDepthFrame();
+                    streamBuffer.consume(paclet_len);
+                    paclet_len = 0;
                     break; // Connection closed cleanly by peer.
                 } else if (error) {
                     throw asio::system_error(error); // Some other error.

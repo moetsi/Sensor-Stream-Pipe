@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
             else
                 avg_fps = 1000 / diff_start_time;
 
-            std::cout << "EOF received, took " << diff_time << " ms; avg " << avg_fps << " fps" << std::endl;
+            std::cout << "Message sent, took " << diff_time << " ms; size " << message.size() << "; avg " << avg_fps << " fps" << std::endl;
             last_time = current_time_ms();
 
 
