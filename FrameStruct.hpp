@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <iterator>
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/memory.hpp>
@@ -22,4 +23,30 @@ struct FrameStruct {
     {
         ar( messageType, colorFrame, depthFrame, sensorId, deviceId, frameId, timestamp);
     }
+
+
 };
+
+template<typename T>
+const std::vector<uint8_t> serialize(const T& t)
+{
+    std::stringstream ss(std::ios::binary | std::ios::out | std::ios::in);
+    cereal::BinaryOutputArchive class_to_ss = {ss};
+    class_to_ss(t);
+
+    return { std::istream_iterator<uint8_t>(ss),
+             std::istream_iterator<uint8_t>() };
+}
+
+template<typename T>
+T deserialize(std::vector<uint8_t>& dat)
+{
+    std::stringstream ss(std::ios::binary | std::ios::out | std::ios::in);
+    cereal::BinaryOutputArchive arr_to_ss = {ss};
+    arr_to_ss(cereal::binary_data(dat.data(), dat.size()));
+
+    cereal::BinaryInputArchive ss_to_MyClass(ss);
+    T t;
+    ss_to_MyClass(t);
+    return t;
+}

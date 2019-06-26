@@ -15,6 +15,7 @@
 #include <thread>
 
 #include "FrameStruct.hpp"
+#include "FrameReader.cpp"
 
 using asio::ip::tcp;
 
@@ -35,28 +36,31 @@ int main(int argc, char* argv[])
       resolver.resolve(argv[1], argv[2]);
 
     tcp::socket socket(io_context);
-
+      asio::error_code error = asio::error::host_unreachable;
+      asio::streambuf streamBuffer;
+      asio::streambuf::mutable_buffers_type mutableBuffer =
+              streamBuffer.prepare(1610610);
     for (;;)
     {
-      asio::connect(socket, endpoints);
+        while(error)
+            asio::connect(socket, endpoints, error);
 
-      for (;;)
-      {
-        std::vector<unsigned char> buf(256);
-        asio::error_code error;
+      for (;;) {
+          size_t len = socket.read_some(asio::buffer(mutableBuffer), error);
+          streamBuffer.commit(len);
 
-        size_t len = socket.read_some(asio::buffer(buf), error);
-
-        if (error == asio::error::eof)
-          break; // Connection closed cleanly by peer.
-        else if (error)
-          throw asio::system_error(error); // Some other error.
-
-        for (uint i = 0; i < len; i++)
-          std::cout << buf[i];
+          if (error == asio::error::eof) {
+              std::cout << "EOF, Received " << len << " bytes " << streamBuffer.size() << std::endl;
+              FrameStruct f = parseFrameStruct(streamBuffer);
+              //streamBuffer.consume(streamBuffer.in_avail());
+              break; // Connection closed cleanly by peer.
+          } else if (error)
+          {
+              throw asio::system_error(error); // Some other error.
+          }
       }
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
     }
   }
   catch (std::exception& e)

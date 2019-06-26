@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 
+#include <asio.hpp>
 #include <cereal/archives/binary.hpp>
 #include "FrameStruct.hpp"
 
@@ -19,26 +20,64 @@ std::vector<unsigned char> readFile(const char* filename)
     return fileData;
 }
 
-
-
-int main (int argc, char *argv[])
+FrameStruct getFrameStruct(const char* filename1, const char* filename2)
 {
-
-    if (argc != 3)
-    {
-        std::cerr << "Usage: reader <file1> <file2>" << std::endl;
-        return 1;
-    }
-
-    std::vector<unsigned char> colorFileData = readFile(argv[1]);
-    std::vector<unsigned char> depthFileData = readFile(argv[2]);
+    std::vector<unsigned char> colorFileData = readFile(filename1);
+    std::vector<unsigned char> depthFileData = readFile(filename2);
     FrameStruct frame = FrameStruct();
     frame.colorFrame = colorFileData;
     frame.depthFrame = depthFileData;
-    std::cout << sizeof(frame) << std::endl;
+    return frame;
+}
 
-    std::ofstream os("out.cereal", std::ios::binary);
-    cereal::BinaryOutputArchive archive( os );
-    archive(frame);
+std::string getExampleFrameStructBytes()
+{
+    FrameStruct frame = getFrameStruct("/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg", "/home/amourao/data/bundle_fusion/apt0/frame-000000.depth.png");
+    std::ostringstream os(std::ios::binary);
+
+    {
+        cereal::BinaryOutputArchive oarchive( os );
+        oarchive(frame);
+    }
+
+    return os.str();
+
+}
+
+FrameStruct parseFrameStruct(std::string& data)
+{
+    FrameStruct frameIn;
+    std::istringstream is(data, std::ios::binary);
+    {
+        cereal::BinaryInputArchive iarchive(is);
+        iarchive(frameIn);
+    }
+    return frameIn;
+}
+
+
+
+FrameStruct parseFrameStruct(std::vector<unsigned char>& data, size_t dataSize)
+{
+    FrameStruct frameIn;
+    std::istringstream is(std::string(data.begin(), data.begin()+dataSize), std::ios::binary);
+    {
+        cereal::BinaryInputArchive iarchive(is);
+        iarchive(frameIn);
+    }
+    return frameIn;
+}
+
+
+FrameStruct parseFrameStruct(asio::streambuf& data)
+{
+    FrameStruct frameIn;
+    std::istream is(&data);
+
+    {
+        cereal::BinaryInputArchive iarchive(is);
+        iarchive(frameIn);
+    }
+    return frameIn;
 }
 
