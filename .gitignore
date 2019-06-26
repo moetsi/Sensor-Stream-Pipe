@@ -33,3 +33,4 @@
 bin/
 
 cmake-*/
+.idea/
