@@ -1,3 +1,7 @@
+//
+// Created by amourao on 26-06-2019.
+//
+
 #pragma once
 
 #include <vector>
@@ -18,29 +22,26 @@ struct FrameStruct {
     unsigned int frameId;
     std::vector<unsigned long> timestamp;
 
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar( messageType, colorFrame, depthFrame, sensorId, deviceId, frameId, timestamp);
+    template<class Archive>
+    void serialize(Archive &ar) {
+        ar(messageType, colorFrame, depthFrame, sensorId, deviceId, frameId, timestamp);
     }
 
 
 };
 
 template<typename T>
-const std::vector<uint8_t> serialize(const T& t)
-{
+const std::vector<uint8_t> serialize(const T &t) {
     std::stringstream ss(std::ios::binary | std::ios::out | std::ios::in);
     cereal::BinaryOutputArchive class_to_ss = {ss};
     class_to_ss(t);
 
-    return { std::istream_iterator<uint8_t>(ss),
-             std::istream_iterator<uint8_t>() };
+    return {std::istream_iterator<uint8_t>(ss),
+            std::istream_iterator<uint8_t>()};
 }
 
 template<typename T>
-T deserialize(std::vector<uint8_t>& dat)
-{
+T deserialize(std::vector<uint8_t> &dat) {
     std::stringstream ss(std::ios::binary | std::ios::out | std::ios::in);
     cereal::BinaryOutputArchive arr_to_ss = {ss};
     arr_to_ss(cereal::binary_data(dat.data(), dat.size()));
