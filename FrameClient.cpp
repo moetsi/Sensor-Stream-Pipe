@@ -62,12 +62,14 @@ int main(int argc, char *argv[]) {
                         avg_fps = 1000 / diff_start_time;
 
                     //std::cout << "Message received, took " << diff_time << " ms; size " << paclet_len << "; avg " << avg_fps << " fps" << std::endl;
+
                     last_time = current_time_ms();
                     FrameStruct f = FrameStruct::parseFrameStruct(streamBuffer);
-                    std::cout << "Frame " << f.frameId << " received, took " << diff_time << " ms; size " << paclet_len
-                              << "; avg " << avg_fps << " fps" << std::endl;
                     cv::Mat color = f.getColorFrame();
                     cv::Mat depth = f.getDepthFrame();
+                    std::cout << "Frame " << f.frameId << " received, took " << diff_time << " ms; size " << paclet_len
+                              << "; avg " << avg_fps << " fps" << std::endl;
+
                     streamBuffer.consume(paclet_len);
                     paclet_len = 0;
                     break; // Connection closed cleanly by peer.
