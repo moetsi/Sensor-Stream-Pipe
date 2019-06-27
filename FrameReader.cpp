@@ -4,7 +4,45 @@
 
 #include "FrameReader.h"
 
-std::vector<unsigned char> readFile(const char *filename) {
+FrameReader::FrameReader(std::string filename) {
+    // bundle_fusion_apt0;0;0;30
+
+    // std::string sceneDesc;
+    // unsigned int sensorId;
+    // unsigned int deviceId;
+
+    std::ifstream file(filename);
+    std::string line;
+    getline(file, line);
+    std::string value;
+
+    std::stringstream ss(line);
+    getline(ss, sceneDesc, ';');
+
+    std::string sensorIdStr, deviceIdStr, frameCountStr, fpsStr;
+    getline(ss, sensorIdStr, ';');
+    getline(ss, deviceIdStr, ';');
+    getline(ss, fpsStr);
+
+    sensorId = std::stoul(sensorIdStr);
+    deviceId = std::stoul(deviceIdStr);
+    fps = std::stoul(fpsStr);
+
+    // get frame count
+    getline(file, frameCountStr);
+    unsigned int frameCount = std::stoul(frameCountStr);
+
+    while (getline(file, line))
+        frameLines.push_back(line);
+
+    if (frameCount != frameLines.size())
+        std::cerr << "Warning: lines read do not match expected size: " << frameLines.size() << " read vs. "
+                  << frameCount << " expected." << std::endl;
+
+    reset();
+}
+
+std::vector<unsigned char> FrameReader::readFile(std::string &filename) {
     std::streampos fileSize;
     std::ifstream file(filename, std::ios::binary);
 
@@ -17,18 +55,43 @@ std::vector<unsigned char> readFile(const char *filename) {
     return fileData;
 }
 
-FrameStruct createFrameStruct(const char *filename1, const char *filename2) {
-    std::vector<unsigned char> colorFileData = readFile(filename1);
-    std::vector<unsigned char> depthFileData = readFile(filename2);
+FrameStruct FrameReader::createFrameStruct(unsigned int frameId) {
+    // 0;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg
+
+    std::string line = frameLines[frameId];
+    std::stringstream ss(line);
+
+    std::string frameIdStr, colorFramePath, depthFramePath;
+
+    getline(ss, frameIdStr, ';');
+    getline(ss, colorFramePath, ';');
+    getline(ss, depthFramePath);
+
+    unsigned int readFrameId = std::stoul(frameIdStr);
+
+    if (readFrameId != currentFrameCounter)
+        std::cerr << "Warning: frame ids do not match: " << readFrameId << " read vs. " << currentFrameCounter
+                  << " expected." << std::endl;
+
+
+    std::vector<unsigned char> colorFileData = readFile(colorFramePath);
+    std::vector<unsigned char> depthFileData = readFile(depthFramePath);
     FrameStruct frame = FrameStruct();
+
+    frame.messageType = 0;
+
+    frame.sceneDesc = sceneDesc;
+    frame.deviceId = deviceId;
+    frame.sensorId = sensorId;
+
+    frame.frameId = readFrameId;
     frame.colorFrame = colorFileData;
     frame.depthFrame = depthFileData;
+
     return frame;
 }
 
-std::string getExampleFrameStructBytes() {
-    FrameStruct frame = createFrameStruct("/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg",
-                                          "/home/amourao/data/bundle_fusion/apt0/frame-000000.depth.png");
+std::string FrameReader::getStructBytes(FrameStruct frame) {
     std::ostringstream os(std::ios::binary);
 
     {
@@ -40,35 +103,50 @@ std::string getExampleFrameStructBytes() {
 
 }
 
-FrameStruct parseFrameStruct(std::string &data) {
-    FrameStruct frameIn;
-    std::istringstream is(data, std::ios::binary);
-    {
-        cereal::BinaryInputArchive iarchive(is);
-        iarchive(frameIn);
-    }
-    return frameIn;
+unsigned int FrameReader::currentFrameId() {
+    return currentFrameCounter;
+}
+
+std::string FrameReader::currentFrameBytes() {
+    return getStructBytes(currentFrameInternal);
+}
+
+FrameStruct FrameReader::currentFrame() {
+    return currentFrameInternal;
 }
 
 
-FrameStruct parseFrameStruct(std::vector<unsigned char> &data, size_t dataSize) {
-    FrameStruct frameIn;
-    std::istringstream is(std::string(data.begin(), data.begin() + dataSize), std::ios::binary);
-    {
-        cereal::BinaryInputArchive iarchive(is);
-        iarchive(frameIn);
-    }
-    return frameIn;
+void FrameReader::nextFrame() {
+    currentFrameCounter += 1;
+    currentFrameInternal = createFrameStruct(currentFrameCounter);
 }
 
+bool FrameReader::hasNextFrame() {
+    return currentFrameCounter + 1 < frameLines.size();
+}
 
-FrameStruct parseFrameStruct(asio::streambuf &data) {
-    FrameStruct frameIn;
+void FrameReader::goToFrame(unsigned int frameId) {
+    currentFrameCounter = frameId;
+    currentFrameInternal = createFrameStruct(currentFrameCounter);
+}
 
-    std::istream is(&data);
-    {
-        cereal::BinaryInputArchive iarchive(is);
-        iarchive(frameIn);
-    }
-    return frameIn;
+void FrameReader::reset() {
+    currentFrameCounter = 0;
+    currentFrameInternal = createFrameStruct(currentFrameCounter);
+}
+
+unsigned int FrameReader::getFps() {
+    return fps;
+}
+
+unsigned int FrameReader::getSensorId() {
+    return sensorId;
+}
+
+unsigned int FrameReader::getDeviceId() {
+    return deviceId;
+}
+
+std::string FrameReader::getSceneDesc() {
+    return sceneDesc;
 }

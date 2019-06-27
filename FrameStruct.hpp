@@ -19,6 +19,7 @@ struct FrameStruct {
     unsigned short messageType;
     std::vector<unsigned char> colorFrame;
     std::vector<unsigned char> depthFrame;
+    std::string sceneDesc;
     unsigned int sensorId;
     unsigned int deviceId;
     unsigned int frameId;
@@ -26,7 +27,7 @@ struct FrameStruct {
 
     template<class Archive>
     void serialize(Archive &ar) {
-        ar(messageType, colorFrame, depthFrame, sensorId, deviceId, frameId, timestamp);
+        ar(messageType, colorFrame, depthFrame, sceneDesc, sensorId, deviceId, frameId, timestamp);
     }
 
     cv::Mat getColorFrame() {
@@ -35,6 +36,39 @@ struct FrameStruct {
 
     cv::Mat getDepthFrame() {
         return cv::imdecode(depthFrame, CV_LOAD_IMAGE_ANYDEPTH);
+    }
+
+    static FrameStruct parseFrameStruct(std::string &data) {
+        FrameStruct frameIn;
+        std::istringstream is(data, std::ios::binary);
+        {
+            cereal::BinaryInputArchive iarchive(is);
+            iarchive(frameIn);
+        }
+        return frameIn;
+    }
+
+
+    static FrameStruct parseFrameStruct(std::vector<unsigned char> &data, size_t dataSize) {
+        FrameStruct frameIn;
+        std::istringstream is(std::string(data.begin(), data.begin() + dataSize), std::ios::binary);
+        {
+            cereal::BinaryInputArchive iarchive(is);
+            iarchive(frameIn);
+        }
+        return frameIn;
+    }
+
+
+    static FrameStruct parseFrameStruct(asio::streambuf &data) {
+        FrameStruct frameIn;
+
+        std::istream is(&data);
+        {
+            cereal::BinaryInputArchive iarchive(is);
+            iarchive(frameIn);
+        }
+        return frameIn;
     }
 
 
@@ -61,3 +95,5 @@ T deserialize(std::vector<uint8_t> &dat) {
     ss_to_MyClass(t);
     return t;
 }
+
+

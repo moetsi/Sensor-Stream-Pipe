@@ -15,21 +15,21 @@
 
 using asio::ip::tcp;
 
-std::string get_frame_message() {
-    return getExampleFrameStructBytes();
-}
-
 int main(int argc, char *argv[]) {
 
     try {
         if (argc != 3) {
-            std::cerr << "Usage: server <port> <fps>" << std::endl;
+            std::cerr << "Usage: server <port> <frame_list>" << std::endl;
             return 1;
         }
 
         asio::io_context io_context;
-        uint port = atoi(argv[1]);
-        uint fps = atoi(argv[2]);
+        uint port = std::stoul(argv[1]);
+
+        std::string name = std::string(argv[2]);
+        FrameReader reader(name);
+
+        uint fps = reader.getFps();
 
         uint64_t last_time = current_time_ms();
         uint64_t start_time = last_time;
@@ -47,7 +47,12 @@ int main(int argc, char *argv[]) {
                 start_time = last_time;
             }
 
-            std::string message = get_frame_message();
+            std::string message = reader.currentFrameBytes();
+            uint frameId = reader.currentFrameId();
+            if (reader.hasNextFrame())
+                reader.nextFrame();
+            else
+                reader.reset();
 
 
             asio::error_code ignored_error;
@@ -65,7 +70,8 @@ int main(int argc, char *argv[]) {
             else
                 avg_fps = 1000 / diff_start_time;
 
-            std::cout << "Message sent, took " << diff_time << " ms; size " << message.size() << "; avg " << avg_fps << " fps" << std::endl;
+            std::cout << "Frame " << frameId << " sent, took " << diff_time << " ms; size " << message.size()
+                      << "; avg " << avg_fps << " fps" << std::endl;
             last_time = current_time_ms();
 
 

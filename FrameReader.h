@@ -13,13 +13,53 @@
 
 #include "FrameStruct.hpp"
 
-std::vector<unsigned char> readFile(const char *filename);
+class FrameReader {
+private:
 
-FrameStruct createFrameStruct(const char *filename1, const char *filename2);
+    unsigned int currentFrameCounter;
+    unsigned int fps;
+    std::string sceneDesc;
+    unsigned int sensorId;
 
-std::string getExampleFrameStructBytes();
 
-FrameStruct parseFrameStruct(std::string &data);
-FrameStruct parseFrameStruct(std::vector<unsigned char> &data, size_t dataSize);
-FrameStruct parseFrameStruct(asio::streambuf &data);
+    unsigned int deviceId;
+
+    FrameStruct currentFrameInternal;
+
+    std::vector<std::string> frameLines;
+
+    std::vector<unsigned char> readFile(std::string &filename);
+
+    FrameStruct createFrameStruct(unsigned int frameId);
+
+    std::string getStructBytes(FrameStruct frame);
+
+public:
+    FrameReader(std::string filename);
+
+    void reset();
+
+    void goToFrame(unsigned int frameId);
+
+    bool hasNextFrame();
+
+    void nextFrame();
+
+    FrameStruct currentFrame();
+
+    std::string currentFrameBytes();
+
+    unsigned int currentFrameId();
+
+    std::string getSceneDesc();
+
+    unsigned int getFps();
+
+    unsigned int getSensorId();
+
+    unsigned int getDeviceId();
+
+
+};
+
 
