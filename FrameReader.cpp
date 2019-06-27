@@ -2,13 +2,7 @@
 // Created by amourao on 26-06-2019.
 //
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-
-#include <asio.hpp>
-#include <cereal/archives/binary.hpp>
-#include "FrameStruct.hpp"
+#include "FrameReader.h"
 
 std::vector<unsigned char> readFile(const char *filename) {
     std::streampos fileSize;
@@ -23,7 +17,7 @@ std::vector<unsigned char> readFile(const char *filename) {
     return fileData;
 }
 
-FrameStruct getFrameStruct(const char *filename1, const char *filename2) {
+FrameStruct createFrameStruct(const char *filename1, const char *filename2) {
     std::vector<unsigned char> colorFileData = readFile(filename1);
     std::vector<unsigned char> depthFileData = readFile(filename2);
     FrameStruct frame = FrameStruct();
@@ -33,8 +27,8 @@ FrameStruct getFrameStruct(const char *filename1, const char *filename2) {
 }
 
 std::string getExampleFrameStructBytes() {
-    FrameStruct frame = getFrameStruct("/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg",
-                                       "/home/amourao/data/bundle_fusion/apt0/frame-000000.depth.png");
+    FrameStruct frame = createFrameStruct("/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg",
+                                          "/home/amourao/data/bundle_fusion/apt0/frame-000000.depth.png");
     std::ostringstream os(std::ios::binary);
 
     {

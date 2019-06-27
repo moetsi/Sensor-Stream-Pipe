@@ -10,7 +10,7 @@
 #include <asio.hpp>
 
 #include "FrameStruct.hpp"
-#include "FrameReader.cpp"
+#include "FrameReader.h"
 #include "Utils.hpp"
 
 using asio::ip::tcp;

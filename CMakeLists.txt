@@ -4,10 +4,10 @@ project(davp-baseline)
 find_package(Threads)
 find_package(OpenCV REQUIRED )
 
-#include_directories(${OpenCV_INCLUDE_DIRS})
+set(SOURCE_FILES FrameReader.cpp)
 
-add_executable(server FrameServer.cpp)
-add_executable(client FrameClient.cpp)
+add_executable(server FrameServer.cpp ${SOURCE_FILES})
+add_executable(client FrameClient.cpp ${SOURCE_FILES})
 
 target_link_libraries (server ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (client ${CMAKE_THREAD_LIBS_INIT})
