@@ -102,50 +102,12 @@ Frame 9 received, took 41 ms; size 161530; avg 31 fps
 
 ### Generating frame list file
 
-The generate_bundle_fusion_filelist is a python script that reads frame metadata and generates a streaming ready frame list file.
-This script was created for the BundleFusion dataset, but the format is compatuble with 
-
-```
-generate_bundle_fusion_filelist.py <path to extracted bundle_fusion folder> <desired streaming framerate>
-```
-
-```
-wget http://graphics.stanford.edu/projects/bundlefusion/data/apt0/apt0.zip
-unzip apt0.zip
-```
-
-For example, run the following command on the davp folder:
-
-```
-python ./scripts/generate_bundle_fusion_filelist.py /home/amourao/data/bundle_fusion/apt0/ 30 > apt0-frames.txt
-```
-
-
-The file generated has the following structure:
-
-```
-<dataset name>;<device id>;<sensor id>;<fps>
-<number of frames>
-<frame id>;<color frame path>;<color frame path>
-....
-```
-
-Example:
-
-```
-bundle_fusion_apt0;0;0;30
-8560
-0;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg;/home/amourao/data/bundle_fusion/apt0/frame-000000.depth.png
-....
-```
+See the [davp-data-scripts](https://github.com/moetsi/davp-data-scripts) to see how to generate files for the 
 
 ## Notes
 
-
 Current protocol is very fast and resilient to network failures.
 The main problem are the network requirements: 40 Mbps for the Bundle Fusion dataset at 30Hz.
-
-
 
 ## Built With
 
