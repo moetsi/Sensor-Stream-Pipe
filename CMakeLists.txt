@@ -4,6 +4,8 @@ project(davp-baseline)
 find_package(Threads)
 find_package(OpenCV REQUIRED )
 
+include_directories("$ENV{HOME}/libs/include")
+
 set(SOURCE_FILES FrameReader.cpp FrameStruct.hpp)
 
 add_executable(server FrameServer.cpp ${SOURCE_FILES})
