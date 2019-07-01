@@ -31,9 +31,11 @@ int main(int argc, char *argv[]) {
 
         uint fps = reader.getFps();
 
+
         uint64_t last_time = current_time_ms();
         uint64_t start_time = last_time;
         uint64_t sent_frames = 0;
+        double sent_mbytes = 0;
 
         tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), port));
 
@@ -60,18 +62,19 @@ int main(int argc, char *argv[]) {
 
             socket.close();
             sent_frames += 1;
+            sent_mbytes += message.size()/1000.0;
 
             uint64_t diff_time = current_time_ms() - last_time;
 
-            double diff_start_time = (current_time_ms() - start_time) / (double) sent_frames;
+            double diff_start_time = (current_time_ms() - start_time);
             int64_t avg_fps;
             if (diff_start_time == 0)
                 avg_fps = -1;
             else
-                avg_fps = 1000 / diff_start_time;
+                avg_fps = 1000 / (diff_start_time / (double) sent_frames);
 
             std::cout << "Frame " << frameId << " sent, took " << diff_time << " ms; size " << message.size()
-                      << "; avg " << avg_fps << " fps" << std::endl;
+                      << "; avg " << avg_fps << " fps; " << 8*(sent_mbytes/diff_start_time) << " Mbps" << std::endl;
             last_time = current_time_ms();
 
 
