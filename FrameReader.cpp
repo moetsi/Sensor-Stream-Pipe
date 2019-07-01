@@ -20,8 +20,8 @@ FrameReader::FrameReader(std::string filename) {
     getline(ss, sceneDesc, ';');
 
     std::string sensorIdStr, deviceIdStr, frameCountStr, fpsStr;
-    getline(ss, sensorIdStr, ';');
     getline(ss, deviceIdStr, ';');
+    getline(ss, sensorIdStr, ';');
     getline(ss, fpsStr);
 
     sensorId = std::stoul(sensorIdStr);
