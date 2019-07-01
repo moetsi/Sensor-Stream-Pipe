@@ -124,7 +124,7 @@ python ./scripts/generate_bundle_fusion_filelist.py /home/amourao/data/bundle_fu
 The file generated has the following structure:
 
 ```
-<dataset name>;<>;<device id>;<>fps
+<dataset name>;<device id>;<sensor id>;<fps>
 <number of frames>
 <frame id>;<color frame path>;<color frame path>
 ....
