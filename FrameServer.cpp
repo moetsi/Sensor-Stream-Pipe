@@ -18,8 +18,8 @@ using asio::ip::tcp;
 int main(int argc, char *argv[]) {
 
     try {
-        if (argc != 3) {
-            std::cerr << "Usage: server <port> <frame_list>" << std::endl;
+        if (argc < 3) {
+            std::cerr << "Usage: server <port> <frame_list> (<stop after>)" << std::endl;
             return 1;
         }
 
@@ -27,6 +27,12 @@ int main(int argc, char *argv[]) {
         uint port = std::stoul(argv[1]);
 
         std::string name = std::string(argv[2]);
+
+        int stopAfter = INT_MAX;
+        if (argc >= 4) {
+            stopAfter = std::stoi(argv[3]);
+        }
+
         FrameReader reader(name);
 
         uint fps = reader.getFps();
@@ -34,13 +40,20 @@ int main(int argc, char *argv[]) {
 
         uint64_t last_time = current_time_ms();
         uint64_t start_time = last_time;
+        uint64_t start_frame_time = last_time;
         uint64_t sent_frames = 0;
+        uint64_t processing_time = 0;
         double sent_mbytes = 0;
 
         tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), port));
 
-        for (;;) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
+        while (stopAfter > 0) {
+            // try to maintain constant FPS by ignoring processing time
+            uint64_t sleep_time = (1000 / fps) - processing_time;
+
+            if (sleep_time >= 1)
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+            start_frame_time = current_time_ms();
             tcp::socket socket(io_context);
             acceptor.accept(socket);
 
@@ -53,8 +66,11 @@ int main(int argc, char *argv[]) {
             uint frameId = reader.currentFrameId();
             if (reader.hasNextFrame())
                 reader.nextFrame();
-            else
+            else {
                 reader.reset();
+                stopAfter--;
+            }
+
 
 
             asio::error_code ignored_error;
@@ -73,9 +89,12 @@ int main(int argc, char *argv[]) {
             else
                 avg_fps = 1000 / (diff_start_time / (double) sent_frames);
 
-            std::cout << "Frame " << frameId << " sent, took " << diff_time << " ms; size " << message.size()
-                      << "; avg " << avg_fps << " fps; " << 8*(sent_mbytes/diff_start_time) << " Mbps" << std::endl;
             last_time = current_time_ms();
+            processing_time = last_time - start_frame_time;
+
+            std::cout << "Frame \t" << frameId << " sent, took " << diff_time << " ms; size " << message.size()
+                      << "; avg " << avg_fps << " fps; " << 8*(sent_mbytes/diff_start_time) << " Mbps" << std::endl;
+
 
 
         }

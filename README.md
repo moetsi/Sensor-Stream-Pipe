@@ -65,7 +65,7 @@ The project is divided into two components:
 » client: receives network frames and decodes them into cv::Mat
 
 ```
-server <port> <frame list file (see below how to generate a file)>
+server <port> <frame list file (see below how to generate a file)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
 client <host> <port>
 ```
 
