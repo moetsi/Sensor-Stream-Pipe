@@ -53,6 +53,8 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/home/amourao/libs
 make install
 ```
 
+### cppzmq 4.3.0
+
 ```
 wget https://github.com/zeromq/cppzmq/archive/v4.3.0.tar.gz
 tar xf v4.3.0.tar.gz
@@ -89,39 +91,49 @@ The project is divided into two components:
 » client: receives network frames and decodes them into cv::Mat
 
 ```
-server <port> <frame list file (see below how to generate a file)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
-client <host> <port>
+server <host> <port> <frame list file (see below how to generate a file)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
+client <port>
 ```
 
 To stream frames on loop on a single node, run the following commands on two terminal windows:
 
 ```
-# ./server 9999 apt-0.txt
-Frame 0 sent, took 1 ms; size 161087; avg 1000 fps
-Frame 1 sent, took 37 ms; size 162913; avg 52 fps
-Frame 2 sent, took 34 ms; size 159411; avg 41 fps
-Frame 3 sent, took 34 ms; size 162808; avg 37 fps
-Frame 4 sent, took 34 ms; size 162200; avg 35 fps
-Frame 5 sent, took 34 ms; size 160750; avg 34 fps
-Frame 6 sent, took 34 ms; size 159583; avg 33 fps
-Frame 7 sent, took 34 ms; size 159952; avg 32 fps
-Frame 8 sent, took 35 ms; size 162306; avg 32 fps
-Frame 9 sent, took 35 ms; size 161530; avg 31 fps
+# ./server localhost 9999 apt-0.txt
+Frame 	0 sent, took 0 ms; size 161087; avg inf fps; inf Mbps
+Frame 	1 sent, took 35 ms; size 162913; avg 57 fps; 74.0571 Mbps
+Frame 	2 sent, took 32 ms; size 159411; avg 44 fps; 57.7207 Mbps
+Frame 	3 sent, took 33 ms; size 162808; avg 40 fps; 51.6975 Mbps
+Frame 	4 sent, took 34 ms; size 162200; avg 37 fps; 48.2638 Mbps
+Frame 	5 sent, took 33 ms; size 160750; avg 35 fps; 46.4273 Mbps
+Frame 	6 sent, took 33 ms; size 159583; avg 35 fps; 45.1501 Mbps
+Frame 	7 sent, took 34 ms; size 159952; avg 34 fps; 44.0583 Mbps
+Frame 	8 sent, took 33 ms; size 162306; avg 33 fps; 43.476 Mbps
+Frame 	9 sent, took 34 ms; size 161530; avg 33 fps; 42.8582 Mbps
+Frame 	10 sent, took 33 ms; size 161508; avg 32 fps; 42.4922 Mbps
 .....
 ```
 
+Client receiving multiple parallel streams.
+
 ```
-# ./client localhost 9999
-Frame 0 received, took 2 ms; size 161087; avg 500 fps
-Frame 1 received, took 36 ms; size 162913; avg 52 fps
-Frame 2 received, took 34 ms; size 159411; avg 41 fps
-Frame 3 received, took 34 ms; size 162808; avg 37 fps
-Frame 4 received, took 34 ms; size 162200; avg 35 fps
-Frame 5 received, took 35 ms; size 160750; avg 34 fps
-Frame 6 received, took 35 ms; size 159583; avg 33 fps
-Frame 7 received, took 33 ms; size 159952; avg 32 fps
-Frame 8 received, took 35 ms; size 162306; avg 32 fps
-Frame 9 received, took 41 ms; size 161530; avg 31 fps
+# ./client 9999
+Frame 907 received, took 23 ms; size 171181; avg 49 fps
+Frame 967 received, took 11 ms; size 156648; avg 50 fps
+Frame 908 received, took 22 ms; size 171891; avg 49 fps
+Frame 968 received, took 10 ms; size 153730; avg 50 fps
+Frame 909 received, took 22 ms; size 166073; avg 50 fps
+Frame 969 received, took 11 ms; size 152208; avg 50 fps
+Frame 910 received, took 21 ms; size 165463; avg 50 fps
+Frame 970 received, took 13 ms; size 152834; avg 50 fps
+Frame 911 received, took 21 ms; size 168747; avg 50 fps
+Frame 971 received, took 11 ms; size 150640; avg 50 fps
+Frame 912 received, took 22 ms; size 167307; avg 50 fps
+Frame 972 received, took 11 ms; size 150720; avg 50 fps
+Frame 913 received, took 23 ms; size 165487; avg 50 fps
+Frame 973 received, took 11 ms; size 149879; avg 50 fps
+Frame 914 received, took 22 ms; size 164491; avg 50 fps
+Frame 974 received, took 10 ms; size 147178; avg 50 fps
+Frame 915 received, took 23 ms; size 168506; avg 50 fps
 ```
 
 ### Generating frame list file
