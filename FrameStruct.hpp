@@ -60,18 +60,6 @@ struct FrameStruct {
     }
 
 
-    static FrameStruct parseFrameStruct(asio::streambuf &data) {
-        FrameStruct frameIn;
-
-        std::istream is(&data);
-        {
-            cereal::BinaryInputArchive iarchive(is);
-            iarchive(frameIn);
-        }
-        return frameIn;
-    }
-
-
 };
 
 template<typename T>

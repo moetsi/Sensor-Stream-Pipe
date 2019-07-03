@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         uint64_t last_time = current_time_ms();
         uint64_t start_time = last_time;
         uint64_t rec_frames = 0;
-        size_t paclet_len = 0;
+        double rec_mbytes = 0;
         for (;;) {
 
             if (rec_frames == 0) {
@@ -60,10 +60,12 @@ int main(int argc, char *argv[]) {
             std::string result = std::string(static_cast<char *>(request.data()), request.size());
 
             FrameStruct f = FrameStruct::parseFrameStruct(result);
-            //cv::Mat color = f.getColorFrame();
-            //cv::Mat depth = f.getDepthFrame();
+            rec_mbytes += request.size()/1000;
+
+            cv::Mat color = f.getColorFrame();
+            cv::Mat depth = f.getDepthFrame();
             std::cout << "Frame " << f.frameId << " received, took " << diff_time << " ms; size " << request.size()
-                      << "; avg " << avg_fps << " fps" << std::endl;
+                      << "; avg " << avg_fps << " fps; " << 8*(rec_mbytes/(current_time_ms()-start_time)) << " Mbps" << std::endl;
 
         }
     }

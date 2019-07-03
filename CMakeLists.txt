@@ -19,4 +19,6 @@ target_link_libraries (server ${OpenCV_LIBS})
 target_link_libraries (client ${OpenCV_LIBS})
 target_link_libraries(server cppzmq)
 target_link_libraries(client cppzmq)
+target_link_libraries(server uuid)
+target_link_libraries(client uuid)
 
