@@ -38,6 +38,30 @@ tar xf v1.2.2
 cp -r cereal-1.2.2/include ~/libs
 ```
 
+## ZeroMQ
+
+
+### libzmq3 4.3.1
+
+```
+wget https://github.com/zeromq/libzmq/releases/download/v4.3.1/zeromq-4.3.1.tar.gz
+tar xf zeromq-4.3.1.tar.gz
+cd zeromq-4.3.1
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/home/amourao/libs
+make install
+```
+
+```
+wget https://github.com/zeromq/cppzmq/archive/v4.3.0.tar.gz
+tar xf v4.3.0.tar.gz
+cd cppzmq-4.3.0
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/home/amourao/libs
+make install
+```
 
 ### Building
 
