@@ -184,7 +184,7 @@ Client receiving six parallel streams.
 
 ### Generating frame list file
 
-See the [davp-data-scripts](https://github.com/moetsi/davp-data-scripts) to see how to generate files for the 
+See the [davp-data-scripts](https://github.com/moetsi/davp-data-scripts) to see how to generate the frame files.
 
 ## Notes
 
