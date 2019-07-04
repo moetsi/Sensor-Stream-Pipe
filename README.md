@@ -188,7 +188,6 @@ See the [davp-data-scripts](https://github.com/moetsi/davp-data-scripts) to see 
 
 ## Notes
 
-
 Current network protocol is fast, resilient to network failures and can deal with parallel streams.
 
 ### MS RGB-D 7-Scenes
@@ -197,7 +196,7 @@ Initial results show that a single thread takes **6-7 ms** to transform image by
 
 This means it takes about **12-14 ms** per FrameStruct, restricting to about **75-85 fps** per thread just to transform two images into cv::Mat.  
 
-**75-85 fps** restricts it to a little below **2.5-2.8** streams per server.
+**75-85 fps** restricts it to a little below **2.5-2.8** streams per thread.
 
 ### BundleFusion
 
@@ -206,7 +205,7 @@ Initial results show that a single thread takes **2-3 ms** to transform image by
 
 This means it takes about **4-5 ms** per FrameStruct, restricting to about **200 fps** per thread to transform two images into cv::Mat.  
 
-**200 fps** allows about **6.6** streams per server.
+**200 fps** allows about **6.6** streams per thread.
 
 This difference in performance is cause by:
  * Frame format: BundleFusion uses **JPG** for color frames, while MS RGB-D 7-Scenes uses **PNG**. 
