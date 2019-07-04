@@ -29,7 +29,7 @@ Download and extract header libraries
 ```
 wget https://codeload.github.com/chriskohlhoff/asio/zip/asio-1-13-0
 unzip asio-1-13-0
-cp -r asio-asio-1-13-0/asio(include/ ~/libs
+cp -r asio-asio-1-13-0/asio/include/ ~/libs
 ```
 
 ```
