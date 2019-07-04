@@ -8,7 +8,6 @@
 #include <fstream>
 #include <vector>
 
-#include <asio.hpp>
 #include <cereal/archives/binary.hpp>
 
 #include "FrameStruct.hpp"
