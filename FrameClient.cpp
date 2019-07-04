@@ -34,14 +34,16 @@ int main(int argc, char *argv[]) {
         double rec_mbytes = 0;
         for (;;) {
 
-            if (rec_frames == 0) {
-                last_time = current_time_ms();
-                start_time = last_time;
-            }
+
 
             zmq::message_t request;
 
             socket.recv(&request);
+
+            if (rec_frames == 0) {
+                last_time = current_time_ms();
+                start_time = last_time;
+            }
 
             rec_frames += 1;
             uint64_t diff_time = current_time_ms() - last_time;
@@ -64,7 +66,7 @@ int main(int argc, char *argv[]) {
 
             cv::Mat color = f.getColorFrame();
             cv::Mat depth = f.getDepthFrame();
-            std::cout << "Frame " << f.frameId << " received, took " << diff_time << " ms; size " << request.size()
+            std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " received, took " << diff_time << " ms; size " << request.size()
                       << "; avg " << avg_fps << " fps; " << 8*(rec_mbytes/(current_time_ms()-start_time)) << " Mbps" << std::endl;
 
         }

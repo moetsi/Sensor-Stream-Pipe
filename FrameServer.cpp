@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) {
             }
 
             std::string message = reader.currentFrameBytes();
+            FrameStruct f = reader.currentFrame();
 
             zmq::message_t request(message.size());
             memcpy(request.data(), message.c_str(), message.size());
@@ -92,7 +93,7 @@ int main(int argc, char *argv[]) {
             last_time = current_time_ms();
             processing_time = last_time - start_frame_time;
 
-            std::cout << "Frame \t" << frameId << " sent, took " << diff_time << " ms; size " << message.size()
+            std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent, took " << diff_time << " ms; size " << message.size()
                       << "; avg " << avg_fps << " fps; " << 8*(sent_mbytes/diff_start_time) << " Mbps" << std::endl;
 
 
