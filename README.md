@@ -86,7 +86,7 @@ make install
 ### Building
 
 
-~~Add header libraries to search path~~ (not necessary; part of the CMakeFile)
+Add header libraries to search path
 
 ```
 export CPATH=~/libs/include:$CPATH

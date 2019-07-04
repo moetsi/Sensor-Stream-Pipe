@@ -6,7 +6,7 @@ link_directories("$ENV{HOME}/libs/lib")
 
 find_package(Threads)
 find_package(OpenCV REQUIRED)
-find_package(cppzmq)
+
 
 set(SOURCE_FILES FrameReader.cpp FrameStruct.hpp)
 
