@@ -31,11 +31,11 @@ struct FrameStruct {
     }
 
     cv::Mat getColorFrame() {
-        return cv::imdecode(colorFrame, CV_LOAD_IMAGE_ANYDEPTH);
+        return cv::imdecode(colorFrame, CV_LOAD_IMAGE_UNCHANGED);
     }
 
     cv::Mat getDepthFrame() {
-        return cv::imdecode(depthFrame, CV_LOAD_IMAGE_ANYDEPTH);
+        return cv::imdecode(depthFrame, CV_LOAD_IMAGE_UNCHANGED);
     }
 
     static FrameStruct parseFrameStruct(std::string &data) {

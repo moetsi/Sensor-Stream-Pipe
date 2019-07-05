@@ -12,8 +12,6 @@
 #include "FrameReader.h"
 #include "Utils.hpp"
 
-using asio::ip::tcp;
-
 #define BUFFER_SIZE 1610610
 
 int main(int argc, char *argv[]) {
@@ -32,6 +30,8 @@ int main(int argc, char *argv[]) {
         uint64_t start_time = last_time;
         uint64_t rec_frames = 0;
         double rec_mbytes = 0;
+
+
         for (;;) {
 
 
@@ -66,6 +66,9 @@ int main(int argc, char *argv[]) {
 
             cv::Mat color = f.getColorFrame();
             cv::Mat depth = f.getDepthFrame();
+            cv::namedWindow("Display Window");
+            cv::imshow("Display Window", color);
+            cv::waitKey(1);
             std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " received, took " << diff_time << " ms; size " << request.size()
                       << "; avg " << avg_fps << " fps; " << 8*(rec_mbytes/(current_time_ms()-start_time)) << " Mbps" << std::endl;
 

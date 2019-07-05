@@ -6,14 +6,13 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
+#include <thread>
 
 #include <zmq.hpp>
 
 #include "FrameStruct.hpp"
 #include "FrameReader.h"
 #include "Utils.hpp"
-
-using asio::ip::tcp;
 
 int main(int argc, char *argv[]) {
 
