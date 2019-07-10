@@ -46,6 +46,8 @@ int main(int argc, char *argv[]) {
         uint64_t start_frame_time = last_time;
         uint64_t sent_frames = 0;
         uint64_t processing_time = 0;
+
+        //TODO: make sure all the units are OK and match the conversion to Mbps
         double sent_mbytes = 0;
 
         socket.connect("tcp://" + host + ":" + std::string(argv[2]));
@@ -54,6 +56,7 @@ int main(int argc, char *argv[]) {
             // try to maintain constant FPS by ignoring processing time
             uint64_t sleep_time = (1000 / fps) - processing_time;
 
+            //TODO: see if the if is needed
             if (sleep_time >= 1)
                 std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
             start_frame_time = current_time_ms();
@@ -87,6 +90,7 @@ int main(int argc, char *argv[]) {
             if (diff_start_time == 0)
                 avg_fps = -1;
             else
+                //TODO: detail the conversions happening here
                 avg_fps = 1000 / (diff_start_time / (double) sent_frames);
 
             last_time = current_time_ms();

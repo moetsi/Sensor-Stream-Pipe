@@ -35,6 +35,7 @@ struct FrameStruct {
     }
 
     cv::Mat getDepthFrame() {
+        //TODO: check if it is reading into 16 bit cv::Mat
         return cv::imdecode(depthFrame, CV_LOAD_IMAGE_UNCHANGED);
     }
 
@@ -62,6 +63,8 @@ struct FrameStruct {
 
 };
 
+
+//TODO: remove if not needed
 template<typename T>
 const std::vector<uint8_t> serialize(const T &t) {
     std::stringstream ss(std::ios::binary | std::ios::out | std::ios::in);

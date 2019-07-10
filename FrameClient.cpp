@@ -59,10 +59,12 @@ int main(int argc, char *argv[]) {
             last_time = current_time_ms();
 
             //std::string result = request.str();
+            //TODO: check if it is also necessary to copy from zeromq buffer
             std::string result = std::string(static_cast<char *>(request.data()), request.size());
 
             FrameStruct f = FrameStruct::parseFrameStruct(result);
             rec_mbytes += request.size()/1000;
+
 
             cv::Mat color = f.getColorFrame();
             cv::Mat depth = f.getDepthFrame();
