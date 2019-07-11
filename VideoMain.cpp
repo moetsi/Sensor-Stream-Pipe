@@ -28,14 +28,26 @@ static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFra
 static void save_gray_frame(unsigned char *buf, int wrap, int xsize, int ysize, char *filename);
 
 int main(int argc, const char *argv[]) {
-    std::string filename(argv[1]);
-    VideoFileReader v(filename);
+    std::string filename_color(argv[1]);
+    VideoFileReader vc(filename_color);
+
+    std::string filename_depth(argv[2]);
+    VideoFileReader vd(filename_depth);
 
     do {
-        v.nextFrame();
-        if (!v.hasNextFrame())
-            v.reset();
-    } while (v.hasNextFrame());
+        FrameStruct f;
+
+        vc.nextFrame();
+        vd.nextFrame();
+
+        f.colorFrame = vc.currentFrameBytes();
+        f.depthFrame = vd.currentFrameBytes();
+
+        if (!vc.hasNextFrame())
+            vc.reset();
+        if (!vd.hasNextFrame())
+            vd.reset();
+    } while (vc.hasNextFrame());
 
 }
 

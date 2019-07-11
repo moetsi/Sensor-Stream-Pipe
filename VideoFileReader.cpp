@@ -174,64 +174,14 @@ std::vector<unsigned char> VideoFileReader::readFile(std::string &filename) {
     return fileData;
 }
 
-FrameStruct VideoFileReader::createFrameStruct(unsigned int frameId) {
-    // 0;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg
-
-    std::string line = frameLines[frameId];
-    std::stringstream ss(line);
-
-    std::string frameIdStr, colorFramePath, depthFramePath;
-
-    getline(ss, frameIdStr, ';');
-    getline(ss, colorFramePath, ';');
-    getline(ss, depthFramePath);
-
-    unsigned int readFrameId = std::stoul(frameIdStr);
-
-    if (readFrameId != currentFrameCounter)
-        std::cerr << "Warning: frame ids do not match: " << readFrameId << " read vs. " << currentFrameCounter
-                  << " expected." << std::endl;
-
-    std::vector<unsigned char> colorFileData = readFile(colorFramePath);
-    std::vector<unsigned char> depthFileData = readFile(depthFramePath);
-    FrameStruct frame = FrameStruct();
-
-    frame.messageType = 0;
-
-    frame.sceneDesc = sceneDesc;
-    frame.deviceId = deviceId;
-    frame.sensorId = sensorId;
-
-    frame.frameId = readFrameId;
-    frame.colorFrame = colorFileData;
-    frame.depthFrame = depthFileData;
-
-    return frame;
-}
-
-std::string VideoFileReader::getStructBytes(FrameStruct frame) {
-    std::ostringstream os(std::ios::binary);
-
-    {
-        cereal::BinaryOutputArchive oarchive(os);
-        oarchive(frame);
-    }
-
-    return os.str();
-
-}
-
 unsigned int VideoFileReader::currentFrameId() {
     return currentFrameCounter;
 }
 
-std::string VideoFileReader::currentFrameBytes() {
-    return getStructBytes(currentFrameInternal);
+std::vector<unsigned char> VideoFileReader::currentFrameBytes() {
+    return std::vector<unsigned char>((unsigned char *) pPacket->data, pPacket->data + pPacket->size);
 }
 
-FrameStruct VideoFileReader::currentFrame() {
-    return currentFrameInternal;
-}
 
 #undef  av_err2str
 #define av_err2str(errnum) av_make_error_string((char*)__builtin_alloca(AV_ERROR_MAX_STRING_SIZE), AV_ERROR_MAX_STRING_SIZE, errnum)
@@ -246,8 +196,9 @@ void VideoFileReader::nextFrame() {
         if (pPacket->stream_index == video_stream_index) {
             AVPacket *newPacket = av_packet_alloc();
             av_packet_from_data(newPacket, pPacket->data, pPacket->size);
-            std::cout << "AVPacket->pts " << PRId64 << " " << newPacket->pts << std::endl;
-            int response = decode_packet();
+            //std::cout << "AVPacket->pts " << PRId64 << " " << newPacket->pts << std::endl;
+            //int response = decode_packet();
+            av_packet_unref(newPacket);
             break;
         }
         // https://ffmpeg.org/doxygen/trunk/group__lavc__packet.html#ga63d5a489b419bd5d45cfd09091cbcbc2
@@ -257,9 +208,8 @@ void VideoFileReader::nextFrame() {
         eofReached = true;
     else if (error == 1)
         currentFrameCounter += 1;
-    else
-        std::cout << "Next frame error: " << error << " " << av_err2str(error) << " " << currentFrameCounter
-                  << std::endl;
+    std::cout << type << " Next frame: " << error << " " << av_err2str(error) << " " << currentFrameCounter
+              << std::endl;
 
 }
 

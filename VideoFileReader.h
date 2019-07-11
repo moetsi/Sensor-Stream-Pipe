@@ -43,18 +43,11 @@ private:
 
     unsigned int deviceId;
 
-    FrameStruct currentFrameInternal;
-
     std::vector<std::string> frameLines;
 
     std::vector<unsigned char> readFile(std::string &filename);
 
-    FrameStruct createFrameStruct(unsigned int frameId);
-
-    std::string getStructBytes(FrameStruct frame);
-
     int decode_packet();
-
 
 public:
     VideoFileReader(std::string filename);
@@ -69,9 +62,7 @@ public:
 
     void nextFrame();
 
-    FrameStruct currentFrame();
-
-    std::string currentFrameBytes();
+    std::vector<unsigned char> currentFrameBytes();
 
     unsigned int currentFrameId();
 
