@@ -15,6 +15,8 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
 
+#include "Utils.h"
+
 struct FrameStruct {
     unsigned short messageType;
     std::vector<unsigned char> colorFrame;

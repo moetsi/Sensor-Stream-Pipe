@@ -16,6 +16,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include "VideoFileReader.h"
 
 // print out the steps and errors
 static void logging(const char *fmt, ...);
@@ -27,6 +28,18 @@ static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFra
 static void save_gray_frame(unsigned char *buf, int wrap, int xsize, int ysize, char *filename);
 
 int main(int argc, const char *argv[]) {
+    std::string filename(argv[1]);
+    VideoFileReader v(filename);
+
+    do {
+        v.nextFrame();
+        if (!v.hasNextFrame())
+            v.reset();
+    } while (v.hasNextFrame());
+
+}
+
+int main2(int argc, const char *argv[]) {
 
     av_register_all();
     logging("initializing all the containers, codecs and protocols.");
@@ -254,17 +267,11 @@ static void avframeToMat(const AVFrame *frame, cv::Mat &image) {
     std::cout << av_frame_get_color_range(frame) << " " << image.step1() << " " << image.step1(0) << std::endl;
 
     SwsContext *conversion;
-    // Allocate the opencv mat and store its stride in a 1-element array
-    if (av_frame_get_color_range(frame) == 0) {
-        image = cv::Mat(height, width, CV_8UC3);
-        conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_BGR24,
-                                    SWS_FAST_BILINEAR, NULL, NULL, NULL);
-    } else if (av_frame_get_color_range(frame) == 1) {
-        image = cv::Mat(height, width, CV_16UC1);
-        conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_GRAY16LE,
-                                    SWS_FAST_BILINEAR, NULL, NULL, NULL);
-    }
 
+    // Allocate the opencv mat and store its stride in a 1-element array
+    image = cv::Mat(height, width, CV_8UC3);
+    conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_BGR24,
+                                    SWS_FAST_BILINEAR, NULL, NULL, NULL);
     int cvLinesizes[1];
     cvLinesizes[0] = image.step1();
 

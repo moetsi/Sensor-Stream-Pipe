@@ -19,11 +19,11 @@ if (FFMPEG_FOUND)
     message("FFMPEG_DEFINITIONS = ${FFMPEG_DEFINITIONS} ")
 endif ()
 
-set(SOURCE_FILES FrameReader.cpp FrameStruct.hpp)
+set(SOURCE_FILES FrameReader.cpp FrameStruct.hpp Utils.cpp)
 
 add_executable(server FrameServer.cpp ${SOURCE_FILES})
 add_executable(client FrameClient.cpp ${SOURCE_FILES})
-add_executable(video VideoMain.cpp)
+add_executable(video VideoMain.cpp VideoFileReader.cpp ${SOURCE_FILES})
 
 target_link_libraries(server zmq)
 target_link_libraries(server ${CMAKE_THREAD_LIBS_INIT})
