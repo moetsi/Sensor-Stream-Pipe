@@ -15,12 +15,17 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
 
+#include <libavcodec/avcodec.h>
+
 #include "Utils.h"
 
 struct FrameStruct {
     unsigned short messageType;
     std::vector<unsigned char> colorFrame;
     std::vector<unsigned char> depthFrame;
+    enum AVCodecID colorCodecId;
+    enum AVCodecID depthCodecId;
+
     std::string sceneDesc;
     unsigned int sensorId;
     unsigned int deviceId;
@@ -29,16 +34,23 @@ struct FrameStruct {
 
     template<class Archive>
     void serialize(Archive &ar) {
-        ar(messageType, colorFrame, depthFrame, sceneDesc, sensorId, deviceId, frameId, timestamp);
+        ar(messageType, colorFrame, depthFrame, colorCodecId, depthCodecId, sceneDesc, sensorId, deviceId, frameId,
+           timestamp);
     }
 
     cv::Mat getColorFrame() {
-        return cv::imdecode(colorFrame, CV_LOAD_IMAGE_UNCHANGED);
+        if (messageType == 0)
+            return cv::imdecode(colorFrame, CV_LOAD_IMAGE_UNCHANGED);
+        else
+            return cv::Mat();
     }
 
     cv::Mat getDepthFrame() {
         //TODO: check if it is reading into 16 bit cv::Mat
-        return cv::imdecode(depthFrame, CV_LOAD_IMAGE_UNCHANGED);
+        if (messageType == 0)
+            return cv::imdecode(depthFrame, CV_LOAD_IMAGE_UNCHANGED);
+        else
+            return cv::Mat();
     }
 
     static FrameStruct parseFrameStruct(std::string &data) {
@@ -60,6 +72,18 @@ struct FrameStruct {
             iarchive(frameIn);
         }
         return frameIn;
+    }
+
+    static std::string getStructBytes(FrameStruct frame) {
+        std::ostringstream os(std::ios::binary);
+
+        {
+            cereal::BinaryOutputArchive oarchive(os);
+            oarchive(frame);
+        }
+
+        return os.str();
+
     }
 
 

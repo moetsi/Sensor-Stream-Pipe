@@ -23,7 +23,7 @@ set(SOURCE_FILES FrameReader.cpp FrameStruct.hpp Utils.cpp)
 
 add_executable(server FrameServer.cpp ${SOURCE_FILES})
 add_executable(client FrameClient.cpp ${SOURCE_FILES})
-add_executable(video VideoMain.cpp VideoFileReader.cpp ${SOURCE_FILES})
+add_executable(video VideoServer.cpp VideoFileReader.cpp ${SOURCE_FILES})
 
 target_link_libraries(server zmq)
 target_link_libraries(server ${CMAKE_THREAD_LIBS_INIT})
@@ -34,5 +34,6 @@ target_link_libraries(client ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(client ${OpenCV_LIBS})
 
 target_link_libraries(video swscale)
+target_link_libraries(video zmq)
 target_link_libraries(video ${FFMPEG_LIBRARIES})
 target_link_libraries(video ${OpenCV_LIBS})
