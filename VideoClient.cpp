@@ -32,6 +32,7 @@ static void avframeToMat(const AVFrame *frame, cv::Mat &image) {
 
     SwsContext *conversion;
 
+    //TODO: this only works for 3 channel 8 bit color frames, make it work also for 1 channel 16 bit depth
     // Allocate the opencv mat and store its stride in a 1-element array
     image = cv::Mat(height, width, CV_8UC3);
     conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_BGR24,
@@ -128,6 +129,7 @@ int main(int argc, char *argv[]) {
             VideoFrameStruct f = VideoFrameStruct::parseFrameStruct(result);
             rec_mbytes += request.size() / 1000;
 
+            //TODO: this only works for a single stream, the video cliemt must keep state for multiple streams
             if (rec_frames == 1) {
                 pColorCodecParameters = f.codec_data[0].getParams();
                 pDepthCodecParameters = f.codec_data[1].getParams();
@@ -206,7 +208,7 @@ int main(int argc, char *argv[]) {
                     response = decode_packet(pPacket, pColorCodecContext, pFrame, img);
                     cv::namedWindow("Display Window");
                     cv::imshow("Display Window", img);
-                    cv::waitKey(1000);
+                    cv::waitKey(1);
                     //av_packet_unref(pPacket);
                 }
 

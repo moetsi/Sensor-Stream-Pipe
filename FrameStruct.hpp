@@ -18,6 +18,7 @@
 
 #include "Utils.h"
 
+//TODO: merge with video frame struct and make it more generic
 struct FrameStruct {
     unsigned short messageType;
     std::vector<unsigned char> colorFrame;
@@ -120,6 +121,7 @@ struct CodecParamsStruct {
     }
 };
 
+//TODO: merge with frame struct and make it more generic
 struct VideoFrameStruct {
     unsigned short messageType;
 
