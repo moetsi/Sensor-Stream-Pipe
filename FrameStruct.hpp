@@ -14,7 +14,6 @@
 #include <cereal/archives/binary.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
-
 #include <libavcodec/avcodec.h>
 
 #include "Utils.h"
@@ -23,8 +22,6 @@ struct FrameStruct {
     unsigned short messageType;
     std::vector<unsigned char> colorFrame;
     std::vector<unsigned char> depthFrame;
-    enum AVCodecID colorCodecId;
-    enum AVCodecID depthCodecId;
 
     std::string sceneDesc;
     unsigned int sensorId;
@@ -34,7 +31,7 @@ struct FrameStruct {
 
     template<class Archive>
     void serialize(Archive &ar) {
-        ar(messageType, colorFrame, depthFrame, colorCodecId, depthCodecId, sceneDesc, sensorId, deviceId, frameId,
+        ar(messageType, colorFrame, depthFrame, sceneDesc, sensorId, deviceId, frameId,
            timestamp);
     }
 
@@ -89,6 +86,112 @@ struct FrameStruct {
 
 };
 
+struct CodecParamsStruct {
+    std::vector<unsigned char> data;
+    std::vector<unsigned char> extra_data;
+
+    CodecParamsStruct() {}
+
+    CodecParamsStruct(std::vector<unsigned char> d, std::vector<unsigned char> ed) : data(d), extra_data(ed) {}
+
+
+    void setData(std::vector<unsigned char> &d) {
+        data = d;
+    }
+
+    void setExtraData(std::vector<unsigned char> &ed) {
+        extra_data = ed;
+    }
+
+    AVCodecParameters *getParams() {
+        AVCodecParameters *results = avcodec_parameters_alloc();
+        results->extradata = NULL;
+        results->extradata_size = 0;
+        memcpy(results, &data[0], data.size());
+        results->extradata = (uint8_t *) av_mallocz(extra_data.size() + AV_INPUT_BUFFER_PADDING_SIZE);
+        memcpy(results->extradata, &extra_data[0], extra_data.size());
+        results->extradata_size = extra_data.size();
+        return results;
+    }
+
+    template<class Archive>
+    void serialize(Archive &ar) {
+        ar(data, extra_data);
+    }
+};
+
+struct VideoFrameStruct {
+    unsigned short messageType;
+
+    std::vector<std::vector<unsigned char>> frames;
+    std::vector<CodecParamsStruct> codec_data;
+
+    std::string sceneDesc;
+    unsigned int sensorId;
+    unsigned int deviceId;
+    unsigned int frameId;
+    std::vector<unsigned long> timestamp;
+
+    template<class Archive>
+    void serialize(Archive &ar) {
+        ar(messageType, frames, codec_data, sceneDesc, sensorId, deviceId, frameId,
+           timestamp);
+    }
+
+    cv::Mat getColorFrame() {
+        return cv::Mat();
+    }
+
+    cv::Mat getDepthFrame() {
+        return cv::Mat();
+    }
+
+    static VideoFrameStruct parseFrameStruct(std::string &data) {
+        VideoFrameStruct frameIn;
+        std::istringstream is(data, std::ios::binary);
+        {
+            cereal::BinaryInputArchive iarchive(is);
+            iarchive(frameIn);
+        }
+        return frameIn;
+    }
+
+
+    static VideoFrameStruct parseFrameStruct(std::vector<unsigned char> &data, size_t dataSize) {
+        VideoFrameStruct frameIn;
+        std::istringstream is(std::string(data.begin(), data.begin() + dataSize), std::ios::binary);
+        {
+            cereal::BinaryInputArchive iarchive(is);
+            iarchive(frameIn);
+        }
+        return frameIn;
+    }
+
+    static std::string getStructBytes(FrameStruct frame) {
+        std::ostringstream os(std::ios::binary);
+
+        {
+            cereal::BinaryOutputArchive oarchive(os);
+            oarchive(frame);
+        }
+
+        return os.str();
+
+    }
+
+
+};
+
+template<typename T>
+const std::string serialize_to_str(const T &t) {
+    std::ostringstream os(std::ios::binary);
+    {
+        cereal::BinaryOutputArchive oarchive(os);
+        oarchive(t);
+    }
+
+    return os.str();
+}
 
 //TODO: remove if not needed
 template<typename T>

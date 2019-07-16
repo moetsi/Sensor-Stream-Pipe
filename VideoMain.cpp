@@ -2,11 +2,15 @@
 
 #include <iostream>
 
+
 extern "C" {
-#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/avutil.h>
+#include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
 }
+
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
@@ -60,6 +64,7 @@ int main2(int argc, const char *argv[]) {
     // Allocating memory for this component
     // http://ffmpeg.org/doxygen/trunk/structAVFormatContext.html
     AVFormatContext *pFormatContext = avformat_alloc_context();
+
     if (!pFormatContext) {
         logging("ERROR could not allocate memory for Format Context");
         return -1;
@@ -110,6 +115,7 @@ int main2(int argc, const char *argv[]) {
     // loop though all the streams and print its main information
     for (int i = 0; i < pFormatContext->nb_streams; i++) {
         AVCodecParameters *pLocalCodecParameters = NULL;
+
         pLocalCodecParameters = pFormatContext->streams[i]->codecpar;
         logging("AVStream->time_base before open coded %d/%d", pFormatContext->streams[i]->time_base.num,
                 pFormatContext->streams[i]->time_base.den);
@@ -148,6 +154,7 @@ int main2(int argc, const char *argv[]) {
         // print its name, id and bitrate
         logging("\tCodec %s ID %d bit_rate %lld", pLocalCodec->name, pLocalCodec->id, pCodecParameters->bit_rate);
     }
+
     // https://ffmpeg.org/doxygen/trunk/structAVCodecContext.html
     AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
     if (!pCodecContext) {
@@ -188,7 +195,7 @@ int main2(int argc, const char *argv[]) {
     // fill the Packet with data from the Stream
     // https://ffmpeg.org/doxygen/trunk/group__lavf__decoding.html#ga4fdb3084415a82e3810de6ee60e46a61
     int error = 0;
-    while (error = av_read_frame(pFormatContext, pPacket) >= 0) {
+    while (error = avcodec_receive_packet(pCodecContext, pPacket) >= 0) {
         // if it's the video stream
         if (pPacket->stream_index == video_stream_index) {
             AVPacket *newPacket = av_packet_alloc();

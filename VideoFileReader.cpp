@@ -104,6 +104,33 @@ VideoFileReader::VideoFileReader(std::string filename) {
         // print its name, id and bitrate
         //std::cout << "\tCodec %s ID %d bit_rate %lld" << " " << pLocalCodec->name << " " << pLocalCodec->id << " " << pCodecParameters->bit_rate << std::endl;
     }
+    void *sPointer = pLocalCodecParameters;
+    size_t sSize = sizeof(*pLocalCodecParameters);
+
+    AVCodecParameters *dst = avcodec_parameters_alloc();
+    memcpy(dst, sPointer, sSize);
+    dst->extradata = NULL;
+    dst->extradata_size = 0;
+    if (pLocalCodecParameters->extradata) {
+        dst->extradata = (uint8_t *) av_mallocz(pLocalCodecParameters->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
+        if (!dst->extradata)
+            std::cerr << "asdasds" << std::endl;
+        memcpy(dst->extradata, pLocalCodecParameters->extradata, pLocalCodecParameters->extradata_size);
+        dst->extradata_size = pLocalCodecParameters->extradata_size;
+    }
+
+    pLocalCodecParameters = dst;
+    // avcodec_parameters_copy
+    // https://ffmpeg.org/doxygen/3.1/libavcodec_2utils_8c_source.html#l04059
+
+    //codec_parameters_reset(dst);
+    //memcpy(dst, src, sizeof(*dst));
+
+    void *sEPointer = pLocalCodecParameters->extradata;
+    size_t sESize = pLocalCodecParameters->extradata_size;
+
+    std::cout << sPointer << " " << sSize << ";" << sEPointer << " " << sESize << std::endl;
+
     // https://ffmpeg.org/doxygen/trunk/structAVCodecContext.html
     pCodecContext = avcodec_alloc_context3(pCodec);
     if (!pCodecContext) {
@@ -301,6 +328,23 @@ std::string VideoFileReader::getSceneDesc() {
     return sceneDesc;
 }
 
+CodecParamsStruct VideoFileReader::getCodecParamsStruct() {
+
+    void *sEPointer = pLocalCodecParameters->extradata;
+    size_t sESize = pLocalCodecParameters->extradata_size;
+    size_t sSize = sizeof(*pLocalCodecParameters);
+
+    std::vector<unsigned char> e(sSize);
+    std::vector<unsigned char> ed(sESize);
+
+    memcpy(&e[0], pLocalCodecParameters, sSize);
+    memcpy(&ed[0], sEPointer, sESize);
+
+    CodecParamsStruct cParamsStruct(e, ed);
+
+    return cParamsStruct;
+}
+
 
 int encode(AVCodecContext *avctx, AVPacket *pkt, int *got_packet, AVFrame *frame) {
     int ret;
@@ -341,3 +385,4 @@ int decode(AVCodecContext *avctx, AVFrame *frame, int *got_frame, AVPacket *pkt)
 
     return 0;
 }
+

@@ -74,6 +74,8 @@ public:
 
     unsigned int getDeviceId();
 
+    CodecParamsStruct getCodecParamsStruct();
+
 
 };
 

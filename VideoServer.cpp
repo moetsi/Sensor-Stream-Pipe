@@ -8,11 +8,21 @@
 #include <stdlib.h>
 #include <thread>
 
+extern "C" {
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/avutil.h>
+#include <libavutil/pixdesc.h>
+#include <libswscale/swscale.h>
+}
+
+
 #include <zmq.hpp>
 
 #include "FrameStruct.hpp"
 #include "VideoFileReader.h"
 #include "Utils.h"
+
 
 int main(int argc, char *argv[]) {
 
@@ -64,20 +74,30 @@ int main(int argc, char *argv[]) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
             start_frame_time = current_time_ms();
 
+            VideoFrameStruct f;
+
             if (sent_frames == 0) {
                 last_time = current_time_ms();
                 start_time = last_time;
-            }
+                f.codec_data.push_back(vc.getCodecParamsStruct());
+                f.codec_data.push_back(vd.getCodecParamsStruct());
 
-            FrameStruct f;
+                CodecParamsStruct c = vc.getCodecParamsStruct();
+                AVCodecParameters *results = avcodec_parameters_alloc();
+                memcpy(results, &c.data[0], sizeof(*results));
+                results->extradata = (uint8_t *) av_mallocz(c.extra_data.size() + AV_INPUT_BUFFER_PADDING_SIZE);
+                memcpy(results->extradata, &c.extra_data[0], c.extra_data.size());
+                results->extradata_size = c.extra_data.size();
+
+            }
 
             vc.nextFrame();
             vd.nextFrame();
 
             f.messageType = 1;
 
-            f.colorFrame = vc.currentFrameBytes();
-            f.depthFrame = vd.currentFrameBytes();
+            f.frames.push_back(vc.currentFrameBytes());
+            f.frames.push_back(vd.currentFrameBytes());
 
             f.frameId = vc.currentFrameId();
 
@@ -90,8 +110,7 @@ int main(int argc, char *argv[]) {
                 vd.reset();
             }
 
-            std::string message = FrameStruct::getStructBytes(f);
-
+            std::string message = serialize_to_str(f);
 
             zmq::message_t request(message.size());
             memcpy(request.data(), message.c_str(), message.size());
