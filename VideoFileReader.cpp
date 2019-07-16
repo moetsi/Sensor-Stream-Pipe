@@ -206,7 +206,7 @@ unsigned int VideoFileReader::currentFrameId() {
 }
 
 std::vector<unsigned char> VideoFileReader::currentFrameBytes() {
-    return std::vector<unsigned char>((unsigned char *) pPacket->data, pPacket->data + pPacket->size);
+    return std::vector<unsigned char>(pPacket->data, pPacket->data + pPacket->size);
 }
 
 

@@ -31,7 +31,7 @@ static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFra
 // save a frame into a .pgm file
 static void save_gray_frame(unsigned char *buf, int wrap, int xsize, int ysize, char *filename);
 
-int main(int argc, const char *argv[]) {
+int main2(int argc, const char *argv[]) {
     std::string filename_color(argv[1]);
     VideoFileReader vc(filename_color);
 
@@ -55,7 +55,7 @@ int main(int argc, const char *argv[]) {
 
 }
 
-int main2(int argc, const char *argv[]) {
+int main(int argc, const char *argv[]) {
 
     av_register_all();
     logging("initializing all the containers, codecs and protocols.");
@@ -195,7 +195,7 @@ int main2(int argc, const char *argv[]) {
     // fill the Packet with data from the Stream
     // https://ffmpeg.org/doxygen/trunk/group__lavf__decoding.html#ga4fdb3084415a82e3810de6ee60e46a61
     int error = 0;
-    while (error = avcodec_receive_packet(pCodecContext, pPacket) >= 0) {
+    while (error = av_read_frame(pFormatContext, pPacket) >= 0) {
         // if it's the video stream
         if (pPacket->stream_index == video_stream_index) {
             AVPacket *newPacket = av_packet_alloc();

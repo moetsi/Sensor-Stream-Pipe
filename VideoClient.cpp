@@ -55,11 +55,13 @@ static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFra
 
     if (response < 0) {
         char errbuf[1000];
-        std::cout << "Error while sending a packet to the decoder: %s" <<
+        std::cerr << "Error while sending a packet to the decoder: %s" <<
                   av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
         return response;
     }
-
+    char errbuf[1000];
+    std::cerr << "Error while sending a packet to the decoder: %s" <<
+              av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
     while (response >= 0) {
         // Return decoded output data (into a frame) from a decoder
         // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga11e6542c4e66d3028668788a1a74217c
@@ -70,9 +72,11 @@ static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFra
             char errbuf[1000];
             std::cout << "Error while receiving a frame from the decoder: %s" <<
                       av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
-
             return response;
         }
+        char errbuf[1000];
+        std::cout << "Error while receiving a frame from the decoder: %s" <<
+                  av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
 
         if (response >= 0) {
             std::cout <<
@@ -212,27 +216,29 @@ int main(int argc, char *argv[]) {
                 return -1;
             }
 
+            av_packet_from_data(pPacket, &f.frames[0][0], f.frames[0].size());
+            std::cout << pPacket << std::endl;
+
             int response = 0;
             int how_many_packets_to_process = 10;
 
             // fill the Packet with data from the Stream
             // https://ffmpeg.org/doxygen/trunk/group__lavf__decoding.html#ga4fdb3084415a82e3810de6ee60e46a61
-            int error = 10;
+            int error = 0;
 
-            while ((error = avcodec_receive_packet(pColorCodecContext, pPacket)) >= 0) {
-                std::cout << "AVPacket->pts % " << PRId64 << " " << pPacket->pts << std::endl;
-                cv::Mat img;
-                response = decode_packet(pPacket, pColorCodecContext, pFrame, img);
+            cv::Mat img;
 
-                cv::namedWindow("Display Window");
-                cv::imshow("Display Window", img);
-                cv::waitKey(1000);
-                if (response < 0)
-                    break;
-                // stop it, otherwise we'll be saving hundreds of frames
-                // https://ffmpeg.org/doxygen/trunk/group__lavc__packet.html#ga63d5a489b419bd5d45cfd09091cbcbc2
-                av_packet_unref(pPacket);
-            }
+            response = decode_packet(pPacket, pColorCodecContext, pFrame, img);
+
+            cv::namedWindow("Display Window");
+            cv::imshow("Display Window", img);
+            cv::waitKey(1000);
+            if (response < 0)
+                break;
+            // stop it, otherwise we'll be saving hundreds of frames
+            // https://ffmpeg.org/doxygen/trunk/group__lavc__packet.html#ga63d5a489b419bd5d45cfd09091cbcbc2
+            av_packet_unref(pPacket);
+
             char errbuf[1000];
             std::cout << "Error: " << error << " " << av_make_error_string(errbuf, (size_t) 1000, error) << std::endl;
 
