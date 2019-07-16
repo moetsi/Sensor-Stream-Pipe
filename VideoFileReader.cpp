@@ -216,20 +216,22 @@ std::vector<unsigned char> VideoFileReader::currentFrameBytes() {
 
 void VideoFileReader::nextFrame() {
     // https://ffmpeg.org/doxygen/trunk/structAVFrame.html
-
+    av_packet_unref(pPacket);
     int error = 0;
     while (error = av_read_frame(pFormatContext, pPacket) >= 0) {
         // if it's the video stream
         if (pPacket->stream_index == video_stream_index) {
-            AVPacket *newPacket = av_packet_alloc();
-            av_packet_from_data(newPacket, pPacket->data, pPacket->size);
+            std::cout << pPacket->size << " " << (int) pPacket->data[0] << " " << (int) pPacket->data[1] << " "
+                      << (int) pPacket->data[pPacket->size - 2] << " " << (int) pPacket->data[pPacket->size - 1]
+                      << std::endl;
+            //AVPacket *newPacket = av_packet_alloc();
+            //av_packet_from_data(newPacket, pPacket->data, pPacket->size);
             //std::cout << "AVPacket->pts " << PRId64 << " " << newPacket->pts << std::endl;
             //int response = decode_packet();
-            av_packet_unref(newPacket);
+            //av_packet_unref(newPacket);
             break;
         }
         // https://ffmpeg.org/doxygen/trunk/group__lavc__packet.html#ga63d5a489b419bd5d45cfd09091cbcbc2
-        av_packet_unref(pPacket);
     }
     if (error == 0)
         eofReached = true;
@@ -251,10 +253,13 @@ int VideoFileReader::decode_packet() {
 
     if (response < 0) {
         char errbuf[1000];
-        std::cout << "Error while sending a packet to the decoder: %s" <<
+        std::cout << "Error while receiving a frame from the decoder: %s " << response << " " <<
                   av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
         return response;
     }
+    char errbuf[1000];
+    std::cout << "Error while receiving a frame from the decoder: %s " << response << " " <<
+              av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
 
     while (response >= 0) {
         // Return decoded output data (into a frame) from a decoder
@@ -263,9 +268,7 @@ int VideoFileReader::decode_packet() {
         if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
             break;
         } else if (response < 0) {
-            char errbuf[1000];
-            std::cout << "Error while receiving a frame from the decoder: %s" << " " <<
-                      av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
+
             return response;
         }
 

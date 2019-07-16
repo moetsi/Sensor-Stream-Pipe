@@ -48,55 +48,22 @@ static void avframeToMat(const AVFrame *frame, cv::Mat &image) {
 static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame, cv::Mat &img) {
     // Supply raw packet data as input to a decoder
     // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga58bc4bf1e0ac59e27362597e467efff3
-    int response = avcodec_send_packet(pCodecContext, pPacket);
 
-    uint8_t *buffer;
-    int numBytes;
+    std::cout <<
+              "Frame %d (type=%c, size=%d bytes) pts %d key_frame %d [DTS %d]" << " " <<
+              pCodecContext->frame_number << " " <<
+              av_get_picture_type_char(pFrame->pict_type) << " " <<
+              pFrame->pkt_size << " " <<
+              pFrame->pts << " " <<
+              pFrame->key_frame << " " <<
+              pFrame->coded_picture_number << " " << std::endl;
 
-    if (response < 0) {
-        char errbuf[1000];
-        std::cerr << "Error while sending a packet to the decoder: %s" <<
-                  av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
-        return response;
-    }
-    char errbuf[1000];
-    std::cerr << "Error while sending a packet to the decoder: %s" <<
-              av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
-    while (response >= 0) {
-        // Return decoded output data (into a frame) from a decoder
-        // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga11e6542c4e66d3028668788a1a74217c
-        response = avcodec_receive_frame(pCodecContext, pFrame);
-        if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
-            break;
-        } else if (response < 0) {
-            char errbuf[1000];
-            std::cout << "Error while receiving a frame from the decoder: %s" <<
-                      av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
-            return response;
-        }
-        char errbuf[1000];
-        std::cout << "Error while receiving a frame from the decoder: %s" <<
-                  av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
+    // char frame_filename[1024];
+    // snprintf(frame_filename, sizeof(frame_filename), "%s-%d.pgm", "frame", pCodecContext->frame_number);
+    // save a grayscale frame into a .pgm file
+    // save_gray_frame(pFrame->data[0], pFrame->linesize[0], pFrame->width, pFrame->height, frame_filename);
 
-        if (response >= 0) {
-            std::cout <<
-                      "Frame %d (type=%c, size=%d bytes) pts %d key_frame %d [DTS %d]" << " " <<
-                      pCodecContext->frame_number << " " <<
-                      av_get_picture_type_char(pFrame->pict_type) << " " <<
-                      pFrame->pkt_size << " " <<
-                      pFrame->pts << " " <<
-                      pFrame->key_frame << " " <<
-                      pFrame->coded_picture_number << " " << std::endl;
-
-            // char frame_filename[1024];
-            // snprintf(frame_filename, sizeof(frame_filename), "%s-%d.pgm", "frame", pCodecContext->frame_number);
-            // save a grayscale frame into a .pgm file
-            // save_gray_frame(pFrame->data[0], pFrame->linesize[0], pFrame->width, pFrame->height, frame_filename);
-
-            avframeToMat(pFrame, img);
-
-        }
-    }
+    avframeToMat(pFrame, img);
     return 0;
 }
 
@@ -217,7 +184,9 @@ int main(int argc, char *argv[]) {
             }
 
             av_packet_from_data(pPacket, &f.frames[0][0], f.frames[0].size());
-            std::cout << pPacket << std::endl;
+            std::cout << pPacket->size << " " << (int) pPacket->data[0] << " " << (int) pPacket->data[1] << " "
+                      << (int) pPacket->data[pPacket->size - 2] << " " << (int) pPacket->data[pPacket->size - 1]
+                      << std::endl;
 
             int response = 0;
             int how_many_packets_to_process = 10;
@@ -228,19 +197,22 @@ int main(int argc, char *argv[]) {
 
             cv::Mat img;
 
-            response = decode_packet(pPacket, pColorCodecContext, pFrame, img);
+            response = avcodec_send_packet(pColorCodecContext, pPacket);
+            if (response >= 0) {
+                // Return decoded output data (into a frame) from a decoder
+                // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga11e6542c4e66d3028668788a1a74217c
+                response = avcodec_receive_frame(pColorCodecContext, pFrame);
+                if (response >= 0) {
+                    response = decode_packet(pPacket, pColorCodecContext, pFrame, img);
+                    cv::namedWindow("Display Window");
+                    cv::imshow("Display Window", img);
+                    cv::waitKey(1000);
+                    //av_packet_unref(pPacket);
+                }
 
-            cv::namedWindow("Display Window");
-            cv::imshow("Display Window", img);
-            cv::waitKey(1000);
-            if (response < 0)
-                break;
-            // stop it, otherwise we'll be saving hundreds of frames
-            // https://ffmpeg.org/doxygen/trunk/group__lavc__packet.html#ga63d5a489b419bd5d45cfd09091cbcbc2
-            av_packet_unref(pPacket);
+            }
 
-            char errbuf[1000];
-            std::cout << "Error: " << error << " " << av_make_error_string(errbuf, (size_t) 1000, error) << std::endl;
+
 
             //cv::Mat color = f.getColorFrame();
             //cv::Mat depth = f.getDepthFrame();
