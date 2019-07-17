@@ -26,6 +26,8 @@ extern "C" {
 
 int main(int argc, char *argv[]) {
 
+    srand(time(NULL));
+
     try {
         if (argc < 5) {
             std::cerr << "Usage: server <host> <port> <color video file> <depth video file> (<stop after>)"
@@ -54,7 +56,7 @@ int main(int argc, char *argv[]) {
         uint fps = vc.getFps();
 
 
-        uint64_t last_time = current_time_ms();
+        uint64_t last_time = currentTimeMs();
         uint64_t start_time = last_time;
         uint64_t start_frame_time = last_time;
         uint64_t sent_frames = 0;
@@ -69,15 +71,16 @@ int main(int argc, char *argv[]) {
             // try to maintain constant FPS by ignoring processing time
             uint64_t sleep_time = (1000 / fps) - processing_time;
 
-            //TODO: see if the if is needed
-            if (sleep_time >= 1)
-                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
-            start_frame_time = current_time_ms();
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+            start_frame_time = currentTimeMs();
+
+            vc.nextFrame();
+            vd.nextFrame();
 
             VideoFrameStruct f;
 
             if (sent_frames == 0) {
-                last_time = current_time_ms();
+                last_time = currentTimeMs();
                 start_time = last_time;
                 f.codec_data.push_back(vc.getCodecParamsStruct());
                 f.codec_data.push_back(vd.getCodecParamsStruct());
@@ -91,8 +94,7 @@ int main(int argc, char *argv[]) {
 
             }
 
-            vc.nextFrame();
-            vd.nextFrame();
+
 
             f.messageType = 1;
 
@@ -100,6 +102,7 @@ int main(int argc, char *argv[]) {
             f.frames.push_back(vd.currentFrameBytes());
 
             f.frameId = vc.currentFrameId();
+            f.streamId = vc.getStreamID();
 
             if (!vc.hasNextFrame()) {
                 vc.reset();
@@ -119,9 +122,9 @@ int main(int argc, char *argv[]) {
             sent_frames += 1;
             sent_mbytes += message.size() / 1000.0;
 
-            uint64_t diff_time = current_time_ms() - last_time;
+            uint64_t diff_time = currentTimeMs() - last_time;
 
-            double diff_start_time = (current_time_ms() - start_time);
+            double diff_start_time = (currentTimeMs() - start_time);
             int64_t avg_fps;
             if (diff_start_time == 0)
                 avg_fps = -1;
@@ -129,7 +132,7 @@ int main(int argc, char *argv[]) {
                 //TODO: detail the conversions happening here
                 avg_fps = 1000 / (diff_start_time / (double) sent_frames);
 
-            last_time = current_time_ms();
+            last_time = currentTimeMs();
             processing_time = last_time - start_frame_time;
 
             std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent, took " << diff_time

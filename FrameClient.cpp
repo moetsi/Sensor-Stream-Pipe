@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 
         //socket.setsockopt(ZMQ_SUBSCRIBE, nullptr, 0);
 
-        uint64_t last_time = current_time_ms();
+        uint64_t last_time = currentTimeMs();
         uint64_t start_time = last_time;
         uint64_t rec_frames = 0;
         double rec_mbytes = 0;
@@ -41,13 +41,13 @@ int main(int argc, char *argv[]) {
             socket.recv(&request);
 
             if (rec_frames == 0) {
-                last_time = current_time_ms();
+                last_time = currentTimeMs();
                 start_time = last_time;
             }
 
             rec_frames += 1;
-            uint64_t diff_time = current_time_ms() - last_time;
-            double diff_start_time = (current_time_ms() - start_time) / (double) rec_frames;
+            uint64_t diff_time = currentTimeMs() - last_time;
+            double diff_start_time = (currentTimeMs() - start_time) / (double) rec_frames;
             int64_t avg_fps;
             if (diff_start_time == 0)
                 avg_fps = -1;
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
                     //std::cout << "Message received, took " << diff_time << " ms; size " << paclet_len << "; avg " << avg_fps << " fps" << std::endl;
 
-            last_time = current_time_ms();
+            last_time = currentTimeMs();
 
             //std::string result = request.str();
             //TODO: check if it is also necessary to copy from zeromq buffer
@@ -72,7 +72,8 @@ int main(int argc, char *argv[]) {
             cv::imshow("Display Window", color);
             cv::waitKey(1);
             std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " received, took " << diff_time << " ms; size " << request.size()
-                      << "; avg " << avg_fps << " fps; " << 8*(rec_mbytes/(current_time_ms()-start_time)) << " Mbps" << std::endl;
+                      << "; avg " << avg_fps << " fps; " << 8 * (rec_mbytes / (currentTimeMs() - start_time)) << " Mbps"
+                      << std::endl;
 
         }
     }

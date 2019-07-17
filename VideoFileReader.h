@@ -25,32 +25,36 @@ extern "C" {
 class VideoFileReader {
 private:
 
-    bool eofReached;
-    unsigned int currentFrameCounter;
     unsigned int fps;
     std::string sceneDesc;
     std::string type;
     unsigned int sensorId;
+    unsigned int deviceId;
+    std::string filename;
+
+    int video_stream_index;
+
     AVFormatContext *pFormatContext;
     AVCodecParameters *pCodecParameters;
-    AVCodecParameters *pLocalCodecParameters;
-    AVCodec *pLocalCodec = NULL;
     AVCodecContext *pCodecContext;
-    int video_stream_index;
-    AVFrame *pFrame;
-    AVPacket *pPacket;
     AVCodec *pCodec;
 
-    unsigned int deviceId;
+    AVFrame *pFrame;
+    AVPacket *pPacket;
 
-    std::vector<std::string> frameLines;
+    bool libAVReady;
 
-    std::vector<unsigned char> readFile(std::string &filename);
+    bool eofReached;
+    unsigned int currentFrameCounter;
 
-    int decode_packet();
+    std::string streamId;
+
+
+    void init(std::string &filename);
+
 
 public:
-    VideoFileReader(std::string filename);
+    VideoFileReader(std::string &filename);
 
     ~VideoFileReader();
 
@@ -76,7 +80,7 @@ public:
 
     CodecParamsStruct getCodecParamsStruct();
 
-
+    std::string getStreamID();
 };
 
 

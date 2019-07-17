@@ -71,6 +71,9 @@ static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFra
 
 
 int main(int argc, char *argv[]) {
+
+    srand(time(NULL));
+
     try {
         if (argc != 2) {
             std::cerr << "Usage: client <port>" << std::endl;
@@ -80,21 +83,15 @@ int main(int argc, char *argv[]) {
         zmq::socket_t socket(context, ZMQ_PULL);
         socket.bind("tcp://*:" + std::string(argv[1]));
 
-        //socket.setsockopt(ZMQ_SUBSCRIBE, nullptr, 0);
-
-        uint64_t last_time = current_time_ms();
+        uint64_t last_time = currentTimeMs();
         uint64_t start_time = last_time;
         uint64_t rec_frames = 0;
         double rec_mbytes = 0;
 
-        AVCodec *pColorCodec;
-        AVCodec *pDepthCodec;
+        std::unordered_map<std::string, std::vector<AVCodec *>> pCodecs;
+        std::unordered_map<std::string, std::vector<AVCodecContext *>> pCodecContexts;
+        std::unordered_map<std::string, std::vector<AVCodecParameters *>> pCodecParameters;
 
-        AVCodecContext *pColorCodecContext;
-        AVCodecContext *pDepthCodecContext;
-
-        AVCodecParameters *pColorCodecParameters;
-        AVCodecParameters *pDepthCodecParameters;;
         av_register_all();
 
         for (;;) {
@@ -105,13 +102,13 @@ int main(int argc, char *argv[]) {
             socket.recv(&request);
 
             if (rec_frames == 0) {
-                last_time = current_time_ms();
+                last_time = currentTimeMs();
                 start_time = last_time;
             }
 
             rec_frames += 1;
-            uint64_t diff_time = current_time_ms() - last_time;
-            double diff_start_time = (current_time_ms() - start_time) / (double) rec_frames;
+            uint64_t diff_time = currentTimeMs() - last_time;
+            double diff_start_time = (currentTimeMs() - start_time) / (double) rec_frames;
             int64_t avg_fps;
             if (diff_start_time == 0)
                 avg_fps = -1;
@@ -120,7 +117,7 @@ int main(int argc, char *argv[]) {
 
             //std::cout << "Message received, took " << diff_time << " ms; size " << paclet_len << "; avg " << avg_fps << " fps" << std::endl;
 
-            last_time = current_time_ms();
+            last_time = currentTimeMs();
 
             //std::string result = request.str();
             //TODO: check if it is also necessary to copy from zeromq buffer
@@ -129,104 +126,91 @@ int main(int argc, char *argv[]) {
             VideoFrameStruct f = VideoFrameStruct::parseFrameStruct(result);
             rec_mbytes += request.size() / 1000;
 
-            //TODO: this only works for a single stream, the video cliemt must keep state for multiple streams
-            if (rec_frames == 1) {
-                pColorCodecParameters = f.codec_data[0].getParams();
-                pDepthCodecParameters = f.codec_data[1].getParams();
+            if (pCodecs.find(f.streamId) == pCodecs.end()) {
+                pCodecs[f.streamId] = std::vector<AVCodec *>();
+                pCodecContexts[f.streamId] = std::vector<AVCodecContext *>();
+                pCodecParameters[f.streamId] = std::vector<AVCodecParameters *>();
 
-                std::cout << pColorCodecParameters->codec_id << std::endl;
-                std::cout << pDepthCodecParameters->codec_id << std::endl;
+                for (uint i = 0; i < f.codec_data.size(); i++) {
+                    AVCodecParameters *pCodecParameter = f.codec_data[i].getParams();
+                    AVCodec *pCodec = avcodec_find_decoder(pCodecParameter->codec_id);
+                    AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
 
-                std::cout << pColorCodecParameters->codec_tag << std::endl;
-                std::cout << pDepthCodecParameters->codec_tag << std::endl;
+                    if (!pCodecContext) {
+                        std::cout << "failed to allocated memory for AVCodecContext" << std::endl;
+                    }
 
+                    if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
+                        std::cout << ("failed to copy codec params to codec context") << std::endl;
+                    }
 
-                pColorCodec = avcodec_find_decoder(pColorCodecParameters->codec_id);
-                pDepthCodec = avcodec_find_decoder(pDepthCodecParameters->codec_id);
+                    if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
+                        std::cout << ("failed to open codec through avcodec_open2") << std::endl;
+                    }
+
+                    pCodecParameters[f.streamId].push_back(pCodecParameter);
+                    pCodecs[f.streamId].push_back(pCodec);
+                    pCodecContexts[f.streamId].push_back(pCodecContext);
+
+                }
+
 
                 // https://ffmpeg.org/doxygen/trunk/structAVCodecContext.html
-                pColorCodecContext = avcodec_alloc_context3(pColorCodec);
-                pDepthCodecContext = avcodec_alloc_context3(pDepthCodec);
-                if (!pColorCodecContext || !pDepthCodecContext) {
-                    std::cout << ("failed to allocated memory for AVCodecContext") << std::endl;
-                    return -1;
-                }
 
-                // Fill the codec context based on the values from the supplied codec parameters
-                // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
-                if (avcodec_parameters_to_context(pColorCodecContext, pColorCodecParameters) < 0 ||
-                    avcodec_parameters_to_context(pDepthCodecContext, pDepthCodecParameters) < 0
-                        ) {
-                    std::cout << ("failed to copy codec params to codec context") << std::endl;
-                    return -1;
-                }
-
-                // Initialize the AVCodecContext to use the given AVCodec.
-                // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#ga11f785a188d7d9df71621001465b0f1d
-                if (avcodec_open2(pColorCodecContext, pColorCodec, NULL) < 0 ||
-                    avcodec_open2(pDepthCodecContext, pDepthCodec, NULL) < 0
-
-                        ) {
-                    std::cout << ("failed to open codec through avcodec_open2") << std::endl;
-                    return -1;
-                }
 
             }
 
-            AVFrame *pFrame = av_frame_alloc();
-            if (!pFrame) {
-                std::cout << ("failed to allocated memory for AVFrame") << std::endl;
-                return -1;
-            }
-            // https://ffmpeg.org/doxygen/trunk/structAVPacket.html
-            AVPacket *pPacket = av_packet_alloc();
-            if (!pPacket) {
-                std::cout << ("failed to allocated memory for AVPacket") << std::endl;
-                return -1;
-            }
+            for (uint i = 0; i < f.frames.size(); i++) {
+                AVCodecContext *pCodecContext = pCodecContexts[f.streamId][i];
 
-            av_packet_from_data(pPacket, &f.frames[0][0], f.frames[0].size());
-            std::cout << pPacket->size << " " << (int) pPacket->data[0] << " " << (int) pPacket->data[1] << " "
-                      << (int) pPacket->data[pPacket->size - 2] << " " << (int) pPacket->data[pPacket->size - 1]
-                      << std::endl;
+                AVFrame *pFrame = av_frame_alloc();
+                if (!pFrame) {
+                    std::cout << ("failed to allocated memory for AVFrame") << std::endl;
+                    return -1;
+                }
+                // https://ffmpeg.org/doxygen/trunk/structAVPacket.html
+                AVPacket *pPacket = av_packet_alloc();
+                if (!pPacket) {
+                    std::cout << ("failed to allocated memory for AVPacket") << std::endl;
+                    return -1;
+                }
 
-            int response = 0;
-            int how_many_packets_to_process = 10;
+                av_packet_from_data(pPacket, &f.frames[i][0], f.frames[i].size());
 
-            // fill the Packet with data from the Stream
-            // https://ffmpeg.org/doxygen/trunk/group__lavf__decoding.html#ga4fdb3084415a82e3810de6ee60e46a61
-            int error = 0;
+                int response = 0;
 
-            cv::Mat img;
+                int error = 0;
 
-            response = avcodec_send_packet(pColorCodecContext, pPacket);
-            if (response >= 0) {
-                // Return decoded output data (into a frame) from a decoder
-                // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga11e6542c4e66d3028668788a1a74217c
-                response = avcodec_receive_frame(pColorCodecContext, pFrame);
+                cv::Mat img;
+
+                response = avcodec_send_packet(pCodecContext, pPacket);
                 if (response >= 0) {
-                    response = decode_packet(pPacket, pColorCodecContext, pFrame, img);
-                    cv::namedWindow("Display Window");
-                    cv::imshow("Display Window", img);
-                    cv::waitKey(1);
-                    //av_packet_unref(pPacket);
+                    // Return decoded output data (into a frame) from a decoder
+                    response = avcodec_receive_frame(pCodecContext, pFrame);
+                    if (response >= 0) {
+                        response = decode_packet(pPacket, pCodecContext, pFrame, img);
+                        cv::namedWindow("Display Window");
+                        cv::imshow("Display Window", img);
+                        cv::waitKey(1);
+                        //av_packet_unref(pPacket);
+                    }
+
                 }
 
+
+
+                //cv::Mat color = f.getColorFrame();
+                //cv::Mat depth = f.getDepthFrame();
+                //cv::namedWindow("Display Window");
+                //cv::imshow("Display Window", color);
+                //cv::waitKey(1);
+
+
             }
-
-
-
-            //cv::Mat color = f.getColorFrame();
-            //cv::Mat depth = f.getDepthFrame();
-            //cv::namedWindow("Display Window");
-            //cv::imshow("Display Window", color);
-            //cv::waitKey(1);
-
             std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " received, took " << diff_time
                       << " ms; size " << request.size()
-                      << "; avg " << avg_fps << " fps; " << 8 * (rec_mbytes / (current_time_ms() - start_time))
+                      << "; avg " << avg_fps << " fps; " << 8 * (rec_mbytes / (currentTimeMs() - start_time))
                       << " Mbps" << std::endl;
-
         }
     }
     catch (std::exception &e) {

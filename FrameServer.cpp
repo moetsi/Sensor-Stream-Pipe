@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
         uint fps = reader.getFps();
 
 
-        uint64_t last_time = current_time_ms();
+        uint64_t last_time = currentTimeMs();
         uint64_t start_time = last_time;
         uint64_t start_frame_time = last_time;
         uint64_t sent_frames = 0;
@@ -59,10 +59,10 @@ int main(int argc, char *argv[]) {
             //TODO: see if the if is needed
             if (sleep_time >= 1)
                 std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
-            start_frame_time = current_time_ms();
+            start_frame_time = currentTimeMs();
 
             if (sent_frames == 0) {
-                last_time = current_time_ms();
+                last_time = currentTimeMs();
                 start_time = last_time;
             }
 
@@ -83,9 +83,9 @@ int main(int argc, char *argv[]) {
             sent_frames += 1;
             sent_mbytes += message.size()/1000.0;
 
-            uint64_t diff_time = current_time_ms() - last_time;
+            uint64_t diff_time = currentTimeMs() - last_time;
 
-            double diff_start_time = (current_time_ms() - start_time);
+            double diff_start_time = (currentTimeMs() - start_time);
             int64_t avg_fps;
             if (diff_start_time == 0)
                 avg_fps = -1;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
                 //TODO: detail the conversions happening here
                 avg_fps = 1000 / (diff_start_time / (double) sent_frames);
 
-            last_time = current_time_ms();
+            last_time = currentTimeMs();
             processing_time = last_time - start_frame_time;
 
             std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent, took " << diff_time << " ms; size " << message.size()

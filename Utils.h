@@ -8,7 +8,13 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
-uint64_t current_time_ms();
+uint64_t currentTimeMs();
 
 std::vector<std::string> split(const std::string &str, const std::string &delim);
+
+std::string randomString(size_t length);
+
+#undef  av_err2str
+#define av_err2str(errnum) av_make_error_string((char*)__builtin_alloca(AV_ERROR_MAX_STRING_SIZE), AV_ERROR_MAX_STRING_SIZE, errnum)

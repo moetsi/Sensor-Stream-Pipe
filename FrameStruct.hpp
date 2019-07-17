@@ -125,6 +125,8 @@ struct CodecParamsStruct {
 struct VideoFrameStruct {
     unsigned short messageType;
 
+    std::string streamId;
+
     std::vector<std::vector<unsigned char>> frames;
     std::vector<CodecParamsStruct> codec_data;
 
@@ -132,12 +134,14 @@ struct VideoFrameStruct {
     unsigned int sensorId;
     unsigned int deviceId;
     unsigned int frameId;
-    std::vector<unsigned long> timestamp;
+    std::vector<unsigned long> timestamps;
+
+
 
     template<class Archive>
     void serialize(Archive &ar) {
-        ar(messageType, frames, codec_data, sceneDesc, sensorId, deviceId, frameId,
-           timestamp);
+        ar(messageType, streamId, frames, codec_data, sceneDesc, sensorId, deviceId, frameId,
+           timestamps);
     }
 
     cv::Mat getColorFrame() {
