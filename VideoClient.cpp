@@ -92,6 +92,19 @@ int main(int argc, char *argv[]) {
         std::unordered_map<std::string, std::vector<AVCodecContext *>> pCodecContexts;
         std::unordered_map<std::string, std::vector<AVCodecParameters *>> pCodecParameters;
 
+        AVPacket *pPacket = av_packet_alloc();
+        AVFrame *pFrame = av_frame_alloc();
+        if (!pFrame) {
+            std::cout << ("failed to allocated memory for AVFrame") << std::endl;
+            return -1;
+        }
+        // https://ffmpeg.org/doxygen/trunk/structAVPacket.html
+
+        if (!pPacket) {
+            std::cout << ("failed to allocated memory for AVPacket") << std::endl;
+            return -1;
+        }
+
         av_register_all();
 
         for (;;) {
@@ -163,18 +176,7 @@ int main(int argc, char *argv[]) {
 
                 AVCodecContext *pCodecContext = pCodecContexts[f.streamId][i];
 
-                AVFrame *pFrame = av_frame_alloc();
-                if (!pFrame) {
-                    std::cout << ("failed to allocated memory for AVFrame") << std::endl;
-                    return -1;
-                }
-                // https://ffmpeg.org/doxygen/trunk/structAVPacket.html
-                AVPacket *pPacket = av_packet_alloc();
-                if (!pPacket) {
-                    std::cout << ("failed to allocated memory for AVPacket") << std::endl;
-                    return -1;
-                }
-
+                // TODO: fix memory fix in this data; check when to free packet in loop
                 av_packet_from_data(pPacket, &f.frames[i][0], f.frames[i].size());
 
                 int response = 0;
@@ -189,16 +191,14 @@ int main(int argc, char *argv[]) {
                     response = avcodec_receive_frame(pCodecContext, pFrame);
                     if (response >= 0) {
                         response = decode_packet(pPacket, pCodecContext, pFrame, img);
-
                         cv::namedWindow(f.streamId + std::to_string(i));
                         cv::imshow(f.streamId + std::to_string(i), img);
                         cv::waitKey(1);
-                        //av_packet_unref(pPacket);
-                    }
 
+                    }
                 }
 
-
+                av_packet_free(&pPacket);
 
                 //cv::Mat color = f.getColorFrame();
                 //cv::Mat depth = f.getDepthFrame();
