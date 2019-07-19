@@ -54,12 +54,8 @@ int main(int argc, char *argv[]) {
             else
                 avg_fps = 1000 / diff_start_time;
 
-                    //std::cout << "Message received, took " << diff_time << " ms; size " << paclet_len << "; avg " << avg_fps << " fps" << std::endl;
-
             last_time = currentTimeMs();
 
-            //std::string result = request.str();
-            //TODO: check if it is also necessary to copy from zeromq buffer
             std::string result = std::string(static_cast<char *>(request.data()), request.size());
 
             FrameStruct f = FrameStruct::parseFrameStruct(result);

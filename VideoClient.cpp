@@ -189,8 +189,9 @@ int main(int argc, char *argv[]) {
                     response = avcodec_receive_frame(pCodecContext, pFrame);
                     if (response >= 0) {
                         response = decode_packet(pPacket, pCodecContext, pFrame, img);
-                        cv::namedWindow("Display Window");
-                        cv::imshow("Display Window", img);
+
+                        cv::namedWindow(f.streamId + std::to_string(i));
+                        cv::imshow(f.streamId + std::to_string(i), img);
                         cv::waitKey(1);
                         //av_packet_unref(pPacket);
                     }
