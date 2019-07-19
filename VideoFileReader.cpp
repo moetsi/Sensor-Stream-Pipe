@@ -201,7 +201,7 @@ void VideoFileReader::goToFrame(unsigned int frameId) {
 void VideoFileReader::reset() {
     currentFrameCounter = 0;
     eofReached = false;
-    int error = av_seek_frame(pFormatContext, video_stream_index, 0, AVSEEK_FLAG_ANY);
+    int error = av_seek_frame(pFormatContext, video_stream_index, 0, AVSEEK_FLAG_BACKWARD);
 
     if (error < 0) {
         std::cerr << "Error " << error << " " << av_err2str(error) << std::endl;

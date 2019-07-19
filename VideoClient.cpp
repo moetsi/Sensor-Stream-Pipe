@@ -153,14 +153,14 @@ int main(int argc, char *argv[]) {
                     pCodecContexts[f.streamId].push_back(pCodecContext);
 
                 }
-
-
-                // https://ffmpeg.org/doxygen/trunk/structAVCodecContext.html
-
-
             }
 
             for (uint i = 0; i < f.frames.size(); i++) {
+
+                if (f.frameId == 1) { // reset the codec context pm video reset
+                    avcodec_flush_buffers(pCodecContexts[f.streamId][i]);
+                }
+
                 AVCodecContext *pCodecContext = pCodecContexts[f.streamId][i];
 
                 AVFrame *pFrame = av_frame_alloc();
