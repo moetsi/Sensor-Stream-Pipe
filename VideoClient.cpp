@@ -177,7 +177,9 @@ int main(int argc, char *argv[]) {
                 AVCodecContext *pCodecContext = pCodecContexts[f.streamId][i];
 
                 // TODO: fix memory fix in this data; check when to free packet in loop
-                av_packet_from_data(pPacket, &f.frames[i][0], f.frames[i].size());
+                //av_packet_from_data(pPacket, &f.frames[i][0], f.frames[i].size());
+                pPacket->data = &f.frames[i][0];
+                pPacket->size = f.frames[i].size();
 
                 int response = 0;
 
@@ -198,7 +200,11 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                av_packet_free(&pPacket);
+                f.frames[i].clear();
+
+
+
+
 
                 //cv::Mat color = f.getColorFrame();
                 //cv::Mat depth = f.getDepthFrame();
