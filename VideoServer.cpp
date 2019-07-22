@@ -84,19 +84,9 @@ int main(int argc, char *argv[]) {
             if (sent_frames == 0) {
                 last_time = currentTimeMs();
                 start_time = last_time;
-                f.codec_data.push_back(vc.getCodecParamsStruct());
-                f.codec_data.push_back(vd.getCodecParamsStruct());
-
-                CodecParamsStruct c = vc.getCodecParamsStruct();
-                AVCodecParameters *results = avcodec_parameters_alloc();
-                memcpy(results, &c.data[0], sizeof(*results));
-                results->extradata = (uint8_t *) av_mallocz(c.extra_data.size() + AV_INPUT_BUFFER_PADDING_SIZE);
-                memcpy(results->extradata, &c.extra_data[0], c.extra_data.size());
-                results->extradata_size = c.extra_data.size();
-
             }
-
-
+            f.codec_data.push_back(vc.getCodecParamsStruct());
+            f.codec_data.push_back(vd.getCodecParamsStruct());
 
             f.messageType = 1;
 
