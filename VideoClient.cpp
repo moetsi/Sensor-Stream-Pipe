@@ -5,6 +5,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <unistd.h>
 
 #include <zmq.hpp>
 
@@ -28,7 +29,7 @@ static void avframeToMat(const AVFrame *frame, cv::Mat &image) {
     int width = frame->width;
     int height = frame->height;
 
-    std::cout << av_frame_get_color_range(frame) << " " << image.step1() << " " << image.step1(0) << std::endl;
+    //std::cout << av_frame_get_color_range(frame) << " " << image.step1() << " " << image.step1(0) << std::endl;
 
     SwsContext *conversion;
 
@@ -50,14 +51,14 @@ static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFra
     // Supply raw packet data as input to a decoder
     // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga58bc4bf1e0ac59e27362597e467efff3
 
-    std::cout <<
-              "Frame %d (type=%c, size=%d bytes) pts %d key_frame %d [DTS %d]" << " " <<
-              pCodecContext->frame_number << " " <<
-              av_get_picture_type_char(pFrame->pict_type) << " " <<
-              pFrame->pkt_size << " " <<
-              pFrame->pts << " " <<
-              pFrame->key_frame << " " <<
-              pFrame->coded_picture_number << " " << std::endl;
+    //std::cout <<
+    //          "Frame %d (type=%c, size=%d bytes) pts %d key_frame %d [DTS %d]" << " " <<
+    //          pCodecContext->frame_number << " " <<
+    //          av_get_picture_type_char(pFrame->pict_type) << " " <<
+    //          pFrame->pkt_size << " " <<
+    //          pFrame->pts << " " <<
+    //          pFrame->key_frame << " " <<
+    //          pFrame->coded_picture_number << " " << std::endl;
 
     // char frame_filename[1024];
     // snprintf(frame_filename, sizeof(frame_filename), "%s-%d.pgm", "frame", pCodecContext->frame_number);
@@ -72,7 +73,7 @@ static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFra
 
 int main(int argc, char *argv[]) {
 
-    srand(time(NULL));
+    srand(time(NULL) * getpid());
 
     try {
         if (argc != 2) {

@@ -7,6 +7,7 @@
 #include <string>
 #include <stdlib.h>
 #include <thread>
+#include <unistd.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -26,7 +27,8 @@ extern "C" {
 
 int main(int argc, char *argv[]) {
 
-    srand(time(NULL));
+    srand(time(NULL) * getpid());
+    //srand(getpid());
 
     try {
         if (argc < 5) {
