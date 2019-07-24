@@ -19,8 +19,6 @@ private:
     unsigned int fps;
     std::string sceneDesc;
     unsigned int sensorId;
-
-
     unsigned int deviceId;
 
     FrameStruct currentFrameInternal;

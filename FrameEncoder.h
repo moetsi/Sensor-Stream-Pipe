@@ -16,6 +16,8 @@ extern "C" {
 #include <libavutil/avutil.h>
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
+#include <libavutil/opt.h>
+#include <libavutil/imgutils.h>
 }
 
 #include "FrameStruct.hpp"
@@ -23,6 +25,9 @@ extern "C" {
 
 class FrameEncoder : public FrameReader {
 private:
+
+    std::string codec_info_string;
+
     AVFormatContext *pFormatContext;
     AVCodecParameters *pCodecParameters;
     AVCodecContext *pCodecContext;
@@ -32,9 +37,16 @@ private:
     AVPacket *pPacket;
 
     bool libAVReady;
+    std::string streamId;
+
+    void init();
+
+    void encode();
 
 public:
     FrameEncoder(std::string filename, std::string frame_filename);
+
+    ~FrameEncoder();
 
     void reset();
 
@@ -42,9 +54,11 @@ public:
 
     void nextFrame();
 
-    FrameStruct currentFrame();
+    std::vector<unsigned char> currentFrameBytes();
 
-    std::string currentFrameBytes();
+    CodecParamsStruct getCodecParamsStruct();
+
+    std::string getStreamID();
 };
 
 
