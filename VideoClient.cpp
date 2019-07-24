@@ -199,10 +199,10 @@ int main(int argc, char *argv[]) {
                         cv::waitKey(1);
                     }
                     char errbuf[1000];
-                    std::cout << av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
+                    std::cout << "b: " << av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
                 }
                 char errbuf[1000];
-                std::cout << av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
+                std::cout << "a: " << av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
 
                 f.frames[i].clear();
 

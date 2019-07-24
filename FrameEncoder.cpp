@@ -75,21 +75,17 @@ void FrameEncoder::encode() {
     if (pFrame)
         printf("Send frame %3 PRId64\n", pFrame->pts);
 
-    ret = avcodec_send_frame(pCodecContext, pFrame);
-    if (ret < 0) {
-        fprintf(stderr, "Error sending a frame for encoding\n");
-        exit(1);
-    }
 
-    while (ret >= 0) {
+    do {
+        ret = avcodec_send_frame(pCodecContext, pFrame);
         ret = avcodec_receive_packet(pCodecContext, pPacket);
-        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-            return;
-        else if (ret < 0) {
-            fprintf(stderr, "Error during encoding\n");
-            exit(1);
-        }
-        printf("Write packet %3 (size=%5d)\n", pPacket->pts, pPacket->size);
+    } while (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF);
+
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+        return;
+    else if (ret < 0) {
+        fprintf(stderr, "Error during encoding\n");
+        exit(1);
     }
 
 
