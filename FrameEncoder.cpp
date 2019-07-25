@@ -2,6 +2,7 @@
 // Created by amourao on 26-06-2019.
 //
 
+#include <cv.hpp>
 #include "FrameEncoder.h"
 
 FrameEncoder::FrameEncoder(std::string filename, std::string codec_info) : FrameReader(filename) {
@@ -33,6 +34,18 @@ void FrameEncoder::nextFrame() {
 
     int i, ret, x, y;
 
+    std::string line = frameLines[currentFrameId()];
+    std::stringstream ss(line);
+
+    std::string frameIdStr, colorFramePath, depthFramePath;
+
+    getline(ss, frameIdStr, ';');
+    getline(ss, colorFramePath, ';');
+    getline(ss, depthFramePath);
+
+    cv::Mat frameBGR, frameYUV;
+    frameBGR = cv::imread(colorFramePath, CV_LOAD_IMAGE_UNCHANGED);
+    cv::cvtColor(frameBGR, frameYUV, cv::COLOR_BGR2YUV);
     /* make sure the frame data is writable */
     ret = av_frame_make_writable(pFrame);
     if (ret < 0)
@@ -42,15 +55,14 @@ void FrameEncoder::nextFrame() {
     /* Y */
     for (y = 0; y < pCodecContext->height; y++) {
         for (x = 0; x < pCodecContext->width; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = x + y + i * 3;
+            pFrame->data[0][y * pFrame->linesize[0] + x] = frameYUV.at<cv::Vec3b>(y, x).val[0];
         }
     }
 
-    /* Cb and Cr */
     for (y = 0; y < pCodecContext->height / 2; y++) {
         for (x = 0; x < pCodecContext->width / 2; x++) {
-            pFrame->data[1][y * pFrame->linesize[1] + x] = 128 + y + i * 2;
-            pFrame->data[2][y * pFrame->linesize[2] + x] = 64 + x + i * 5;
+            pFrame->data[1][y * pFrame->linesize[1] + x] = frameYUV.at<cv::Vec3b>(2 * y, 2 * x).val[1];
+            pFrame->data[2][y * pFrame->linesize[2] + x] = frameYUV.at<cv::Vec3b>(2 * y, 2 * x).val[2];
         }
     }
 
@@ -103,8 +115,8 @@ void FrameEncoder::init() {
     /* put sample parameters */
     pCodecContext->bit_rate = 400000;
     /* resolution must be a multiple of two */
-    pCodecContext->width = 352;
-    pCodecContext->height = 288;
+    pCodecContext->width = 640;
+    pCodecContext->height = 480;
     /* frames per second */
     pCodecContext->time_base = (AVRational) {1, (int) getFps()};
     pCodecContext->framerate = (AVRational) {(int) getFps(), 1};

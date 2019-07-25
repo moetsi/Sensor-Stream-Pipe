@@ -10,6 +10,9 @@
 
 #include <cereal/archives/binary.hpp>
 
+#include <opencv2/core/mat.hpp>
+#include <opencv2/highgui.hpp>
+
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>

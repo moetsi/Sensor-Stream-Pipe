@@ -23,8 +23,6 @@ private:
 
     FrameStruct currentFrameInternal;
 
-    std::vector<std::string> frameLines;
-
     std::vector<unsigned char> readFile(std::string &filename);
 
     FrameStruct createFrameStruct(unsigned int frameId);
@@ -32,6 +30,8 @@ private:
     std::string getStructBytes(FrameStruct frame);
 
 public:
+    std::vector<std::string> frameLines;
+
     FrameReader(std::string filename);
 
     void reset();
@@ -43,6 +43,8 @@ public:
     void nextFrame();
 
     FrameStruct currentFrame();
+
+    std::string currentFramePath(int i);
 
     std::string currentFrameBytes();
 
