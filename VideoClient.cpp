@@ -171,13 +171,13 @@ int main(int argc, char *argv[]) {
 
             for (uint i = 0; i < f.frames.size(); i++) {
 
+                //TODO: check when this to be made: re-sending the same video results
                 if (f.frameId == 1) { // reset the codec context pm video reset
                     avcodec_flush_buffers(pCodecContexts[f.streamId][i]);
                 }
 
                 AVCodecContext *pCodecContext = pCodecContexts[f.streamId][i];
 
-                // TODO: fix memory fix in this data; check when to free packet in loop
                 //av_packet_from_data(pPacket, &f.frames[i][0], f.frames[i].size());
                 pPacket->data = &f.frames[i][0];
                 pPacket->size = f.frames[i].size();
@@ -199,10 +199,11 @@ int main(int argc, char *argv[]) {
                         cv::waitKey(1);
                     }
                     char errbuf[1000];
-                    std::cout << "b: " << av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
+                    std::cout << "b: " << response << " " << av_make_error_string(errbuf, (size_t) 1000, response)
+                              << std::endl;
                 }
-                char errbuf[1000];
-                std::cout << "a: " << av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
+                //char errbuf[1000];
+                //std::cout << "a: " << response << " " << av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
 
                 f.frames[i].clear();
 
