@@ -10,6 +10,7 @@ FrameEncoder::FrameEncoder(std::string filename, std::string codec_info) : Frame
     av_register_all();
     init();
     streamId = randomString(16);
+    totalCurrentFrameCounter = 0;
     reset();
 }
 
@@ -29,12 +30,13 @@ FrameEncoder::~FrameEncoder() {
 void FrameEncoder::nextFrame() {
     if (FrameReader::hasNextFrame())
         FrameReader::nextFrame();
-    else
+    else {
         FrameReader::reset();
+    }
 
     int i, ret, x, y;
 
-    std::string line = frameLines[currentFrameId()];
+    std::string line = frameLines[FrameReader::currentFrameId()];
     std::stringstream ss(line);
 
     std::string frameIdStr, colorFramePath, depthFramePath;
@@ -71,13 +73,11 @@ void FrameEncoder::nextFrame() {
 
     /* encode the image */
     encode();
+    totalCurrentFrameCounter += 1;
 
 }
 
 void FrameEncoder::goToFrame(unsigned int frameId) {
-}
-
-void FrameEncoder::reset() {
 }
 
 void FrameEncoder::encode() {
@@ -112,6 +112,7 @@ void FrameEncoder::init() {
     pPacket = av_packet_alloc();
     pCodecParameters = avcodec_parameters_alloc();
 
+    //TODO: get parameters from frames and command line options
     /* put sample parameters */
     pCodecContext->bit_rate = 400000;
     /* resolution must be a multiple of two */
@@ -122,6 +123,9 @@ void FrameEncoder::init() {
     pCodecContext->framerate = (AVRational) {(int) getFps(), 1};
 
     pCodecParameters->codec_type = AVMEDIA_TYPE_VIDEO;
+
+    //TODO: check what happens for different codecs
+    //TODO: check what happens for depth frames
     pCodecParameters->codec_id = pCodec->id;
     pCodecParameters->codec_tag = pCodecContext->codec_tag;
     //pCodecParameters->format
@@ -190,4 +194,8 @@ CodecParamsStruct FrameEncoder::getCodecParamsStruct() {
 
 std::string FrameEncoder::getStreamID() {
     return streamId;
+}
+
+unsigned int FrameEncoder::currentFrameId() {
+    return totalCurrentFrameCounter;
 }

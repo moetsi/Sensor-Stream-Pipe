@@ -29,6 +29,7 @@ extern "C" {
 class FrameEncoder : public FrameReader {
 private:
 
+    unsigned int totalCurrentFrameCounter;
     std::string codec_info_string;
 
     AVFormatContext *pFormatContext;
@@ -51,13 +52,13 @@ public:
 
     ~FrameEncoder();
 
-    void reset();
-
     void goToFrame(unsigned int frameId);
 
     void nextFrame();
 
     std::vector<unsigned char> currentFrameBytes();
+
+    unsigned int currentFrameId();
 
     CodecParamsStruct getCodecParamsStruct();
 
