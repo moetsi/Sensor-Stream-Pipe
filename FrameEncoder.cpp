@@ -45,9 +45,12 @@ void FrameEncoder::nextFrame() {
     getline(ss, colorFramePath, ';');
     getline(ss, depthFramePath);
 
-    cv::Mat frameBGR, frameYUV;
-    frameBGR = cv::imread(colorFramePath, CV_LOAD_IMAGE_UNCHANGED);
+    cv::Mat frameOri, frameBGR, frameYUV;
+    frameOri = cv::imread(depthFramePath, CV_LOAD_IMAGE_UNCHANGED);
+
+    cv::cvtColor(frameOri, frameBGR, cv::COLOR_GRAY2BGR);
     cv::cvtColor(frameBGR, frameYUV, cv::COLOR_BGR2YUV);
+
     /* make sure the frame data is writable */
     ret = av_frame_make_writable(pFrame);
     if (ret < 0)
@@ -87,7 +90,7 @@ void FrameEncoder::encode() {
     if (pFrame)
         printf("Send frame %3 PRId64\n", pFrame->pts);
 
-
+    //TODO: add an explanation regarding the do-while cycle and "error" codes
     do {
         ret = avcodec_send_frame(pCodecContext, pFrame);
         ret = avcodec_receive_packet(pCodecContext, pPacket);
