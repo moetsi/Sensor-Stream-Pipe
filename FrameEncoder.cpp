@@ -27,6 +27,34 @@ FrameEncoder::~FrameEncoder() {
 }
 
 
+cv::Mat getFloat(cv::Mat &input) {
+    cv::Mat output;
+    double minVal, maxVal;
+
+    minMaxIdx(input.reshape(0), &minVal, &maxVal);
+
+    input.convertTo(output, CV_32FC1);
+
+    return output / maxVal;
+
+}
+
+cv::Mat getUMat(cv::Mat &input) {
+    cv::Mat outputF, outputU;
+    double minVal, maxVal;
+
+    minMaxIdx(input.reshape(0), &minVal, &maxVal);
+
+    input.convertTo(outputF, CV_32FC1);
+
+    outputF = (outputF / maxVal) * 256;
+
+    outputF.convertTo(outputU, CV_8UC1);
+
+    return outputU;
+
+}
+
 void FrameEncoder::nextFrame() {
     if (FrameReader::hasNextFrame())
         FrameReader::nextFrame();
@@ -45,19 +73,43 @@ void FrameEncoder::nextFrame() {
     getline(ss, colorFramePath, ';');
     getline(ss, depthFramePath);
 
-    cv::Mat frameOri, frameBGR, frameYUV;
+    cv::Mat frameOri, frameOriU, frameOriF, frameBGR, frameYUV;
     frameOri = cv::imread(depthFramePath, CV_LOAD_IMAGE_UNCHANGED);
+    frameOriU = getUMat(frameOri);
+    frameOriF = getFloat(frameOri);
 
-    cv::cvtColor(frameOri, frameBGR, cv::COLOR_GRAY2BGR);
+    cv::cvtColor(getFloat(frameOri), frameBGR, cv::COLOR_GRAY2BGR);
     cv::cvtColor(frameBGR, frameYUV, cv::COLOR_BGR2YUV);
+
+    cv::imshow("i1", getFloat(frameOri));
+    //cv::imshow("i1a", getUMat(frameOri));
+    //cv::imshow("i2", frameBGR);
+    //cv::imshow("i3", frameYUV);
+    cv::waitKey(1);
+
+    //std::cout << frameOri.type() << " " << frameBGR.type() << " " << frameYUV.type() << std::endl;
+    //std::cout << frameOri.size[0] << " " << frameBGR.size[0] << " " << frameYUV.size[0] << std::endl;
+    //std::cout << frameOri.at<ushort>(213, 442) << " " << frameBGR.at<cv::Vec3b>(213, 442) << " " << frameYUV.at<cv::Vec3b>(213, 442) << std::endl;
 
     /* make sure the frame data is writable */
     ret = av_frame_make_writable(pFrame);
     if (ret < 0)
         exit(1);
 
+    for (y = 0; y < pCodecContext->height; y++) {
+        for (x = 0; x < pCodecContext->width; x++) {
+            pFrame->data[0][y * pFrame->linesize[0] + x] = frameOriF.at<float>(y, x) * 255;
+        }
+    }
+
+    for (y = 0; y < pCodecContext->height / 2; y++) {
+        for (x = 0; x < pCodecContext->width / 2; x++) {
+            pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
+            pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
+        }
+    }
     /* prepare a dummy image */
-    /* Y */
+    /*
     for (y = 0; y < pCodecContext->height; y++) {
         for (x = 0; x < pCodecContext->width; x++) {
             pFrame->data[0][y * pFrame->linesize[0] + x] = frameYUV.at<cv::Vec3b>(y, x).val[0];
@@ -70,6 +122,7 @@ void FrameEncoder::nextFrame() {
             pFrame->data[2][y * pFrame->linesize[2] + x] = frameYUV.at<cv::Vec3b>(2 * y, 2 * x).val[2];
         }
     }
+    */
 
     pFrame->pts = currentFrameId();
 
