@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
             stopAfter = std::stoi(argv[5]);
         }
 
-        FrameEncoder fc(frame_file, "libx264");
+        FrameEncoder fc(frame_file, codec_name);
 
         uint fps = fc.getFps();
 

@@ -135,12 +135,12 @@ Run the frame processing client
 Start the frame streaming devices:
 
 ```
-./server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-01-frames.txt &
-./server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-02-frames.txt &
-./server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-03-frames.txt &
-./server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-04-frames.txt &
-./server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-05-frames.txt &
-./server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-06-frames.txt &
+./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-01-frames-color.txt libx264 &
+./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-02-frames-color.txt libx264 &
+./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-03-frames-color.txt libx264 &
+./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-04-frames-color.txt libx264 &
+./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-05-frames-color.txt libx264 &
+./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-06-frames-color.txt libx264 &
 ```
 
 **Real output running on a 4 core i5-2500k at 4.4 GHz**
@@ -186,7 +186,7 @@ Client receiving six parallel streams.
 
 See the [davp-data-scripts](https://github.com/moetsi/davp-data-scripts) to see how to generate the frame files.
 
-## Notes
+## Notes: Image frame streaming
 
 Current network protocol is fast, resilient to network failures and can deal with parallel streams.
 
@@ -225,6 +225,7 @@ In addition, network requirements are also high: **33 Mbps** for the Bundle Fusi
 * [ZeroMQ](http://zeromq.org/) and [cppzmq](https://github.com/zeromq/cppzmq) - Network and low-level I/O programming
 * [Cereal](https://uscilab.github.io/cereal/) - Serialization library
 * [OpenCV](https://opencv.org/) - Turn frames to cv::Mat
+* [libav](https://github.com/libav/libav/) - Turn frames to cv::Mat
 
 ## Authors
 
