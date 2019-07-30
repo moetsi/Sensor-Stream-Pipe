@@ -67,25 +67,28 @@ void FrameEncoder::nextFrame() {
     std::string line = frameLines[FrameReader::currentFrameId()];
     std::stringstream ss(line);
 
-    std::string frameIdStr, colorFramePath, depthFramePath;
+    std::string frameIdStr, framePath;
 
     getline(ss, frameIdStr, ';');
-    getline(ss, colorFramePath, ';');
-    getline(ss, depthFramePath);
+    getline(ss, framePath);
 
-    cv::Mat frameOri, frameOriU, frameOriF, frameBGR, frameYUV;
-    frameOri = cv::imread(depthFramePath, CV_LOAD_IMAGE_UNCHANGED);
-    frameOriU = getUMat(frameOri);
-    frameOriF = getFloat(frameOri);
 
-    cv::cvtColor(getFloat(frameOri), frameBGR, cv::COLOR_GRAY2BGR);
-    cv::cvtColor(frameBGR, frameYUV, cv::COLOR_BGR2YUV);
+    cv::Mat frameOri = cv::imread(framePath, CV_LOAD_IMAGE_UNCHANGED);
 
-    cv::imshow("i1", getFloat(frameOri));
+    if (frameOri.channels() == 1) {
+        prepareDepthFrame(getFloat(frameOri));
+    } else {
+        cv::Mat frameYUV;
+        cv::cvtColor(frameOri, frameYUV, cv::COLOR_BGR2YUV);
+        prepareColorFrame(frameYUV);
+    }
+
+
+    //cv::imshow("i1", getFloat(frameOri));
     //cv::imshow("i1a", getUMat(frameOri));
     //cv::imshow("i2", frameBGR);
     //cv::imshow("i3", frameYUV);
-    cv::waitKey(1);
+
 
     //std::cout << frameOri.type() << " " << frameBGR.type() << " " << frameYUV.type() << std::endl;
     //std::cout << frameOri.size[0] << " " << frameBGR.size[0] << " " << frameYUV.size[0] << std::endl;
@@ -96,33 +99,6 @@ void FrameEncoder::nextFrame() {
     if (ret < 0)
         exit(1);
 
-    for (y = 0; y < pCodecContext->height; y++) {
-        for (x = 0; x < pCodecContext->width; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = frameOriF.at<float>(y, x) * 255;
-        }
-    }
-
-    for (y = 0; y < pCodecContext->height / 2; y++) {
-        for (x = 0; x < pCodecContext->width / 2; x++) {
-            pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
-            pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
-        }
-    }
-    /* prepare a dummy image */
-    /*
-    for (y = 0; y < pCodecContext->height; y++) {
-        for (x = 0; x < pCodecContext->width; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = frameYUV.at<cv::Vec3b>(y, x).val[0];
-        }
-    }
-
-    for (y = 0; y < pCodecContext->height / 2; y++) {
-        for (x = 0; x < pCodecContext->width / 2; x++) {
-            pFrame->data[1][y * pFrame->linesize[1] + x] = frameYUV.at<cv::Vec3b>(2 * y, 2 * x).val[1];
-            pFrame->data[2][y * pFrame->linesize[2] + x] = frameYUV.at<cv::Vec3b>(2 * y, 2 * x).val[2];
-        }
-    }
-    */
 
     pFrame->pts = currentFrameId();
 
@@ -139,9 +115,6 @@ void FrameEncoder::goToFrame(unsigned int frameId) {
 void FrameEncoder::encode() {
     int ret;
 
-    /* send the frame to the encoder */
-    if (pFrame)
-        printf("Send frame %3 PRId64\n", pFrame->pts);
 
     //TODO: add an explanation regarding the do-while cycle and "error" codes
     do {
@@ -254,4 +227,35 @@ std::string FrameEncoder::getStreamID() {
 
 unsigned int FrameEncoder::currentFrameId() {
     return totalCurrentFrameCounter;
+}
+
+void FrameEncoder::prepareDepthFrame(cv::Mat frame) {
+    for (uint y = 0; y < pCodecContext->height; y++) {
+        for (uint x = 0; x < pCodecContext->width; x++) {
+            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x) * 255;
+        }
+    }
+
+    for (uint y = 0; y < pCodecContext->height / 2; y++) {
+        for (uint x = 0; x < pCodecContext->width / 2; x++) {
+            pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
+            pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
+        }
+    }
+}
+
+void FrameEncoder::prepareColorFrame(cv::Mat frame) {
+    for (uint y = 0; y < pCodecContext->height; y++) {
+        for (uint x = 0; x < pCodecContext->width; x++) {
+            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<cv::Vec3b>(y, x).val[0];
+        }
+    }
+
+    for (uint y = 0; y < pCodecContext->height / 2; y++) {
+        for (uint x = 0; x < pCodecContext->width / 2; x++) {
+            pFrame->data[1][y * pFrame->linesize[1] + x] = frame.at<cv::Vec3b>(2 * y, 2 * x).val[1];
+            pFrame->data[2][y * pFrame->linesize[2] + x] = frame.at<cv::Vec3b>(2 * y, 2 * x).val[2];
+        }
+    }
+
 }

@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 
     try {
         if (argc < 5) {
-            std::cerr << "Usage: server <host> <port> <color video file> <depth video file> (<stop after>)"
+            std::cerr << "Usage: server <host> <port> <video file> <video type> (<stop after>)"
                       << std::endl;
             return 1;
         }
@@ -44,18 +44,18 @@ int main(int argc, char *argv[]) {
         std::string host = std::string(argv[1]);
         uint port = std::stoul(argv[2]);
 
-        std::string color_video_name = std::string(argv[3]);
-        std::string depth_video_name = std::string(argv[4]);
+        std::string video_name = std::string(argv[3]);
+
+        int video_type = std::stoul(argv[4]);
 
         int stopAfter = INT_MAX;
         if (argc >= 6) {
             stopAfter = std::stoi(argv[5]);
         }
 
-        VideoFileReader vc(color_video_name);
-        VideoFileReader vd(depth_video_name);
+        VideoFileReader videoReader(video_name);
 
-        uint fps = vc.getFps();
+        uint fps = videoReader.getFps();
 
 
         uint64_t last_time = currentTimeMs();
@@ -76,41 +76,35 @@ int main(int argc, char *argv[]) {
             std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
             start_frame_time = currentTimeMs();
 
-            vc.nextFrame();
-            vd.nextFrame();
+            videoReader.nextFrame();
 
-            VideoFrameStruct f;
+
+            FrameStruct frameStruct;
 
             if (sent_frames == 0) {
                 last_time = currentTimeMs();
                 start_time = last_time;
             }
-            f.codec_data.push_back(vc.getCodecParamsStruct());
-            f.codec_data.push_back(vd.getCodecParamsStruct());
+            frameStruct.codec_data = videoReader.getCodecParamsStruct();
+            frameStruct.messageType = 1;
+            frameStruct.frame = videoReader.currentFrameBytes();
+            frameStruct.frameId = videoReader.currentFrameId();
+            frameStruct.streamId = videoReader.getStreamID();
+            frameStruct.deviceId = videoReader.getDeviceId();
+            frameStruct.sensorId = videoReader.getSensorId();
+            frameStruct.frameType = video_type;
 
-            f.messageType = 1;
 
-            f.frames.push_back(vc.currentFrameBytes());
-            f.frames.push_back(vd.currentFrameBytes());
-
-            f.frameId = vc.currentFrameId();
-            f.streamId = vc.getStreamID();
-
-            if (!vc.hasNextFrame()) {
-                vc.reset();
+            if (!videoReader.hasNextFrame()) {
+                videoReader.reset();
                 stopAfter--;
             }
 
-            if (!vd.hasNextFrame()) {
-                vd.reset();
-            }
-
-            std::string message = serialize_to_str(f);
-
+            std::string message = cerealStructToString(frameStruct);
             zmq::message_t request(message.size());
             memcpy(request.data(), message.c_str(), message.size());
-
             socket.send(request);
+
             sent_frames += 1;
             sent_mbytes += message.size() / 1000.0;
 
@@ -127,10 +121,10 @@ int main(int argc, char *argv[]) {
             last_time = currentTimeMs();
             processing_time = last_time - start_frame_time;
 
-            std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent, took " << diff_time
+            std::cout << frameStruct.deviceId << ";" << frameStruct.sensorId << ";" << frameStruct.frameId
+                      << " sent, took " << diff_time
                       << " ms; size " << message.size()
                       << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps" << std::endl;
-
 
         }
     }

@@ -76,27 +76,30 @@ int main(int argc, char *argv[]) {
 
             fc.nextFrame();
 
-            VideoFrameStruct f;
+            FrameStruct f;
 
             if (sent_frames == 0) {
                 last_time = currentTimeMs();
                 start_time = last_time;
             }
-            f.codec_data.push_back(fc.getCodecParamsStruct());
+
 
             f.messageType = 1;
-
-            f.frames.push_back(fc.currentFrameBytes());
-
+            f.codec_data = fc.getCodecParamsStruct();
+            f.frame = fc.currentFrameBytes();
             f.frameId = fc.currentFrameId();
             f.streamId = fc.getStreamID();
+            f.deviceId = fc.getDeviceId();
+            f.sensorId = fc.getSensorId();
+            f.frameType = fc.getFrameType();
+
 
             if (!fc.hasNextFrame()) {
                 fc.reset();
                 stopAfter--;
             }
 
-            std::string message = serialize_to_str(f);
+            std::string message = cerealStructToString(f);
 
             zmq::message_t request(message.size());
             memcpy(request.data(), message.c_str(), message.size());

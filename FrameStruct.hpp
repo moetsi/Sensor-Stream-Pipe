@@ -18,75 +18,6 @@
 
 #include "Utils.h"
 
-//TODO: merge with video frame struct and make it more generic
-struct FrameStruct {
-    unsigned short messageType;
-    std::vector<unsigned char> colorFrame;
-    std::vector<unsigned char> depthFrame;
-
-    std::string sceneDesc;
-    unsigned int sensorId;
-    unsigned int deviceId;
-    unsigned int frameId;
-    std::vector<unsigned long> timestamp;
-
-    template<class Archive>
-    void serialize(Archive &ar) {
-        ar(messageType, colorFrame, depthFrame, sceneDesc, sensorId, deviceId, frameId,
-           timestamp);
-    }
-
-    cv::Mat getColorFrame() {
-        if (messageType == 0)
-            return cv::imdecode(colorFrame, CV_LOAD_IMAGE_UNCHANGED);
-        else
-            return cv::Mat();
-    }
-
-    cv::Mat getDepthFrame() {
-        //TODO: check if it is reading into 16 bit cv::Mat
-        if (messageType == 0)
-            return cv::imdecode(depthFrame, CV_LOAD_IMAGE_UNCHANGED);
-        else
-            return cv::Mat();
-    }
-
-    static FrameStruct parseFrameStruct(std::string &data) {
-        FrameStruct frameIn;
-        std::istringstream is(data, std::ios::binary);
-        {
-            cereal::BinaryInputArchive iarchive(is);
-            iarchive(frameIn);
-        }
-        return frameIn;
-    }
-
-
-    static FrameStruct parseFrameStruct(std::vector<unsigned char> &data, size_t dataSize) {
-        FrameStruct frameIn;
-        std::istringstream is(std::string(data.begin(), data.begin() + dataSize), std::ios::binary);
-        {
-            cereal::BinaryInputArchive iarchive(is);
-            iarchive(frameIn);
-        }
-        return frameIn;
-    }
-
-    static std::string getStructBytes(FrameStruct frame) {
-        std::ostringstream os(std::ios::binary);
-
-        {
-            cereal::BinaryOutputArchive oarchive(os);
-            oarchive(frame);
-        }
-
-        return os.str();
-
-    }
-
-
-};
-
 struct CodecParamsStruct {
     std::vector<unsigned char> data;
     std::vector<unsigned char> extra_data;
@@ -121,75 +52,49 @@ struct CodecParamsStruct {
     }
 };
 
-//TODO: merge with frame struct and make it more generic
-struct VideoFrameStruct {
+struct FrameStruct {
+    // 0 for image frames, 1 for libav packets
     unsigned short messageType;
 
+    // 0 for color, 1 for depth
+    unsigned short frameType;
+
+    // random 16 char string that uniquely ids the frame stream
     std::string streamId;
 
-    std::vector<std::vector<unsigned char>> frames;
-    std::vector<CodecParamsStruct> codec_data;
+    // frame binary data
+    std::vector<unsigned char> frame;
 
+    // codec info for video frames, null for image frames
+    CodecParamsStruct codec_data;
+
+    // optional: scene description
     std::string sceneDesc;
+
+    // 0 for color, 1 for depth: currently redundant with frameType, but distinction may be needed in the future
     unsigned int sensorId;
+
+    // integer device id: distingish between devices in the same scene
     unsigned int deviceId;
+
+    // current frame number (increases over time)
     unsigned int frameId;
+
+    // TODO: fill with capture and processing timestamps
     std::vector<unsigned long> timestamps;
-
-
 
     template<class Archive>
     void serialize(Archive &ar) {
-        ar(messageType, streamId, frames, codec_data, sceneDesc, sensorId, deviceId, frameId,
+        ar(messageType, streamId, frame, codec_data, sceneDesc, sensorId, deviceId, frameId,
            timestamps);
     }
 
-    cv::Mat getColorFrame() {
-        return cv::Mat();
-    }
-
-    cv::Mat getDepthFrame() {
-        return cv::Mat();
-    }
-
-    static VideoFrameStruct parseFrameStruct(std::string &data) {
-        VideoFrameStruct frameIn;
-        std::istringstream is(data, std::ios::binary);
-        {
-            cereal::BinaryInputArchive iarchive(is);
-            iarchive(frameIn);
-        }
-        return frameIn;
-    }
-
-
-    static VideoFrameStruct parseFrameStruct(std::vector<unsigned char> &data, size_t dataSize) {
-        VideoFrameStruct frameIn;
-        std::istringstream is(std::string(data.begin(), data.begin() + dataSize), std::ios::binary);
-        {
-            cereal::BinaryInputArchive iarchive(is);
-            iarchive(frameIn);
-        }
-        return frameIn;
-    }
-
-    static std::string getStructBytes(FrameStruct frame) {
-        std::ostringstream os(std::ios::binary);
-
-        {
-            cereal::BinaryOutputArchive oarchive(os);
-            oarchive(frame);
-        }
-
-        return os.str();
-
-    }
 
 
 };
 
 template<typename T>
-const std::string serialize_to_str(const T &t) {
+static const std::string cerealStructToString(const T &t) {
     std::ostringstream os(std::ios::binary);
     {
         cereal::BinaryOutputArchive oarchive(os);
@@ -199,27 +104,13 @@ const std::string serialize_to_str(const T &t) {
     return os.str();
 }
 
-//TODO: remove if not needed
 template<typename T>
-const std::vector<uint8_t> serialize(const T &t) {
-    std::stringstream ss(std::ios::binary | std::ios::out | std::ios::in);
-    cereal::BinaryOutputArchive class_to_ss = {ss};
-    class_to_ss(t);
-
-    return {std::istream_iterator<uint8_t>(ss),
-            std::istream_iterator<uint8_t>()};
+static T parseCerealStructFromString(std::string &data) {
+    FrameStruct frameIn;
+    std::istringstream is(data, std::ios::binary);
+    {
+        cereal::BinaryInputArchive iarchive(is);
+        iarchive(frameIn);
+    }
+    return frameIn;
 }
-
-template<typename T>
-T deserialize(std::vector<uint8_t> &dat) {
-    std::stringstream ss(std::ios::binary | std::ios::out | std::ios::in);
-    cereal::BinaryOutputArchive arr_to_ss = {ss};
-    arr_to_ss(cereal::binary_data(dat.data(), dat.size()));
-
-    cereal::BinaryInputArchive ss_to_MyClass(ss);
-    T t;
-    ss_to_MyClass(t);
-    return t;
-}
-
-

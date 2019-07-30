@@ -19,13 +19,15 @@ FrameReader::FrameReader(std::string filename) {
     std::stringstream ss(line);
     getline(ss, sceneDesc, ';');
 
-    std::string sensorIdStr, deviceIdStr, frameCountStr, fpsStr;
+    std::string sensorIdStr, deviceIdStr, frameCountStr, fpsStr, frameTypeStr;
     getline(ss, deviceIdStr, ';');
     getline(ss, sensorIdStr, ';');
+    getline(ss, frameTypeStr, ';');
     getline(ss, fpsStr);
 
     sensorId = std::stoul(sensorIdStr);
     deviceId = std::stoul(deviceIdStr);
+    frameType = std::stoul(frameTypeStr);
     fps = std::stoul(fpsStr);
 
     // get frame count
@@ -39,6 +41,7 @@ FrameReader::FrameReader(std::string filename) {
         std::cerr << "Warning: lines read do not match expected size: " << frameLines.size() << " read vs. "
                   << frameCount << " expected." << std::endl;
 
+    streamId = randomString(16);
     reset();
 }
 
@@ -61,11 +64,10 @@ FrameStruct FrameReader::createFrameStruct(unsigned int frameId) {
     std::string line = frameLines[frameId];
     std::stringstream ss(line);
 
-    std::string frameIdStr, colorFramePath, depthFramePath;
+    std::string frameIdStr, framePath;
 
     getline(ss, frameIdStr, ';');
-    getline(ss, colorFramePath, ';');
-    getline(ss, depthFramePath);
+    getline(ss, framePath);
 
     unsigned int readFrameId = std::stoul(frameIdStr);
 
@@ -74,8 +76,7 @@ FrameStruct FrameReader::createFrameStruct(unsigned int frameId) {
                   << " expected." << std::endl;
 
 
-    std::vector<unsigned char> colorFileData = readFile(colorFramePath);
-    std::vector<unsigned char> depthFileData = readFile(depthFramePath);
+    std::vector<unsigned char> fileData = readFile(framePath);
     FrameStruct frame = FrameStruct();
 
     frame.messageType = 0;
@@ -85,8 +86,9 @@ FrameStruct FrameReader::createFrameStruct(unsigned int frameId) {
     frame.sensorId = sensorId;
 
     frame.frameId = readFrameId;
-    frame.colorFrame = colorFileData;
-    frame.depthFrame = depthFileData;
+
+    frame.frame = fileData;
+    frame.streamId = streamId;
 
     return frame;
 }
@@ -147,6 +149,15 @@ unsigned int FrameReader::getDeviceId() {
     return deviceId;
 }
 
+unsigned int FrameReader::getFrameType() {
+    return frameType;
+}
+
+
 std::string FrameReader::getSceneDesc() {
     return sceneDesc;
+}
+
+std::string FrameReader::getStreamId() {
+    return streamId;
 }

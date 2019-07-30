@@ -20,6 +20,8 @@ private:
     std::string sceneDesc;
     unsigned int sensorId;
     unsigned int deviceId;
+    unsigned int frameType;
+    std::string streamId;
 
     FrameStruct currentFrameInternal;
 
@@ -57,6 +59,10 @@ public:
     unsigned int getSensorId();
 
     unsigned int getDeviceId();
+
+    unsigned int getFrameType();
+
+    std::string getStreamId();
 
 
 };

@@ -47,6 +47,10 @@ private:
 
     void encode();
 
+    void prepareDepthFrame(cv::Mat frame);
+
+    void prepareColorFrame(cv::Mat frame);
+
 public:
     FrameEncoder(std::string filename, std::string frame_filename);
 

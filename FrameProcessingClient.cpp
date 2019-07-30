@@ -89,9 +89,9 @@ int main(int argc, char *argv[]) {
         uint64_t rec_frames = 0;
         double rec_mbytes = 0;
 
-        std::unordered_map<std::string, std::vector<AVCodec *>> pCodecs;
-        std::unordered_map<std::string, std::vector<AVCodecContext *>> pCodecContexts;
-        std::unordered_map<std::string, std::vector<AVCodecParameters *>> pCodecParameters;
+        std::unordered_map<std::string, AVCodec *> pCodecs;
+        std::unordered_map<std::string, AVCodecContext *> pCodecContexts;
+        std::unordered_map<std::string, AVCodecParameters *> pCodecParameters;
 
         AVPacket *pPacket = av_packet_alloc();
         AVFrame *pFrame = av_frame_alloc();
@@ -107,6 +107,9 @@ int main(int argc, char *argv[]) {
         }
 
         av_register_all();
+
+        cv::Mat img;
+        bool imgChanged = false;
 
         for (;;) {
 
@@ -137,17 +140,19 @@ int main(int argc, char *argv[]) {
             //TODO: check if it is also necessary to copy from zeromq buffer
             std::string result = std::string(static_cast<char *>(request.data()), request.size());
 
-            VideoFrameStruct f = VideoFrameStruct::parseFrameStruct(result);
+            FrameStruct f = parseCerealStructFromString<FrameStruct>(result);
             rec_mbytes += request.size() / 1000;
 
-            if (pCodecs.find(f.streamId) == pCodecs.end()) {
-                pCodecs[f.streamId] = std::vector<AVCodec *>();
-                pCodecContexts[f.streamId] = std::vector<AVCodecContext *>();
-                pCodecParameters[f.streamId] = std::vector<AVCodecParameters *>();
 
-                for (uint i = 0; i < f.codec_data.size(); i++) {
-                    AVCodecParameters *pCodecParameter = f.codec_data[i].getParams();
-                    AVCodec *pCodec = avcodec_find_decoder(pCodecParameter->codec_id);
+            if (f.messageType == 0) {
+                img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
+                imgChanged = true;
+            } else if (f.messageType == 1) {
+
+                if (pCodecs.find(f.streamId) == pCodecs.end()) {
+
+                    AVCodecParameters *pCodecParameter = f.codec_data.getParams();
+                    AVCodec *pCodec = avcodec_find_decoder(f.codec_data.getParams()->codec_id);
                     AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
 
                     if (!pCodecContext) {
@@ -162,31 +167,27 @@ int main(int argc, char *argv[]) {
                         std::cout << ("failed to open codec through avcodec_open2") << std::endl;
                     }
 
-                    pCodecParameters[f.streamId].push_back(pCodecParameter);
-                    pCodecs[f.streamId].push_back(pCodec);
-                    pCodecContexts[f.streamId].push_back(pCodecContext);
-
+                    pCodecs[f.streamId] = pCodec;
+                    pCodecContexts[f.streamId] = pCodecContext;
+                    pCodecParameters[f.streamId] = pCodecParameter;
                 }
-            }
 
-            for (uint i = 0; i < f.frames.size(); i++) {
 
                 //TODO: check when this to be made: re-sending the same video results
                 if (f.frameId == 1) { // reset the codec context pm video reset
-                    avcodec_flush_buffers(pCodecContexts[f.streamId][i]);
+                    avcodec_flush_buffers(pCodecContexts[f.streamId]);
                 }
 
-                AVCodecContext *pCodecContext = pCodecContexts[f.streamId][i];
+                AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
 
                 //av_packet_from_data(pPacket, &f.frames[i][0], f.frames[i].size());
-                pPacket->data = &f.frames[i][0];
-                pPacket->size = f.frames[i].size();
+                pPacket->data = &f.frame[0];
+                pPacket->size = f.frame.size();
 
                 int response = 0;
 
                 int error = 0;
 
-                cv::Mat img;
 
                 response = avcodec_send_packet(pCodecContext, pPacket);
                 if (response >= 0) {
@@ -194,36 +195,26 @@ int main(int argc, char *argv[]) {
                     response = avcodec_receive_frame(pCodecContext, pFrame);
                     if (response >= 0) {
                         response = decode_packet(pPacket, pCodecContext, pFrame, img);
-                        cv::namedWindow(f.streamId + std::to_string(i));
-                        cv::imshow(f.streamId + std::to_string(i), img);
-                        cv::waitKey(1);
+                        imgChanged = true;
                     }
-                    char errbuf[1000];
-                    std::cout << "b: " << response << " " << av_make_error_string(errbuf, (size_t) 1000, response)
-                              << std::endl;
                 }
-                //char errbuf[1000];
-                //std::cout << "a: " << response << " " << av_make_error_string(errbuf, (size_t) 1000, response) << std::endl;
 
-                f.frames[i].clear();
-
-
-
-
-
-                //cv::Mat color = f.getColorFrame();
-                //cv::Mat depth = f.getDepthFrame();
-                //cv::namedWindow("Display Window");
-                //cv::imshow("Display Window", color);
-                //cv::waitKey(1);
-
+                f.frame.clear();
 
             }
+            if (imgChanged && !img.empty()) {
+                cv::namedWindow(f.streamId);
+                cv::imshow(f.streamId, img);
+                cv::waitKey(1);
+                imgChanged = false;
+            }
+
             std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " received, took " << diff_time
                       << " ms; size " << request.size()
                       << "; avg " << avg_fps << " fps; " << 8 * (rec_mbytes / (currentTimeMs() - start_time))
                       << " Mbps" << std::endl;
         }
+
     }
     catch (std::exception &e) {
         std::cerr << e.what() << std::endl;

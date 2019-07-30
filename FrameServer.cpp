@@ -2,6 +2,9 @@
 // Created by amourao on 26-06-2019.
 //
 
+#include <unistd.h>
+
+
 #include <ctime>
 #include <iostream>
 #include <string>
@@ -16,7 +19,11 @@
 
 int main(int argc, char *argv[]) {
 
+    srand(time(NULL) * getpid());
+
     try {
+
+
         if (argc < 4) {
             std::cerr << "Usage: server <host> <port> <frame_list> (<stop after>)" << std::endl;
             return 1;
@@ -37,6 +44,7 @@ int main(int argc, char *argv[]) {
         }
 
         FrameReader reader(name);
+
 
         uint fps = reader.getFps();
 
@@ -68,6 +76,8 @@ int main(int argc, char *argv[]) {
 
             std::string message = reader.currentFrameBytes();
             FrameStruct f = reader.currentFrame();
+            f.streamId = reader.getStreamId();
+
 
             zmq::message_t request(message.size());
             memcpy(request.data(), message.c_str(), message.size());
