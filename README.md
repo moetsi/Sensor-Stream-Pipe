@@ -83,6 +83,21 @@ cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install
 ```
 
+#### yaml-cpp
+
+```
+cd ~/libs/srcOriginal
+wget https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.0.tar.gz
+tar xf yaml-cpp-0.6.0.tar.gz
+cd yaml-cpp-yaml-cpp-0.6.0
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
+make install
+```
+
+
+
 ### Building
 
 
