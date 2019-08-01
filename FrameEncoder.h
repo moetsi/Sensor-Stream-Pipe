@@ -13,6 +13,8 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
 
+#include <yaml-cpp/yaml.h>
+
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
@@ -30,7 +32,6 @@ class FrameEncoder : public FrameReader {
 private:
 
     unsigned int totalCurrentFrameCounter;
-    std::string codec_info_string;
 
     AVFormatContext *pFormatContext;
     AVCodecParameters *pCodecParameters;
@@ -39,6 +40,8 @@ private:
 
     AVFrame *pFrame;
     AVPacket *pPacket;
+
+    YAML::Node codec_parameters;
 
     bool libAVReady;
     std::string streamId;

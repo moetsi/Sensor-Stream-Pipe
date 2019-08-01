@@ -6,6 +6,8 @@ link_directories("$ENV{HOME}/libs/lib")
 
 find_package(Threads)
 find_package(OpenCV REQUIRED)
+find_package(Yaml-cpp)
+
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
 find_package(FFmpeg REQUIRED) #add here the list of ffmpeg components required
@@ -45,3 +47,4 @@ target_link_libraries(video_encoder_server swscale)
 target_link_libraries(video_encoder_server zmq)
 target_link_libraries(video_encoder_server ${FFMPEG_LIBRARIES})
 target_link_libraries(video_encoder_server ${OpenCV_LIBS})
+target_link_libraries(video_encoder_server yaml-cpp)

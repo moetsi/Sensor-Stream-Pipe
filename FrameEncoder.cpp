@@ -5,8 +5,8 @@
 #include <cv.hpp>
 #include "FrameEncoder.h"
 
-FrameEncoder::FrameEncoder(std::string filename, std::string codec_info) : FrameReader(filename) {
-    codec_info_string = codec_info;
+FrameEncoder::FrameEncoder(std::string filename, std::string codec_parameters_file) : FrameReader(filename) {
+    codec_parameters = YAML::LoadFile(codec_parameters_file);
     av_register_all();
     init();
     streamId = randomString(16);
@@ -136,20 +136,37 @@ void FrameEncoder::init() {
     int ret;
     uint8_t endcode[] = {0, 0, 1, 0xb7};
 
-    pCodec = avcodec_find_encoder_by_name(codec_info_string.c_str());
+    std::cout << codec_parameters << std::endl;
+
+    pCodec = avcodec_find_encoder_by_name(codec_parameters["codec_name"].as<std::string>().c_str());
     pCodecContext = avcodec_alloc_context3(pCodec);
     pPacket = av_packet_alloc();
     pCodecParameters = avcodec_parameters_alloc();
 
     //TODO: get parameters from frames and command line options
     /* put sample parameters */
-    pCodecContext->bit_rate = 400000;
-    /* resolution must be a multiple of two */
-    pCodecContext->width = 640;
-    pCodecContext->height = 480;
+    pCodecContext->bit_rate = codec_parameters["bitrate"].as<int>();
+
+    /* get res from file */
+    std::string line = frameLines[FrameReader::currentFrameId()];
+    std::stringstream ss(line);
+
+    std::string frameIdStr, framePath;
+
+    getline(ss, frameIdStr, ';');
+    getline(ss, framePath);
+    cv::Mat frameOri = cv::imread(framePath, CV_LOAD_IMAGE_UNCHANGED);
+
+    pCodecContext->width = frameOri.cols;
+    pCodecContext->height = frameOri.rows;
     /* frames per second */
     pCodecContext->time_base = (AVRational) {1, (int) getFps()};
     pCodecContext->framerate = (AVRational) {(int) getFps(), 1};
+
+    pCodecContext->gop_size = codec_parameters["gop_size"].as<int>(); // 10
+    pCodecContext->max_b_frames = codec_parameters["max_b_frames"].as<int>(); // 1
+    pCodecContext->pix_fmt = av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str()); // yuv420, gray16le
+
 
     pCodecParameters->codec_type = AVMEDIA_TYPE_VIDEO;
 
@@ -174,9 +191,6 @@ void FrameEncoder::init() {
      * then gop_size is ignored and the output of encoder
      * will always be I frame irrespective to gop_size
      */
-    pCodecContext->gop_size = 10;
-    pCodecContext->max_b_frames = 1;
-    pCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
 
     if (pCodec->id == AV_CODEC_ID_H264)
         av_opt_set(pCodecContext->priv_data, "preset", "slow", 0);

@@ -9,6 +9,7 @@
 #include <thread>
 #include <unistd.h>
 
+
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
@@ -16,7 +17,6 @@ extern "C" {
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
 }
-
 
 #include <zmq.hpp>
 
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 
     try {
         if (argc < 5) {
-            std::cerr << "Usage: server <host> <port> <frame_file>"
+            std::cerr << "Usage: server <host> <port> <codec parameters> <frame_file>"
                       << std::endl;
             return 1;
         }
@@ -45,14 +45,15 @@ int main(int argc, char *argv[]) {
         uint port = std::stoul(argv[2]);
 
         std::string frame_file = std::string(argv[3]);
-        std::string codec_name = std::string(argv[4]);
+        std::string codec_parameters_file = std::string(argv[4]);
 
         int stopAfter = INT_MAX;
         if (argc >= 6) {
             stopAfter = std::stoi(argv[5]);
         }
 
-        FrameEncoder fc(frame_file, codec_name);
+
+        FrameEncoder fc(frame_file, codec_parameters_file);
 
         uint fps = fc.getFps();
 
@@ -115,7 +116,6 @@ int main(int argc, char *argv[]) {
             if (diff_start_time == 0)
                 avg_fps = -1;
             else
-                //TODO: detail the conversions happening here
                 avg_fps = 1000 / (diff_start_time / (double) sent_frames);
 
             last_time = currentTimeMs();
