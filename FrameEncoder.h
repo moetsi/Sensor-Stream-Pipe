@@ -54,6 +54,8 @@ private:
 
     void prepareColorFrame(cv::Mat frame);
 
+    void prepareGrayDepthFrame(cv::Mat frame);
+
 public:
     FrameEncoder(std::string filename, std::string frame_filename);
 
@@ -71,5 +73,3 @@ public:
 
     std::string getStreamID();
 };
-
-

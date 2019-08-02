@@ -76,7 +76,10 @@ void FrameEncoder::nextFrame() {
     cv::Mat frameOri = cv::imread(framePath, CV_LOAD_IMAGE_UNCHANGED);
 
     if (frameOri.channels() == 1) {
-        prepareDepthFrame(getFloat(frameOri));
+        if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE)
+            prepareGrayDepthFrame(getUMat(frameOri));
+        else
+            prepareDepthFrame(getFloat(frameOri));
     } else {
         cv::Mat frameYUV;
         cv::cvtColor(frameOri, frameYUV, cv::COLOR_BGR2YUV);
@@ -166,7 +169,10 @@ void FrameEncoder::init() {
 
     pCodecContext->gop_size = codec_parameters["gop_size"].as<int>(); // 10
     pCodecContext->max_b_frames = codec_parameters["max_b_frames"].as<int>(); // 1
-    pCodecContext->pix_fmt = av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str()); // yuv420, gray16le
+
+    // libx264: Supported pixel formats: yuv420p yuvj420p yuv422p yuvj422p yuv444p yuvj444p nv12 nv16 nv21
+    // libx265: Supported pixel formats: yuv420p yuv422p yuv444p gbrp yuv420p10le yuv422p10le yuv444p10le gbrp10le yuv420p12le yuv422p12le yuv444p12le gbrp12le gray gray10le gray12le
+    pCodecContext->pix_fmt = av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str());
 
 
     pCodecParameters->codec_type = AVMEDIA_TYPE_VIDEO;
@@ -193,7 +199,7 @@ void FrameEncoder::init() {
      * will always be I frame irrespective to gop_size
      */
 
-    if (pCodec->id == AV_CODEC_ID_H264)
+    if (pCodec->id == AV_CODEC_ID_H264 || pCodec->id == AV_CODEC_ID_H265)
         av_opt_set(pCodecContext->priv_data, "preset", "slow", 0);
 
 
@@ -243,6 +249,15 @@ std::string FrameEncoder::getStreamID() {
 unsigned int FrameEncoder::currentFrameId() {
     return totalCurrentFrameCounter;
 }
+
+void FrameEncoder::prepareGrayDepthFrame(cv::Mat frame) {
+    for (uint y = 0; y < pCodecContext->height; y++) {
+        for (uint x = 0; x < pCodecContext->width; x++) {
+            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x);
+        }
+    }
+}
+
 
 void FrameEncoder::prepareDepthFrame(cv::Mat frame) {
     for (uint y = 0; y < pCodecContext->height; y++) {
