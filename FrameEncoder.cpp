@@ -143,9 +143,10 @@ void FrameEncoder::init() {
     pPacket = av_packet_alloc();
     pCodecParameters = avcodec_parameters_alloc();
 
-    //TODO: get parameters from frames and command line options
-    /* put sample parameters */
-    pCodecContext->bit_rate = codec_parameters["bitrate"].as<int>();
+
+    // http://git.videolan.org/?p=ffmpeg.git;a=blob;f=libavcodec/options_table.h;hb=HEAD
+    // TODO: adapt to use variable bitrate
+    av_opt_set(pCodecContext->priv_data, "preset", "b", codec_parameters["bitrate"].as<int>());
 
     /* get res from file */
     std::string line = frameLines[FrameReader::currentFrameId()];
