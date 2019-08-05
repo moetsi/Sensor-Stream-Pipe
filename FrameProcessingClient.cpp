@@ -140,68 +140,69 @@ int main(int argc, char *argv[]) {
             //TODO: check if it is also necessary to copy from zeromq buffer
             std::string result = std::string(static_cast<char *>(request.data()), request.size());
 
-            FrameStruct f = parseCerealStructFromString<FrameStruct>(result);
+            std::vector<FrameStruct> f_list = parseCerealStructFromString<std::vector<FrameStruct>>(result);
             rec_mbytes += request.size() / 1000;
 
+            for (FrameStruct f: f_list) {
+                if (f.messageType == 0) {
+                    img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
+                    imgChanged = true;
+                } else if (f.messageType == 1) {
 
-            if (f.messageType == 0) {
-                img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
-                imgChanged = true;
-            } else if (f.messageType == 1) {
+                    if (pCodecs.find(f.streamId) == pCodecs.end()) {
 
-                if (pCodecs.find(f.streamId) == pCodecs.end()) {
+                        AVCodecParameters *pCodecParameter = f.codec_data.getParams();
+                        AVCodec *pCodec = avcodec_find_decoder(f.codec_data.getParams()->codec_id);
+                        AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
 
-                    AVCodecParameters *pCodecParameter = f.codec_data.getParams();
-                    AVCodec *pCodec = avcodec_find_decoder(f.codec_data.getParams()->codec_id);
-                    AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
+                        if (!pCodecContext) {
+                            std::cout << "failed to allocated memory for AVCodecContext" << std::endl;
+                        }
 
-                    if (!pCodecContext) {
-                        std::cout << "failed to allocated memory for AVCodecContext" << std::endl;
+                        if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
+                            std::cout << ("failed to copy codec params to codec context") << std::endl;
+                        }
+
+                        if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
+                            std::cout << ("failed to open codec through avcodec_open2") << std::endl;
+                        }
+
+                        pCodecs[f.streamId] = pCodec;
+                        pCodecContexts[f.streamId] = pCodecContext;
+                        pCodecParameters[f.streamId] = pCodecParameter;
                     }
 
-                    if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
-                        std::cout << ("failed to copy codec params to codec context") << std::endl;
+
+                    //TODO: check when this to be made: re-sending the same video results
+                    if (f.frameId == 1) { // reset the codec context pm video reset
+                        avcodec_flush_buffers(pCodecContexts[f.streamId]);
                     }
 
-                    if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
-                        std::cout << ("failed to open codec through avcodec_open2") << std::endl;
-                    }
+                    AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
 
-                    pCodecs[f.streamId] = pCodec;
-                    pCodecContexts[f.streamId] = pCodecContext;
-                    pCodecParameters[f.streamId] = pCodecParameter;
-                }
+                    //av_packet_from_data(pPacket, &f.frames[i][0], f.frames[i].size());
+                    pPacket->data = &f.frame[0];
+                    pPacket->size = f.frame.size();
 
+                    int response = 0;
 
-                //TODO: check when this to be made: re-sending the same video results
-                if (f.frameId == 1) { // reset the codec context pm video reset
-                    avcodec_flush_buffers(pCodecContexts[f.streamId]);
-                }
-
-                AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
-
-                //av_packet_from_data(pPacket, &f.frames[i][0], f.frames[i].size());
-                pPacket->data = &f.frame[0];
-                pPacket->size = f.frame.size();
-
-                int response = 0;
-
-                int error = 0;
+                    int error = 0;
 
 
-                response = avcodec_send_packet(pCodecContext, pPacket);
-                if (response >= 0) {
-                    // Return decoded output data (into a frame) from a decoder
-                    response = avcodec_receive_frame(pCodecContext, pFrame);
+                    response = avcodec_send_packet(pCodecContext, pPacket);
                     if (response >= 0) {
-                        response = decode_packet(pPacket, pCodecContext, pFrame, img);
-                        imgChanged = true;
+                        // Return decoded output data (into a frame) from a decoder
+                        response = avcodec_receive_frame(pCodecContext, pFrame);
+                        if (response >= 0) {
+                            response = decode_packet(pPacket, pCodecContext, pFrame, img);
+                            imgChanged = true;
+                        }
                     }
+
+                    f.frame.clear();
+
                 }
 
-                f.frame.clear();
-
-            }
             if (imgChanged && !img.empty()) {
                 cv::namedWindow(f.streamId);
                 cv::imshow(f.streamId, img);
@@ -213,6 +214,7 @@ int main(int argc, char *argv[]) {
                       << " ms; size " << request.size()
                       << "; avg " << avg_fps << " fps; " << 8 * (rec_mbytes / (currentTimeMs() - start_time))
                       << " Mbps" << std::endl;
+        }
         }
 
     }

@@ -55,6 +55,26 @@ cv::Mat getUMat(cv::Mat &input) {
 
 }
 
+std::vector<ushort> unique(const cv::Mat &input, bool sort = false) {
+
+    std::vector<ushort> out;
+    for (int y = 0; y < input.rows; ++y) {
+        const ushort *row_ptr = input.ptr<ushort>(y);
+        for (int x = 0; x < input.cols; ++x) {
+            ushort value = row_ptr[x];
+
+            if (std::find(out.begin(), out.end(), value) == out.end())
+                out.push_back(value);
+        }
+    }
+
+    if (sort)
+        std::sort(out.begin(), out.end());
+
+    return out;
+}
+
+
 void FrameEncoder::nextFrame() {
     if (FrameReader::hasNextFrame())
         FrameReader::nextFrame();
@@ -75,11 +95,21 @@ void FrameEncoder::nextFrame() {
 
     cv::Mat frameOri = cv::imread(framePath, CV_LOAD_IMAGE_UNCHANGED);
 
-    if (frameOri.channels() == 1) {
-        if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE)
-            prepareGrayDepthFrame(getUMat(frameOri));
-        else
-            prepareDepthFrame(getFloat(frameOri));
+
+    double min, max;
+    cv::minMaxLoc(frameOri, &min, &max);
+
+    std::cout << frameOri.type() << " " << min << " " << max << " " << unique(frameOri).size() << std::endl;
+
+    /* make sure the frame data is writable */
+    ret = av_frame_make_writable(pFrame);
+    if (ret < 0)
+        exit(1);
+
+    if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
+        prepareGrayDepthFrame(getFloat(frameOri), 12);
+    } else if (frameOri.channels() == 1) {
+        prepareDepthFrame(getFloat(frameOri));
     } else {
         cv::Mat frameYUV;
         cv::cvtColor(frameOri, frameYUV, cv::COLOR_BGR2YUV);
@@ -96,12 +126,6 @@ void FrameEncoder::nextFrame() {
     //std::cout << frameOri.type() << " " << frameBGR.type() << " " << frameYUV.type() << std::endl;
     //std::cout << frameOri.size[0] << " " << frameBGR.size[0] << " " << frameYUV.size[0] << std::endl;
     //std::cout << frameOri.at<ushort>(213, 442) << " " << frameBGR.at<cv::Vec3b>(213, 442) << " " << frameYUV.at<cv::Vec3b>(213, 442) << std::endl;
-
-    /* make sure the frame data is writable */
-    ret = av_frame_make_writable(pFrame);
-    if (ret < 0)
-        exit(1);
-
 
     pFrame->pts = currentFrameId();
 
@@ -250,10 +274,10 @@ unsigned int FrameEncoder::currentFrameId() {
     return totalCurrentFrameCounter;
 }
 
-void FrameEncoder::prepareGrayDepthFrame(cv::Mat frame) {
+void FrameEncoder::prepareGrayDepthFrame(cv::Mat frame, int range) {
     for (uint y = 0; y < pCodecContext->height; y++) {
-        for (uint x = 0; x < pCodecContext->width; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x);
+        for (uint x = 0; x < pCodecContext->width * 2; x++) {
+            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x / 2) * range;
         }
     }
 }

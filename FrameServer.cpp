@@ -74,10 +74,13 @@ int main(int argc, char *argv[]) {
                 start_time = last_time;
             }
 
-            std::string message = reader.currentFrameBytes();
             FrameStruct f = reader.currentFrame();
             f.streamId = reader.getStreamId();
 
+            std::vector<FrameStruct> v;
+            v.push_back(f);
+
+            std::string message = cerealStructToString(v);
 
             zmq::message_t request(message.size());
             memcpy(request.data(), message.c_str(), message.size());

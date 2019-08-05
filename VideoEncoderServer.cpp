@@ -84,7 +84,6 @@ int main(int argc, char *argv[]) {
                 start_time = last_time;
             }
 
-
             f.messageType = 1;
             f.codec_data = fc.getCodecParamsStruct();
             f.frame = fc.currentFrameBytes();
@@ -100,7 +99,10 @@ int main(int argc, char *argv[]) {
                 stopAfter--;
             }
 
-            std::string message = cerealStructToString(f);
+            std::vector<FrameStruct> result;
+            result.push_back(f);
+
+            std::string message = cerealStructToString(result);
 
             zmq::message_t request(message.size());
             memcpy(request.data(), message.c_str(), message.size());

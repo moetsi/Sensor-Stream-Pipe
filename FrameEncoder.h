@@ -54,7 +54,7 @@ private:
 
     void prepareColorFrame(cv::Mat frame);
 
-    void prepareGrayDepthFrame(cv::Mat frame);
+    void prepareGrayDepthFrame(cv::Mat frame, int range);
 
 public:
     FrameEncoder(std::string filename, std::string frame_filename);

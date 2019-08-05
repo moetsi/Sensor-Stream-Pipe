@@ -100,7 +100,11 @@ int main(int argc, char *argv[]) {
                 stopAfter--;
             }
 
-            std::string message = cerealStructToString(frameStruct);
+            std::vector<FrameStruct> v;
+            v.push_back(frameStruct);
+
+
+            std::string message = cerealStructToString(v);
             zmq::message_t request(message.size());
             memcpy(request.data(), message.c_str(), message.size());
             socket.send(request);
