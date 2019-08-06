@@ -75,7 +75,6 @@ int main(int argc, char *argv[]) {
             std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
             start_frame_time = currentTimeMs();
 
-            fc.nextFrame();
 
             FrameStruct f;
 
@@ -92,12 +91,6 @@ int main(int argc, char *argv[]) {
             f.deviceId = fc.getDeviceId();
             f.sensorId = fc.getSensorId();
             f.frameType = fc.getFrameType();
-
-
-            if (!fc.hasNextFrame()) {
-                fc.reset();
-                stopAfter--;
-            }
 
             std::vector<FrameStruct> result;
             result.push_back(f);
@@ -127,7 +120,12 @@ int main(int argc, char *argv[]) {
                       << " ms; size " << message.size()
                       << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps" << std::endl;
 
-
+            if (fc.hasNextFrame()) {
+                fc.nextFrame();
+            } else {
+                fc.reset();
+                stopAfter--;
+            }
         }
     }
     catch (std::exception &e) {

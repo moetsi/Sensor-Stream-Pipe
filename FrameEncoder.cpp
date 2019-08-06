@@ -2,7 +2,7 @@
 // Created by amourao on 26-06-2019.
 //
 
-#include <cv.hpp>
+
 #include "FrameEncoder.h"
 
 FrameEncoder::FrameEncoder(std::string filename, std::string codec_parameters_file) : FrameReader(filename) {
@@ -67,10 +67,6 @@ std::vector<ushort> unique(const cv::Mat &input, bool sort = false) {
                 out.push_back(value);
         }
     }
-
-    if (sort)
-        std::sort(out.begin(), out.end());
-
     return out;
 }
 
@@ -78,9 +74,6 @@ std::vector<ushort> unique(const cv::Mat &input, bool sort = false) {
 void FrameEncoder::nextFrame() {
     if (FrameReader::hasNextFrame())
         FrameReader::nextFrame();
-    else {
-        FrameReader::reset();
-    }
 
     int i, ret, x, y;
 
@@ -99,7 +92,7 @@ void FrameEncoder::nextFrame() {
     double min, max;
     cv::minMaxLoc(frameOri, &min, &max);
 
-    std::cout << frameOri.type() << " " << min << " " << max << " " << unique(frameOri).size() << std::endl;
+    //std::cout << frameOri.type() << " " << min << " " << max << " " << unique(frameOri).size() << std::endl;
 
     /* make sure the frame data is writable */
     ret = av_frame_make_writable(pFrame);
@@ -115,7 +108,6 @@ void FrameEncoder::nextFrame() {
         cv::cvtColor(frameOri, frameYUV, cv::COLOR_BGR2YUV);
         prepareColorFrame(frameYUV);
     }
-
 
     //cv::imshow("i1", getFloat(frameOri));
     //cv::imshow("i1a", getUMat(frameOri));
