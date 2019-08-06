@@ -26,6 +26,17 @@ Install OpenCV
 sudo apt install libopencv-dev libopencv-core-dev uuid-dev
 ```
 
+Install Azure SDK
+
+
+```
+curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+sudo apt-add-repository https://packages.microsoft.com/ubuntu/18.04/prod
+sudo apt-get update
+
+sudo apt install libk4a1.1 libk4a1.1-dev k4a-tools
+```
+
 ## Download and extract "out-of-repo" libraries
 
 
