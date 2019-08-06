@@ -96,10 +96,19 @@ void FrameEncoder::nextFrame() {
     cv::Mat frameOri = cv::imread(framePath, CV_LOAD_IMAGE_UNCHANGED);
 
 
-    double min, max;
-    cv::minMaxLoc(frameOri, &min, &max);
+    double localMin, localMax;
+    cv::minMaxLoc(frameOri, &localMin, &localMax);
 
-    std::cout << frameOri.type() << " " << min << " " << max << " " << unique(frameOri).size() << std::endl;
+    if (localMax > max && localMax != 65535)
+        max = localMax;
+    if (localMin < min)
+        min = localMin;
+
+    if ((currentFrameId() % 1000) == 0)
+        std::cerr << min << " " << max << std::endl;
+
+    //std::vector<ushort> uni = unique(frameOri, true);
+    //std::cerr << frameOri.type() << " " << uni[1] << " " << localMax << " " << uni.size() << std::endl;
 
     /* make sure the frame data is writable */
     ret = av_frame_make_writable(pFrame);

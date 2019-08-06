@@ -57,6 +57,9 @@ private:
     void prepareGrayDepthFrame(cv::Mat frame, int range);
 
 public:
+
+    double min = 9999999, max = 0;
+
     FrameEncoder(std::string filename, std::string frame_filename);
 
     ~FrameEncoder();
