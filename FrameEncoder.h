@@ -10,7 +10,6 @@
 
 #include <cereal/archives/binary.hpp>
 
-#include <cv.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
 
