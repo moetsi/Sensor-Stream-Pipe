@@ -12,6 +12,7 @@
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
+#include <cv.hpp>
 
 #include <yaml-cpp/yaml.h>
 
@@ -25,7 +26,7 @@ extern "C" {
 #include <libavutil/imgutils.h>
 }
 
-#include "../utils/FrameStruct.hpp"
+#include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
 
 class FrameEncoder : public FrameReader {
@@ -57,8 +58,6 @@ private:
     void prepareGrayDepthFrame(cv::Mat frame, int range);
 
 public:
-
-    double min = 9999999, max = 0;
 
     FrameEncoder(std::string filename, std::string frame_filename);
 

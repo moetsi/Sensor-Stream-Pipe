@@ -22,13 +22,13 @@ if (FFMPEG_FOUND)
 endif ()
 
 set(EXECUTABLE_OUTPUT_PATH bin)
-set(SOURCE_FILES readers/FrameReader.cpp utils/FrameStruct.hpp utils/Utils.cpp)
+set(SOURCE_FILES readers/FrameReader.cpp structs/FrameStruct.hpp utils/Utils.cpp)
 
 add_executable(client clients/FrameProcessingClient.cpp readers/VideoFileReader.cpp ${SOURCE_FILES})
 add_executable(frame_server servers/FrameServer.cpp ${SOURCE_FILES})
 add_executable(video_file_server servers/VideoFileServer.cpp readers/VideoFileReader.cpp ${SOURCE_FILES})
-add_executable(video_encoder_server servers/VideoEncoderServer.cpp video/FrameEncoder.cpp ${SOURCE_FILES})
-
+add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/FrameEncoder.cpp ${SOURCE_FILES})
+add_executable(video_encoder_test utils/VideoEncodingTester.cpp encoders/FrameEncoder.cpp ${SOURCE_FILES} utils/VideoEncodingTester.cpp)
 
 target_link_libraries(client swscale)
 target_link_libraries(client zmq)
@@ -49,3 +49,8 @@ target_link_libraries(video_encoder_server zmq)
 target_link_libraries(video_encoder_server ${FFMPEG_LIBRARIES})
 target_link_libraries(video_encoder_server ${OpenCV_LIBS})
 target_link_libraries(video_encoder_server yaml-cpp)
+
+target_link_libraries(video_encoder_test ${FFMPEG_LIBRARIES})
+target_link_libraries(video_encoder_test swscale)
+target_link_libraries(video_encoder_test ${OpenCV_LIBS})
+target_link_libraries(video_encoder_test yaml-cpp)

@@ -13,7 +13,7 @@
 
 #include <zmq.hpp>
 
-#include "../utils/FrameStruct.hpp"
+#include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
 #include "../utils/Utils.h"
 

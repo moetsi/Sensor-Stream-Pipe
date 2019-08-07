@@ -18,7 +18,7 @@ extern "C" {
 }
 
 
-#include "../utils/FrameStruct.hpp"
+#include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
 #include "../utils/Utils.h"
 
@@ -46,29 +46,32 @@ static void avframeToMat(const AVFrame *frame, cv::Mat &image) {
     sws_freeContext(conversion);
 }
 
+static void prepareDecodingStruct(FrameStruct &f, std::unordered_map<std::string, AVCodec *> &pCodecs,
+                                  std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
+                                  std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters) {
+    AVCodecParameters *pCodecParameter = f.codec_data.getParams();
+    AVCodec *pCodec = avcodec_find_decoder(f.codec_data.getParams()->codec_id);
+    AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
 
-static int decode_packet(AVPacket *pPacket, AVCodecContext *pCodecContext, AVFrame *pFrame, cv::Mat &img) {
-    // Supply raw packet data as input to a decoder
-    // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga58bc4bf1e0ac59e27362597e467efff3
+    if (!pCodecContext) {
+        std::cerr << "failed to allocated memory for AVCodecContext" << std::endl;
+        exit(1);
+    }
 
-    //std::cout <<
-    //          "Frame %d (type=%c, size=%d bytes) pts %d key_frame %d [DTS %d]" << " " <<
-    //          pCodecContext->frame_number << " " <<
-    //          av_get_picture_type_char(pFrame->pict_type) << " " <<
-    //          pFrame->pkt_size << " " <<
-    //          pFrame->pts << " " <<
-    //          pFrame->key_frame << " " <<
-    //          pFrame->coded_picture_number << " " << std::endl;
+    if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
+        std::cerr << ("failed to copy codec params to codec context") << std::endl;
+        exit(1);
+    }
 
-    // char frame_filename[1024];
-    // snprintf(frame_filename, sizeof(frame_filename), "%s-%d.pgm", "frame", pCodecContext->frame_number);
-    // save a grayscale frame into a .pgm file
-    // save_gray_frame(pFrame->data[0], pFrame->linesize[0], pFrame->width, pFrame->height, frame_filename);
+    if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
+        std::cerr << ("failed to open codec through avcodec_open2") << std::endl;
+        exit(1);
+    }
 
-    avframeToMat(pFrame, img);
-    return 0;
+    pCodecs[f.streamId] = pCodec;
+    pCodecContexts[f.streamId] = pCodecContext;
+    pCodecParameters[f.streamId] = pCodecParameter;
 }
-
 
 
 int main(int argc, char *argv[]) {
@@ -112,8 +115,6 @@ int main(int argc, char *argv[]) {
         bool imgChanged = false;
 
         for (;;) {
-
-
             zmq::message_t request;
 
             socket.recv(&request);
@@ -132,8 +133,6 @@ int main(int argc, char *argv[]) {
             else
                 avg_fps = 1000 / diff_start_time;
 
-            //std::cout << "Message received, took " << diff_time << " ms; size " << paclet_len << "; avg " << avg_fps << " fps" << std::endl;
-
             last_time = currentTimeMs();
 
             std::string result = std::string(static_cast<char *>(request.data()), request.size());
@@ -148,26 +147,7 @@ int main(int argc, char *argv[]) {
                 } else if (f.messageType == 1) {
 
                     if (pCodecs.find(f.streamId) == pCodecs.end()) {
-
-                        AVCodecParameters *pCodecParameter = f.codec_data.getParams();
-                        AVCodec *pCodec = avcodec_find_decoder(f.codec_data.getParams()->codec_id);
-                        AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
-
-                        if (!pCodecContext) {
-                            std::cout << "failed to allocated memory for AVCodecContext" << std::endl;
-                        }
-
-                        if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
-                            std::cout << ("failed to copy codec params to codec context") << std::endl;
-                        }
-
-                        if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
-                            std::cout << ("failed to open codec through avcodec_open2") << std::endl;
-                        }
-
-                        pCodecs[f.streamId] = pCodec;
-                        pCodecContexts[f.streamId] = pCodecContext;
-                        pCodecParameters[f.streamId] = pCodecParameter;
+                        prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
                     }
 
                     if (f.frameId == 1) { // reset the codec context pm video reset
@@ -176,21 +156,15 @@ int main(int argc, char *argv[]) {
 
                     AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
 
-                    //av_packet_from_data(pPacket, &f.frames[i][0], f.frames[i].size());
                     pPacket->data = &f.frame[0];
                     pPacket->size = f.frame.size();
 
-                    int response = 0;
-
-                    int error = 0;
-
-
-                    response = avcodec_send_packet(pCodecContext, pPacket);
+                    int response = avcodec_send_packet(pCodecContext, pPacket);
                     if (response >= 0) {
                         // Return decoded output data (into a frame) from a decoder
                         response = avcodec_receive_frame(pCodecContext, pFrame);
                         if (response >= 0) {
-                            response = decode_packet(pPacket, pCodecContext, pFrame, img);
+                            avframeToMat(pFrame, img);
                             imgChanged = true;
                         }
                     }
@@ -199,18 +173,18 @@ int main(int argc, char *argv[]) {
 
                 }
 
-            if (imgChanged && !img.empty()) {
-                cv::namedWindow(f.streamId);
-                cv::imshow(f.streamId, img);
-                cv::waitKey(1);
-                imgChanged = false;
-            }
+                if (imgChanged && !img.empty()) {
+                    cv::namedWindow(f.streamId);
+                    cv::imshow(f.streamId, img);
+                    cv::waitKey(1);
+                    imgChanged = false;
+                }
 
-            std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " received, took " << diff_time
+                std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " received, took " << diff_time
                       << " ms; size " << request.size()
                       << "; avg " << avg_fps << " fps; " << 8 * (rec_mbytes / (currentTimeMs() - start_time))
                       << " Mbps" << std::endl;
-        }
+            }
         }
 
     }

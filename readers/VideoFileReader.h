@@ -18,7 +18,7 @@ extern "C" {
 
 #include <cereal/archives/binary.hpp>
 
-#include "../utils/FrameStruct.hpp"
+#include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
 
 

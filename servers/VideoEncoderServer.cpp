@@ -20,8 +20,8 @@ extern "C" {
 
 #include <zmq.hpp>
 
-#include "../utils/FrameStruct.hpp"
-#include "../video/FrameEncoder.h"
+#include "../structs/FrameStruct.hpp"
+#include "../encoders/FrameEncoder.h"
 #include "../utils/Utils.h"
 
 

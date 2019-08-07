@@ -2,7 +2,6 @@
 // Created by amourao on 26-06-2019.
 //
 
-#include <cv.hpp>
 #include "FrameEncoder.h"
 
 FrameEncoder::FrameEncoder(std::string filename, std::string codec_parameters_file) : FrameReader(filename) {
@@ -95,25 +94,13 @@ void FrameEncoder::nextFrame() {
 
     cv::Mat frameOri = cv::imread(framePath, CV_LOAD_IMAGE_UNCHANGED);
 
-
-    double localMin, localMax;
-    cv::minMaxLoc(frameOri, &localMin, &localMax);
-
-    if (localMax > max && localMax != 65535)
-        max = localMax;
-    if (localMin < min)
-        min = localMin;
-
-    if ((currentFrameId() % 1000) == 0)
-        std::cerr << min << " " << max << std::endl;
-
-    //std::vector<ushort> uni = unique(frameOri, true);
-    //std::cerr << frameOri.type() << " " << uni[1] << " " << localMax << " " << uni.size() << std::endl;
-
-    /* make sure the frame data is writable */
     ret = av_frame_make_writable(pFrame);
-    if (ret < 0)
+    if (ret < 0) {
+        std::cerr << "Error making frames writable" << std::endl;
         exit(1);
+    }
+    // yuv420p 640 320 320 format 0
+    // yuv422p 640 320 320 format 4
 
     if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
         prepareGrayDepthFrame(getFloat(frameOri), 12);
@@ -125,21 +112,8 @@ void FrameEncoder::nextFrame() {
         prepareColorFrame(frameYUV);
     }
 
-
-    //cv::imshow("i1", getFloat(frameOri));
-    //cv::imshow("i1a", getUMat(frameOri));
-    //cv::imshow("i2", frameBGR);
-    //cv::imshow("i3", frameYUV);
-
-
-    //std::cout << frameOri.type() << " " << frameBGR.type() << " " << frameYUV.type() << std::endl;
-    //std::cout << frameOri.size[0] << " " << frameBGR.size[0] << " " << frameYUV.size[0] << std::endl;
-    //std::cout << frameOri.at<ushort>(213, 442) << " " << frameBGR.at<cv::Vec3b>(213, 442) << " " << frameYUV.at<cv::Vec3b>(213, 442) << std::endl;
-
     pFrame->pts = currentFrameId();
 
-
-    /* encode the image */
     encode();
     totalCurrentFrameCounter += 1;
 
@@ -149,7 +123,8 @@ void FrameEncoder::encode() {
     int ret;
 
 
-    // avcodec_send_frame and avcodec_receive_packet may require multple calls (ret == AVERROR(EAGAIN)) before one is able to retrieve a packet.
+    // avcodec_send_frame and avcodec_receive_packet may require multiple calls,
+    // (ret == AVERROR(EAGAIN)) before one is able to retrieve a packet.
     do {
         ret = avcodec_send_frame(pCodecContext, pFrame);
         ret = avcodec_receive_packet(pCodecContext, pPacket);
@@ -164,7 +139,6 @@ void FrameEncoder::encode() {
 
 void FrameEncoder::init() {
     int ret;
-    uint8_t endcode[] = {0, 0, 1, 0xb7};
 
     std::cout << codec_parameters << std::endl;
 
@@ -181,7 +155,7 @@ void FrameEncoder::init() {
     pCodecContext->bit_rate = codec_parameters["bitrate"].as<int>();
     av_opt_set(pCodecContext->priv_data, "preset", "b", codec_parameters["bitrate"].as<int>());
 
-    /* get res from file */
+    // get resolution from image file
     std::string line = frameLines[FrameReader::currentFrameId()];
     std::stringstream ss(line);
 
@@ -193,10 +167,18 @@ void FrameEncoder::init() {
 
     pCodecContext->width = frameOri.cols;
     pCodecContext->height = frameOri.rows;
+
     /* frames per second */
     pCodecContext->time_base = (AVRational) {1, (int) getFps()};
     pCodecContext->framerate = (AVRational) {(int) getFps(), 1};
 
+    /* emit one intra frame every ten frames
+     * check frame pict_type before passing frame
+     * to encoder, if frame->pict_type is AV_PICTURE_TYPE_I
+     * then gop_size is ignored and the output of encoder
+     * will always be I frame irrespective to gop_size
+     */
+    //TODO: check what other parameters are required for different codecs
     pCodecContext->gop_size = codec_parameters["gop_size"].as<int>(); // 10
     pCodecContext->max_b_frames = codec_parameters["max_b_frames"].as<int>(); // 1
 
@@ -207,7 +189,6 @@ void FrameEncoder::init() {
 
     pCodecParameters->codec_type = AVMEDIA_TYPE_VIDEO;
 
-    //TODO: check what other parameters are required for different codecs
     pCodecParameters->codec_id = pCodec->id;
     pCodecParameters->codec_tag = pCodecContext->codec_tag;
     pCodecParameters->bit_rate = pCodecContext->bit_rate;
@@ -220,12 +201,6 @@ void FrameEncoder::init() {
     pCodecParameters->color_space = pCodecContext->colorspace;
     pCodecParameters->sample_rate = pCodecContext->sample_rate;
 
-    /* emit one intra frame every ten frames
-     * check frame pict_type before passing frame
-     * to encoder, if frame->pict_type is AV_PICTURE_TYPE_I
-     * then gop_size is ignored and the output of encoder
-     * will always be I frame irrespective to gop_size
-     */
 
     if (pCodec->id == AV_CODEC_ID_H264 || pCodec->id == AV_CODEC_ID_H265)
         av_opt_set(pCodecContext->priv_data, "preset", "slow", 0);
@@ -233,13 +208,13 @@ void FrameEncoder::init() {
 
     ret = avcodec_open2(pCodecContext, pCodec, NULL);
     if (ret < 0) {
-        fprintf(stderr, "Could not open codec: %s\n", av_err2str(ret));
+        std::cerr << "Could not open codec: " << av_err2str(ret) << std::endl;
         exit(1);
     }
 
     pFrame = av_frame_alloc();
     if (!pFrame) {
-        fprintf(stderr, "Could not allocate video frame\n");
+        std::cerr << "Could not allocate video frame." << std::endl;
         exit(1);
     }
 
@@ -249,7 +224,7 @@ void FrameEncoder::init() {
 
     ret = av_frame_get_buffer(pFrame, 30);
     if (ret < 0) {
-        fprintf(stderr, "Could not allocate the video frame data\n");
+        std::cerr << "Could not allocate the video frame data" << std::endl;
         exit(1);
     }
 }
@@ -308,7 +283,6 @@ void FrameEncoder::prepareColorFrame(cv::Mat frame) {
             pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<cv::Vec3b>(y, x).val[0];
         }
     }
-
     for (uint y = 0; y < pCodecContext->height / 2; y++) {
         for (uint x = 0; x < pCodecContext->width / 2; x++) {
             pFrame->data[1][y * pFrame->linesize[1] + x] = frame.at<cv::Vec3b>(2 * y, 2 * x).val[1];
