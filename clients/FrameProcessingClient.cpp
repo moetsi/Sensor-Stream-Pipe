@@ -18,9 +18,9 @@ extern "C" {
 }
 
 
-#include "FrameStruct.hpp"
-#include "FrameReader.h"
-#include "Utils.h"
+#include "../utils/FrameStruct.hpp"
+#include "../readers/FrameReader.h"
+#include "../utils/Utils.h"
 
 #define BUFFER_SIZE 1610610
 

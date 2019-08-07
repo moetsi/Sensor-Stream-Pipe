@@ -25,8 +25,8 @@ extern "C" {
 #include <libavutil/imgutils.h>
 }
 
-#include "FrameStruct.hpp"
-#include "FrameReader.h"
+#include "../utils/FrameStruct.hpp"
+#include "../readers/FrameReader.h"
 
 class FrameEncoder : public FrameReader {
 private:

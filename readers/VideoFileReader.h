@@ -18,8 +18,8 @@ extern "C" {
 
 #include <cereal/archives/binary.hpp>
 
-#include "FrameStruct.hpp"
-#include "Utils.h"
+#include "../utils/FrameStruct.hpp"
+#include "../utils/Utils.h"
 
 
 class VideoFileReader {

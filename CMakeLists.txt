@@ -21,12 +21,13 @@ if (FFMPEG_FOUND)
     message("FFMPEG_DEFINITIONS = ${FFMPEG_DEFINITIONS} ")
 endif ()
 
-set(SOURCE_FILES FrameReader.cpp FrameStruct.hpp Utils.cpp)
+set(EXECUTABLE_OUTPUT_PATH bin)
+set(SOURCE_FILES readers/FrameReader.cpp utils/FrameStruct.hpp utils/Utils.cpp)
 
-add_executable(client FrameProcessingClient.cpp VideoFileReader.cpp ${SOURCE_FILES})
-add_executable(frame_server FrameServer.cpp ${SOURCE_FILES})
-add_executable(video_file_server VideoFileServer.cpp VideoFileReader.cpp ${SOURCE_FILES})
-add_executable(video_encoder_server VideoEncoderServer.cpp FrameEncoder.cpp ${SOURCE_FILES})
+add_executable(client clients/FrameProcessingClient.cpp readers/VideoFileReader.cpp ${SOURCE_FILES})
+add_executable(frame_server servers/FrameServer.cpp ${SOURCE_FILES})
+add_executable(video_file_server servers/VideoFileServer.cpp readers/VideoFileReader.cpp ${SOURCE_FILES})
+add_executable(video_encoder_server servers/VideoEncoderServer.cpp video/FrameEncoder.cpp ${SOURCE_FILES})
 
 
 target_link_libraries(client swscale)

@@ -10,7 +10,7 @@
 
 #include <cereal/archives/binary.hpp>
 
-#include "FrameStruct.hpp"
+#include "../utils/FrameStruct.hpp"
 
 class FrameReader {
 private:

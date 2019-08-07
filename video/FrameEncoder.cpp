@@ -210,7 +210,6 @@ void FrameEncoder::init() {
     //TODO: check what other parameters are required for different codecs
     pCodecParameters->codec_id = pCodec->id;
     pCodecParameters->codec_tag = pCodecContext->codec_tag;
-    //pCodecParameters->format
     pCodecParameters->bit_rate = pCodecContext->bit_rate;
     pCodecParameters->bits_per_coded_sample = pCodecContext->bits_per_coded_sample;
     pCodecParameters->bits_per_raw_sample = pCodecContext->bits_per_raw_sample;

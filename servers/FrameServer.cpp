@@ -13,9 +13,9 @@
 
 #include <zmq.hpp>
 
-#include "FrameStruct.hpp"
-#include "FrameReader.h"
-#include "Utils.h"
+#include "../utils/FrameStruct.hpp"
+#include "../readers/FrameReader.h"
+#include "../utils/Utils.h"
 
 int main(int argc, char *argv[]) {
 
