@@ -14,7 +14,12 @@
 #include <cereal/archives/binary.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
+
+
+extern "C" {
 #include <libavcodec/avcodec.h>
+}
+
 
 #include "../utils/Utils.h"
 

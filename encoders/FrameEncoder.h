@@ -72,4 +72,6 @@ public:
     CodecParamsStruct getCodecParamsStruct();
 
     std::string getStreamID();
+
+    FrameStruct currentFrameVid();
 };

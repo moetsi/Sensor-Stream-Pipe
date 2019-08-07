@@ -291,3 +291,20 @@ void FrameEncoder::prepareColorFrame(cv::Mat frame) {
     }
 
 }
+
+FrameStruct FrameEncoder::currentFrameVid() {
+    FrameStruct f;
+
+    FrameReader *fr = (FrameReader *) this;
+
+    f.messageType = 1;
+    f.codec_data = getCodecParamsStruct();
+    f.frame = currentFrameBytes();
+    f.frameId = currentFrameId();
+    f.streamId = getStreamID();
+    f.deviceId = getDeviceId();
+    f.sensorId = getSensorId();
+    f.frameType = getFrameType();
+
+    return f;
+}
