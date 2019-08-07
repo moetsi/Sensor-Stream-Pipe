@@ -145,24 +145,18 @@ void FrameEncoder::nextFrame() {
 
 }
 
-void FrameEncoder::goToFrame(unsigned int frameId) {
-}
-
 void FrameEncoder::encode() {
     int ret;
 
 
-    //TODO: add an explanation regarding the do-while cycle and "error" codes
+    // avcodec_send_frame and avcodec_receive_packet may require multple calls (ret == AVERROR(EAGAIN)) before one is able to retrieve a packet.
     do {
         ret = avcodec_send_frame(pCodecContext, pFrame);
         ret = avcodec_receive_packet(pCodecContext, pPacket);
     } while (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF);
 
-    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-        return;
-    else if (ret < 0) {
-        fprintf(stderr, "Error during encoding\n");
-        exit(1);
+    if (ret < 0) {
+        std::cerr << "Error during encoding" << std::endl;
     }
 
 
@@ -181,7 +175,10 @@ void FrameEncoder::init() {
 
 
     // http://git.videolan.org/?p=ffmpeg.git;a=blob;f=libavcodec/options_table.h;hb=HEAD
-    // TODO: adapt to use variable bitrate
+    // https://stackoverflow.com/questions/3553003/how-to-encode-h-264-with-libavcodec-x264
+    // TODO: adapt to use variable bitrate and check the links above for more parameters
+    // check what other parameters are required for different codecs
+    pCodecContext->bit_rate = codec_parameters["bitrate"].as<int>();
     av_opt_set(pCodecContext->priv_data, "preset", "b", codec_parameters["bitrate"].as<int>());
 
     /* get res from file */
@@ -210,8 +207,7 @@ void FrameEncoder::init() {
 
     pCodecParameters->codec_type = AVMEDIA_TYPE_VIDEO;
 
-    //TODO: check what happens for different codecs
-    //TODO: check what happens for depth frames
+    //TODO: check what other parameters are required for different codecs
     pCodecParameters->codec_id = pCodec->id;
     pCodecParameters->codec_tag = pCodecContext->codec_tag;
     //pCodecParameters->format

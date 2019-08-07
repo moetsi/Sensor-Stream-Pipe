@@ -64,8 +64,6 @@ public:
 
     ~FrameEncoder();
 
-    void goToFrame(unsigned int frameId);
-
     void nextFrame();
 
     std::vector<unsigned char> currentFrameBytes();

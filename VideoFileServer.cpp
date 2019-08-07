@@ -64,7 +64,6 @@ int main(int argc, char *argv[]) {
         uint64_t sent_frames = 0;
         uint64_t processing_time = 0;
 
-        //TODO: make sure all the units are OK and match the conversion to Mbps
         double sent_mbytes = 0;
 
         socket.connect("tcp://" + host + ":" + std::string(argv[2]));
@@ -118,9 +117,10 @@ int main(int argc, char *argv[]) {
             int64_t avg_fps;
             if (diff_start_time == 0)
                 avg_fps = -1;
-            else
-                //TODO: detail the conversions happening here
-                avg_fps = 1000 / (diff_start_time / (double) sent_frames);
+            else {
+                double avg_time_per_frame_sent_ms = diff_start_time / (double) sent_frames;
+                avg_fps = 1000 / avg_time_per_frame_sent_ms;
+            }
 
             last_time = currentTimeMs();
             processing_time = last_time - start_frame_time;

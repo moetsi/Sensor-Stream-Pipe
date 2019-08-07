@@ -136,8 +136,6 @@ int main(int argc, char *argv[]) {
 
             last_time = currentTimeMs();
 
-            //std::string result = request.str();
-            //TODO: check if it is also necessary to copy from zeromq buffer
             std::string result = std::string(static_cast<char *>(request.data()), request.size());
 
             std::vector<FrameStruct> f_list = parseCerealStructFromString<std::vector<FrameStruct>>(result);
@@ -172,8 +170,6 @@ int main(int argc, char *argv[]) {
                         pCodecParameters[f.streamId] = pCodecParameter;
                     }
 
-
-                    //TODO: check when this to be made: re-sending the same video results
                     if (f.frameId == 1) { // reset the codec context pm video reset
                         avcodec_flush_buffers(pCodecContexts[f.streamId]);
                     }
