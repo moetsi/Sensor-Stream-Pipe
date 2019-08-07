@@ -86,8 +86,8 @@ int main(int argc, char *argv[]) {
                     i++;
                     avframeToMat(pFrame, img);
                     imgChanged = true;
-                    fr.goToFrame(i);
-                    fr.nextFrame();
+                    if (fc.currentFrameId() >= 18)
+                        fr.goToFrame(fc.currentFrameId() - 18);
                 }
             }
 
@@ -96,6 +96,8 @@ int main(int argc, char *argv[]) {
                 cv::imshow("Original", frameOri);
                 cv::namedWindow("Encoded");
                 cv::imshow("Encoded", img);
+                cv::namedWindow("Diff");
+                cv::imshow("Diff", img - frameOri);
                 cv::waitKey(1);
             }
 
