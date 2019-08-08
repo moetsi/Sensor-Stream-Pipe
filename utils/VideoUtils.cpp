@@ -57,7 +57,7 @@ cv::Mat getFloat(cv::Mat &input) {
 
     input.convertTo(output, CV_32FC1);
 
-    return output / maxVal;
+    return output / MAX_DEPTH_VALUE;
 
 }
 
@@ -69,7 +69,7 @@ cv::Mat getUMat(cv::Mat &input) {
 
     input.convertTo(outputF, CV_32FC1);
 
-    outputF = (outputF / maxVal) * 256;
+    outputF = (outputF / MAX_DEPTH_VALUE) * 256;
 
     outputF.convertTo(outputU, CV_8UC1);
 

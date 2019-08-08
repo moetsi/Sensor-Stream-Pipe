@@ -25,6 +25,8 @@ extern "C" {
 
 #include "../structs/FrameStruct.hpp"
 
+#define MAX_DEPTH_VALUE 4096
+
 void avframeToMat(const AVFrame *frame, cv::Mat &image);
 
 void prepareDecodingStruct(FrameStruct &f, std::unordered_map<std::string, AVCodec *> &pCodecs,

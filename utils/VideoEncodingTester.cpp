@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
         FrameEncoder fc(frame_file, codec_parameters_file);
         FrameReader fr(frame_file);
 
+        //This class only reads the file once
         while (fc.hasNextFrame()) {
             FrameStruct fo = fr.currentFrame();
             FrameStruct f = fc.currentFrameVid();
@@ -71,7 +72,8 @@ int main(int argc, char *argv[]) {
 
             AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
 
-            if (fc.currentFrameId() == 1) { // reset the codec context pm video reset
+            // reset the codec context on restarting the video
+            if (fc.currentFrameId() == 1) {
                 std::cout << "Resetting stream" << std::endl;
                 avcodec_flush_buffers(pCodecContext);
             }
@@ -87,8 +89,6 @@ int main(int argc, char *argv[]) {
                     i++;
                     avframeToMat(pFrame, img);
                     imgChanged = true;
-                    //if (fc.currentFrameId() >= 18)
-                    //fr.goToFrame(fc.currentFrameId() - 18);
                     fr.nextFrame();
                 }
             }
@@ -98,6 +98,7 @@ int main(int argc, char *argv[]) {
                     cv::Mat frameOriF = getUMat(frameOri);
                     cv::cvtColor(frameOriF, frameOri, cv::COLOR_GRAY2BGR);
                 }
+
                 cv::namedWindow("Original");
                 cv::imshow("Original", frameOri);
                 cv::namedWindow("Encoded");
