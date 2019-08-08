@@ -16,6 +16,11 @@ cereal 1.2.2 (headers only lib)
 
 zeroMQ (libzmq3 4.3.1, cppzmq 4.3.0)
 
+yaml-cpp 0.6.0
+
+
+
+
 Tested on Ubuntu 18.04.2
 
 ### Installing dependencies
@@ -107,8 +112,6 @@ cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install
 ```
 
-
-
 ### Building
 
 
@@ -131,14 +134,47 @@ make
 
 ## Running
 
-The project is divided into two components:
-» server: reads frames on disk and sends them over the network
-» client: receives network frames and decodes them into cv::Mat
+The project is divided into two types of components:
+» servers: read frames on disk and sends them over the network
+» clients: receive network frames and decodes them into cv::Mat
+
+### Client
+
+The client can handle all types for frames (color, depth) for all formats (images and packets):
 
 ```
-server <host> <port> <frame list file (see below how to generate a file)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
 client <port>
 ```
+
+
+### Servers:
+
+
+The project is divided into two types of components:
+» frame_server: sends frames over the network in their original format (png, jpg)
+» video_file_server: sends encoded frames from a previously encoded video
+» video_encoder_server: encodes RAW png or jpg images into video live and sends them over the network
+
+
+```
+frame_server <host> <port> <frame list file (see below how to generate a file)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
+video_file_server <host> <port> <video file> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
+video_encoder_server <host> <port> <frame list file (see below how to generate a file)> <video parameters (see below)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
+```
+
+#### Video parametrization format
+
+This is a [YAML](https://en.wikipedia.org/wiki/YAML) file that contains the parameters for libAV live video encoding (codec, bitrate, pixel format, I-B-P frame ratio, ...):
+
+```
+codec_name: "libx264"
+bitrate: 1960000
+gop_size: 10
+max_b_frames: 1
+pix_fmt: "yuv420p"
+```
+
+### Example 1: Stream six parallel raw frame streams to a client
 
 The output for the server and client follows this format:
 
@@ -146,14 +182,13 @@ The output for the server and client follows this format:
 <device id>;<sensor id>;<frame id> sent/received, took <time to frame> ms; size <packet size in bytes>; avg <avg fps since first frame sent/received> fps; <avg bandwidth since first frame sent/received> Mbps
 ```
 
-### Example: Stream six parallel frame streams to a client
 
 **Terminal 1:**
 
 Run the frame processing client 
 
 ```
-./client 9999
+./bin/client 9999
 ``` 
 
 **Terminal 2:**
@@ -161,15 +196,15 @@ Run the frame processing client
 Start the frame streaming devices:
 
 ```
-./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-01-frames-color.txt libx264 &
-./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-02-frames-color.txt libx264 &
-./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-03-frames-color.txt libx264 &
-./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-04-frames-color.txt libx264 &
-./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-05-frames-color.txt libx264 &
-./video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-06-frames-color.txt libx264 &
+./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-01-frames-color.txt &
+./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-02-frames-color.txt &
+./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-03-frames-color.txt &
+./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-04-frames-color.txt &
+./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-05-frames-color.txt &
+./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-06-frames-color.txt &
 ```
 
-**Real output running on a 4 core i5-2500k at 4.4 GHz**
+**Real frame_server output running on a 4 core i5-2500k at 4.4 GHz**
 
 
 Server sending a stream.
@@ -193,7 +228,7 @@ Server sending a stream.
 Client receiving six parallel streams.
 
 ```
-# ./client 9999
+# ./bin/client 9999
 .....
 2;0;232 received, took 13 ms; size 504917; avg 77 fps; 312.452 Mbps
 3;0;232 received, took 11 ms; size 458153; avg 77 fps; 312.448 Mbps
@@ -207,16 +242,39 @@ Client receiving six parallel streams.
 .....
 ```
 
+### Example 2: Stream six parallel raw frame streams to a client
+
+
+**Terminal 1:**
+
+Run the frame processing client
+
+```
+./bin/client 9999
+```
+
+**Terminal 2:**
+
+Start the frame streaming devices:
+
+```
+./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-01-frames-color.txt config/color_h264.yaml &
+./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-02-frames-color.txt config/color_h264.yaml &
+./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-03-frames-color.txt config/color_h264.yaml &
+./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-04-frames-color.txt config/color_h264.yaml &
+./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-05-frames-color.txt config/color_h264.yaml &
+./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-06-frames-color.txt config/color_h264.yaml &
+```
 
 ### Generating frame list file
 
 See the [davp-data-scripts](https://github.com/moetsi/davp-data-scripts) to see how to generate the frame files.
 
-## Notes: Image frame streaming
+## Notes:
 
-Current network protocol is fast, resilient to network failures and can deal with parallel streams.
+### Frame Client
 
-### MS RGB-D 7-Scenes
+#### MS RGB-D 7-Scenes
 
 Initial results show that a single thread takes **6-7 ms** to transform image bytes into a cv::Mat.
 
@@ -224,7 +282,7 @@ This means it takes about **12-14 ms** per FrameStruct, restricting to about **7
 
 **75-85 fps** restricts it to a little below **2.5-2.8** streams per thread.
 
-### BundleFusion
+#### BundleFusion
 
 BundleFusion results are much better.
 Initial results show that a single thread takes **2-3 ms** to transform image bytes into a cv::Mat.
@@ -251,9 +309,12 @@ In addition, network requirements are also high: **33 Mbps** for the Bundle Fusi
 * [ZeroMQ](http://zeromq.org/) and [cppzmq](https://github.com/zeromq/cppzmq) - Network and low-level I/O programming
 * [Cereal](https://uscilab.github.io/cereal/) - Serialization library
 * [OpenCV](https://opencv.org/) - Turn frames to cv::Mat
-* [libav](https://github.com/libav/libav/) - Turn frames to cv::Mat
+* [libav](https://github.com/libav/libav/) - Encodes and decodes images into video
+* [yaml-cpp](https://github.com/jbeder/yaml-cpp) - Used to store parameters for video encoding
 
 ## Authors
 
 * **André Mourão** - *Initial work* - [amourao](https://github.com/amourao)
+
+
 
