@@ -68,12 +68,13 @@ int main(int argc, char *argv[]) {
             if (pCodecs.find(f.streamId) == pCodecs.end()) {
                 prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
             }
-            if (fc.currentFrameId() == 1) { // reset the codec context pm video reset
-                std::cout << "Resetting stream" << std::endl;
-                avcodec_flush_buffers(pCodecContexts[f.streamId]);
-            }
 
             AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
+
+            if (fc.currentFrameId() == 1) { // reset the codec context pm video reset
+                std::cout << "Resetting stream" << std::endl;
+                avcodec_flush_buffers(pCodecContext);
+            }
 
             pPacket->data = &f.frame[0];
             pPacket->size = f.frame.size();

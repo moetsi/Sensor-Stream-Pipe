@@ -35,7 +35,6 @@ private:
 
     unsigned int totalCurrentFrameCounter;
 
-    AVFormatContext *pFormatContext;
     AVCodecParameters *pCodecParameters;
     AVCodecContext *pCodecContext;
     AVCodec *pCodec;

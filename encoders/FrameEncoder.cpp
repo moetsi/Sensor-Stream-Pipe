@@ -18,8 +18,6 @@ std::vector<unsigned char> FrameEncoder::currentFrameBytes() {
 }
 
 FrameEncoder::~FrameEncoder() {
-    avformat_close_input(&pFormatContext);
-    avformat_free_context(pFormatContext);
     av_packet_free(&pPacket);
     av_frame_free(&pFrame);
     avcodec_free_context(&pCodecContext);
