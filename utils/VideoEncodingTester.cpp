@@ -88,10 +88,7 @@ int main(int argc, char *argv[]) {
                 if (response >= 0) {
                     i++;
 
-                    if (f.frameType == 0)
-                        avframeToMat(pFrame, img);
-                    if (f.frameType == 1)
-                        avframeToMatGray(pFrame, img);
+                    avframeToMat(pFrame, img);
 
                     imgChanged = true;
                     fr.nextFrame();
@@ -100,14 +97,7 @@ int main(int argc, char *argv[]) {
 
             if (imgChanged) {
                 cv::Mat frameDiff;
-                if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
-
-                    cv::Mat frameOriSquached;
-                    minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE);
-
-                    psnr += getPSNR(frameOriSquached, img, MAX_DEPTH_VALUE);
-                    absdiff(frameOri, img, frameDiff);
-                } else if (fc.getFrameType() == 1) {
+                if (fc.getFrameType() == 1) {
                     cv::Mat frameOriU = getUMat(frameOri);
 
                     cv::cvtColor(frameOriU, frameOriU, cv::COLOR_GRAY2BGR);

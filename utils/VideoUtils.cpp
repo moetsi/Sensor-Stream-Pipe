@@ -31,8 +31,8 @@ void avframeToMatGray(const AVFrame *frame, cv::Mat &image) {
 
     //TODO: this only works for 3 channel 8 bit color frames, make it work also for 1 channel 16 bit depth
     // Allocate the opencv mat and store its stride in a 1-element array
-    image = cv::Mat(height, width, CV_16UC1);
-    conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_GRAY16,
+    image = cv::Mat(height, width, CV_8UC3);
+    conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_BGR24,
                                 SWS_FAST_BILINEAR, NULL, NULL, NULL);
     int cvLinesizes[1];
     cvLinesizes[0] = image.step1();
