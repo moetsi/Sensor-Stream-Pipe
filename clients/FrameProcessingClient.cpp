@@ -21,7 +21,7 @@ extern "C" {
 #include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
 #include "../utils/Utils.h"
-#include "../utils/VideoUtils.hpp"
+#include "../utils/VideoUtils.h"
 
 #define BUFFER_SIZE 1610610
 
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
                         prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
                     }
 
-                    if (f.frameId == 1) { // reset the codec context pm video reset
+                    if (f.frameId == 1) { // reset the codec context on video reset
                         avcodec_flush_buffers(pCodecContexts[f.streamId]);
                     }
 

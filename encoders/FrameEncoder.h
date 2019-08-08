@@ -28,6 +28,7 @@ extern "C" {
 
 #include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
+#include "../utils/VideoUtils.h"
 
 class FrameEncoder : public FrameReader {
 private:
@@ -51,11 +52,7 @@ private:
 
     void encode();
 
-    void prepareDepthFrame(cv::Mat frame);
-
-    void prepareColorFrame(cv::Mat frame);
-
-    void prepareGrayDepthFrame(cv::Mat frame, int range);
+    void prepareFrame();
 
 public:
 

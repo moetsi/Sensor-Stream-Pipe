@@ -22,7 +22,7 @@ extern "C" {
 #include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
 #include "../utils/Utils.h"
-#include "../utils/VideoUtils.hpp"
+#include "VideoUtils.h"
 
 
 int main(int argc, char *argv[]) {
@@ -68,8 +68,8 @@ int main(int argc, char *argv[]) {
             if (pCodecs.find(f.streamId) == pCodecs.end()) {
                 prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
             }
-
-            if (f.frameId == 1) { // reset the codec context pm video reset
+            if (fc.currentFrameId() == 1) { // reset the codec context pm video reset
+                std::cout << "Resetting stream" << std::endl;
                 avcodec_flush_buffers(pCodecContexts[f.streamId]);
             }
 
@@ -86,19 +86,28 @@ int main(int argc, char *argv[]) {
                     i++;
                     avframeToMat(pFrame, img);
                     imgChanged = true;
-                    if (fc.currentFrameId() >= 18)
-                        fr.goToFrame(fc.currentFrameId() - 18);
+                    //if (fc.currentFrameId() >= 18)
+                    //fr.goToFrame(fc.currentFrameId() - 18);
+                    fr.nextFrame();
                 }
             }
 
-            if (imgChanged && !img.empty()) {
+            if (imgChanged) {
+                if (fc.getFrameType() == 1) {
+                    cv::Mat frameOriF = getUMat(frameOri);
+                    cv::cvtColor(frameOriF, frameOri, cv::COLOR_GRAY2BGR);
+                }
                 cv::namedWindow("Original");
                 cv::imshow("Original", frameOri);
                 cv::namedWindow("Encoded");
                 cv::imshow("Encoded", img);
                 cv::namedWindow("Diff");
-                cv::imshow("Diff", img - frameOri);
+                cv::Mat frameDiff;
+                cv::absdiff(img, frameOri, frameDiff);
+                cv::imshow("Diff", frameDiff);
+                //std::cout << cv::sum(cv::sum(frameDiff))[0]/(frameDiff.cols*frameDiff.rows) << std::endl;
                 cv::waitKey(1);
+                imgChanged = false;
             }
 
             fc.nextFrame();

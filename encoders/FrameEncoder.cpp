@@ -25,61 +25,12 @@ FrameEncoder::~FrameEncoder() {
     avcodec_free_context(&pCodecContext);
 }
 
-
-cv::Mat getFloat(cv::Mat &input) {
-    cv::Mat output;
-    double minVal, maxVal;
-
-    minMaxIdx(input.reshape(0), &minVal, &maxVal);
-
-    input.convertTo(output, CV_32FC1);
-
-    return output / maxVal;
-
-}
-
-cv::Mat getUMat(cv::Mat &input) {
-    cv::Mat outputF, outputU;
-    double minVal, maxVal;
-
-    minMaxIdx(input.reshape(0), &minVal, &maxVal);
-
-    input.convertTo(outputF, CV_32FC1);
-
-    outputF = (outputF / maxVal) * 256;
-
-    outputF.convertTo(outputU, CV_8UC1);
-
-    return outputU;
-
-}
-
-std::vector<ushort> unique(const cv::Mat &input, bool sort = false) {
-
-    std::vector<ushort> out;
-    for (int y = 0; y < input.rows; ++y) {
-        const ushort *row_ptr = input.ptr<ushort>(y);
-        for (int x = 0; x < input.cols; ++x) {
-            ushort value = row_ptr[x];
-
-            if (std::find(out.begin(), out.end(), value) == out.end())
-                out.push_back(value);
-        }
-    }
-
-    if (sort)
-        std::sort(out.begin(), out.end());
-
-    return out;
-}
-
-
 void FrameEncoder::nextFrame() {
-    if (FrameReader::hasNextFrame())
-        FrameReader::nextFrame();
-    else {
-        FrameReader::reset();
-    }
+    encode();
+}
+
+void FrameEncoder::prepareFrame() {
+
 
     int i, ret, x, y;
 
@@ -103,29 +54,34 @@ void FrameEncoder::nextFrame() {
     // yuv422p 640 320 320 format 4
 
     if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
-        prepareGrayDepthFrame(getFloat(frameOri), 12);
+        prepareGrayDepthFrame(getFloat(frameOri), pCodecContext, pFrame, 12);
     } else if (frameOri.channels() == 1) {
-        prepareDepthFrame(getFloat(frameOri));
+        prepareDepthFrame(getFloat(frameOri), pCodecContext, pFrame);
     } else {
         cv::Mat frameYUV;
         cv::cvtColor(frameOri, frameYUV, cv::COLOR_BGR2YUV);
-        prepareColorFrame(frameYUV);
+        prepareColorFrame(frameYUV, pCodecContext, pFrame);
     }
 
-    pFrame->pts = currentFrameId();
+    if (FrameReader::hasNextFrame())
+        FrameReader::nextFrame();
+    else {
+        FrameReader::reset();
+    }
 
-    encode();
-    totalCurrentFrameCounter += 1;
 
 }
 
 void FrameEncoder::encode() {
+
     int ret;
 
-
+    int i = 0;
     // avcodec_send_frame and avcodec_receive_packet may require multiple calls,
     // (ret == AVERROR(EAGAIN)) before one is able to retrieve a packet.
+
     do {
+        prepareFrame();
         ret = avcodec_send_frame(pCodecContext, pFrame);
         ret = avcodec_receive_packet(pCodecContext, pPacket);
     } while (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF);
@@ -133,6 +89,9 @@ void FrameEncoder::encode() {
     if (ret < 0) {
         std::cerr << "Error during encoding" << std::endl;
     }
+
+    pFrame->pts = totalCurrentFrameCounter;
+    totalCurrentFrameCounter++;
 
 
 }
@@ -253,44 +212,6 @@ unsigned int FrameEncoder::currentFrameId() {
     return totalCurrentFrameCounter;
 }
 
-void FrameEncoder::prepareGrayDepthFrame(cv::Mat frame, int range) {
-    for (uint y = 0; y < pCodecContext->height; y++) {
-        for (uint x = 0; x < pCodecContext->width * 2; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x / 2) * range;
-        }
-    }
-}
-
-
-void FrameEncoder::prepareDepthFrame(cv::Mat frame) {
-    for (uint y = 0; y < pCodecContext->height; y++) {
-        for (uint x = 0; x < pCodecContext->width; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x) * 255;
-        }
-    }
-
-    for (uint y = 0; y < pCodecContext->height / 2; y++) {
-        for (uint x = 0; x < pCodecContext->width / 2; x++) {
-            pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
-            pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
-        }
-    }
-}
-
-void FrameEncoder::prepareColorFrame(cv::Mat frame) {
-    for (uint y = 0; y < pCodecContext->height; y++) {
-        for (uint x = 0; x < pCodecContext->width; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<cv::Vec3b>(y, x).val[0];
-        }
-    }
-    for (uint y = 0; y < pCodecContext->height / 2; y++) {
-        for (uint x = 0; x < pCodecContext->width / 2; x++) {
-            pFrame->data[1][y * pFrame->linesize[1] + x] = frame.at<cv::Vec3b>(2 * y, 2 * x).val[1];
-            pFrame->data[2][y * pFrame->linesize[2] + x] = frame.at<cv::Vec3b>(2 * y, 2 * x).val[2];
-        }
-    }
-
-}
 
 FrameStruct FrameEncoder::currentFrameVid() {
     FrameStruct f;
