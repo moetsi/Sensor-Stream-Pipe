@@ -69,7 +69,7 @@ cv::Mat getUMat(cv::Mat &input) {
 
     input.convertTo(outputF, CV_32FC1);
 
-    outputF = (outputF / MAX_DEPTH_VALUE) * 256;
+    outputF = (outputF / MAX_DEPTH_VALUE) * 255;
 
     outputF.convertTo(outputU, CV_8UC1);
 

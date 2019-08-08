@@ -94,9 +94,23 @@ int main(int argc, char *argv[]) {
             }
 
             if (imgChanged) {
+                cv::Mat frameDiff;
                 if (fc.getFrameType() == 1) {
-                    cv::Mat frameOriF = getUMat(frameOri);
-                    cv::cvtColor(frameOriF, frameOri, cv::COLOR_GRAY2BGR);
+                    cv::Mat frameOriU = getUMat(frameOri);
+
+                    cv::cvtColor(frameOriU, frameOriU, cv::COLOR_GRAY2BGR);
+
+                    cv::Mat imgU16;
+                    cv::cvtColor(img, imgU16, cv::COLOR_BGR2GRAY);
+                    imgU16.convertTo(imgU16, CV_16UC1);
+                    imgU16 = imgU16 * (MAX_DEPTH_VALUE / 256);
+
+                    cv::absdiff(frameOri, imgU16, frameDiff);
+                    std::cout << cv::sum(cv::sum(frameDiff))[0] / (frameDiff.cols * frameDiff.rows) << std::endl;
+                    frameOri = frameOriU;
+                } else {
+                    cv::absdiff(img, frameOri, frameDiff);
+                    std::cout << cv::sum(cv::sum(frameDiff))[0] / (frameDiff.cols * frameDiff.rows) << std::endl;
                 }
 
                 cv::namedWindow("Original");
@@ -104,10 +118,9 @@ int main(int argc, char *argv[]) {
                 cv::namedWindow("Encoded");
                 cv::imshow("Encoded", img);
                 cv::namedWindow("Diff");
-                cv::Mat frameDiff;
-                cv::absdiff(img, frameOri, frameDiff);
+
                 cv::imshow("Diff", frameDiff);
-                //std::cout << cv::sum(cv::sum(frameDiff))[0]/(frameDiff.cols*frameDiff.rows) << std::endl;
+
                 cv::waitKey(1);
                 imgChanged = false;
             }
