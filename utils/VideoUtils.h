@@ -29,6 +29,8 @@ extern "C" {
 
 void avframeToMat(const AVFrame *frame, cv::Mat &image);
 
+void avframeToMatGray(const AVFrame *frame, cv::Mat &image);
+
 void prepareDecodingStruct(FrameStruct &f, std::unordered_map<std::string, AVCodec *> &pCodecs,
                            std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
                            std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
@@ -40,11 +42,11 @@ cv::Mat getUMat(cv::Mat &input);
 
 std::vector<ushort> unique(const cv::Mat &input, bool sort = false);
 
-void prepareGrayDepthFrame(cv::Mat frame, AVCodecContext *pCodecContext, AVFrame *pFrame, int range);
+void prepareGrayDepthFrame(cv::Mat &frame, AVFrame *pFrame);
 
-void prepareDepthFrame(cv::Mat frame, AVCodecContext *pCodecContext, AVFrame *pFrame);
+void prepareDepthFrame(cv::Mat &frame, AVFrame *pFrame);
 
-void prepareColorFrame(cv::Mat frame, AVCodecContext *pCodecContext, AVFrame *pFrame);
+void prepareColorFrame(cv::Mat &frame, AVFrame *pFrame);
 
 double getPSNR(const cv::Mat &I1, const cv::Mat &I2, int maxValue);
 

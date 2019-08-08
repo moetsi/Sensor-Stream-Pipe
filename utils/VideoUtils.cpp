@@ -21,6 +21,27 @@ void avframeToMat(const AVFrame *frame, cv::Mat &image) {
     sws_freeContext(conversion);
 }
 
+void avframeToMatGray(const AVFrame *frame, cv::Mat &image) {
+    int width = frame->width;
+    int height = frame->height;
+
+    //std::cout << av_frame_get_color_range(frame) << " " << image.step1() << " " << image.step1(0) << std::endl;
+
+    SwsContext *conversion;
+
+    //TODO: this only works for 3 channel 8 bit color frames, make it work also for 1 channel 16 bit depth
+    // Allocate the opencv mat and store its stride in a 1-element array
+    image = cv::Mat(height, width, CV_16UC1);
+    conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_GRAY16,
+                                SWS_FAST_BILINEAR, NULL, NULL, NULL);
+    int cvLinesizes[1];
+    cvLinesizes[0] = image.step1();
+
+    // Convert the colour format and write directly to the opencv matrix
+    sws_scale(conversion, frame->data, frame->linesize, 0, height, &image.data, cvLinesizes);
+    sws_freeContext(conversion);
+}
+
 void prepareDecodingStruct(FrameStruct &f, std::unordered_map<std::string, AVCodec *> &pCodecs,
                            std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
                            std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters) {
@@ -51,9 +72,6 @@ void prepareDecodingStruct(FrameStruct &f, std::unordered_map<std::string, AVCod
 
 cv::Mat getFloat(cv::Mat &input) {
     cv::Mat output;
-    double minVal, maxVal;
-
-    minMaxIdx(input.reshape(0), &minVal, &maxVal);
 
     input.convertTo(output, CV_32FC1);
 
@@ -64,8 +82,6 @@ cv::Mat getFloat(cv::Mat &input) {
 cv::Mat getUMat(cv::Mat &input) {
     cv::Mat outputF, outputU;
     double minVal, maxVal;
-
-    minMaxIdx(input.reshape(0), &minVal, &maxVal);
 
     input.convertTo(outputF, CV_32FC1);
 
@@ -96,38 +112,38 @@ std::vector<ushort> unique(const cv::Mat &input, bool sort) {
     return out;
 }
 
-void prepareGrayDepthFrame(cv::Mat frame, AVCodecContext *pCodecContext, AVFrame *pFrame, int range) {
-    for (uint y = 0; y < pCodecContext->height; y++) {
-        for (uint x = 0; x < pCodecContext->width * 2; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x / 2) * range;
+void prepareGrayDepthFrame(cv::Mat &frame, AVFrame *pFrame) {
+    for (uint y = 0; y < pFrame->height; y++) {
+        for (uint x = 0; x < pFrame->width * 2; x++) {
+            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x / 2);
         }
     }
 }
 
 
-void prepareDepthFrame(cv::Mat frame, AVCodecContext *pCodecContext, AVFrame *pFrame) {
-    for (uint y = 0; y < pCodecContext->height; y++) {
-        for (uint x = 0; x < pCodecContext->width; x++) {
+void prepareDepthFrame(cv::Mat &frame, AVFrame *pFrame) {
+    for (uint y = 0; y < pFrame->height; y++) {
+        for (uint x = 0; x < pFrame->width; x++) {
             pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x) * 255;
         }
     }
 
-    for (uint y = 0; y < pCodecContext->height / 2; y++) {
-        for (uint x = 0; x < pCodecContext->width / 2; x++) {
+    for (uint y = 0; y < pFrame->height / 2; y++) {
+        for (uint x = 0; x < pFrame->width / 2; x++) {
             pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
             pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
         }
     }
 }
 
-void prepareColorFrame(cv::Mat frame, AVCodecContext *pCodecContext, AVFrame *pFrame) {
-    for (uint y = 0; y < pCodecContext->height; y++) {
-        for (uint x = 0; x < pCodecContext->width; x++) {
+void prepareColorFrame(cv::Mat &frame, AVFrame *pFrame) {
+    for (uint y = 0; y < pFrame->height; y++) {
+        for (uint x = 0; x < pFrame->width; x++) {
             pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<cv::Vec3b>(y, x).val[0];
         }
     }
-    for (uint y = 0; y < pCodecContext->height / 2; y++) {
-        for (uint x = 0; x < pCodecContext->width / 2; x++) {
+    for (uint y = 0; y < pFrame->height / 2; y++) {
+        for (uint x = 0; x < pFrame->width / 2; x++) {
             pFrame->data[1][y * pFrame->linesize[1] + x] = frame.at<cv::Vec3b>(2 * y, 2 * x).val[1];
             pFrame->data[2][y * pFrame->linesize[2] + x] = frame.at<cv::Vec3b>(2 * y, 2 * x).val[2];
         }

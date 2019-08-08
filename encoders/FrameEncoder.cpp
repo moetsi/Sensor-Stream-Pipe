@@ -52,13 +52,18 @@ void FrameEncoder::prepareFrame() {
     // yuv422p 640 320 320 format 4
 
     if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
-        prepareGrayDepthFrame(getFloat(frameOri), pCodecContext, pFrame, 12);
+        cv::Mat frameOriSquached;
+        minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE);
+        frameOriSquached = frameOriSquached * 12;
+        cv::Mat frameOriSquachedF = getFloat(frameOriSquached);
+        prepareGrayDepthFrame(frameOriSquachedF, pFrame);
     } else if (frameOri.channels() == 1) {
-        prepareDepthFrame(getFloat(frameOri), pCodecContext, pFrame);
+        cv::Mat frameOriF = getFloat(frameOri);
+        prepareDepthFrame(frameOriF, pFrame);
     } else {
         cv::Mat frameYUV;
         cv::cvtColor(frameOri, frameYUV, cv::COLOR_BGR2YUV);
-        prepareColorFrame(frameYUV, pCodecContext, pFrame);
+        prepareColorFrame(frameYUV, pFrame);
     }
 
     if (FrameReader::hasNextFrame())

@@ -44,9 +44,6 @@ int main(int argc, char *argv[]) {
 
     av_register_all();
 
-
-
-    try {
         if (argc < 3) {
             std::cerr << "Usage: video_encoder_test <frame_file> <codec parameters>"
                       << std::endl;
@@ -90,7 +87,12 @@ int main(int argc, char *argv[]) {
                 response = avcodec_receive_frame(pCodecContext, pFrame);
                 if (response >= 0) {
                     i++;
-                    avframeToMat(pFrame, img);
+
+                    if (f.frameType == 0)
+                        avframeToMat(pFrame, img);
+                    if (f.frameType == 1)
+                        avframeToMatGray(pFrame, img);
+
                     imgChanged = true;
                     fr.nextFrame();
                 }
@@ -98,8 +100,14 @@ int main(int argc, char *argv[]) {
 
             if (imgChanged) {
                 cv::Mat frameDiff;
+                if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
 
-                if (fc.getFrameType() == 1) {
+                    cv::Mat frameOriSquached;
+                    minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE);
+
+                    psnr += getPSNR(frameOriSquached, img, MAX_DEPTH_VALUE);
+                    absdiff(frameOri, img, frameDiff);
+                } else if (fc.getFrameType() == 1) {
                     cv::Mat frameOriU = getUMat(frameOri);
 
                     cv::cvtColor(frameOriU, frameOriU, cv::COLOR_GRAY2BGR);
@@ -110,9 +118,9 @@ int main(int argc, char *argv[]) {
                     imgU16 = imgU16 * (MAX_DEPTH_VALUE / 256);
 
                     cv::Mat frameOriSquached;
-                    minMaxFilter<ushort>(frameOri, frameOriSquached, 0, 4096);
+                    minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE);
 
-                    psnr += getPSNR(frameOriSquached, imgU16, 4096);
+                    psnr += getPSNR(frameOriSquached, imgU16, MAX_DEPTH_VALUE);
                     absdiff(frameOri, imgU16, frameDiff);
                     frameOri = frameOriU;
                 } else {
@@ -134,10 +142,7 @@ int main(int argc, char *argv[]) {
 
             fc.nextFrame();
         }
-    }
-    catch (std::exception &e) {
-        std::cerr << e.what() << std::endl;
-    }
+
     std::cout << psnr / i << std::endl;
     return 0;
 }
