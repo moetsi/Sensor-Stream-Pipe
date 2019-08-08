@@ -93,9 +93,6 @@ struct FrameStruct {
         ar(messageType, streamId, frame, codec_data, sceneDesc, sensorId, deviceId, frameId,
            timestamps);
     }
-
-
-
 };
 
 template<typename T>

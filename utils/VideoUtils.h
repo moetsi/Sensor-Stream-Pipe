@@ -45,3 +45,20 @@ void prepareGrayDepthFrame(cv::Mat frame, AVCodecContext *pCodecContext, AVFrame
 void prepareDepthFrame(cv::Mat frame, AVCodecContext *pCodecContext, AVFrame *pFrame);
 
 void prepareColorFrame(cv::Mat frame, AVCodecContext *pCodecContext, AVFrame *pFrame);
+
+double getPSNR(const cv::Mat &I1, const cv::Mat &I2, int maxValue);
+
+template<typename T>
+void minMaxFilter(cv::Mat &inmat, cv::Mat &outmat, double min, double max) {
+    inmat.copyTo(outmat);
+    for (uint i = 0; i < outmat.rows; i++) {
+        for (uint j = 0; j < outmat.cols; j++) {
+            if (outmat.at<T>(i, j) < min) {
+                outmat.at<T>(i, j) = min;
+            }
+            if (outmat.at<T>(i, j) > max) {
+                outmat.at<T>(i, j) = max;
+            }
+        }
+    }
+}

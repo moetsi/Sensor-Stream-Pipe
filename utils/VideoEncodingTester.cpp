@@ -29,6 +29,9 @@ int main(int argc, char *argv[]) {
     srand(time(NULL) * getpid());
     //srand(getpid());
 
+    double psnr = 0;
+    int i = 0;
+
     std::unordered_map<std::string, AVCodec *> pCodecs;
     std::unordered_map<std::string, AVCodecContext *> pCodecContexts;
     std::unordered_map<std::string, AVCodecParameters *> pCodecParameters;
@@ -41,7 +44,7 @@ int main(int argc, char *argv[]) {
 
     av_register_all();
 
-    int i = 0;
+
 
     try {
         if (argc < 3) {
@@ -95,6 +98,7 @@ int main(int argc, char *argv[]) {
 
             if (imgChanged) {
                 cv::Mat frameDiff;
+
                 if (fc.getFrameType() == 1) {
                     cv::Mat frameOriU = getUMat(frameOri);
 
@@ -105,12 +109,15 @@ int main(int argc, char *argv[]) {
                     imgU16.convertTo(imgU16, CV_16UC1);
                     imgU16 = imgU16 * (MAX_DEPTH_VALUE / 256);
 
-                    cv::absdiff(frameOri, imgU16, frameDiff);
-                    std::cout << cv::sum(cv::sum(frameDiff))[0] / (frameDiff.cols * frameDiff.rows) << std::endl;
+                    cv::Mat frameOriSquached;
+                    minMaxFilter<ushort>(frameOri, frameOriSquached, 0, 4096);
+
+                    psnr += getPSNR(frameOriSquached, imgU16, 4096);
+                    absdiff(frameOri, imgU16, frameDiff);
                     frameOri = frameOriU;
                 } else {
-                    cv::absdiff(img, frameOri, frameDiff);
-                    std::cout << cv::sum(cv::sum(frameDiff))[0] / (frameDiff.cols * frameDiff.rows) << std::endl;
+                    absdiff(frameOri, img, frameDiff);
+                    psnr += getPSNR(frameOri, img, 256);
                 }
 
                 cv::namedWindow("Original");
@@ -131,6 +138,6 @@ int main(int argc, char *argv[]) {
     catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
     }
-
+    std::cout << psnr / i << std::endl;
     return 0;
 }
