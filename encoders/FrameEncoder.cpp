@@ -54,9 +54,9 @@ void FrameEncoder::prepareFrame() {
     if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
         cv::Mat frameOriSquached;
         minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE);
-        frameOriSquached = frameOriSquached * 12;
-        cv::Mat frameOriSquachedF = getFloat(frameOriSquached);
-        prepareGrayDepthFrame(frameOriSquachedF, pFrame);
+        //frameOriSquached = frameOriSquached * 255;
+        //cv::Mat frameOriSquachedF = getFloat(frameOriSquached);
+        prepareGrayDepthFrame(frameOriSquached, pFrame);
     } else if (frameOri.channels() == 1) {
         cv::Mat frameOriF = getFloat(frameOri);
         prepareDepthFrame(frameOriF, pFrame);

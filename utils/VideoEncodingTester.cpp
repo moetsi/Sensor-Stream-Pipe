@@ -29,6 +29,18 @@ int main(int argc, char *argv[]) {
     srand(time(NULL) * getpid());
     //srand(getpid());
 
+    ushort values[] = {0, 1, 2, 3, 254, 255, 256, 257, 65534, 65535};
+
+    for (int i = 0; i < 10; i++) {
+        ushort value = values[i];
+        uint upper = value >> 8;
+        uint lower = value & 0xff;
+        ushort nvalue = upper << 8 | lower;
+        std::cout << value << " " << nvalue << " " << upper << " " << lower << std::endl;
+    }
+    std::cout << std::endl;
+
+
     double psnr = 0;
     int i = 0;
 
@@ -88,7 +100,11 @@ int main(int argc, char *argv[]) {
                 if (response >= 0) {
                     i++;
 
-                    avframeToMat(pFrame, img);
+                    if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
+                        avframeToMatGray(pFrame, img);
+                    } else {
+                        avframeToMat(pFrame, img);
+                    }
 
                     imgChanged = true;
                     fr.nextFrame();
@@ -97,7 +113,18 @@ int main(int argc, char *argv[]) {
 
             if (imgChanged) {
                 cv::Mat frameDiff;
-                if (fc.getFrameType() == 1) {
+                if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
+                    absdiff(frameOri, img, frameDiff);
+
+                    img = img * (MAX_DEPTH_VALUE / 256);
+
+                    cv::Mat frameOriSquached;
+                    minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE);
+                    frameOriSquached = frameOriSquached * (MAX_DEPTH_VALUE / 256);
+
+                    psnr += getPSNR(frameOriSquached, img, MAX_DEPTH_VALUE);
+                    frameOri = frameOriSquached;
+                } else if (fc.getFrameType() == 1) {
                     cv::Mat frameOriU = getUMat(frameOri);
 
                     cv::cvtColor(frameOriU, frameOriU, cv::COLOR_GRAY2BGR);

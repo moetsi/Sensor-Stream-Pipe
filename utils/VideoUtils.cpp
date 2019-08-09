@@ -25,21 +25,15 @@ void avframeToMatGray(const AVFrame *frame, cv::Mat &image) {
     int width = frame->width;
     int height = frame->height;
 
-    //std::cout << av_frame_get_color_range(frame) << " " << image.step1() << " " << image.step1(0) << std::endl;
-
-    SwsContext *conversion;
-
-    //TODO: this only works for 3 channel 8 bit color frames, make it work also for 1 channel 16 bit depth
-    // Allocate the opencv mat and store its stride in a 1-element array
-    image = cv::Mat(height, width, CV_8UC3);
-    conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_BGR24,
-                                SWS_FAST_BILINEAR, NULL, NULL, NULL);
-    int cvLinesizes[1];
-    cvLinesizes[0] = image.step1();
-
-    // Convert the colour format and write directly to the opencv matrix
-    sws_scale(conversion, frame->data, frame->linesize, 0, height, &image.data, cvLinesizes);
-    sws_freeContext(conversion);
+    image = cv::Mat(height, width, CV_16UC1);
+    for (uint y = 0; y < frame->height; y++) {
+        for (uint x = 0; x < frame->width; x++) {
+            uint lower = frame->data[0][y * frame->linesize[0] + x * 2];
+            uint upper = frame->data[0][y * frame->linesize[0] + x * 2 + 1];
+            ushort value = upper << 8 | lower;
+            image.at<ushort>(y, x) = value;
+        }
+    }
 }
 
 void prepareDecodingStruct(FrameStruct &f, std::unordered_map<std::string, AVCodec *> &pCodecs,
@@ -114,8 +108,12 @@ std::vector<ushort> unique(const cv::Mat &input, bool sort) {
 
 void prepareGrayDepthFrame(cv::Mat &frame, AVFrame *pFrame) {
     for (uint y = 0; y < pFrame->height; y++) {
-        for (uint x = 0; x < pFrame->width * 2; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x / 2);
+        for (uint x = 0; x < pFrame->width; x++) {
+            ushort value = frame.at<ushort>(y, x);
+            uint upper = value >> 8;
+            uint lower = value & 0xff;
+            pFrame->data[0][y * pFrame->linesize[0] + x * 2] = lower;
+            pFrame->data[0][y * pFrame->linesize[0] + x * 2 + 1] = upper;
         }
     }
 }
