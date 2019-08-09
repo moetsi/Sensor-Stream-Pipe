@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
                             if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
                                 avframeToMatGray(pFrame, img);
                             } else {
-                                avframeToMat(pFrame, img);
+                                avframeToMatYUV(pFrame, img);
                             }
                             imgChanged = true;
                         }

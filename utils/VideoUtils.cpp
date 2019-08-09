@@ -1,15 +1,11 @@
 #include "VideoUtils.h"
 
-void avframeToMat(const AVFrame *frame, cv::Mat &image) {
+void avframeToMatYUV(const AVFrame *frame, cv::Mat &image) {
     int width = frame->width;
     int height = frame->height;
 
-    //std::cout << av_frame_get_color_range(frame) << " " << image.step1() << " " << image.step1(0) << std::endl;
-
     SwsContext *conversion;
 
-    //TODO: this only works for 3 channel 8 bit color frames, make it work also for 1 channel 16 bit depth
-    // Allocate the opencv mat and store its stride in a 1-element array
     image = cv::Mat(height, width, CV_8UC3);
     conversion = sws_getContext(width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_BGR24,
                                 SWS_FAST_BILINEAR, NULL, NULL, NULL);
@@ -69,17 +65,16 @@ cv::Mat getFloat(cv::Mat &input) {
 
     input.convertTo(output, CV_32FC1);
 
-    return output / MAX_DEPTH_VALUE;
+    return output / MAX_DEPTH_VALUE_12_BITS;
 
 }
 
 cv::Mat getUMat(cv::Mat &input) {
     cv::Mat outputF, outputU;
-    double minVal, maxVal;
 
     input.convertTo(outputF, CV_32FC1);
 
-    outputF = (outputF / MAX_DEPTH_VALUE) * 255;
+    outputF = (outputF / MAX_DEPTH_VALUE_12_BITS) * MAX_DEPTH_VALUE_8_BITS;
 
     outputF.convertTo(outputU, CV_8UC1);
 
@@ -122,7 +117,7 @@ void prepareGrayDepthFrame(cv::Mat &frame, AVFrame *pFrame) {
 void prepareDepthFrame(cv::Mat &frame, AVFrame *pFrame) {
     for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
-            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x) * 255;
+            pFrame->data[0][y * pFrame->linesize[0] + x] = frame.at<float>(y, x) * MAX_DEPTH_VALUE_8_BITS;
         }
     }
 

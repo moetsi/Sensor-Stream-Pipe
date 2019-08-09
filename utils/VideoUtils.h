@@ -25,9 +25,11 @@ extern "C" {
 
 #include "../structs/FrameStruct.hpp"
 
-#define MAX_DEPTH_VALUE 4096
+#define MAX_DEPTH_VALUE_12_BITS 4096
+#define MAX_DEPTH_VALUE_8_BITS 256
 
-void avframeToMat(const AVFrame *frame, cv::Mat &image);
+
+void avframeToMatYUV(const AVFrame *frame, cv::Mat &image);
 
 void avframeToMatGray(const AVFrame *frame, cv::Mat &image);
 
