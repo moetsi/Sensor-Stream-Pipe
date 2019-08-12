@@ -22,13 +22,13 @@ if (FFMPEG_FOUND)
 endif ()
 
 set(EXECUTABLE_OUTPUT_PATH bin)
-set(SOURCE_FILES readers/FrameReader.cpp structs/FrameStruct.hpp utils/Utils.cpp utils/VideoUtils.cpp)
+set(SOURCE_FILES readers/FrameReader.cpp structs/FrameStruct.hpp utils/Utils.cpp)
 
-add_executable(client clients/FrameProcessingClient.cpp ${SOURCE_FILES})
+add_executable(client clients/FrameProcessingClient.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
 add_executable(frame_server servers/FrameServer.cpp ${SOURCE_FILES})
-add_executable(video_file_server servers/VideoFileServer.cpp readers/VideoFileReader.cpp ${SOURCE_FILES})
-add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/FrameEncoder.cpp ${SOURCE_FILES})
-add_executable(video_encoder_test utils/VideoEncodingTester.cpp encoders/FrameEncoder.cpp utils/VideoEncodingTester.cpp ${SOURCE_FILES})
+add_executable(video_file_server servers/VideoFileServer.cpp readers/VideoFileReader.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
+add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
+add_executable(video_encoder_test utils/VideoEncodingTester.cpp encoders/FrameEncoder.cpp utils/VideoEncodingTester.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
 
 target_link_libraries(client swscale)
 target_link_libraries(client zmq)
