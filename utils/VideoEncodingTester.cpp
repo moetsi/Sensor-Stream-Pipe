@@ -21,8 +21,10 @@ extern "C" {
 #include "../encoders/FrameEncoder.h"
 #include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
-#include "../utils/Utils.h"
+
+#include "Utils.h"
 #include "VideoUtils.h"
+#include "SimilarityMeasures.h"
 
 
 int main(int argc, char *argv[]) {
@@ -30,6 +32,7 @@ int main(int argc, char *argv[]) {
     //srand(getpid());
 
     double psnr = 0;
+    cv::Scalar mssim;
     int i = 0;
 
     std::unordered_map<std::string, AVCodec *> pCodecs;
@@ -111,6 +114,7 @@ int main(int argc, char *argv[]) {
                     img = img * (MAX_DEPTH_VALUE_12_BITS / MAX_DEPTH_VALUE_8_BITS);
 
                     absdiff(frameOriSquached, img, frameDiff);
+                    mssim += getMSSIM(frameOriSquached, img);
                     frameOri = frameOriSquached;
                 } else if (fc.getFrameType() == 1) {
                     cv::Mat frameOriU = getUMat(frameOri);
@@ -126,11 +130,15 @@ int main(int argc, char *argv[]) {
                     minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE_12_BITS);
 
                     psnr += getPSNR(frameOriSquached, imgU16, MAX_DEPTH_VALUE_12_BITS);
+                    mssim += getMSSIM(frameOriSquached, imgU16);
+
                     absdiff(frameOriSquached, imgU16, frameDiff);
                     frameOri = frameOriU;
+
                 } else {
                     absdiff(frameOri, img, frameDiff);
                     psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
+                    mssim += getMSSIM(frameOri, img);
                 }
 
                 cv::namedWindow("Original");
@@ -149,5 +157,6 @@ int main(int argc, char *argv[]) {
         }
 
     std::cout << "Avg PSNR: " << psnr / i << std::endl;
+    std::cout << "Avg MSSIM: " << mssim / i << std::endl;
     return 0;
 }

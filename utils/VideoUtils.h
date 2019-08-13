@@ -50,8 +50,6 @@ void prepareDepthFrame(cv::Mat &frame, AVFrame *pFrame);
 
 void prepareColorFrame(cv::Mat &frame, AVFrame *pFrame);
 
-double getPSNR(const cv::Mat &I1, const cv::Mat &I2, int maxValue);
-
 template<typename T>
 void minMaxFilter(cv::Mat &inmat, cv::Mat &outmat, double min, double max) {
     inmat.copyTo(outmat);
