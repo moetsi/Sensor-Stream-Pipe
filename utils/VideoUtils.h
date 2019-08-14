@@ -25,6 +25,9 @@ extern "C" {
 
 #include "../structs/FrameStruct.hpp"
 
+#define MAX_DEPTH_VALUE_16_BITS 65536
+#define MAX_DEPTH_VALUE_14_BITS 16384
+#define MAX_DEPTH_VALUE_13_BITS 8192
 #define MAX_DEPTH_VALUE_12_BITS 4096
 #define MAX_DEPTH_VALUE_8_BITS 256
 

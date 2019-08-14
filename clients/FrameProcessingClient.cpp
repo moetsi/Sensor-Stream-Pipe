@@ -23,8 +23,6 @@ extern "C" {
 #include "../utils/Utils.h"
 #include "../utils/VideoUtils.h"
 
-#define BUFFER_SIZE 1610610
-
 int main(int argc, char *argv[]) {
 
     srand(time(NULL) * getpid());
@@ -129,8 +127,8 @@ int main(int argc, char *argv[]) {
                 }
 
                 if (imgChanged && !img.empty()) {
-                    cv::namedWindow(f.streamId);
-                    cv::imshow(f.streamId, img);
+                    cv::namedWindow(f.streamId + std::to_string(f.sensorId));
+                    cv::imshow(f.streamId + std::to_string(f.sensorId), img);
                     cv::waitKey(1);
                     imgChanged = false;
                 }
