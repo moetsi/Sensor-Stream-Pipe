@@ -22,7 +22,7 @@ if (FFMPEG_FOUND)
 endif ()
 
 set(EXECUTABLE_OUTPUT_PATH bin)
-set(SOURCE_FILES readers/FrameReader.cpp structs/FrameStruct.hpp utils/Utils.cpp)
+set(SOURCE_FILES readers/FrameReader.cpp structs/FrameStruct.hpp utils/Utils.cpp readers/IReader.h)
 
 add_executable(client clients/FrameProcessingClient.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
 add_executable(frame_server servers/FrameServer.cpp ${SOURCE_FILES})

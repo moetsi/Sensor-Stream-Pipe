@@ -111,6 +111,10 @@ KinectReader::KinectReader(uint8_t _device_index,
     frameTemplate.sceneDesc = "kinect";
     frameTemplate.streamId = randomString(16);
 
+    currentFrameCounter.push_back(0);
+    currentFrameCounter.push_back(0);
+    currentFrameCounter.push_back(0);
+
 
 }
 
@@ -125,10 +129,6 @@ KinectReader::~KinectReader() {
     k4a_device_close(device);
 }
 
-unsigned int KinectReader::currentFrameId() {
-    return currentFrameCounter;
-}
-
 void KinectReader::nextFrame() {
     currFrame.clear();
 
@@ -140,16 +140,17 @@ void KinectReader::nextFrame() {
             std::cerr << "Runtime error: k4a_device_get_capture() returned " << result << std::endl;
             break;
         }
-        k4a_image_t colorImage = k4a_capture_get_color_image(capture);
-        k4a_image_t depthImage = k4a_capture_get_depth_image(capture);
-        k4a_image_t irImage = k4a_capture_get_ir_image(capture);
+        k4a_image_t colorImage, depthImage, irImage;
+        colorImage = k4a_capture_get_color_image(capture);
+        //depthImage = k4a_capture_get_depth_image(capture);
+        //irImage = k4a_capture_get_ir_image(capture);
 
         //std::cout << k4a_image_get_format(colorImage) << " " << k4a_image_get_format(depthImage) << " " << k4a_image_get_format(irImage) << " " << std::endl;
 
         if (k4a_image_get_format(colorImage) != 6) {
             FrameStruct s = frameTemplate;
             s.sensorId = 0;
-            s.frameId = currentFrameCounter;
+            s.frameId = currentFrameCounter.at(0)++;
             uint8_t *buffer = k4a_image_get_buffer(colorImage);
             // convert the raw buffer to cv::Mat
             int rows = k4a_image_get_height_pixels(colorImage);
@@ -162,7 +163,7 @@ void KinectReader::nextFrame() {
         if (k4a_image_get_format(depthImage) != 6) {
             FrameStruct s = frameTemplate;
             s.sensorId = 1;
-            s.frameId = currentFrameCounter;
+            s.frameId = currentFrameCounter.at(1)++;
             uint8_t *buffer = k4a_image_get_buffer(depthImage);
             // convert the raw buffer to cv::Mat
             int rows = k4a_image_get_height_pixels(depthImage);
@@ -175,7 +176,7 @@ void KinectReader::nextFrame() {
         if (k4a_image_get_format(irImage) != 6) {
             FrameStruct s = frameTemplate;
             s.sensorId = 2;
-            s.frameId = currentFrameCounter;
+            s.frameId = currentFrameCounter.at(2)++;
             uint8_t *buffer = k4a_image_get_buffer(irImage);
             // convert the raw buffer to cv::Mat
             int rows = k4a_image_get_height_pixels(irImage);
@@ -191,7 +192,7 @@ void KinectReader::nextFrame() {
         k4a_image_release(irImage);
         k4a_capture_release(capture);
     } while (result == K4A_WAIT_RESULT_FAILED);
-    currentFrameCounter += 1;
+
 
 }
 

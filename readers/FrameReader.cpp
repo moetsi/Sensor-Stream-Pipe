@@ -93,30 +93,15 @@ FrameStruct FrameReader::createFrameStruct(unsigned int frameId) {
     return frame;
 }
 
-std::string FrameReader::getStructBytes(FrameStruct frame) {
-    std::ostringstream os(std::ios::binary);
-
-    {
-        cereal::BinaryOutputArchive oarchive(os);
-        oarchive(frame);
-    }
-
-    return os.str();
-
-}
-
 unsigned int FrameReader::currentFrameId() {
     return currentFrameCounter;
 }
 
-std::string FrameReader::currentFrameBytes() {
-    return getStructBytes(currentFrameInternal);
+std::vector<FrameStruct> FrameReader::currentFrame() {
+    std::vector<FrameStruct> v;
+    v.push_back(currentFrameInternal);
+    return v;
 }
-
-FrameStruct FrameReader::currentFrame() {
-    return currentFrameInternal;
-}
-
 
 void FrameReader::nextFrame() {
     currentFrameCounter += 1;
@@ -139,25 +124,4 @@ void FrameReader::reset() {
 
 unsigned int FrameReader::getFps() {
     return fps;
-}
-
-unsigned int FrameReader::getSensorId() {
-    return sensorId;
-}
-
-unsigned int FrameReader::getDeviceId() {
-    return deviceId;
-}
-
-unsigned int FrameReader::getFrameType() {
-    return frameType;
-}
-
-
-std::string FrameReader::getSceneDesc() {
-    return sceneDesc;
-}
-
-std::string FrameReader::getStreamId() {
-    return streamId;
 }

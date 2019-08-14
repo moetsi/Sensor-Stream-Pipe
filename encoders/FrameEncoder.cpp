@@ -87,16 +87,14 @@ void FrameEncoder::encode() {
         prepareFrame();
         ret = avcodec_send_frame(pCodecContext, pFrame);
         ret = avcodec_receive_packet(pCodecContext, pPacket);
+        //std::cout << pFrame->pts << " " << pFrame->pkt_dts << " " << pPacket->pts << " " << pPacket->dts << std::endl << std::endl;
     } while (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF);
 
     if (ret < 0) {
         std::cerr << "Error during encoding" << std::endl;
     }
 
-    pFrame->pts = totalCurrentFrameCounter;
-    totalCurrentFrameCounter++;
-
-
+    pFrame->pts = totalCurrentFrameCounter++;
 }
 
 void FrameEncoder::init() {
@@ -184,11 +182,15 @@ void FrameEncoder::init() {
     pFrame->width = pCodecContext->width;
     pFrame->height = pCodecContext->height;
 
+    pFrame->pts = 0;
+    pFrame->pkt_dts = 0;
+
     ret = av_frame_get_buffer(pFrame, 30);
     if (ret < 0) {
         std::cerr << "Could not allocate the video frame data" << std::endl;
         exit(1);
     }
+
 }
 
 CodecParamsStruct FrameEncoder::getCodecParamsStruct() {
@@ -217,18 +219,14 @@ unsigned int FrameEncoder::currentFrameId() {
 
 
 FrameStruct FrameEncoder::currentFrameVid() {
-    FrameStruct f;
 
     FrameReader *fr = (FrameReader *) this;
+    FrameStruct f = fr->currentFrame().at(0);
 
     f.messageType = 1;
     f.codec_data = getCodecParamsStruct();
     f.frame = currentFrameBytes();
     f.frameId = currentFrameId();
-    f.streamId = getStreamID();
-    f.deviceId = getDeviceId();
-    f.sensorId = getSensorId();
-    f.frameType = getFrameType();
 
     return f;
 }

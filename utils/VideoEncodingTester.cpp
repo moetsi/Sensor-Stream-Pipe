@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
         //This class only reads the file once
         while (fc.hasNextFrame()) {
-            FrameStruct fo = fr.currentFrame();
+            FrameStruct fo = fr.currentFrame().at(0);
             FrameStruct f = fc.currentFrameVid();
 
             cv::Mat frameOri = cv::imdecode(fo.frame, CV_LOAD_IMAGE_UNCHANGED);
@@ -75,14 +75,16 @@ int main(int argc, char *argv[]) {
 
             AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
 
-            // reset the codec context on restarting the video
-            if (fc.currentFrameId() == 1) {
-                std::cout << "Resetting stream" << std::endl;
-                avcodec_flush_buffers(pCodecContext);
-            }
 
             pPacket->data = &f.frame[0];
             pPacket->size = f.frame.size();
+
+
+            // reset the codec context on restarting the video
+            if (f.frameId == 1) {
+                std::cout << "Resetting stream" << std::endl;
+                avcodec_flush_buffers(pCodecContext);
+            }
 
             int response = avcodec_send_packet(pCodecContext, pPacket);
             if (response >= 0) {
@@ -116,7 +118,7 @@ int main(int argc, char *argv[]) {
                     absdiff(frameOriSquached, img, frameDiff);
                     mssim += getMSSIM(frameOriSquached, img);
                     frameOri = frameOriSquached;
-                } else if (fc.getFrameType() == 1) {
+                } else if (f.frameType == 1) {
                     cv::Mat frameOriU = getUMat(frameOri);
 
                     cv::cvtColor(frameOriU, frameOriU, cv::COLOR_GRAY2BGR);

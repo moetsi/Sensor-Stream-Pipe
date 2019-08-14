@@ -58,7 +58,7 @@ inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps) {
 class KinectReader {
 private:
 
-    unsigned int currentFrameCounter;
+    std::vector<uint> currentFrameCounter;
     unsigned int fps;
     std::string sceneDesc;
     unsigned int sensorId;
@@ -96,8 +96,6 @@ public:
     void nextFrame();
 
     std::vector<FrameStruct> currentFrame();
-
-    unsigned int currentFrameId();
 
 };
 

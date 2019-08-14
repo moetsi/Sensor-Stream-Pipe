@@ -34,6 +34,7 @@ class FrameEncoder : public FrameReader {
 private:
 
     unsigned int totalCurrentFrameCounter;
+    unsigned int totalCurrentPacketCounter;
 
     AVCodecParameters *pCodecParameters;
     AVCodecContext *pCodecContext;

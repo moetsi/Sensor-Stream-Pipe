@@ -75,34 +75,20 @@ int main(int argc, char *argv[]) {
             std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
             start_frame_time = currentTimeMs();
 
-            fc.nextFrame();
-
-            FrameStruct f;
-
             if (sent_frames == 0) {
                 last_time = currentTimeMs();
                 start_time = last_time;
             }
-
-            f.messageType = 1;
-            f.codec_data = fc.getCodecParamsStruct();
-            f.frame = fc.currentFrameBytes();
-            f.frameId = fc.currentFrameId();
-            f.streamId = fc.getStreamID();
-            f.deviceId = fc.getDeviceId();
-            f.sensorId = fc.getSensorId();
-            f.frameType = fc.getFrameType();
-
 
             if (!fc.hasNextFrame()) {
                 fc.reset();
                 stopAfter--;
             }
 
-            std::vector<FrameStruct> result;
-            result.push_back(f);
+            std::vector<FrameStruct> v;
+            v.push_back(fc.currentFrameVid());
 
-            std::string message = cerealStructToString(result);
+            std::string message = cerealStructToString(v);
 
             zmq::message_t request(message.size());
             memcpy(request.data(), message.c_str(), message.size());
@@ -123,11 +109,15 @@ int main(int argc, char *argv[]) {
             last_time = currentTimeMs();
             processing_time = last_time - start_frame_time;
 
-            std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent, took " << diff_time
-                      << " ms; size " << message.size()
+            std::cout << "Took " << diff_time << " ms; size " << message.size()
                       << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps" << std::endl;
+            for (uint i = 0; i < v.size(); i++) {
+                FrameStruct f = v.at(i);
+                std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent" << std::endl;
+            }
 
 
+            fc.nextFrame();
         }
     }
     catch (std::exception &e) {

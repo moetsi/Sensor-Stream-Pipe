@@ -8,38 +8,50 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-OpenCV 3.x, probably 4.x (tested on version available on 18.04 repo, 3.2.0)
-
-Asio 1.13 (headers only lib)
-
-cereal 1.2.2 (headers only lib)
-
-zeroMQ (libzmq3 4.3.1, cppzmq 4.3.0)
-
-yaml-cpp 0.6.0
-
-
-
+* OpenCV 3.x, probably 4.x (tested on version available on 18.04 repo, 3.2.0)
+* Asio 1.13 (headers only lib)
+* cereal 1.2.2 (headers only lib)
+* zeroMQ (libzmq3 4.3.1, cppzmq 4.3.0)
+* yaml-cpp 0.6.0
 
 Tested on Ubuntu 18.04.2
 
-### Installing dependencies
+### Installing dependencies from repo
 
-Install OpenCV
+#### OpenCV 3.2.0
 
 ```
 sudo apt install libopencv-dev libopencv-core-dev uuid-dev
 ```
 
-Install Azure SDK
+#### Azure Kinect SDK 1.1
 
 
+Add the Linux Software Repository for Microsoft Products.
+
+Note: Run any command as sudo to avoid getting a password prompt
 ```
 curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 sudo apt-add-repository https://packages.microsoft.com/ubuntu/18.04/prod
 sudo apt-get update
+```
 
+Install Azure Kinect SDK 1.1
+```
 sudo apt install libk4a1.1 libk4a1.1-dev k4a-tools
+```
+
+To be able to use the Kinect as non-root, please run the following:
+```
+wget https://raw.githubusercontent.com/microsoft/Azure-Kinect-Sensor-SDK/develop/scripts/99-k4a.rules
+sudo cp 99-k4a.rules /etc/udev/rules.d/
+```
+
+On my installation, the link to the canonical version of the depth lib was missing.
+You can create it by running the following command:
+
+```
+sudo ln -s /usr/lib/x86_64-linux-gnu/libdepthengine.so.1.0 /usr/lib/x86_64-linux-gnu/libdepthengine.so
 ```
 
 ## Download and extract "out-of-repo" libraries
@@ -52,16 +64,7 @@ mkdir ~/libs
 mkdir ~/libs/srcOriginal
 ```
 
-### ~~ASIO (outdated, now using ZeroMQ)~~
-
-```
-cd ~/libs/srcOriginal
-wget https://codeload.github.com/chriskohlhoff/asio/zip/asio-1-13-0
-unzip asio-1-13-0
-cp -r asio-asio-1-13-0/asio/include/ ~/libs
-```
-
-### Cereal
+### Cereal 1.2.2
 
 ```
 cd ~/libs/srcOriginal
@@ -99,7 +102,7 @@ cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install
 ```
 
-#### yaml-cpp
+#### yaml-cpp 0.6.0
 
 ```
 cd ~/libs/srcOriginal
@@ -110,12 +113,6 @@ mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install
-```
-
-#### Azure Kinect SDK
-
-```
-sudo ln -s /usr/lib/x86_64-linux-gnu/libdepthengine.so.1.0 /usr/lib/x86_64-linux-gnu/libdepthengine.so
 ```
 
 ### Building
@@ -141,8 +138,8 @@ make
 ## Running
 
 The project is divided into two types of components:
-» servers: read frames on disk and sends them over the network
-» clients: receive network frames and decodes them into cv::Mat
+* servers: read frames on disk and sends them over the network
+* clients: receive network frames and decodes them into cv::Mat
 
 ### Client
 
@@ -157,15 +154,15 @@ client <port>
 
 
 The project is divided into two types of components:
-» frame_server: sends frames over the network in their original format (png, jpg)
-» video_file_server: sends encoded frames from a previously encoded video
-» video_encoder_server: encodes RAW png or jpg images into video live and sends them over the network
+* frame_server: sends frames over the network in their original format (png, jpg)
+* video_file_server: sends encoded frames from a previously encoded video
+* video_encoder_server: encodes RAW png or jpg images into video live and sends them over the network
 
 
 ```
-frame_server <host> <port> <frame list file (see below how to generate a file)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
-video_file_server <host> <port> <video file> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
-video_encoder_server <host> <port> <frame list file (see below how to generate a file)> <video parameters (see below)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
+./bin/frame_server <host> <port> <frame list file (see below how to generate a file)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
+./bin/video_file_server <host> <port> <video file> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
+./bin/video_encoder_server <host> <port> <frame list file (see below how to generate a file)> <video parameters (see below)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
 ```
 
 #### Video parametrization format
@@ -311,16 +308,15 @@ In addition, network requirements are also high: **33 Mbps** for the Bundle Fusi
 
 ## Built With
 
-* [ASIO](https://think-async.com/Asio/) - ~~Network and low-level I/O programming~~ (replaced by **ZeroMQ**)
 * [ZeroMQ](http://zeromq.org/) and [cppzmq](https://github.com/zeromq/cppzmq) - Network and low-level I/O programming
 * [Cereal](https://uscilab.github.io/cereal/) - Serialization library
 * [OpenCV](https://opencv.org/) - Turn frames to cv::Mat
 * [libav](https://github.com/libav/libav/) - Encodes and decodes images into video
-* [yaml-cpp](https://github.com/jbeder/yaml-cpp) - Used to store parameters for video encoding
+* [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK) - Access Azure Kinect DK
 
 ## Authors
 
-* **André Mourão** - *Initial work* - [amourao](https://github.com/amourao)
+* **André Mourão** - [amourao](https://github.com/amourao)
 
 
 

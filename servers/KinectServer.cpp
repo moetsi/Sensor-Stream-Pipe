@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
 
         k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-        k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_1080P;
+        k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
         k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
         k4a_fps_t recording_rate = K4A_FRAMES_PER_SECOND_30;
 
@@ -91,7 +91,6 @@ int main(int argc, char *argv[]) {
                 zmq::message_t request(message.size());
                 memcpy(request.data(), message.c_str(), message.size());
 
-                uint frameId = reader.currentFrameId();
                 socket.send(request);
                 sent_frames += 1;
                 sent_mbytes += message.size() / 1000.0;
@@ -110,10 +109,13 @@ int main(int argc, char *argv[]) {
                 last_time = currentTimeMs();
                 processing_time = last_time - start_frame_time;
 
-                FrameStruct f = v.at(0);
-                std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent, took " << diff_time
-                          << " ms; size " << message.size() << "; avg " << avg_fps << " fps; "
-                          << 8 * (sent_mbytes / diff_start_time) << " Mbps" << std::endl;
+                std::cout << "Took " << diff_time << " ms; size " << message.size()
+                          << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps"
+                          << std::endl;
+                for (uint i = 0; i < v.size(); i++) {
+                    FrameStruct f = v.at(i);
+                    std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent" << std::endl;
+                }
 
             }
 

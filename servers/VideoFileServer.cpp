@@ -125,10 +125,13 @@ int main(int argc, char *argv[]) {
             last_time = currentTimeMs();
             processing_time = last_time - start_frame_time;
 
-            std::cout << frameStruct.deviceId << ";" << frameStruct.sensorId << ";" << frameStruct.frameId
-                      << " sent, took " << diff_time
-                      << " ms; size " << message.size()
+            std::cout << "Took " << diff_time << " ms; size " << message.size()
                       << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps" << std::endl;
+            for (uint i = 0; i < v.size(); i++) {
+                FrameStruct f = v.at(i);
+                std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent" << std::endl;
+            }
+
 
         }
     }

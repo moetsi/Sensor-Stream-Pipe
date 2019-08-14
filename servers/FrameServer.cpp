@@ -72,44 +72,51 @@ int main(int argc, char *argv[]) {
                 start_time = last_time;
             }
 
-            FrameStruct f = reader.currentFrame();
-            f.streamId = reader.getStreamId();
+            std::vector<FrameStruct> v = reader.currentFrame();
 
-            std::vector<FrameStruct> v;
-            v.push_back(f);
+            if (!v.empty()) {
 
-            std::string message = cerealStructToString(v);
+                std::string message = cerealStructToString(v);
 
-            zmq::message_t request(message.size());
-            memcpy(request.data(), message.c_str(), message.size());
+                zmq::message_t request(message.size());
+                memcpy(request.data(), message.c_str(), message.size());
 
-            uint frameId = reader.currentFrameId();
-            if (reader.hasNextFrame())
-                reader.nextFrame();
-            else {
-                reader.reset();
-                stopAfter--;
+                uint frameId = reader.currentFrameId();
+                if (reader.hasNextFrame())
+                    reader.nextFrame();
+                else {
+                    reader.reset();
+                    stopAfter--;
+                }
+                socket.send(request);
+                sent_frames += 1;
+                sent_mbytes += message.size() / 1000.0;
+
+                uint64_t diff_time = currentTimeMs() - last_time;
+
+                double diff_start_time = (currentTimeMs() - start_time);
+                int64_t avg_fps;
+                if (diff_start_time == 0)
+                    avg_fps = -1;
+                else {
+                    double avg_time_per_frame_sent_ms = diff_start_time / (double) sent_frames;
+                    avg_fps = 1000 / avg_time_per_frame_sent_ms;
+                }
+
+                last_time = currentTimeMs();
+                processing_time = last_time - start_frame_time;
+
+
+                std::cout << "Took " << diff_time << " ms; size " << message.size()
+                          << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps"
+                          << std::endl;
+                for (uint i = 0; i < v.size(); i++) {
+                    FrameStruct f = v.at(i);
+                    std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent" << std::endl;
+                }
+
+
             }
-            socket.send(request);
-            sent_frames += 1;
-            sent_mbytes += message.size()/1000.0;
-
-            uint64_t diff_time = currentTimeMs() - last_time;
-
-            double diff_start_time = (currentTimeMs() - start_time);
-            int64_t avg_fps;
-            if (diff_start_time == 0)
-                avg_fps = -1;
-            else {
-                double avg_time_per_frame_sent_ms = diff_start_time / (double) sent_frames;
-                avg_fps = 1000 / avg_time_per_frame_sent_ms;
-            }
-
-            last_time = currentTimeMs();
-            processing_time = last_time - start_frame_time;
-
-            std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent, took " << diff_time << " ms; size " << message.size()
-                      << "; avg " << avg_fps << " fps; " << 8*(sent_mbytes/diff_start_time) << " Mbps" << std::endl;
 
 
 

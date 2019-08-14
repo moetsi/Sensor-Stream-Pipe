@@ -11,8 +11,9 @@
 #include <cereal/archives/binary.hpp>
 
 #include "../structs/FrameStruct.hpp"
+#include "IReader.h"
 
-class FrameReader {
+class FrameReader : public IReader {
 private:
 
     unsigned int currentFrameCounter;
@@ -38,32 +39,17 @@ public:
 
     void reset();
 
-    void goToFrame(unsigned int frameId);
+    void goToFrame(uint frameId);
 
     bool hasNextFrame();
 
     void nextFrame();
 
-    FrameStruct currentFrame();
+    std::vector<FrameStruct> currentFrame();
 
-    std::string currentFramePath(int i);
+    uint currentFrameId();
 
-    std::string currentFrameBytes();
-
-    unsigned int currentFrameId();
-
-    std::string getSceneDesc();
-
-    unsigned int getFps();
-
-    unsigned int getSensorId();
-
-    unsigned int getDeviceId();
-
-    unsigned int getFrameType();
-
-    std::string getStreamId();
-
+    uint getFps();
 
 };
 
