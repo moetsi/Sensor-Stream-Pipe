@@ -82,9 +82,6 @@ private:
 
     std::vector<FrameStruct> currFrame;
 
-    FrameStruct createFrameStruct();
-
-    std::string getStructBytes(FrameStruct frame);
 
 public:
 

@@ -112,6 +112,12 @@ cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install
 ```
 
+#### Azure Kinect SDK
+
+```
+sudo ln -s /usr/lib/x86_64-linux-gnu/libdepthengine.so.1.0 /usr/lib/x86_64-linux-gnu/libdepthengine.so
+```
+
 ### Building
 
 

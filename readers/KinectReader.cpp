@@ -104,7 +104,7 @@ KinectReader::KinectReader(uint8_t _device_index,
     recording_start = clock();
     timeout_ms = 1000 / camera_fps;
 
-
+    frameTemplate.frameId = 0;
     frameTemplate.deviceId = 0;
 
     frameTemplate.messageType = 0;
@@ -123,50 +123,6 @@ KinectReader::~KinectReader() {
     std::cout << "Done" << std::endl;
 
     k4a_device_close(device);
-}
-
-FrameStruct KinectReader::createFrameStruct() {
-    // 0;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg
-
-
-    std::string frameIdStr, framePath;
-
-    unsigned int readFrameId = std::stoul(frameIdStr);
-
-    if (readFrameId != currentFrameCounter)
-        std::cerr << "Warning: frame ids do not match: " << readFrameId << " read vs. " << currentFrameCounter
-                  << " expected." << std::endl;
-
-
-    std::vector<unsigned char> fileData;
-    FrameStruct frame = FrameStruct();
-
-    frame.messageType = 0;
-
-    frame.sceneDesc = sceneDesc;
-    frame.deviceId = deviceId;
-    frame.sensorId = sensorId;
-
-    frame.frameId = readFrameId;
-
-    frame.frame = fileData;
-    frame.streamId = streamId;
-
-    currentFrameCounter = 0;
-
-    return frame;
-}
-
-std::string KinectReader::getStructBytes(FrameStruct frame) {
-    std::ostringstream os(std::ios::binary);
-
-    {
-        cereal::BinaryOutputArchive oarchive(os);
-        oarchive(frame);
-    }
-
-    return os.str();
-
 }
 
 unsigned int KinectReader::currentFrameId() {
