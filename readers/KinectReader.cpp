@@ -142,8 +142,8 @@ void KinectReader::nextFrame() {
         }
         k4a_image_t colorImage, depthImage, irImage;
         colorImage = k4a_capture_get_color_image(capture);
-        //depthImage = k4a_capture_get_depth_image(capture);
-        //irImage = k4a_capture_get_ir_image(capture);
+        depthImage = k4a_capture_get_depth_image(capture);
+        irImage = k4a_capture_get_ir_image(capture);
 
         //std::cout << k4a_image_get_format(colorImage) << " " << k4a_image_get_format(depthImage) << " " << k4a_image_get_format(irImage) << " " << std::endl;
 
@@ -152,11 +152,15 @@ void KinectReader::nextFrame() {
             s.sensorId = 0;
             s.frameId = currentFrameCounter.at(0)++;
             uint8_t *buffer = k4a_image_get_buffer(colorImage);
+            size_t size = k4a_image_get_size(colorImage);
+            s.frame.resize(size);
+            memcpy(reinterpret_cast<void *>(&s.frame[0]), buffer, size);
             // convert the raw buffer to cv::Mat
             int rows = k4a_image_get_height_pixels(colorImage);
             int cols = k4a_image_get_width_pixels(colorImage);
-            cv::Mat colorMat(rows, cols, CV_8UC4, (void *) buffer, cv::Mat::AUTO_STEP);
-            imencode(".png", colorMat, s.frame);
+            //cv::Mat colorMat(rows, cols, CV_8UC4, (void *) buffer, cv::Mat::AUTO_STEP);
+            //imencode(".png", colorMat, s.frame);
+
             currFrame.push_back(s);
         }
 

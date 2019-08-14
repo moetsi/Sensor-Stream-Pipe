@@ -38,9 +38,9 @@ int main(int argc, char *argv[]) {
         uint port = std::stoul(argv[2]);
 
 
-        k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-        k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
-        k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+        k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
+        k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_2160P;
+        k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_OFF;
         k4a_fps_t recording_rate = K4A_FRAMES_PER_SECOND_30;
 
         k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
