@@ -84,6 +84,8 @@ void FrameEncoder::encode() {
     // (ret == AVERROR(EAGAIN)) before one is able to retrieve a packet.
 
     do {
+        //TODO: add frame queue for already processed frames
+        //TODO: make it work with live feed
         prepareFrame();
         ret = avcodec_send_frame(pCodecContext, pFrame);
         ret = avcodec_receive_packet(pCodecContext, pPacket);
