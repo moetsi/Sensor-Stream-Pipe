@@ -36,8 +36,6 @@ private:
 
     unsigned int totalCurrentFrameCounter;
     unsigned int currentFrameCounterReset;
-    unsigned int encoderCalls;
-
 
     AVCodecParameters *pCodecParameters;
     AVCodecContext *pCodecContext;
@@ -48,8 +46,6 @@ private:
 
     YAML::Node codec_parameters;
 
-    unsigned int bufferSize;
-    bool needsToBreak;
     std::string streamId;
 
     void init();

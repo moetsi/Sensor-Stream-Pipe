@@ -32,8 +32,10 @@ private:
 
     std::string getStructBytes(FrameStruct frame);
 
-public:
     std::vector<std::string> frameLines;
+
+public:
+
 
     FrameReader(std::string filename);
 

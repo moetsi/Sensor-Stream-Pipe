@@ -11,8 +11,6 @@ FrameEncoder::FrameEncoder(std::string filename, std::string codec_parameters_fi
     streamId = randomString(16);
     totalCurrentFrameCounter = 0;
     currentFrameCounterReset = 0;
-    bufferSize = 1;
-    needsToBreak = false;
     encode();
 }
 
@@ -36,20 +34,11 @@ void FrameEncoder::nextFrame() {
 }
 
 void FrameEncoder::prepareFrame() {
-    int i, ret, x, y;
 
-    std::string line = frameLines[FrameReader::currentFrameId()];
-    std::stringstream ss(line);
+    std::vector<unsigned char> frameData = FrameReader::currentFrame().front().frame;
+    cv::Mat frameOri = cv::imdecode(frameData, CV_LOAD_IMAGE_UNCHANGED);
 
-    std::string frameIdStr, framePath;
-
-    getline(ss, frameIdStr, ';');
-    getline(ss, framePath);
-
-
-    cv::Mat frameOri = cv::imread(framePath, CV_LOAD_IMAGE_UNCHANGED);
-
-    ret = av_frame_make_writable(pFrame);
+    int ret = av_frame_make_writable(pFrame);
     if (ret < 0) {
         std::cerr << "Error making frames writable" << std::endl;
         exit(1);
@@ -153,14 +142,8 @@ void FrameEncoder::init() {
     av_opt_set(pCodecContext->priv_data, "preset", "b", codec_parameters["bitrate"].as<int>());
 
     // get resolution from image file
-    std::string line = frameLines[FrameReader::currentFrameId()];
-    std::stringstream ss(line);
-
-    std::string frameIdStr, framePath;
-
-    getline(ss, frameIdStr, ';');
-    getline(ss, framePath);
-    cv::Mat frameOri = cv::imread(framePath, CV_LOAD_IMAGE_UNCHANGED);
+    std::vector<unsigned char> frameData = FrameReader::currentFrame().front().frame;
+    cv::Mat frameOri = cv::imdecode(frameData, CV_LOAD_IMAGE_UNCHANGED);
 
     pCodecContext->width = frameOri.cols;
     pCodecContext->height = frameOri.rows;
