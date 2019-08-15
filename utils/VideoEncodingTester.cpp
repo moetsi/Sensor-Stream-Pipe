@@ -76,11 +76,11 @@ int main(int argc, char *argv[]) {
         pPacket->size = f.frame.size();
 
         int response = avcodec_send_packet(pCodecContext, pPacket);
-        std::cout << "avcodec_send_packet: " << response << " " << av_err2str(response) << std::endl;
+        //std::cout << "avcodec_send_packet: " << response << " " << av_err2str(response) << std::endl;
         while (response >= 0) {
             // Return decoded output data (into a frame) from a decoder
             response = avcodec_receive_frame(pCodecContext, pFrame);
-            std::cout << "avcodec_receive_frame: " << response << " " << av_err2str(response) << std::endl;
+            //std::cout << "avcodec_receive_frame: " << response << " " << av_err2str(response) << std::endl;
             if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
                 break;
             }

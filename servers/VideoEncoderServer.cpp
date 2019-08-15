@@ -104,6 +104,8 @@ int main(int argc, char *argv[]) {
             else
                 avg_fps = 1000 / (diff_start_time / (double) sent_frames);
 
+
+            fc.nextFrame();
             last_time = currentTimeMs();
             processing_time = last_time - start_frame_time;
 
@@ -113,9 +115,6 @@ int main(int argc, char *argv[]) {
                 FrameStruct f = v.at(i);
                 std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " sent" << std::endl;
             }
-
-
-            fc.nextFrame();
         }
     }
     catch (std::exception &e) {

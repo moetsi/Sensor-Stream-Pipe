@@ -13,7 +13,7 @@ FrameEncoder::FrameEncoder(std::string filename, std::string codec_parameters_fi
     currentFrameCounterReset = 0;
     bufferSize = 1;
     needsToBreak = false;
-    nextFrame();
+    encode();
 }
 
 std::vector<unsigned char> FrameEncoder::currentFrameBytes(AVPacket &packet) {
@@ -75,9 +75,7 @@ void FrameEncoder::prepareFrame() {
 
 void FrameEncoder::reset() {
     std::cout << "Reset" << std::endl;
-    currentFrameCounterReset = 0;
-    bufferSize = 1;
-    needsToBreak = false;
+    encode();
 }
 
 bool FrameEncoder::hasNextFrame() {
@@ -117,8 +115,7 @@ void FrameEncoder::encode() {
     int ret;
 
     int i = 0;
-    // avcodec_send_frame and avcodec_receive_packet may require multiple calls,
-    // (ret == AVERROR(EAGAIN)) before one is able to retrieve a packet.
+
     while (pBuffer.empty()) {
 
         prepareFrame();
@@ -135,42 +132,6 @@ void FrameEncoder::encode() {
         }
     }
 }
-
-/*
- do {
-    //TODO: make it work with live feed
-    if (!FrameReader::hasNextFrame()) {
-        needsToBreak = true;
-        FrameReader::reset();
-    }
-
-    if (buffer.empty()) {
-        buffer.emplace(FrameReader::currentFrame());
-        buffer.emplace(FrameReader::currentFrame());
-    }
-    buffer.emplace(FrameReader::currentFrame());
-    prepareFrame();
-
-    if (needsToBreak) {
-        bufferSize--;
-    } else {
-        bufferSize = buffer.size() - 2;
-    }
-
-    ret = avcodec_send_frame(pCodecContext, pFrame);
-    ret = avcodec_receive_packet(pCodecContext, pPacket);
-    //std::cout << pFrame->pts << " " << pFrame->pkt_dts << " " << pPacket->pts << " " << pPacket->dts << std::endl << std::endl;
-    encoderCalls++;
-} while (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF);
-
-if (ret < 0) {
-    std::cerr << "Error during encoding" << std::endl;
-}
-
-
-pFrame->pts = totalCurrentFrameCounter++;
-currentFrameCounterReset++;
- */
 
 
 void FrameEncoder::init() {
