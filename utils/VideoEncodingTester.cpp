@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
     double psnr = 0;
     cv::Scalar mssim;
     int i = 0;
+    int j = 0;
 
     std::unordered_map<std::string, AVCodec *> pCodecs;
     std::unordered_map<std::string, AVCodecContext *> pCodecContexts;
@@ -57,17 +58,13 @@ int main(int argc, char *argv[]) {
 
 
         FrameEncoder fc(frame_file, codec_parameters_file);
-        FrameReader fr(frame_file);
 
         //This class only reads the file once
         while (fc.hasNextFrame()) {
-            FrameStruct fo = fr.currentFrame().at(0);
+            j++;
+
             FrameStruct f = fc.currentFrameVid();
 
-            cv::Mat frameOri = cv::imdecode(fo.frame, CV_LOAD_IMAGE_UNCHANGED);
-
-            double localMin, localMax;
-            cv::minMaxLoc(frameOri, &localMin, &localMax);
 
             if (pCodecs.find(f.streamId) == pCodecs.end()) {
                 prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
@@ -100,11 +97,12 @@ int main(int argc, char *argv[]) {
                     }
 
                     imgChanged = true;
-                    fr.nextFrame();
                 }
             }
 
             if (imgChanged) {
+                std::vector<FrameStruct> fo = fc.currentFrameSync();
+                cv::Mat frameOri = cv::imdecode(fo.at(0).frame, CV_LOAD_IMAGE_UNCHANGED);
                 cv::Mat frameDiff;
                 if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
 
@@ -157,7 +155,8 @@ int main(int argc, char *argv[]) {
 
             fc.nextFrame();
         }
-
+    std::cout << ((FrameReader) fc).currentFrameId() << " " << i << " " << j << " " << fc.buffer.size() << " "
+              << std::endl;
     std::cout << "Avg PSNR: " << psnr / i << std::endl;
     std::cout << "Avg MSSIM: " << mssim / i << std::endl;
     return 0;

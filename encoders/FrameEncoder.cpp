@@ -86,7 +86,9 @@ void FrameEncoder::encode() {
     do {
         //TODO: add frame queue for already processed frames
         //TODO: make it work with live feed
+        buffer.emplace(currentFrame());
         prepareFrame();
+
         ret = avcodec_send_frame(pCodecContext, pFrame);
         ret = avcodec_receive_packet(pCodecContext, pPacket);
         //std::cout << pFrame->pts << " " << pFrame->pkt_dts << " " << pPacket->pts << " " << pPacket->dts << std::endl << std::endl;
@@ -221,9 +223,7 @@ unsigned int FrameEncoder::currentFrameId() {
 
 
 FrameStruct FrameEncoder::currentFrameVid() {
-
-    FrameReader *fr = (FrameReader *) this;
-    FrameStruct f = fr->currentFrame().at(0);
+    FrameStruct f = FrameReader::currentFrame().at(0);
 
     f.messageType = 1;
     f.codec_data = getCodecParamsStruct();
@@ -232,3 +232,14 @@ FrameStruct FrameEncoder::currentFrameVid() {
 
     return f;
 }
+
+std::vector<FrameStruct> FrameEncoder::currentFrameSync() {
+
+    if (buffer.empty())
+        return std::vector<FrameStruct>();
+    std::vector<FrameStruct> res = buffer.front();
+    buffer.pop();
+    return res;
+
+}
+

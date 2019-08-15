@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <queue>
 
 #include <cereal/archives/binary.hpp>
 
@@ -36,6 +37,7 @@ private:
     unsigned int totalCurrentFrameCounter;
     unsigned int totalCurrentPacketCounter;
 
+
     AVCodecParameters *pCodecParameters;
     AVCodecContext *pCodecContext;
     AVCodec *pCodec;
@@ -56,6 +58,8 @@ private:
 
 public:
 
+    std::queue<std::vector<FrameStruct>> buffer;
+
     FrameEncoder(std::string filename, std::string frame_filename);
 
     ~FrameEncoder();
@@ -71,4 +75,6 @@ public:
     std::string getStreamID();
 
     FrameStruct currentFrameVid();
+
+    std::vector<FrameStruct> currentFrameSync();
 };
