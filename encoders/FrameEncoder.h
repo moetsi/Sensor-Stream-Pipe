@@ -56,11 +56,14 @@ private:
 
     void encode();
 
+    void encodeA(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt);
+
     void prepareFrame();
 
 public:
 
     std::queue<std::vector<FrameStruct>> buffer;
+    std::queue<AVPacket> pBuffer;
 
     FrameEncoder(std::string filename, std::string frame_filename);
 
@@ -74,7 +77,7 @@ public:
 
     void reset();
 
-    std::vector<unsigned char> currentFrameBytes();
+    std::vector<unsigned char> currentFrameBytes(AVPacket &packet);
 
     unsigned int currentFrameId();
 

@@ -75,17 +75,16 @@ int main(int argc, char *argv[]) {
         pPacket->data = &f.frame[0];
         pPacket->size = f.frame.size();
 
-
-        // reset the codec context on restarting the video
-        if (f.frameId == 1) {
-            std::cout << "Resetting stream" << std::endl;
-            avcodec_flush_buffers(pCodecContext);
-        }
-
         int response = avcodec_send_packet(pCodecContext, pPacket);
-        if (response >= 0) {
+        std::cout << "avcodec_send_packet: " << response << " " << av_err2str(response) << std::endl;
+        while (response >= 0) {
             // Return decoded output data (into a frame) from a decoder
             response = avcodec_receive_frame(pCodecContext, pFrame);
+            std::cout << "avcodec_receive_frame: " << response << " " << av_err2str(response) << std::endl;
+            if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
+                break;
+            }
+
             if (response >= 0) {
                 i++;
 
@@ -96,15 +95,12 @@ int main(int argc, char *argv[]) {
                 }
 
                 imgChanged = true;
-            } else {
-                std::cerr << "avcodec_receive_frame: " << av_err2str(response) << std::endl;
             }
-        } else {
-            std::cerr << "avcodec_send_packet: " << av_err2str(response) << std::endl;
-        }
 
-        std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " received, "
-                  << " ms; size " << f.frame.size() << std::endl;
+
+        }
+        std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId << " received; size " << f.frame.size()
+                  << std::endl;
 
         if (imgChanged) {
             std::vector<FrameStruct> fo = fc.currentFrameSync();
@@ -142,6 +138,11 @@ int main(int argc, char *argv[]) {
                 frameOri = frameOriU;
 
             } else {
+
+                if (frameOri.channels() == 1) {
+                    cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+                    img.convertTo(img, CV_16UC1);
+                }
                 absdiff(frameOri, img, frameDiff);
                 psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
                 mssim += getMSSIM(frameOri, img);

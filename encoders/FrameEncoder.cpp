@@ -12,11 +12,12 @@ FrameEncoder::FrameEncoder(std::string filename, std::string codec_parameters_fi
     totalCurrentFrameCounter = 0;
     currentFrameCounterReset = 0;
     bufferSize = 1;
-    reset();
+    needsToBreak = false;
+    nextFrame();
 }
 
-std::vector<unsigned char> FrameEncoder::currentFrameBytes() {
-    return std::vector<unsigned char>(pPacket->data, pPacket->data + pPacket->size);
+std::vector<unsigned char> FrameEncoder::currentFrameBytes(AVPacket &packet) {
+    return std::vector<unsigned char>(packet.data, packet.data + packet.size);
 }
 
 FrameEncoder::~FrameEncoder() {
@@ -26,15 +27,16 @@ FrameEncoder::~FrameEncoder() {
 }
 
 void FrameEncoder::nextFrame() {
+    if (!buffer.empty())
+        buffer.pop();
+    if (!pBuffer.empty())
+        pBuffer.pop();
+    currentFrameCounterReset++;
     encode();
-    buffer.pop();
 }
 
 void FrameEncoder::prepareFrame() {
-
-
     int i, ret, x, y;
-
 
     std::string line = frameLines[FrameReader::currentFrameId()];
     std::stringstream ss(line);
@@ -69,14 +71,6 @@ void FrameEncoder::prepareFrame() {
         cv::cvtColor(frameOri, frameYUV, cv::COLOR_BGR2YUV);
         prepareColorFrame(frameYUV, pFrame);
     }
-
-    if (FrameReader::hasNextFrame())
-        FrameReader::nextFrame();
-    else {
-        FrameReader::reset();
-    }
-
-
 }
 
 void FrameEncoder::reset() {
@@ -87,9 +81,35 @@ void FrameEncoder::reset() {
 }
 
 bool FrameEncoder::hasNextFrame() {
-    std::cout << bufferSize << " " << buffer.size() << " " << currentFrameCounterReset << " "
-              << totalCurrentFrameCounter << std::endl;
-    return bufferSize > 0;
+    //std::cout << bufferSize << " " << buffer.size() << " " << currentFrameCounterReset << " " << totalCurrentFrameCounter << std::endl;
+    //return true;
+    return !buffer.empty();
+}
+
+
+void FrameEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt) {
+    int ret;
+    /* send the frame to the encoder */
+    ret = avcodec_send_frame(enc_ctx, frame);
+    if (ret < 0) {
+        fprintf(stderr, "Error sending a frame for encoding\n");
+        exit(1);
+    }
+    while (ret >= 0) {
+        ret = avcodec_receive_packet(enc_ctx, pkt);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            return;
+        else if (ret < 0) {
+            fprintf(stderr, "Error during encoding\n");
+            exit(1);
+        }
+
+        AVPacket newPacket(*pPacket);
+        newPacket.data = reinterpret_cast<uint8_t *>(new uint64_t[
+        (pPacket->size + FF_INPUT_BUFFER_PADDING_SIZE) / sizeof(uint64_t) + 1]);
+        memcpy(newPacket.data, pPacket->data, pPacket->size);
+        pBuffer.emplace(newPacket);
+    }
 }
 
 void FrameEncoder::encode() {
@@ -99,42 +119,59 @@ void FrameEncoder::encode() {
     int i = 0;
     // avcodec_send_frame and avcodec_receive_packet may require multiple calls,
     // (ret == AVERROR(EAGAIN)) before one is able to retrieve a packet.
+    while (pBuffer.empty()) {
 
-
-    do {
-        //TODO: make it work with live feed
-        if (!FrameReader::hasNextFrame()) {
-            needsToBreak = true;
-            FrameReader::reset();
-        }
-
-        if (buffer.empty()) {
-            buffer.emplace(FrameReader::currentFrame());
-            buffer.emplace(FrameReader::currentFrame());
-        }
-        buffer.emplace(FrameReader::currentFrame());
         prepareFrame();
 
-        if (needsToBreak) {
-            bufferSize--;
+        pFrame->pts = totalCurrentFrameCounter++;
+
+        encodeA(pCodecContext, pFrame, pPacket);
+
+        if (FrameReader::hasNextFrame()) {
+            buffer.emplace(FrameReader::currentFrame());
+            FrameReader::nextFrame();
         } else {
-            bufferSize = buffer.size() - 2;
+            FrameReader::reset();
         }
+    }
+}
 
-        ret = avcodec_send_frame(pCodecContext, pFrame);
-        ret = avcodec_receive_packet(pCodecContext, pPacket);
-        //std::cout << pFrame->pts << " " << pFrame->pkt_dts << " " << pPacket->pts << " " << pPacket->dts << std::endl << std::endl;
-        encoderCalls++;
-    } while (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF);
-
-    if (ret < 0) {
-        std::cerr << "Error during encoding" << std::endl;
+/*
+ do {
+    //TODO: make it work with live feed
+    if (!FrameReader::hasNextFrame()) {
+        needsToBreak = true;
+        FrameReader::reset();
     }
 
+    if (buffer.empty()) {
+        buffer.emplace(FrameReader::currentFrame());
+        buffer.emplace(FrameReader::currentFrame());
+    }
+    buffer.emplace(FrameReader::currentFrame());
+    prepareFrame();
 
-    pFrame->pts = totalCurrentFrameCounter++;
-    currentFrameCounterReset++;
+    if (needsToBreak) {
+        bufferSize--;
+    } else {
+        bufferSize = buffer.size() - 2;
+    }
+
+    ret = avcodec_send_frame(pCodecContext, pFrame);
+    ret = avcodec_receive_packet(pCodecContext, pPacket);
+    //std::cout << pFrame->pts << " " << pFrame->pkt_dts << " " << pPacket->pts << " " << pPacket->dts << std::endl << std::endl;
+    encoderCalls++;
+} while (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF);
+
+if (ret < 0) {
+    std::cerr << "Error during encoding" << std::endl;
 }
+
+
+pFrame->pts = totalCurrentFrameCounter++;
+currentFrameCounterReset++;
+ */
+
 
 void FrameEncoder::init() {
     int ret;
@@ -179,12 +216,12 @@ void FrameEncoder::init() {
      */
     //TODO: check what other parameters are required for different codecs
     pCodecContext->gop_size = codec_parameters["gop_size"].as<int>(); // 10
-    pCodecContext->max_b_frames = codec_parameters["max_b_frames"].as<int>(); // 1
+    //pCodecContext->max_b_frames = codec_parameters["max_b_frames"].as<int>(); // 1
 
     // libx264: Supported pixel formats: yuv420p yuvj420p yuv422p yuvj422p yuv444p yuvj444p nv12 nv16 nv21
     // libx265: Supported pixel formats: yuv420p yuv422p yuv444p gbrp yuv420p10le yuv422p10le yuv444p10le gbrp10le yuv420p12le yuv422p12le yuv444p12le gbrp12le gray gray10le gray12le
     pCodecContext->pix_fmt = av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str());
-
+    av_opt_set(pCodecContext->priv_data, "tune", "zerolatency", 0);
 
     pCodecParameters->codec_type = AVMEDIA_TYPE_VIDEO;
 
@@ -202,7 +239,7 @@ void FrameEncoder::init() {
 
 
     if (pCodec->id == AV_CODEC_ID_H264 || pCodec->id == AV_CODEC_ID_H265)
-        av_opt_set(pCodecContext->priv_data, "preset", "slow", 0);
+        av_opt_set(pCodecContext->priv_data, "preset", "ultrafast", 0);
 
 
     ret = avcodec_open2(pCodecContext, pCodec, NULL);
@@ -263,11 +300,10 @@ std::vector<FrameStruct> FrameEncoder::currentFrame() {
 
     f.messageType = 1;
     f.codec_data = getCodecParamsStruct();
-    f.frame = currentFrameBytes();
-    f.frameId = currentFrameId();
+    f.frame = currentFrameBytes(pBuffer.front());
+    f.frameId = currentFrameCounterReset;
 
     res.push_back(f);
-
     return res;
 }
 
@@ -275,7 +311,6 @@ std::vector<FrameStruct> FrameEncoder::currentFrameSync() {
     if (buffer.empty())
         return std::vector<FrameStruct>();
     std::vector<FrameStruct> res = buffer.front();
-
     return res;
 }
 
