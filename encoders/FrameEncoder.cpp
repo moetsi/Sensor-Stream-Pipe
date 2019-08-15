@@ -11,7 +11,7 @@ FrameEncoder::FrameEncoder(std::string filename, std::string codec_parameters_fi
     streamId = randomString(16);
     totalCurrentFrameCounter = 0;
     currentFrameCounterReset = 0;
-    bufferSize = 0;
+    bufferSize = 1;
     reset();
 }
 
@@ -27,6 +27,7 @@ FrameEncoder::~FrameEncoder() {
 
 void FrameEncoder::nextFrame() {
     encode();
+    buffer.pop();
 }
 
 void FrameEncoder::prepareFrame() {
@@ -79,13 +80,16 @@ void FrameEncoder::prepareFrame() {
 }
 
 void FrameEncoder::reset() {
+    std::cout << "Reset" << std::endl;
     currentFrameCounterReset = 0;
-    bufferSize = buffer.size();
-    FrameReader::reset();
+    bufferSize = 1;
+    needsToBreak = false;
 }
 
 bool FrameEncoder::hasNextFrame() {
-    return FrameReader::hasNextFrame() || !buffer.empty();
+    std::cout << bufferSize << " " << buffer.size() << " " << currentFrameCounterReset << " "
+              << totalCurrentFrameCounter << std::endl;
+    return bufferSize > 0;
 }
 
 void FrameEncoder::encode() {
@@ -97,12 +101,24 @@ void FrameEncoder::encode() {
     // (ret == AVERROR(EAGAIN)) before one is able to retrieve a packet.
 
 
-
     do {
         //TODO: make it work with live feed
-        if (FrameReader::hasNextFrame()) {
+        if (!FrameReader::hasNextFrame()) {
+            needsToBreak = true;
+            FrameReader::reset();
+        }
+
+        if (buffer.empty()) {
             buffer.emplace(FrameReader::currentFrame());
-            prepareFrame();
+            buffer.emplace(FrameReader::currentFrame());
+        }
+        buffer.emplace(FrameReader::currentFrame());
+        prepareFrame();
+
+        if (needsToBreak) {
+            bufferSize--;
+        } else {
+            bufferSize = buffer.size() - 2;
         }
 
         ret = avcodec_send_frame(pCodecContext, pFrame);
@@ -114,6 +130,7 @@ void FrameEncoder::encode() {
     if (ret < 0) {
         std::cerr << "Error during encoding" << std::endl;
     }
+
 
     pFrame->pts = totalCurrentFrameCounter++;
     currentFrameCounterReset++;
@@ -255,12 +272,10 @@ std::vector<FrameStruct> FrameEncoder::currentFrame() {
 }
 
 std::vector<FrameStruct> FrameEncoder::currentFrameSync() {
-
     if (buffer.empty())
         return std::vector<FrameStruct>();
     std::vector<FrameStruct> res = buffer.front();
-    buffer.pop();
-    return res;
 
+    return res;
 }
 
