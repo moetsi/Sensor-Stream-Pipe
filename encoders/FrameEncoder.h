@@ -35,7 +35,8 @@ class FrameEncoder : public FrameReader {
 private:
 
     unsigned int totalCurrentFrameCounter;
-    unsigned int totalCurrentPacketCounter;
+    unsigned int currentFrameCounterReset;
+    unsigned int encoderCalls;
 
 
     AVCodecParameters *pCodecParameters;
@@ -47,7 +48,8 @@ private:
 
     YAML::Node codec_parameters;
 
-    bool libAVReady;
+    unsigned int bufferSize;
+    bool needsToBreak;
     std::string streamId;
 
     void init();
@@ -65,6 +67,12 @@ public:
     ~FrameEncoder();
 
     void nextFrame();
+
+    bool hasNextFrame();
+
+    std::vector<FrameStruct> currentFrame();
+
+    void reset();
 
     std::vector<unsigned char> currentFrameBytes();
 

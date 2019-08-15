@@ -52,11 +52,9 @@ int main(int argc, char *argv[]) {
             stopAfter = std::stoi(argv[5]);
         }
 
-
         FrameEncoder fc(frame_file, codec_parameters_file);
 
         uint fps = fc.getFps();
-
 
         uint64_t last_time = currentTimeMs();
         uint64_t start_time = last_time;
@@ -80,13 +78,13 @@ int main(int argc, char *argv[]) {
                 start_time = last_time;
             }
 
+            std::vector<FrameStruct> v = fc.currentFrame();
+
             if (!fc.hasNextFrame()) {
                 fc.reset();
                 stopAfter--;
             }
 
-            std::vector<FrameStruct> v;
-            v.push_back(fc.currentFrameVid());
 
             std::string message = cerealStructToString(v);
 

@@ -10,6 +10,8 @@ FrameEncoder::FrameEncoder(std::string filename, std::string codec_parameters_fi
     init();
     streamId = randomString(16);
     totalCurrentFrameCounter = 0;
+    currentFrameCounterReset = 0;
+    bufferSize = 0;
     reset();
 }
 
@@ -31,6 +33,7 @@ void FrameEncoder::prepareFrame() {
 
 
     int i, ret, x, y;
+
 
     std::string line = frameLines[FrameReader::currentFrameId()];
     std::stringstream ss(line);
@@ -75,6 +78,16 @@ void FrameEncoder::prepareFrame() {
 
 }
 
+void FrameEncoder::reset() {
+    currentFrameCounterReset = 0;
+    bufferSize = buffer.size();
+    FrameReader::reset();
+}
+
+bool FrameEncoder::hasNextFrame() {
+    return FrameReader::hasNextFrame() || !buffer.empty();
+}
+
 void FrameEncoder::encode() {
 
     int ret;
@@ -83,15 +96,19 @@ void FrameEncoder::encode() {
     // avcodec_send_frame and avcodec_receive_packet may require multiple calls,
     // (ret == AVERROR(EAGAIN)) before one is able to retrieve a packet.
 
+
+
     do {
-        //TODO: add frame queue for already processed frames
         //TODO: make it work with live feed
-        buffer.emplace(currentFrame());
-        prepareFrame();
+        if (FrameReader::hasNextFrame()) {
+            buffer.emplace(FrameReader::currentFrame());
+            prepareFrame();
+        }
 
         ret = avcodec_send_frame(pCodecContext, pFrame);
         ret = avcodec_receive_packet(pCodecContext, pPacket);
         //std::cout << pFrame->pts << " " << pFrame->pkt_dts << " " << pPacket->pts << " " << pPacket->dts << std::endl << std::endl;
+        encoderCalls++;
     } while (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF);
 
     if (ret < 0) {
@@ -99,6 +116,7 @@ void FrameEncoder::encode() {
     }
 
     pFrame->pts = totalCurrentFrameCounter++;
+    currentFrameCounterReset++;
 }
 
 void FrameEncoder::init() {
@@ -222,7 +240,8 @@ unsigned int FrameEncoder::currentFrameId() {
 }
 
 
-FrameStruct FrameEncoder::currentFrameVid() {
+std::vector<FrameStruct> FrameEncoder::currentFrame() {
+    std::vector<FrameStruct> res;
     FrameStruct f = FrameReader::currentFrame().at(0);
 
     f.messageType = 1;
@@ -230,7 +249,9 @@ FrameStruct FrameEncoder::currentFrameVid() {
     f.frame = currentFrameBytes();
     f.frameId = currentFrameId();
 
-    return f;
+    res.push_back(f);
+
+    return res;
 }
 
 std::vector<FrameStruct> FrameEncoder::currentFrameSync() {

@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 
         av_register_all();
 
-        cv::Mat img;
+
         bool imgChanged = false;
 
         for (;;) {
@@ -90,6 +90,7 @@ int main(int argc, char *argv[]) {
             rec_mbytes += request.size() / 1000;
 
             for (FrameStruct f: f_list) {
+                cv::Mat img;
                 if (f.messageType == 0) {
                     img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
                     imgChanged = true;
@@ -99,14 +100,17 @@ int main(int argc, char *argv[]) {
                         prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
                     }
 
-                    if (f.frameId == 1) { // reset the codec context on video reset
-                        avcodec_flush_buffers(pCodecContexts[f.streamId]);
-                    }
 
                     AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
 
                     pPacket->data = &f.frame[0];
                     pPacket->size = f.frame.size();
+
+                    if (f.frameId == 1) { // reset the codec context on video reset
+                        std::cout << "Resetting stream" << std::endl;
+                        avcodec_flush_buffers(pCodecContexts[f.streamId]);
+                    }
+
 
                     int response = avcodec_send_packet(pCodecContext, pPacket);
                     if (response >= 0) {
@@ -119,7 +123,11 @@ int main(int argc, char *argv[]) {
                                 avframeToMatYUV(pFrame, img);
                             }
                             imgChanged = true;
+                        } else {
+                            std::cerr << "avcodec_receive_frame: " << av_err2str(response) << std::endl;
                         }
+                    } else {
+                        std::cerr << "avcodec_send_packet: " << av_err2str(response) << std::endl;
                     }
 
                     f.frame.clear();
