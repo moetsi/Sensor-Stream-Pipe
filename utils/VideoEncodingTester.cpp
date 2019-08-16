@@ -57,13 +57,24 @@ int main(int argc, char *argv[]) {
     std::string codec_parameters_file = std::string(argv[2]);
 
 
-    FrameEncoder fc(frame_file, codec_parameters_file);
+    FrameReader reader(frame_file);
+    FrameEncoder frameEncoder(codec_parameters_file, reader.getFps());
+
 
     //This class only reads the file once
-    while (fc.hasNextFrame()) {
+    while (reader.hasNextFrame() || frameEncoder.hasNextPacket()) {
 
-        std::vector<FrameStruct> v = fc.currentFrame();
-        FrameStruct f = v.at(0);
+        while (!frameEncoder.hasNextPacket()) {
+            frameEncoder.addFrameStruct(reader.currentFrame().front());
+            reader.nextFrame();
+        }
+
+        FrameStruct f = frameEncoder.currentFrame();
+        std::vector<FrameStruct> v;
+        v.push_back(f);
+
+
+
 
         if (pCodecs.find(f.streamId) == pCodecs.end()) {
             prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
@@ -103,8 +114,8 @@ int main(int argc, char *argv[]) {
                   << std::endl;
 
         if (imgChanged) {
-            std::vector<FrameStruct> fo = fc.currentFrameSync();
-            cv::Mat frameOri = cv::imdecode(fo.at(0).frame, CV_LOAD_IMAGE_UNCHANGED);
+            FrameStruct fo = frameEncoder.currentFrameOriginal();
+            cv::Mat frameOri = cv::imdecode(fo.frame, CV_LOAD_IMAGE_UNCHANGED);
             cv::Mat frameDiff;
             if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
 
@@ -159,10 +170,9 @@ int main(int argc, char *argv[]) {
             cv::waitKey(1);
             imgChanged = false;
         }
-
-        fc.nextFrame();
+        frameEncoder.nextPacket();
     }
-    std::cout << ((FrameReader) fc).currentFrameId() << " " << i << " " << j << " " << fc.buffer.size() << " "
+    std::cout << frameEncoder.currentFrameId() << " " << i << " " << j << " " << frameEncoder.buffer.size() << " "
               << std::endl;
     std::cout << "Avg PSNR: " << psnr / i << std::endl;
     std::cout << "Avg MSSIM: " << mssim / i << std::endl;

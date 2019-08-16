@@ -31,11 +31,10 @@ extern "C" {
 #include "../readers/FrameReader.h"
 #include "../utils/VideoUtils.h"
 
-class FrameEncoder : public FrameReader {
+class FrameEncoder {
 private:
 
     unsigned int totalCurrentFrameCounter;
-    unsigned int currentFrameCounterReset;
 
     AVCodecParameters *pCodecParameters;
     AVCodecContext *pCodecContext;
@@ -44,11 +43,16 @@ private:
     AVFrame *pFrame;
     AVPacket *pPacket;
 
+
+    cv::Mat frameOri;
+
     YAML::Node codec_parameters;
 
-    std::string streamId;
+    uint fps;
 
-    void init();
+    bool ready;
+
+    void init(FrameStruct &fs);
 
     void encode();
 
@@ -56,32 +60,33 @@ private:
 
     void prepareFrame();
 
+    std::vector<unsigned char> currentFrameBytes(AVPacket &packet);
+
 public:
 
-    std::queue<std::vector<FrameStruct>> buffer;
+    std::queue<FrameStruct> buffer;
     std::queue<AVPacket> pBuffer;
 
-    FrameEncoder(std::string filename, std::string frame_filename);
+    FrameEncoder(std::string codec_parameters_file, uint fps);
 
     ~FrameEncoder();
 
-    void nextFrame();
+    void addFrameStruct(FrameStruct &fs);
 
-    bool hasNextFrame();
+    void nextPacket();
 
-    std::vector<FrameStruct> currentFrame();
+    bool hasNextPacket();
 
-    void reset();
+    FrameStruct currentFrame();
 
-    std::vector<unsigned char> currentFrameBytes(AVPacket &packet);
-
-    unsigned int currentFrameId();
+    FrameStruct currentFrameOriginal();
 
     CodecParamsStruct getCodecParamsStruct();
 
-    std::string getStreamID();
+    unsigned int currentFrameId();
 
-    FrameStruct currentFrameVid();
+    uint getFps();
 
-    std::vector<FrameStruct> currentFrameSync();
+
+
 };

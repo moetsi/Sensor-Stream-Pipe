@@ -52,9 +52,10 @@ int main(int argc, char *argv[]) {
             stopAfter = std::stoi(argv[5]);
         }
 
-        FrameEncoder fc(frame_file, codec_parameters_file);
+        FrameReader reader(frame_file);
+        FrameEncoder frameEncoder(codec_parameters_file, reader.getFps());
 
-        uint fps = fc.getFps();
+        uint fps = reader.getFps();
 
         uint64_t last_time = currentTimeMs();
         uint64_t start_time = last_time;
@@ -78,13 +79,20 @@ int main(int argc, char *argv[]) {
                 start_time = last_time;
             }
 
-            std::vector<FrameStruct> v = fc.currentFrame();
-
-            if (!fc.hasNextFrame()) {
-                fc.reset();
-                stopAfter--;
+            while (!frameEncoder.hasNextPacket()) {
+                frameEncoder.addFrameStruct(reader.currentFrame().front());
+                if (!reader.hasNextFrame()) {
+                    reader.reset();
+                    stopAfter--;
+                }
+                reader.nextFrame();
             }
 
+            FrameStruct f = frameEncoder.currentFrame();
+            std::vector<FrameStruct> v;
+            v.push_back(f);
+
+            frameEncoder.nextPacket();
 
             std::string message = cerealStructToString(v);
 
@@ -105,7 +113,6 @@ int main(int argc, char *argv[]) {
                 avg_fps = 1000 / (diff_start_time / (double) sent_frames);
 
 
-            fc.nextFrame();
             last_time = currentTimeMs();
             processing_time = last_time - start_frame_time;
 

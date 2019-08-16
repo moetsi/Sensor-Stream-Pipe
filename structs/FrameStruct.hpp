@@ -62,7 +62,7 @@ struct FrameStruct {
     unsigned short messageType;
 
     // 0 for color, 1 for depth
-    unsigned short frameType;
+    unsigned short frameType = -1;
 
     // random 16 char string that uniquely ids the frame stream
     std::string streamId;
