@@ -54,9 +54,9 @@ void prepareDecodingStruct(FrameStruct &f, std::unordered_map<std::string, AVCod
         exit(1);
     }
 
-    pCodecs[f.streamId] = pCodec;
-    pCodecContexts[f.streamId] = pCodecContext;
-    pCodecParameters[f.streamId] = pCodecParameter;
+    pCodecs[f.streamId + std::to_string(f.sensorId)] = pCodec;
+    pCodecContexts[f.streamId + std::to_string(f.sensorId)] = pCodecContext;
+    pCodecParameters[f.streamId + std::to_string(f.sensorId)] = pCodecParameter;
 }
 
 

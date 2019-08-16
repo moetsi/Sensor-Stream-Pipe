@@ -95,20 +95,19 @@ int main(int argc, char *argv[]) {
                     img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
                     imgChanged = true;
                 } else if (f.messageType == 1) {
-
-                    if (pCodecs.find(f.streamId) == pCodecs.end()) {
+                    if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) == pCodecs.end()) {
                         prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
                     }
 
 
-                    AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
+                    AVCodecContext *pCodecContext = pCodecContexts[f.streamId + std::to_string(f.sensorId)];
 
                     pPacket->data = &f.frame[0];
                     pPacket->size = f.frame.size();
 
                     if (f.frameId == 1) { // reset the codec context on video reset
                         std::cout << "Resetting stream" << std::endl;
-                        avcodec_flush_buffers(pCodecContexts[f.streamId]);
+                        avcodec_flush_buffers(pCodecContexts[f.streamId + std::to_string(f.sensorId)]);
                     }
 
 

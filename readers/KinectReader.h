@@ -97,6 +97,12 @@ public:
 
     std::vector<FrameStruct> currentFrame();
 
+    FrameStruct currentFrame(uint type);
+
+    uint getFps();
+
+    std::vector<uint> getType();
+
 };
 
 

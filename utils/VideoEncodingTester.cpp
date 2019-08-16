@@ -74,13 +74,11 @@ int main(int argc, char *argv[]) {
         v.push_back(f);
 
 
-
-
-        if (pCodecs.find(f.streamId) == pCodecs.end()) {
+        if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) == pCodecs.end()) {
             prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
         }
 
-        AVCodecContext *pCodecContext = pCodecContexts[f.streamId];
+        AVCodecContext *pCodecContext = pCodecContexts[f.streamId + std::to_string(f.sensorId)];
 
 
         pPacket->data = &f.frame[0];

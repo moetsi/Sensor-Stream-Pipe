@@ -150,16 +150,19 @@ void KinectReader::nextFrame() {
         if (k4a_image_get_format(colorImage) != 6) {
             FrameStruct s = frameTemplate;
             s.sensorId = 0;
+            s.frameType = 0;
             s.frameId = currentFrameCounter.at(0)++;
             uint8_t *buffer = k4a_image_get_buffer(colorImage);
-            size_t size = k4a_image_get_size(colorImage);
-            s.frame.resize(size);
-            memcpy(reinterpret_cast<void *>(&s.frame[0]), buffer, size);
+            //size_t size = k4a_image_get_size(colorImage);
+            //s.frame.resize(size);
+            //memcpy(&s.frame[0], buffer, size);
+            //cv::Mat colorMat = cv::imdecode(s.frame, CV_LOAD_IMAGE_UNCHANGED);
             // convert the raw buffer to cv::Mat
+            //TODO: change back to MJPG
             int rows = k4a_image_get_height_pixels(colorImage);
             int cols = k4a_image_get_width_pixels(colorImage);
-            //cv::Mat colorMat(rows, cols, CV_8UC4, (void *) buffer, cv::Mat::AUTO_STEP);
-            //imencode(".png", colorMat, s.frame);
+            cv::Mat colorMat(rows, cols, CV_8UC4, (void *) buffer, cv::Mat::AUTO_STEP);
+            imencode(".png", colorMat, s.frame);
 
             currFrame.push_back(s);
         }
@@ -167,6 +170,7 @@ void KinectReader::nextFrame() {
         if (k4a_image_get_format(depthImage) != 6) {
             FrameStruct s = frameTemplate;
             s.sensorId = 1;
+            s.frameType = 1;
             s.frameId = currentFrameCounter.at(1)++;
             uint8_t *buffer = k4a_image_get_buffer(depthImage);
             // convert the raw buffer to cv::Mat
@@ -180,6 +184,7 @@ void KinectReader::nextFrame() {
         if (k4a_image_get_format(irImage) != 6) {
             FrameStruct s = frameTemplate;
             s.sensorId = 2;
+            s.frameType = 2;
             s.frameId = currentFrameCounter.at(2)++;
             uint8_t *buffer = k4a_image_get_buffer(irImage);
             // convert the raw buffer to cv::Mat
@@ -210,4 +215,28 @@ void KinectReader::reset() {
 
 std::vector<FrameStruct> KinectReader::currentFrame() {
     return currFrame;
+}
+
+FrameStruct KinectReader::currentFrame(uint type) {
+    for (FrameStruct fs: currFrame) {
+        std::cout << "b " << fs.frameType << " " << type << std::endl;
+        if (fs.frameType == type)
+            return fs;
+    }
+    //TODO: fix to add null
+    return FrameStruct();
+}
+
+uint KinectReader::getFps() {
+    //TODO: get from config
+    return 30;
+}
+
+
+std::vector<uint> KinectReader::getType() {
+    std::vector<uint> types;
+    types.push_back(0);
+    types.push_back(1);
+    types.push_back(2);
+    return types;
 }
