@@ -116,6 +116,7 @@ int main(int argc, char *argv[]) {
                         // Return decoded output data (into a frame) from a decoder
                         response = avcodec_receive_frame(pCodecContext, pFrame);
                         if (response >= 0) {
+                            // TODO: add fake color depth map as with Azure viewer
                             if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
                                 avframeToMatGray(pFrame, img);
                             } else {

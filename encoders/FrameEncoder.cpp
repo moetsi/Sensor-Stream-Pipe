@@ -113,7 +113,7 @@ void FrameEncoder::init(FrameStruct &fs) {
 
     // http://git.videolan.org/?p=ffmpeg.git;a=blob;f=libavcodec/options_table.h;hb=HEAD
     // https://stackoverflow.com/questions/3553003/how-to-encode-h-264-with-libavcodec-x264
-    // TODO: adapt to use variable bitrate and check the links above for more parameters
+    // TODO: adapt to use variable bitrate and check the links above for more parameters: bitrate versus crf
     // check what other parameters are required for different codecs
     pCodecContext->bit_rate = codec_parameters["bitrate"].as<int>();
     av_opt_set(pCodecContext->priv_data, "preset", "b", codec_parameters["bitrate"].as<int>());
@@ -137,11 +137,17 @@ void FrameEncoder::init(FrameStruct &fs) {
      */
     //TODO: check what other parameters are required for different codecs
     pCodecContext->gop_size = codec_parameters["gop_size"].as<int>(); // 10
-    //pCodecContext->max_b_frames = codec_parameters["max_b_frames"].as<int>(); // 1
+    pCodecContext->max_b_frames = codec_parameters["max_b_frames"].as<int>(); // 1
 
-    // libx264: Supported pixel formats: yuv420p yuvj420p yuv422p yuvj422p yuv444p yuvj444p nv12 nv16 nv21
-    // libx265: Supported pixel formats: yuv420p yuv422p yuv444p gbrp yuv420p10le yuv422p10le yuv444p10le gbrp10le yuv420p12le yuv422p12le yuv444p12le gbrp12le gray gray10le gray12le
+    // fmpeg -h encoder=hevc
+    // libx264:                 yuv420p yuvj420p yuv422p yuvj422p yuv444p yuvj444p nv12 nv16 nv21
+    // libx264rgb:              bgr0 bgr24 rgb24
+    // libx265:                 yuv420p yuv422p yuv444p gbrp yuv420p10le yuv422p10le yuv444p10le gbrp10le yuv420p12le yuv422p12le yuv444p12le gbrp12le gray gray10le gray12le
+    // hevc_nvenc (gpu x265):   yuv420p nv12 p010le yuv444p yuv444p16le bgr0 rgb0 cuda nv12 p010le
+    // nvenc_h264 (gpu x264):   yuv420p nv12 p010le yuv444p yuv444p16le bgr0 rgb0 cuda
+
     pCodecContext->pix_fmt = av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str());
+    //TODO: B frames and the GPU
     av_opt_set(pCodecContext->priv_data, "tune", "zerolatency", 0);
     av_opt_set(pCodecContext->priv_data, "rcParams", "zeroReorderDelay", 1);
 
@@ -159,7 +165,7 @@ void FrameEncoder::init(FrameStruct &fs) {
     pCodecParameters->color_space = pCodecContext->colorspace;
     pCodecParameters->sample_rate = pCodecContext->sample_rate;
 
-
+    //TODO: does this parameter really matter?
     if (pCodec->id == AV_CODEC_ID_H264 || pCodec->id == AV_CODEC_ID_H265)
         av_opt_set(pCodecContext->priv_data, "preset", "ultrafast", 0);
 

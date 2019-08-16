@@ -41,8 +41,9 @@ int main(int argc, char *argv[]) {
 
 
 
-        //TODO: Read parameters from file
+        //TODO: Read parameters from file; add new category
         k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
+        //TODO: K4A_IMAGE_FORMAT_COLOR_BGRA32 -> K4A_IMAGE_FORMAT_COLOR_MJPG
         k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
         k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
         k4a_fps_t recording_rate = K4A_FRAMES_PER_SECOND_30;
@@ -59,11 +60,13 @@ int main(int argc, char *argv[]) {
 
         KinectReader reader(0, &device_config, 0);
 
+        //TODO: use smarter pointers
         std::unordered_map<uint, FrameEncoder *> encoders;
 
         std::vector<uint> types = reader.getType();
 
         for (uint type: types) {
+            //TODO: Create YAML dict of parameters to send to each encoder
             FrameEncoder *fe = new FrameEncoder(codec_parameters_file, reader.getFps());
             encoders[type] = fe;
         }
@@ -80,7 +83,6 @@ int main(int argc, char *argv[]) {
         socket.connect("tcp://" + host + ":" + std::string(argv[2]));
 
         while (1) {
-            // maintain constant FPS by ignoring processing time
             start_frame_time = currentTimeMs();
 
             if (sent_frames == 0) {
@@ -89,17 +91,6 @@ int main(int argc, char *argv[]) {
             }
 
             std::vector<FrameStruct> v;
-
-            /*
-             while(!frameEncoder.hasNextPacket()){
-                frameEncoder.addFrameStruct(reader.currentFrame().front());
-                if (!reader.hasNextFrame()) {
-                    reader.reset();
-                    stopAfter--;
-                }
-                reader.nextFrame();
-            }
-             */
 
             while (v.empty()) {
                 std::vector<FrameStruct> frameStruct = reader.currentFrame();

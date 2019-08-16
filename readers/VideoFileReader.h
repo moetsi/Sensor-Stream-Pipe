@@ -21,7 +21,7 @@ extern "C" {
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
 
-
+// TODO: add support to kinect video?
 class VideoFileReader {
 private:
 
