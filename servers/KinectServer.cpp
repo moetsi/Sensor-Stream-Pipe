@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
         //TODO: Read parameters from file
         k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_2160P;
+        k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
         k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
         k4a_fps_t recording_rate = K4A_FRAMES_PER_SECOND_30;
 
@@ -110,7 +110,8 @@ int main(int argc, char *argv[]) {
                 processing_time = last_time - start_frame_time;
 
                 std::cout << "Took " << diff_time << " ms; size " << message.size()
-                          << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps"
+                          << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps "
+                          << 8 * (sent_mbytes * reader.getFps() / (sent_frames * 1000)) << " Mbps expected "
                           << std::endl;
                 for (uint i = 0; i < v.size(); i++) {
                     FrameStruct f = v.at(i);

@@ -153,16 +153,17 @@ void KinectReader::nextFrame() {
             s.frameType = 0;
             s.frameId = currentFrameCounter.at(0)++;
             uint8_t *buffer = k4a_image_get_buffer(colorImage);
-            //size_t size = k4a_image_get_size(colorImage);
-            //s.frame.resize(size);
-            //memcpy(&s.frame[0], buffer, size);
-            //cv::Mat colorMat = cv::imdecode(s.frame, CV_LOAD_IMAGE_UNCHANGED);
-            // convert the raw buffer to cv::Mat
-            //TODO: change back to MJPG
-            int rows = k4a_image_get_height_pixels(colorImage);
-            int cols = k4a_image_get_width_pixels(colorImage);
-            cv::Mat colorMat(rows, cols, CV_8UC4, (void *) buffer, cv::Mat::AUTO_STEP);
-            imencode(".png", colorMat, s.frame);
+            size_t size = k4a_image_get_size(colorImage);
+
+            if (k4a_image_get_format(colorImage) == K4A_IMAGE_FORMAT_COLOR_MJPG) {
+                s.frame.resize(size);
+                memcpy(&s.frame[0], buffer, size);
+            } else {
+                int rows = k4a_image_get_height_pixels(colorImage);
+                int cols = k4a_image_get_width_pixels(colorImage);
+                cv::Mat colorMat(rows, cols, CV_8UC4, (void *) buffer, cv::Mat::AUTO_STEP);
+                imencode(".png", colorMat, s.frame);
+            }
 
             currFrame.push_back(s);
         }

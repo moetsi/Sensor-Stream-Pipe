@@ -108,7 +108,8 @@ int main(int argc, char *argv[]) {
 
 
                 std::cout << "Took " << diff_time << " ms; size " << message.size()
-                          << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps"
+                          << "; avg " << avg_fps << " fps; " << 8 * (sent_mbytes / diff_start_time) << " Mbps "
+                          << 8 * (sent_mbytes * reader.getFps() / (sent_frames * 1000)) << " Mbps expected "
                           << std::endl;
                 for (uint i = 0; i < v.size(); i++) {
                     FrameStruct f = v.at(i);
