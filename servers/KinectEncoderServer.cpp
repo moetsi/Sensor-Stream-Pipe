@@ -42,10 +42,11 @@ int main(int argc, char *argv[]) {
 
 
         //TODO: Read parameters from file; add new category
-        k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
+        k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
         //TODO: K4A_IMAGE_FORMAT_COLOR_BGRA32 -> K4A_IMAGE_FORMAT_COLOR_MJPG
         k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
-        k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+        //k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+        k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_OFF;
         k4a_fps_t recording_rate = K4A_FRAMES_PER_SECOND_30;
 
         k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
@@ -92,6 +93,7 @@ int main(int argc, char *argv[]) {
 
             std::vector<FrameStruct> v;
 
+            //TODO: document what is happening with the Encoders and Queue
             while (v.empty()) {
                 std::vector<FrameStruct> frameStruct = reader.currentFrame();
                 for (FrameStruct frameStruct: frameStruct) {
@@ -103,17 +105,14 @@ int main(int argc, char *argv[]) {
                         frameEncoder->nextPacket();
                     }
                 }
-
                 reader.nextFrame();
             }
 
             if (!v.empty()) {
-
                 std::string message = cerealStructToString(v);
 
                 zmq::message_t request(message.size());
                 memcpy(request.data(), message.c_str(), message.size());
-
                 socket.send(request);
                 sent_frames += 1;
                 sent_mbytes += message.size() / 1000.0;

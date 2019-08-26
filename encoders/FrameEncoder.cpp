@@ -100,7 +100,7 @@ void FrameEncoder::encode() {
 }
 
 
-void FrameEncoder::init(FrameStruct &fs) {
+void FrameEncoder::init(FrameStruct fs) {
     int ret;
 
     std::cout << codec_parameters << std::endl;
@@ -118,9 +118,23 @@ void FrameEncoder::init(FrameStruct &fs) {
     pCodecContext->bit_rate = codec_parameters["bitrate"].as<int>();
     av_opt_set(pCodecContext->priv_data, "preset", "b", codec_parameters["bitrate"].as<int>());
 
-    // get resolution from image file
-    std::vector<unsigned char> frameData = fs.frame;
-    cv::Mat frameOri = cv::imdecode(frameData, CV_LOAD_IMAGE_UNCHANGED);
+
+    /* get resolution from image file
+    std::stringstream ss;
+    ss << "/home/amourao/example" << totalCurrentFrameCounter << ".jpg";
+    std::ofstream hFile;
+    hFile.open(ss.str(), std::ios::out | std::ios::binary);
+    if (hFile.is_open())
+    {
+        hFile.write((char *)&fs.frame[0], static_cast<std::streamsize>(fs.frame.size()));
+        hFile.close();
+    }
+    cv::Mat frameOri = cv::imread(ss.str(), cv::IMREAD_UNCHANGED);
+     */
+    cv::Mat frameOri = cv::imdecode(fs.frame, CV_LOAD_IMAGE_UNCHANGED);
+
+    std::cout << frameOri.cols << " " << fs.frame.size() << " " << (int) fs.frame[100] << " "
+              << (int) fs.frame[fs.frame.size() - 100] << std::endl;
 
     pCodecContext->width = frameOri.cols;
     pCodecContext->height = frameOri.rows;

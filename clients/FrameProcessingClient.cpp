@@ -94,6 +94,8 @@ int main(int argc, char *argv[]) {
                 if (f.messageType == 0) {
                     img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
                     imgChanged = true;
+                    std::cout << img.cols << " " << f.frame.size() << " " << (int) f.frame[100] << " "
+                              << (int) f.frame[f.frame.size() - 100] << std::endl;
                 } else if (f.messageType == 1) {
                     if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) == pCodecs.end()) {
                         prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);

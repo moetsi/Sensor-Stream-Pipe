@@ -11,9 +11,10 @@
 
 #include <cereal/archives/binary.hpp>
 
+#include <opencv2/opencv.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
-#include <cv.hpp>
+
 
 #include <yaml-cpp/yaml.h>
 
@@ -52,7 +53,7 @@ private:
 
     bool ready;
 
-    void init(FrameStruct &fs);
+    void init(FrameStruct fs);
 
     void encode();
 

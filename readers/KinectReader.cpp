@@ -140,66 +140,65 @@ void KinectReader::nextFrame() {
             std::cerr << "Runtime error: k4a_device_get_capture() returned " << result << std::endl;
             break;
         }
-        k4a_image_t colorImage, depthImage, irImage;
-        colorImage = k4a_capture_get_color_image(capture);
-        depthImage = k4a_capture_get_depth_image(capture);
-        irImage = k4a_capture_get_ir_image(capture);
 
-        //std::cout << k4a_image_get_format(colorImage) << " " << k4a_image_get_format(depthImage) << " " << k4a_image_get_format(irImage) << " " << std::endl;
+        if (device_config->color_resolution != K4A_COLOR_RESOLUTION_OFF) {
+            k4a_image_t colorImage = k4a_capture_get_color_image(capture);
+            if (k4a_image_get_format(colorImage) != 6) {
+                FrameStruct s = frameTemplate;
+                s.sensorId = 0;
+                s.frameType = 0;
+                s.frameId = currentFrameCounter.at(0)++;
 
-        if (k4a_image_get_format(colorImage) != 6) {
-            FrameStruct s = frameTemplate;
-            s.sensorId = 0;
-            s.frameType = 0;
-            s.frameId = currentFrameCounter.at(0)++;
-            uint8_t *buffer = k4a_image_get_buffer(colorImage);
-            size_t size = k4a_image_get_size(colorImage);
+                uint8_t *buffer = k4a_image_get_buffer(colorImage);
+                size_t size = k4a_image_get_size(colorImage);
 
-            if (k4a_image_get_format(colorImage) == K4A_IMAGE_FORMAT_COLOR_MJPG) {
-                s.frame.resize(size);
-                memcpy(&s.frame[0], buffer, size);
-            } else {
-                int rows = k4a_image_get_height_pixels(colorImage);
-                int cols = k4a_image_get_width_pixels(colorImage);
-                cv::Mat colorMat(rows, cols, CV_8UC4, (void *) buffer, cv::Mat::AUTO_STEP);
-                imencode(".png", colorMat, s.frame);
+
+                if (k4a_image_get_format(colorImage) == K4A_IMAGE_FORMAT_COLOR_MJPG) {
+                    s.frame = std::vector<uchar>(buffer, buffer + size);
+                } else {
+                    int rows = k4a_image_get_height_pixels(colorImage);
+                    int cols = k4a_image_get_width_pixels(colorImage);
+                    cv::Mat colorMat(rows, cols, CV_8UC4, (void *) buffer, cv::Mat::AUTO_STEP);
+                    imencode(".png", colorMat, s.frame);
+                }
+                currFrame.push_back(s);
             }
-
-            currFrame.push_back(s);
+            k4a_image_release(colorImage);
         }
 
-        if (k4a_image_get_format(depthImage) != 6) {
-            FrameStruct s = frameTemplate;
-            s.sensorId = 1;
-            s.frameType = 1;
-            s.frameId = currentFrameCounter.at(1)++;
-            uint8_t *buffer = k4a_image_get_buffer(depthImage);
-            // convert the raw buffer to cv::Mat
-            int rows = k4a_image_get_height_pixels(depthImage);
-            int cols = k4a_image_get_width_pixels(depthImage);
-            cv::Mat depthMat(rows, cols, CV_16UC1, (void *) buffer, cv::Mat::AUTO_STEP);
-            imencode(".png", depthMat, s.frame);
-            currFrame.push_back(s);
+        if (device_config->depth_mode != K4A_DEPTH_MODE_OFF) {
+
+            k4a_image_t depthImage = k4a_capture_get_depth_image(capture);
+            k4a_image_t irImage = k4a_capture_get_ir_image(capture);
+            if (k4a_image_get_format(depthImage) != 6) {
+                FrameStruct s = frameTemplate;
+                s.sensorId = 1;
+                s.frameType = 1;
+                s.frameId = currentFrameCounter.at(1)++;
+                uint8_t *buffer = k4a_image_get_buffer(depthImage);
+                // convert the raw buffer to cv::Mat
+                int rows = k4a_image_get_height_pixels(depthImage);
+                int cols = k4a_image_get_width_pixels(depthImage);
+                cv::Mat depthMat(rows, cols, CV_16UC1, (void *) buffer, cv::Mat::AUTO_STEP);
+                imencode(".png", depthMat, s.frame);
+                currFrame.push_back(s);
+            }
+            if (k4a_image_get_format(irImage) != 6) {
+                FrameStruct s = frameTemplate;
+                s.sensorId = 2;
+                s.frameType = 2;
+                s.frameId = currentFrameCounter.at(2)++;
+                uint8_t *buffer = k4a_image_get_buffer(irImage);
+                // convert the raw buffer to cv::Mat
+                int rows = k4a_image_get_height_pixels(irImage);
+                int cols = k4a_image_get_width_pixels(irImage);
+                cv::Mat irMat(rows, cols, CV_16UC1, (void *) buffer, cv::Mat::AUTO_STEP);
+                imencode(".png", irMat, s.frame);
+                currFrame.push_back(s);
+            }
+            k4a_image_release(depthImage);
+            k4a_image_release(irImage);
         }
-
-        if (k4a_image_get_format(irImage) != 6) {
-            FrameStruct s = frameTemplate;
-            s.sensorId = 2;
-            s.frameType = 2;
-            s.frameId = currentFrameCounter.at(2)++;
-            uint8_t *buffer = k4a_image_get_buffer(irImage);
-            // convert the raw buffer to cv::Mat
-            int rows = k4a_image_get_height_pixels(irImage);
-            int cols = k4a_image_get_width_pixels(irImage);
-            cv::Mat irMat(rows, cols, CV_16UC1, (void *) buffer, cv::Mat::AUTO_STEP);
-            imencode(".png", irMat, s.frame);
-            currFrame.push_back(s);
-        }
-
-
-        k4a_image_release(colorImage);
-        k4a_image_release(depthImage);
-        k4a_image_release(irImage);
         k4a_capture_release(capture);
     } while (result == K4A_WAIT_RESULT_FAILED);
 
@@ -229,8 +228,13 @@ FrameStruct KinectReader::currentFrame(uint type) {
 }
 
 uint KinectReader::getFps() {
-    //TODO: get from config
-    return 30;
+    if (device_config->camera_fps == K4A_FRAMES_PER_SECOND_5)
+        return 5;
+    if (device_config->camera_fps == K4A_FRAMES_PER_SECOND_15)
+        return 15;
+    if (device_config->camera_fps == K4A_FRAMES_PER_SECOND_30)
+        return 30;
+    return -1;
 }
 
 
