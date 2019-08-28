@@ -28,14 +28,21 @@ add_executable(client clients/FrameProcessingClient.cpp utils/VideoUtils.cpp ${S
 add_executable(frame_server servers/FrameServer.cpp ${SOURCE_FILES})
 add_executable(video_file_server servers/VideoFileServer.cpp readers/VideoFileReader.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
 add_executable(kinect_server servers/KinectServer.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
-add_executable(kinect_encoder_server servers/KinectEncoderServer.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
-add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
+add_executable(kinect_encoder_server servers/KinectEncoderServer.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp ${SOURCE_FILES} utils/ImageDecoder.cpp utils/ImageDecoder.h)
+add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp ${SOURCE_FILES} utils/ImageDecoder.cpp utils/ImageDecoder.h)
 add_executable(video_encoder_test utils/VideoEncodingTester.cpp encoders/FrameEncoder.cpp utils/VideoEncodingTester.cpp utils/VideoUtils.cpp ${SOURCE_FILES} utils/SimilarityMeasures.cpp utils/SimilarityMeasures.h)
+
+add_executable(image_decoder utils/ImageDecoder.cpp ${SOURCE_FILES})
 
 target_link_libraries(client swscale)
 target_link_libraries(client zmq)
 target_link_libraries(client ${FFMPEG_LIBRARIES})
 target_link_libraries(client ${OpenCV_LIBS})
+
+target_link_libraries(image_decoder swscale)
+target_link_libraries(image_decoder zmq)
+target_link_libraries(image_decoder ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(image_decoder ${FFMPEG_LIBRARIES})
 
 target_link_libraries(frame_server zmq)
 target_link_libraries(frame_server ${CMAKE_THREAD_LIBS_INIT})

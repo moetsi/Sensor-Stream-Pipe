@@ -101,6 +101,42 @@ std::vector<ushort> unique(const cv::Mat &input, bool sort) {
     return out;
 }
 
+
+void prepareGrayDepthFrame(AVFrame *pFrameO, AVFrame *pFrame) {
+    for (uint y = 0; y < pFrame->height; y++) {
+        for (uint x = 0; x < pFrame->width; x++) {
+            ushort value = 0;
+            //ushort value = frame.at<ushort>(y, x);
+            uint upper = value >> 8;
+            uint lower = value & 0xff;
+            pFrame->data[0][y * pFrame->linesize[0] + x * 2] = lower;
+            pFrame->data[0][y * pFrame->linesize[0] + x * 2 + 1] = upper;
+        }
+    }
+}
+
+
+void prepareDepthFrame(AVFrame *pFrameO, AVFrame *pFrame) {
+    for (uint y = 0; y < pFrame->height; y++) {
+        for (uint x = 0; x < pFrame->width; x++) {
+            //ushort value = frame.at<ushort>(y, x);
+            uint lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
+            uint upper = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2 + 1];
+            ushort value = upper << 8 | lower;
+            pFrame->data[0][y * pFrame->linesize[0] + x] = value;
+        }
+    }
+
+    for (uint y = 0; y < pFrame->height / 2; y++) {
+        for (uint x = 0; x < pFrame->width / 2; x++) {
+            pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
+            pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
+        }
+    }
+}
+
+
+
 void prepareGrayDepthFrame(cv::Mat &frame, AVFrame *pFrame) {
     for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {

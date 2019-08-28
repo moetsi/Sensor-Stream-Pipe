@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
     //avformat_free_context(pFormatContext);
     //av_packet_free(&pPacket);
     //av_frame_free(&pFrame);
-    //avcodec_free_context(&pCodecContext);
+    //avcodec_free_context(&pCodecContextEncoder);
 
     return 0;
 }

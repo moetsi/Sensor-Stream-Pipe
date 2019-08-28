@@ -12,8 +12,6 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/base_class.hpp>
 #include <cereal/archives/binary.hpp>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/highgui.hpp>
 
 
 extern "C" {

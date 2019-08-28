@@ -53,6 +53,12 @@ void prepareDepthFrame(cv::Mat &frame, AVFrame *pFrame);
 
 void prepareColorFrame(cv::Mat &frame, AVFrame *pFrame);
 
+void prepareGrayDepthFrame(AVFrame *pFrameO, AVFrame *pFrame);
+
+void prepareDepthFrame(AVFrame *pFrameO, AVFrame *pFrame);
+
+
+
 template<typename T>
 void minMaxFilter(cv::Mat &inmat, cv::Mat &outmat, double min, double max) {
     inmat.copyTo(outmat);

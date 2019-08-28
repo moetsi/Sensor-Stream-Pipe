@@ -11,11 +11,6 @@
 
 #include <cereal/archives/binary.hpp>
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/highgui.hpp>
-
-
 #include <yaml-cpp/yaml.h>
 
 extern "C" {
@@ -30,24 +25,30 @@ extern "C" {
 
 #include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
-#include "../utils/VideoUtils.h"
+#include "../utils/ImageDecoder.h"
 
 class FrameEncoder {
 private:
 
     unsigned int totalCurrentFrameCounter;
 
-    AVCodecParameters *pCodecParameters;
-    AVCodecContext *pCodecContext;
-    AVCodec *pCodec;
+    AVCodecParameters *pCodecParametersDecoder;
+    AVCodecContext *pCodecContextDecoder;
+    AVCodec *pCodecDecoder;
+
+    AVCodecParameters *pCodecParametersEncoder;
+    AVCodecContext *pCodecContextEncoder;
+    AVCodec *pCodecEncoder;
 
     AVFrame *pFrame;
     AVPacket *pPacket;
 
+    struct SwsContext *sws_ctx;
 
-    cv::Mat frameOri;
 
     YAML::Node codec_parameters;
+
+    ImageDecoder id;
 
     uint fps;
 
@@ -91,3 +92,9 @@ public:
 
 
 };
+
+static int readFunction(void *opaque, uint8_t *buf, int buf_size) {
+    auto &me = *reinterpret_cast<std::istream *>(opaque);
+    me.read(reinterpret_cast<char *>(buf), buf_size);
+    return me.gcount();
+}

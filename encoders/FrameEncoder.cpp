@@ -3,6 +3,7 @@
 //
 
 #include "FrameEncoder.h"
+#include "../utils/VideoUtils.h"
 
 FrameEncoder::FrameEncoder(std::string codec_parameters_file, uint _fps) {
     codec_parameters = YAML::LoadFile(codec_parameters_file);
@@ -20,7 +21,7 @@ std::vector<unsigned char> FrameEncoder::currentFrameBytes(AVPacket &packet) {
 FrameEncoder::~FrameEncoder() {
     av_packet_free(&pPacket);
     av_frame_free(&pFrame);
-    avcodec_free_context(&pCodecContext);
+    avcodec_free_context(&pCodecContextEncoder);
 }
 
 void FrameEncoder::nextPacket() {
@@ -33,6 +34,15 @@ void FrameEncoder::nextPacket() {
 void FrameEncoder::prepareFrame() {
 
     std::vector<unsigned char> frameData = buffer.front().frame;
+
+    AVFrame *pFrameO = av_frame_alloc();
+    id.imageBufferToAVFrame(frameData, pFrameO);
+
+    sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data,
+              pFrameO->linesize, 0, pFrameO->height, pFrame->data, pFrame->linesize);
+
+    av_frame_free(&pFrameO);
+    /*
     cv::Mat frameOri = cv::imdecode(frameData, CV_LOAD_IMAGE_UNCHANGED);
 
     int ret = av_frame_make_writable(pFrame);
@@ -43,20 +53,8 @@ void FrameEncoder::prepareFrame() {
     // yuv420p 640 320 320 format 0
     // yuv422p 640 320 320 format 4
 
-    if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
-        cv::Mat frameOriSquached;
-        //minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE);
-        //frameOriSquached = frameOriSquached * 255;
-        //cv::Mat frameOriSquachedF = getFloat(frameOriSquached);
-        prepareGrayDepthFrame(frameOri, pFrame);
-    } else if (frameOri.channels() == 1) {
-        cv::Mat frameOriF = getFloat(frameOri);
-        prepareDepthFrame(frameOriF, pFrame);
-    } else {
-        cv::Mat frameYUV;
-        cv::cvtColor(frameOri, frameYUV, cv::COLOR_BGR2YUV);
-        prepareColorFrame(frameYUV, pFrame);
-    }
+
+     */
 }
 
 void FrameEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt) {
@@ -95,7 +93,7 @@ void FrameEncoder::encode() {
 
     pFrame->pts = totalCurrentFrameCounter++;
 
-    encodeA(pCodecContext, pFrame, pPacket);
+    encodeA(pCodecContextEncoder, pFrame, pPacket);
 
 }
 
@@ -105,18 +103,18 @@ void FrameEncoder::init(FrameStruct fs) {
 
     std::cout << codec_parameters << std::endl;
 
-    pCodec = avcodec_find_encoder_by_name(codec_parameters["codec_name"].as<std::string>().c_str());
-    pCodecContext = avcodec_alloc_context3(pCodec);
+    pCodecEncoder = avcodec_find_encoder_by_name(codec_parameters["codec_name"].as<std::string>().c_str());
+    pCodecContextEncoder = avcodec_alloc_context3(pCodecEncoder);
     pPacket = av_packet_alloc();
-    pCodecParameters = avcodec_parameters_alloc();
+    pCodecParametersEncoder = avcodec_parameters_alloc();
 
 
     // http://git.videolan.org/?p=ffmpeg.git;a=blob;f=libavcodec/options_table.h;hb=HEAD
     // https://stackoverflow.com/questions/3553003/how-to-encode-h-264-with-libavcodec-x264
     // TODO: adapt to use variable bitrate and check the links above for more parameters: bitrate versus crf
     // check what other parameters are required for different codecs
-    pCodecContext->bit_rate = codec_parameters["bitrate"].as<int>();
-    av_opt_set(pCodecContext->priv_data, "preset", "b", codec_parameters["bitrate"].as<int>());
+    pCodecContextEncoder->bit_rate = codec_parameters["bitrate"].as<int>();
+    av_opt_set(pCodecContextEncoder->priv_data, "preset", "b", codec_parameters["bitrate"].as<int>());
 
 
     /* get resolution from image file
@@ -131,17 +129,16 @@ void FrameEncoder::init(FrameStruct fs) {
     }
     cv::Mat frameOri = cv::imread(ss.str(), cv::IMREAD_UNCHANGED);
      */
-    cv::Mat frameOri = cv::imdecode(fs.frame, CV_LOAD_IMAGE_UNCHANGED);
+    AVFrame *pFrameO = av_frame_alloc();
+    id.imageBufferToAVFrame(fs.frame, pFrameO);
 
-    std::cout << frameOri.cols << " " << fs.frame.size() << " " << (int) fs.frame[100] << " "
-              << (int) fs.frame[fs.frame.size() - 100] << std::endl;
+    pCodecContextEncoder->width = pFrameO->width;
+    pCodecContextEncoder->height = pFrameO->height;
 
-    pCodecContext->width = frameOri.cols;
-    pCodecContext->height = frameOri.rows;
 
     /* frames per second */
-    pCodecContext->time_base = (AVRational) {1, (int) fps};
-    pCodecContext->framerate = (AVRational) {(int) fps, 1};
+    pCodecContextEncoder->time_base = (AVRational) {1, (int) fps};
+    pCodecContextEncoder->framerate = (AVRational) {(int) fps, 1};
 
     /* emit one intra frame every ten frames
      * check frame pict_type before passing frame
@@ -149,9 +146,11 @@ void FrameEncoder::init(FrameStruct fs) {
      * then gop_size is ignored and the output of encoder
      * will always be I frame irrespective to gop_size
      */
+
+    //TDOO: check delay: https://ffmpeg.org/pipermail/libav-user/2014-December/007672.html
     //TODO: check what other parameters are required for different codecs
-    pCodecContext->gop_size = codec_parameters["gop_size"].as<int>(); // 10
-    pCodecContext->max_b_frames = codec_parameters["max_b_frames"].as<int>(); // 1
+    pCodecContextEncoder->gop_size = codec_parameters["gop_size"].as<int>(); // 10
+    pCodecContextEncoder->max_b_frames = codec_parameters["max_b_frames"].as<int>(); // 1
 
     // fmpeg -h encoder=hevc
     // libx264:                 yuv420p yuvj420p yuv422p yuvj422p yuv444p yuvj444p nv12 nv16 nv21
@@ -160,31 +159,31 @@ void FrameEncoder::init(FrameStruct fs) {
     // hevc_nvenc (gpu x265):   yuv420p nv12 p010le yuv444p yuv444p16le bgr0 rgb0 cuda nv12 p010le
     // nvenc_h264 (gpu x264):   yuv420p nv12 p010le yuv444p yuv444p16le bgr0 rgb0 cuda
 
-    pCodecContext->pix_fmt = av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str());
+    pCodecContextEncoder->pix_fmt = av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str());
     //TODO: B frames and the GPU
-    av_opt_set(pCodecContext->priv_data, "tune", "zerolatency", 0);
-    av_opt_set(pCodecContext->priv_data, "rcParams", "zeroReorderDelay", 1);
+    av_opt_set(pCodecContextEncoder->priv_data, "tune", "zerolatency", 0);
+    av_opt_set(pCodecContextEncoder->priv_data, "rcParams", "zeroReorderDelay", 1);
 
-    pCodecParameters->codec_type = AVMEDIA_TYPE_VIDEO;
+    pCodecParametersEncoder->codec_type = AVMEDIA_TYPE_VIDEO;
 
-    pCodecParameters->codec_id = pCodec->id;
-    pCodecParameters->codec_tag = pCodecContext->codec_tag;
-    pCodecParameters->bit_rate = pCodecContext->bit_rate;
-    pCodecParameters->bits_per_coded_sample = pCodecContext->bits_per_coded_sample;
-    pCodecParameters->bits_per_raw_sample = pCodecContext->bits_per_raw_sample;
-    pCodecParameters->profile = pCodecContext->level;
-    pCodecParameters->width = pCodecContext->width;
-    pCodecParameters->height = pCodecContext->height;
+    pCodecParametersEncoder->codec_id = pCodecEncoder->id;
+    pCodecParametersEncoder->codec_tag = pCodecContextEncoder->codec_tag;
+    pCodecParametersEncoder->bit_rate = pCodecContextEncoder->bit_rate;
+    pCodecParametersEncoder->bits_per_coded_sample = pCodecContextEncoder->bits_per_coded_sample;
+    pCodecParametersEncoder->bits_per_raw_sample = pCodecContextEncoder->bits_per_raw_sample;
+    pCodecParametersEncoder->profile = pCodecContextEncoder->level;
+    pCodecParametersEncoder->width = pCodecContextEncoder->width;
+    pCodecParametersEncoder->height = pCodecContextEncoder->height;
 
-    pCodecParameters->color_space = pCodecContext->colorspace;
-    pCodecParameters->sample_rate = pCodecContext->sample_rate;
+    pCodecParametersEncoder->color_space = pCodecContextEncoder->colorspace;
+    pCodecParametersEncoder->sample_rate = pCodecContextEncoder->sample_rate;
 
     //TODO: does this parameter really matter?
-    if (pCodec->id == AV_CODEC_ID_H264 || pCodec->id == AV_CODEC_ID_H265)
-        av_opt_set(pCodecContext->priv_data, "preset", "ultrafast", 0);
+    if (pCodecEncoder->id == AV_CODEC_ID_H264 || pCodecEncoder->id == AV_CODEC_ID_H265)
+        av_opt_set(pCodecContextEncoder->priv_data, "preset", "ultrafast", 0);
 
 
-    ret = avcodec_open2(pCodecContext, pCodec, NULL);
+    ret = avcodec_open2(pCodecContextEncoder, pCodecEncoder, NULL);
     if (ret < 0) {
         std::cerr << "Could not open codec: " << av_err2str(ret) << std::endl;
         exit(1);
@@ -196,12 +195,13 @@ void FrameEncoder::init(FrameStruct fs) {
         exit(1);
     }
 
-    pFrame->format = pCodecContext->pix_fmt;
-    pFrame->width = pCodecContext->width;
-    pFrame->height = pCodecContext->height;
+    pFrame->format = pCodecContextEncoder->pix_fmt;
+    pFrame->width = pCodecContextEncoder->width;
+    pFrame->height = pCodecContextEncoder->height;
 
     pFrame->pts = 0;
     pFrame->pkt_dts = 0;
+
 
     ret = av_frame_get_buffer(pFrame, 30);
     if (ret < 0) {
@@ -209,17 +209,25 @@ void FrameEncoder::init(FrameStruct fs) {
         exit(1);
     }
 
+    sws_ctx = sws_getContext(pFrameO->width, pFrameO->height, (AVPixelFormat) pFrameO->format,
+                             pFrame->width, pFrame->height, (AVPixelFormat) pFrame->format,
+                             SWS_BILINEAR, NULL, NULL, NULL);
+
+    av_frame_free(&pFrameO);
+
+
+
 }
 
 CodecParamsStruct FrameEncoder::getCodecParamsStruct() {
-    void *sEPointer = pCodecParameters->extradata;
-    size_t sESize = pCodecParameters->extradata_size;
-    size_t sSize = sizeof(*pCodecParameters);
+    void *sEPointer = pCodecParametersEncoder->extradata;
+    size_t sESize = pCodecParametersEncoder->extradata_size;
+    size_t sSize = sizeof(*pCodecParametersEncoder);
 
     std::vector<unsigned char> e(sSize);
     std::vector<unsigned char> ed(sESize);
 
-    memcpy(&e[0], pCodecParameters, sSize);
+    memcpy(&e[0], pCodecParametersEncoder, sSize);
     memcpy(&ed[0], sEPointer, sESize);
 
     CodecParamsStruct cParamsStruct(e, ed);
