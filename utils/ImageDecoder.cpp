@@ -109,7 +109,7 @@ void ImageDecoder::init(std::vector<unsigned char> &buffer) {
         exit(1);
     }
 
-    av_dump_format(pFormatContext, 0, "nofile", 0);
+    //av_dump_format(pFormatContext, 0, "nofile", 0);
 
 
     pCodecParameters = NULL;

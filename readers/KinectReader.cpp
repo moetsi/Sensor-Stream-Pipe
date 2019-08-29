@@ -130,6 +130,9 @@ KinectReader::~KinectReader() {
 }
 
 void KinectReader::nextFrame() {
+    for (FrameStruct fs: currFrame) {
+        fs.frame.clear();
+    }
     currFrame.clear();
 
     do {
