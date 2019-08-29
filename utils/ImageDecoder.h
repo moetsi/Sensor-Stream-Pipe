@@ -29,6 +29,9 @@ private:
     AVCodec *pCodec;
     AVPacket *pPacket;
 
+    uint8_t *avio_ctx_buffer = NULL;
+    size_t avio_ctx_buffer_size = 4096;
+
     bool libAVReady;
 
     void init(std::vector<unsigned char> &buffer);

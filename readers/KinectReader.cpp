@@ -13,6 +13,7 @@ KinectReader::KinectReader(uint8_t _device_index,
     device_index = _device_index;
     device_config = _device_config;
     absoluteExposureValue = _absoluteExposureValue;
+    record_imu = false;
 
     streamId = randomString(16);
 

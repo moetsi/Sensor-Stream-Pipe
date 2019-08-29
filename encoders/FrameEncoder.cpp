@@ -25,10 +25,18 @@ FrameEncoder::~FrameEncoder() {
 }
 
 void FrameEncoder::nextPacket() {
-    if (!buffer.empty())
+    if (!buffer.empty()) {
+        FrameStruct fs = buffer.front();
+        fs.frame.clear();
         buffer.pop();
-    if (!pBuffer.empty())
+    }
+    if (!pBuffer.empty()) {
+        AVPacket p = pBuffer.front();
+        delete[] p.data;
         pBuffer.pop();
+
+
+    }
 }
 
 void FrameEncoder::prepareFrame() {

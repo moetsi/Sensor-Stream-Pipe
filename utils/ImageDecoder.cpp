@@ -81,8 +81,6 @@ void ImageDecoder::init(std::vector<unsigned char> &buffer) {
     if (!(pFormatContext = avformat_alloc_context())) {
         ret = AVERROR(ENOMEM);
     }
-    uint8_t *avio_ctx_buffer = NULL;
-    size_t avio_ctx_buffer_size = 4096;
 
     avio_ctx_buffer = (unsigned char *) av_malloc(avio_ctx_buffer_size);
     if (!avio_ctx_buffer) {
@@ -183,9 +181,16 @@ void ImageDecoder::imageBufferToAVFrame(std::vector<unsigned char> &buffer, AVFr
 
 
     buffer.clear();
-
+    av_packet_free(&pPacket);
     avcodec_free_context(&pCodecContext);
-    avformat_free_context(pFormatContext);
+    //avformat_free_context(pFormatContext);
+
+    avformat_close_input(&pFormatContext);
+    if (avio_ctx) {
+        av_freep(&avio_ctx->buffer);
+        av_freep(&avio_ctx);
+    }
+    buffer.clear();
 }
 
 /*
