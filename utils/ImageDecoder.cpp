@@ -172,6 +172,7 @@ int ImageDecoder::getHeigth() {
 // http://guru-coder.blogspot.com/2014/01/in-memory-jpeg-decode-using-ffmpeg.html
 void ImageDecoder::imageBufferToAVFrame(std::vector<unsigned char> &buffer, AVFrame *pFrame) {
 
+    //TODO: do not create a decoder for each single frame
     init(buffer);
 
     int response = 0;

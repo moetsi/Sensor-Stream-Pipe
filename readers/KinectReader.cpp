@@ -147,7 +147,7 @@ void KinectReader::nextFrame() {
 
         if (device_config->color_resolution != K4A_COLOR_RESOLUTION_OFF) {
             k4a_image_t colorImage = k4a_capture_get_color_image(capture);
-            if (k4a_image_get_format(colorImage) != 6) {
+            if (colorImage && k4a_image_get_format(colorImage) != 6) {
                 FrameStruct s = frameTemplate;
                 s.sensorId = 0;
                 s.frameType = 0;
@@ -174,7 +174,7 @@ void KinectReader::nextFrame() {
 
             k4a_image_t depthImage = k4a_capture_get_depth_image(capture);
             k4a_image_t irImage = k4a_capture_get_ir_image(capture);
-            if (k4a_image_get_format(depthImage) != 6) {
+            if (depthImage && k4a_image_get_format(depthImage) != 6) {
                 FrameStruct s = frameTemplate;
                 s.sensorId = 1;
                 s.frameType = 1;
@@ -183,11 +183,12 @@ void KinectReader::nextFrame() {
                 // convert the raw buffer to cv::Mat
                 int rows = k4a_image_get_height_pixels(depthImage);
                 int cols = k4a_image_get_width_pixels(depthImage);
+                //TODO: allow sending raw slab of memory instead png
                 cv::Mat depthMat(rows, cols, CV_16UC1, (void *) buffer, cv::Mat::AUTO_STEP);
                 imencode(".png", depthMat, s.frame);
                 currFrame.push_back(s);
             }
-            if (k4a_image_get_format(irImage) != 6) {
+            if (irImage && k4a_image_get_format(irImage) != 6) {
                 FrameStruct s = frameTemplate;
                 s.sensorId = 2;
                 s.frameType = 2;
@@ -196,6 +197,7 @@ void KinectReader::nextFrame() {
                 // convert the raw buffer to cv::Mat
                 int rows = k4a_image_get_height_pixels(irImage);
                 int cols = k4a_image_get_width_pixels(irImage);
+                //TODO: allow sending raw slab of memory instead png
                 cv::Mat irMat(rows, cols, CV_16UC1, (void *) buffer, cv::Mat::AUTO_STEP);
                 imencode(".png", irMat, s.frame);
                 currFrame.push_back(s);

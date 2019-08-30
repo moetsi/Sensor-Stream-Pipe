@@ -45,7 +45,6 @@ void FrameEncoder::prepareFrame() {
     id.imageBufferToAVFrame(frameData, pFrameO);
 
 
-    // YUV to YUV
 
 
     // PNG GRAY16 TO gray12le
@@ -64,11 +63,13 @@ void FrameEncoder::prepareFrame() {
 
         // PNG GRAY16 TO YUV
     else if (pFrameO->format == AV_PIX_FMT_GRAY16BE) {
+        //TODO: remove redundant call
         sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data,
                   pFrameO->linesize, 0, pFrameO->height, pFrame->data, pFrame->linesize);
 
         int i = 0;
         float coeff = (float) MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
+        //TODO: replace with straight mem copy
         for (uint y = 0; y < pFrameO->height; y++) {
             for (uint x = 0; x < pFrameO->width; x++) {
                 uint lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
@@ -79,7 +80,7 @@ void FrameEncoder::prepareFrame() {
             }
         }
 
-        //TODO: encode the missing bits in the other channels
+        //TODO: encode the missing bits in the other channels (see the research papers)
         /*
         for (uint y = 0; y < pFrame->height; y++) {
             for (uint x = 0; x < pFrame->width; x++) {
@@ -88,6 +89,7 @@ void FrameEncoder::prepareFrame() {
             }
         }*/
     } else {
+        // YUV to YUV
         sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data,
                   pFrameO->linesize, 0, pFrameO->height, pFrame->data, pFrame->linesize);
     }
