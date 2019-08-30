@@ -1,6 +1,6 @@
 ---
-codec_name: "hevc_nvenc"
+codec_name: "libx265"
 bitrate: 1960000
 gop_size: 10
-max_b_frames: 1
-pix_fmt: "gray12le"
+max_b_frames: 0
+pix_fmt: "yuv420p"

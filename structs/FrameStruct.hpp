@@ -88,7 +88,7 @@ struct FrameStruct {
 
     template<class Archive>
     void serialize(Archive &ar) {
-        ar(messageType, streamId, frame, codec_data, sceneDesc, sensorId, deviceId, frameId,
+        ar(messageType, frameType, streamId, frame, codec_data, sceneDesc, sensorId, deviceId, frameId,
            timestamps);
     }
 };

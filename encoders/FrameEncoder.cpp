@@ -26,8 +26,6 @@ FrameEncoder::~FrameEncoder() {
 
 void FrameEncoder::nextPacket() {
     if (!buffer.empty()) {
-        FrameStruct fs = buffer.front();
-        fs.frame.clear();
         buffer.pop();
     }
     if (!pBuffer.empty()) {
@@ -46,8 +44,55 @@ void FrameEncoder::prepareFrame() {
     AVFrame *pFrameO = av_frame_alloc();
     id.imageBufferToAVFrame(frameData, pFrameO);
 
-    sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data,
-              pFrameO->linesize, 0, pFrameO->height, pFrame->data, pFrame->linesize);
+
+    // YUV to YUV
+
+
+    // PNG GRAY16 TO gray12le
+    if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
+        int i = 0;
+        for (uint y = 0; y < pFrameO->height; y++) {
+            for (uint x = 0; x < pFrameO->width; x++) {
+                uint lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
+                uint upper = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2 + 1];
+
+                pFrame->data[0][i++] = upper;
+                pFrame->data[0][i++] = lower;
+            }
+        }
+    }
+
+        // PNG GRAY16 TO YUV
+    else if (pFrameO->format == AV_PIX_FMT_GRAY16BE) {
+        sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data,
+                  pFrameO->linesize, 0, pFrameO->height, pFrame->data, pFrame->linesize);
+
+        int i = 0;
+        float coeff = (float) MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
+        for (uint y = 0; y < pFrameO->height; y++) {
+            for (uint x = 0; x < pFrameO->width; x++) {
+                uint lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
+                uint upper = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2 + 1];
+                ushort value = lower << 8 | upper;
+
+                pFrame->data[0][i++] = std::min((ushort) (value * coeff), (ushort) 255);
+            }
+        }
+
+        //TODO: encode the missing bits in the other channels
+        /*
+        for (uint y = 0; y < pFrame->height; y++) {
+            for (uint x = 0; x < pFrame->width; x++) {
+                pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
+                pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
+            }
+        }*/
+    } else {
+        sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data,
+                  pFrameO->linesize, 0, pFrameO->height, pFrame->data, pFrame->linesize);
+    }
+
+    std::cout << std::endl;
 
     av_frame_free(&pFrameO);
     /*

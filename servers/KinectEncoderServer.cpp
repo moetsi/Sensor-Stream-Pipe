@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
 
         //TODO: Read parameters from file; add new category
         k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        //TODO: K4A_IMAGE_FORMAT_COLOR_BGRA32 -> K4A_IMAGE_FORMAT_COLOR_MJPG
         k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
         k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
         //k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_OFF;

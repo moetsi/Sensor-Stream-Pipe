@@ -84,6 +84,7 @@ FrameStruct FrameReader::createFrameStruct(unsigned int frameId) {
     frame.sceneDesc = sceneDesc;
     frame.deviceId = deviceId;
     frame.sensorId = sensorId;
+    frame.frameType = frameType;
 
     frame.frameId = readFrameId;
 

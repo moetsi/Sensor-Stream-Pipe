@@ -117,7 +117,6 @@ int main(int argc, char *argv[]) {
                         // Return decoded output data (into a frame) from a decoder
                         response = avcodec_receive_frame(pCodecContext, pFrame);
                         if (response >= 0) {
-                            // TODO: add fake color depth map as with Azure viewer
                             if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
                                 avframeToMatGray(pFrame, img);
                             } else {
@@ -137,20 +136,24 @@ int main(int argc, char *argv[]) {
 
                 if (imgChanged && !img.empty()) {
 
-                    double min, max;
-                    cv::minMaxIdx(img, &min, &max);
 
-                    std::cout << f.sensorId << " " << min << " " << max << std::endl;
-
-                    if (f.sensorId == 1) {
+                    //Manipulate image to show as a color map
+                    if (f.frameType == 1) {
+                        if (img.type() == CV_16U) {
+                            //Compress images to show up on a 255 valued color map
+                            img *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
+                        }
                         cv::Mat imgOut;
-                        img *= (256 / 4096.0);
+
                         img.convertTo(imgOut, CV_8U);
                         cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
                     }
-
-
-
+                    if (f.frameType == 2) {
+                        double min, max;
+                        cv::minMaxIdx(img, &min, &max);
+                        img *= (MAX_DEPTH_VALUE_8_BITS / (float) max);
+                        img.convertTo(img, CV_8U);
+                    }
 
                     cv::namedWindow(f.streamId + std::to_string(f.sensorId));
                     cv::imshow(f.streamId + std::to_string(f.sensorId), img);

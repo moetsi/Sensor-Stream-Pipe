@@ -18,6 +18,7 @@ extern "C" {
 }
 
 
+#include <cv.hpp>
 #include "../encoders/FrameEncoder.h"
 #include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
@@ -121,37 +122,45 @@ int main(int argc, char *argv[]) {
                 minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE_12_BITS);
                 psnr += getPSNR(frameOriSquached, img, MAX_DEPTH_VALUE_12_BITS);
 
-                frameOriSquached = frameOriSquached * (MAX_DEPTH_VALUE_12_BITS / MAX_DEPTH_VALUE_8_BITS);
-                img = img * (MAX_DEPTH_VALUE_12_BITS / MAX_DEPTH_VALUE_8_BITS);
+                img *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
+                frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
 
-                absdiff(frameOriSquached, img, frameDiff);
-                mssim += getMSSIM(frameOriSquached, img);
-                frameOri = frameOriSquached;
+                img.convertTo(img, CV_8U);
+                frameOri.convertTo(frameOri, CV_8U);
+
+                absdiff(frameOri, img, frameDiff);
+                mssim += getMSSIM(frameOri, img);
+
+                cv::applyColorMap(img, img, cv::COLORMAP_JET);
+                cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
+                cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
             } else if (f.frameType == 1) {
-                cv::Mat frameOriU = getUMat(frameOri);
 
-                cv::cvtColor(frameOriU, frameOriU, cv::COLOR_GRAY2BGR);
+                cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
 
-                cv::Mat imgU16;
-                cv::cvtColor(img, imgU16, cv::COLOR_BGR2GRAY);
-                imgU16.convertTo(imgU16, CV_16UC1);
-                imgU16 = imgU16 * (MAX_DEPTH_VALUE_12_BITS / MAX_DEPTH_VALUE_8_BITS);
+
+                img.convertTo(img, CV_16U);
 
                 cv::Mat frameOriSquached;
                 minMaxFilter<ushort>(frameOri, frameOriSquached, 0, MAX_DEPTH_VALUE_12_BITS);
+                psnr += getPSNR(frameOriSquached, img, MAX_DEPTH_VALUE_12_BITS);
+                mssim += getMSSIM(frameOriSquached, img);
+                img.convertTo(img, CV_8U);
 
-                psnr += getPSNR(frameOriSquached, imgU16, MAX_DEPTH_VALUE_12_BITS);
-                mssim += getMSSIM(frameOriSquached, imgU16);
+                frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
 
-                absdiff(frameOriSquached, imgU16, frameDiff);
-                frameOri = frameOriU;
+                frameOri.convertTo(frameOri, CV_8U);
+
+                absdiff(frameOri, img, frameDiff);
+
+
+                cv::applyColorMap(img, img, cv::COLORMAP_JET);
+                cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
+                cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
+
 
             } else {
 
-                if (frameOri.channels() == 1) {
-                    cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
-                    img.convertTo(img, CV_16UC1);
-                }
                 absdiff(frameOri, img, frameDiff);
                 psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
                 mssim += getMSSIM(frameOri, img);
