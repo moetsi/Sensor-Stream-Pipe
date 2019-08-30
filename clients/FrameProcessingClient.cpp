@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include <zmq.hpp>
+#include <opencv2/imgproc.hpp>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -94,8 +95,6 @@ int main(int argc, char *argv[]) {
                 if (f.messageType == 0) {
                     img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
                     imgChanged = true;
-                    std::cout << img.cols << " " << f.frame.size() << " " << (int) f.frame[100] << " "
-                              << (int) f.frame[f.frame.size() - 100] << std::endl;
                 } else if (f.messageType == 1) {
                     if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) == pCodecs.end()) {
                         prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
@@ -137,6 +136,22 @@ int main(int argc, char *argv[]) {
                 }
 
                 if (imgChanged && !img.empty()) {
+
+                    double min, max;
+                    cv::minMaxIdx(img, &min, &max);
+
+                    std::cout << f.sensorId << " " << min << " " << max << std::endl;
+
+                    if (f.sensorId == 1) {
+                        cv::Mat imgOut;
+                        img *= (256 / 4096.0);
+                        img.convertTo(imgOut, CV_8U);
+                        cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
+                    }
+
+
+
+
                     cv::namedWindow(f.streamId + std::to_string(f.sensorId));
                     cv::imshow(f.streamId + std::to_string(f.sensorId), img);
                     cv::waitKey(1);

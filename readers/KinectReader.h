@@ -60,14 +60,11 @@ private:
 
     std::vector<uint> currentFrameCounter;
     unsigned int fps;
-    std::string sceneDesc;
     unsigned int sensorId;
     unsigned int deviceId;
     std::string streamId;
 
     uint8_t device_index;
-    char *recording_filename;
-    int recording_length;
     k4a_device_configuration_t *device_config;
     bool record_imu;
     int32_t absoluteExposureValue;
