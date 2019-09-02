@@ -30,18 +30,16 @@ void avframeToMatGray(const AVFrame *frame, cv::Mat &image) {
 
             if (frame->format == AV_PIX_FMT_GRAY12LE) {
                 value = upper << 8 | lower;
+                image.at<ushort>(y, x) = value;
             } else if (frame->format == AV_PIX_FMT_GRAY16BE) {
                 value = lower << 8 | upper;
+                image.at<ushort>(y, x) = value;
+                //for some reason, the png decoder sums the frame values
+                //zeroing the data solves the problem
+                //TODO: zero matrix by mem copy
+                frame->data[0][y * frame->linesize[0] + x * 2] = 0;
+                frame->data[0][y * frame->linesize[0] + x * 2 + 1] = 0;
             }
-
-            image.at<ushort>(y, x) = value;
-
-            //for some reason, the png decoder sums the frame values
-            //zeroing the data solves the problem
-            //TODO: zero matrix by mem copy
-            frame->data[0][y * frame->linesize[0] + x * 2] = 0;
-            frame->data[0][y * frame->linesize[0] + x * 2 + 1] = 0;
-
         }
     }
 }
