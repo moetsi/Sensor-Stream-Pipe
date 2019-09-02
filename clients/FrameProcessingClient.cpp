@@ -117,7 +117,8 @@ int main(int argc, char *argv[]) {
                         // Return decoded output data (into a frame) from a decoder
                         response = avcodec_receive_frame(pCodecContext, pFrame);
                         if (response >= 0) {
-                            if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
+                            if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE ||
+                                pCodecContext->pix_fmt == AV_PIX_FMT_GRAY16BE) {
                                 avframeToMatGray(pFrame, img);
                             } else {
                                 avframeToMatYUV(pFrame, img);

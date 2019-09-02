@@ -26,6 +26,7 @@ extern "C" {
 #include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
 #include "../utils/ImageDecoder.h"
+#include "../utils/VideoUtils.h"
 
 class FrameEncoder {
 private:
@@ -66,6 +67,8 @@ public:
     std::queue<AVPacket> pBuffer;
 
     FrameEncoder(std::string codec_parameters_file, uint fps);
+
+    FrameEncoder(YAML::Node &_codec_parameters, uint _fps);
 
     ~FrameEncoder();
 

@@ -24,10 +24,24 @@ void avframeToMatGray(const AVFrame *frame, cv::Mat &image) {
     image = cv::Mat(height, width, CV_16UC1);
     for (uint y = 0; y < frame->height; y++) {
         for (uint x = 0; x < frame->width; x++) {
-            uint lower = frame->data[0][y * frame->linesize[0] + x * 2];
-            uint upper = frame->data[0][y * frame->linesize[0] + x * 2 + 1];
-            ushort value = upper << 8 | lower;
+            ushort lower = frame->data[0][y * frame->linesize[0] + x * 2];
+            ushort upper = frame->data[0][y * frame->linesize[0] + x * 2 + 1];
+            ushort value;
+
+            if (frame->format == AV_PIX_FMT_GRAY12LE) {
+                value = upper << 8 | lower;
+            } else if (frame->format == AV_PIX_FMT_GRAY16BE) {
+                value = lower << 8 | upper;
+            }
+
             image.at<ushort>(y, x) = value;
+
+            //for some reason, the png decoder sums the frame values
+            //zeroing the data solves the problem
+            //TODO: zero matrix by mem copy
+            frame->data[0][y * frame->linesize[0] + x * 2] = 0;
+            frame->data[0][y * frame->linesize[0] + x * 2 + 1] = 0;
+
         }
     }
 }

@@ -3,10 +3,19 @@
 //
 
 #include "FrameEncoder.h"
-#include "../utils/VideoUtils.h"
+
 
 FrameEncoder::FrameEncoder(std::string codec_parameters_file, uint _fps) {
     codec_parameters = YAML::LoadFile(codec_parameters_file);
+    fps = _fps;
+    av_register_all();
+
+    ready = false;
+    totalCurrentFrameCounter = 0;
+}
+
+FrameEncoder::FrameEncoder(YAML::Node &_codec_parameters, uint _fps) {
+    codec_parameters = _codec_parameters;
     fps = _fps;
     av_register_all();
 
@@ -45,10 +54,11 @@ void FrameEncoder::prepareFrame() {
     id.imageBufferToAVFrame(frameData, pFrameO);
 
 
+    if (pFrameO->format == pFrame->format) {
+        av_frame_copy(pFrame, pFrameO);
 
-
-    // PNG GRAY16 TO gray12le
-    if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
+    } else if (pFrameO->format == AV_PIX_FMT_GRAY16BE &&
+               pFrame->format == AV_PIX_FMT_GRAY12LE) { // PNG GRAY16 TO gray12le
         int i = 0;
         for (uint y = 0; y < pFrameO->height; y++) {
             for (uint x = 0; x < pFrameO->width; x++) {
@@ -59,10 +69,9 @@ void FrameEncoder::prepareFrame() {
                 pFrame->data[0][i++] = lower;
             }
         }
-    }
-
-        // PNG GRAY16 TO YUV
-    else if (pFrameO->format == AV_PIX_FMT_GRAY16BE) {
+    } else if (pFrameO->format == AV_PIX_FMT_GRAY16BE &&
+               (pFrame->format == AV_PIX_FMT_YUV420P || pFrame->format == AV_PIX_FMT_YUV422P ||
+                pFrame->format == AV_PIX_FMT_YUV444P)) { // PNG GRAY16 TO YUV
         //TODO: remove redundant call
         sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data,
                   pFrameO->linesize, 0, pFrameO->height, pFrame->data, pFrame->linesize);
@@ -93,8 +102,6 @@ void FrameEncoder::prepareFrame() {
         sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data,
                   pFrameO->linesize, 0, pFrameO->height, pFrame->data, pFrame->linesize);
     }
-
-    std::cout << std::endl;
 
     av_frame_free(&pFrameO);
     /*

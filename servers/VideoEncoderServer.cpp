@@ -19,6 +19,7 @@ extern "C" {
 }
 
 #include <zmq.hpp>
+#include <yaml-cpp/yaml.h>
 
 #include "../structs/FrameStruct.hpp"
 #include "../encoders/FrameEncoder.h"
@@ -53,7 +54,9 @@ int main(int argc, char *argv[]) {
         }
 
         FrameReader reader(frame_file);
-        FrameEncoder frameEncoder(codec_parameters_file, reader.getFps());
+
+        YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
+        FrameEncoder frameEncoder(codec_parameters, reader.getFps());
 
         uint fps = reader.getFps();
 
