@@ -1,6 +1,6 @@
 ---
-codec_name: "libx265"
+codec_name: "libx264"
 bitrate: 1960000
 gop_size: 10
 max_b_frames: 1
-pix_fmt: "yuv422p"
+pix_fmt: "yuv420p"

@@ -1,0 +1,29 @@
+---
+- kinect_parameters:
+  0: #parameters for the first Kinect
+    stream_color: true
+    stream_depth: true
+    stream_ir: true
+    recording_color_format: "K4A_IMAGE_FORMAT_COLOR_MJPG"
+    recording_color_resolution: "K4A_COLOR_RESOLUTION_2160P"
+    recording_depth_mode: "K4A_DEPTH_MODE_PASSIVE_IR"
+    recording_rate: "K4A_FRAMES_PER_SECOND_30"
+video_encoder:
+  0: #color
+    codec_name: "hevc_nvenc"
+    bitrate: 1960000
+    gop_size: 10
+    max_b_frames: 0
+    pix_fmt: "yuv420p"
+  1: #depth
+    codec_name: "png"
+    bitrate: 1960000
+    gop_size: 10
+    max_b_frames: 0
+    pix_fmt: "gray16be"
+  2: #ir
+    codec_name: "hevc_nvenc"
+    bitrate: 1960000
+    gop_size: 10
+    max_b_frames: 0
+    pix_fmt: "yuv420p"
