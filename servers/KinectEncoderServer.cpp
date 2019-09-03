@@ -19,6 +19,7 @@
 #include "../readers/KinectReader.h"
 #include "../utils/Utils.h"
 #include "../encoders/FrameEncoder.h"
+#include "../utils/KinectUtils.h"
 
 int main(int argc, char *argv[]) {
 
@@ -58,11 +59,11 @@ int main(int argc, char *argv[]) {
         device_config.color_resolution = recording_color_resolution;
         device_config.depth_mode = recording_depth_mode;
         device_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
-        device_config.depth_delay_off_color_usec = 0;
-        device_config.subordinate_delay_off_master_usec = 0;
+
+        ExtendedAzureConfig c = buildKinectConfigFromYAML(codec_parameters["kinect_parameters"][0]);
 
 
-        KinectReader reader(0, &device_config, 0);
+        KinectReader reader(0, c, 0);
 
         //TODO: use smarter pointers
         std::unordered_map<uint, FrameEncoder *> encoders;

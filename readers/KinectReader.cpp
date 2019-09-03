@@ -7,12 +7,18 @@
 std::atomic_bool exiting(false);
 
 KinectReader::KinectReader(uint8_t _device_index,
-                           k4a_device_configuration_t *_device_config,
-                           int32_t _absoluteExposureValue) {
+                           ExtendedAzureConfig &_device_config) {
+
 
     device_index = _device_index;
-    device_config = _device_config;
-    absoluteExposureValue = _absoluteExposureValue;
+
+    device_config = _device_config.device_config;
+
+    stream_color = _device_config.stream_color;
+    stream_depth = _device_config.stream_depth;
+    stream_ir = _device_config.stream_ir;
+
+    absoluteExposureValue = _device_config.absoluteExposureValue;
     record_imu = false;
 
     streamId = randomString(16);
@@ -44,10 +50,10 @@ KinectReader::KinectReader(uint8_t _device_index,
               << "; A: " << version_info.audio.major << "." << version_info.audio.minor << "."
               << version_info.audio.iteration << std::endl;
 
-    uint32_t camera_fps = k4a_convert_fps_to_uint(device_config->camera_fps);
+    uint32_t camera_fps = k4a_convert_fps_to_uint(device_config.camera_fps);
 
-    if (camera_fps <= 0 || (device_config->color_resolution == K4A_COLOR_RESOLUTION_OFF &&
-                            device_config->depth_mode == K4A_DEPTH_MODE_OFF)) {
+    if (camera_fps <= 0 || (device_config.color_resolution == K4A_COLOR_RESOLUTION_OFF &&
+                            device_config.depth_mode == K4A_DEPTH_MODE_OFF)) {
         std::cerr << "Either the color or depth modes must be enabled to record." << std::endl;
         exit(1);
     }
@@ -68,7 +74,7 @@ KinectReader::KinectReader(uint8_t _device_index,
         }
     }
 
-    CHECK(k4a_device_start_cameras(device, device_config), device);
+    CHECK(k4a_device_start_cameras(device, &device_config), device);
     if (record_imu) {
         CHECK(k4a_device_start_imu(device), device);
     }
@@ -77,7 +83,7 @@ KinectReader::KinectReader(uint8_t _device_index,
 
     // Wait for the first capture before starting recording.
     int32_t timeout_sec_for_first_capture = 60;
-    if (device_config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE) {
+    if (device_config.wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE) {
         timeout_sec_for_first_capture = 360;
         std::cout << "[subordinate mode] Waiting for signal from master" << std::endl;
     }
@@ -145,7 +151,7 @@ void KinectReader::nextFrame() {
             break;
         }
 
-        if (device_config->color_resolution != K4A_COLOR_RESOLUTION_OFF) {
+        if (stream_color && device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF) {
             k4a_image_t colorImage = k4a_capture_get_color_image(capture);
             if (colorImage && k4a_image_get_format(colorImage) != 6) {
                 FrameStruct s = frameTemplate;
@@ -170,10 +176,9 @@ void KinectReader::nextFrame() {
             k4a_image_release(colorImage);
         }
 
-        if (device_config->depth_mode != K4A_DEPTH_MODE_OFF) {
+        if (stream_depth && device_config.depth_mode != K4A_DEPTH_MODE_OFF) {
 
             k4a_image_t depthImage = k4a_capture_get_depth_image(capture);
-            k4a_image_t irImage = k4a_capture_get_ir_image(capture);
             if (depthImage && k4a_image_get_format(depthImage) != 6) {
                 FrameStruct s = frameTemplate;
                 s.sensorId = 1;
@@ -188,6 +193,12 @@ void KinectReader::nextFrame() {
                 imencode(".png", depthMat, s.frame);
                 currFrame.push_back(s);
             }
+            k4a_image_release(depthImage);
+        }
+
+        if (stream_ir && device_config.depth_mode != K4A_DEPTH_MODE_OFF) {
+
+            k4a_image_t irImage = k4a_capture_get_ir_image(capture);
             if (irImage && k4a_image_get_format(irImage) != 6) {
                 FrameStruct s = frameTemplate;
                 s.sensorId = 2;
@@ -202,7 +213,7 @@ void KinectReader::nextFrame() {
                 imencode(".png", irMat, s.frame);
                 currFrame.push_back(s);
             }
-            k4a_image_release(depthImage);
+
             k4a_image_release(irImage);
         }
         k4a_capture_release(capture);
@@ -234,11 +245,11 @@ FrameStruct KinectReader::currentFrame(uint type) {
 }
 
 uint KinectReader::getFps() {
-    if (device_config->camera_fps == K4A_FRAMES_PER_SECOND_5)
+    if (device_config.camera_fps == K4A_FRAMES_PER_SECOND_5)
         return 5;
-    if (device_config->camera_fps == K4A_FRAMES_PER_SECOND_15)
+    if (device_config.camera_fps == K4A_FRAMES_PER_SECOND_15)
         return 15;
-    if (device_config->camera_fps == K4A_FRAMES_PER_SECOND_30)
+    if (device_config.camera_fps == K4A_FRAMES_PER_SECOND_30)
         return 30;
     return -1;
 }
@@ -246,8 +257,13 @@ uint KinectReader::getFps() {
 
 std::vector<uint> KinectReader::getType() {
     std::vector<uint> types;
-    types.push_back(0);
-    types.push_back(1);
-    types.push_back(2);
+
+    if (stream_color)
+        types.push_back(0);
+    if (stream_depth)
+        types.push_back(1);
+    if (stream_ir)
+        types.push_back(2);
+
     return types;
 }

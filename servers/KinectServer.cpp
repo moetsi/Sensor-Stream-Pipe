@@ -36,24 +36,12 @@ int main(int argc, char *argv[]) {
 
         std::string host = std::string(argv[1]);
         uint port = std::stoul(argv[2]);
+        std::string codec_parameters_file = std::string(argv[3]);
 
-        //TODO: Read parameters from file
-        k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
-        k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-        k4a_fps_t recording_rate = K4A_FRAMES_PER_SECOND_5;
+        YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
-        k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        device_config.color_format = recording_color_format;
-        device_config.color_resolution = recording_color_resolution;
-        device_config.depth_mode = recording_depth_mode;
-        device_config.camera_fps = recording_rate;
-        device_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
-        device_config.depth_delay_off_color_usec = 0;
-        device_config.subordinate_delay_off_master_usec = 0;
-
-
-        KinectReader reader(0, &device_config, 0);
+        ExtendedAzureConfig c = buildKinectConfigFromYAML(codec_parameters["kinect_parameters"][0]);
+        KinectReader reader(0, c, 0);
 
         uint64_t last_time = currentTimeMs();
         uint64_t start_time = last_time;

@@ -16,9 +16,11 @@
 
 #include "../structs/FrameStruct.hpp"
 #include "../utils/VideoUtils.h"
+#include "../utils/KinectUtils.h"
 
 #include <k4a/k4a.h>
 #include <k4arecord/record.h>
+
 
 extern std::atomic_bool exiting;
 
@@ -64,8 +66,12 @@ private:
     unsigned int deviceId;
     std::string streamId;
 
+    bool stream_color;
+    bool stream_depth;
+    bool stream_ir;
+
     uint8_t device_index;
-    k4a_device_configuration_t *device_config;
+    k4a_device_configuration_t device_config;
     bool record_imu;
     int32_t absoluteExposureValue;
     k4a_device_t device;
@@ -79,10 +85,9 @@ private:
 
     std::vector<FrameStruct> currFrame;
 
-
 public:
 
-    KinectReader(uint8_t _device_index, k4a_device_configuration_t *_device_config, int32_t _absoluteExposureValue);
+    KinectReader(uint8_t _device_index, ExtendedAzureConfig &_device_config);
 
     ~KinectReader();
 
