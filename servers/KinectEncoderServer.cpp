@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
         ExtendedAzureConfig c = buildKinectConfigFromYAML(codec_parameters["kinect_parameters"][0]);
 
 
-        KinectReader reader(0, c, 0);
+        KinectReader reader(0, c);
 
         //TODO: use smarter pointers
         std::unordered_map<uint, FrameEncoder *> encoders;

@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
         YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
         ExtendedAzureConfig c = buildKinectConfigFromYAML(codec_parameters["kinect_parameters"][0]);
-        KinectReader reader(0, c, 0);
+        KinectReader reader(0, c);
 
         uint64_t last_time = currentTimeMs();
         uint64_t start_time = last_time;

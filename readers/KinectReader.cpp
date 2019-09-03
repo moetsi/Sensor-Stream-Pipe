@@ -7,7 +7,7 @@
 std::atomic_bool exiting(false);
 
 KinectReader::KinectReader(uint8_t _device_index,
-                           ExtendedAzureConfig &_device_config) {
+                           ExtendedAzureConfig _device_config) {
 
 
     device_index = _device_index;

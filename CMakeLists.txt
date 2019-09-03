@@ -27,8 +27,8 @@ set(SOURCE_FILES readers/FrameReader.cpp structs/FrameStruct.hpp utils/Utils.cpp
 add_executable(client clients/FrameProcessingClient.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
 add_executable(frame_server servers/FrameServer.cpp ${SOURCE_FILES})
 add_executable(video_file_server servers/VideoFileServer.cpp readers/VideoFileReader.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
-add_executable(kinect_server servers/KinectServer.cpp readers/KinectReader.cpp utils/VideoUtils.cpp ${SOURCE_FILES})
-add_executable(kinect_encoder_server servers/KinectEncoderServer.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp ${SOURCE_FILES})
+add_executable(kinect_server servers/KinectServer.cpp readers/KinectReader.cpp utils/VideoUtils.cpp utils/KinectUtils.cpp ${SOURCE_FILES})
+add_executable(kinect_encoder_server servers/KinectEncoderServer.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp ${SOURCE_FILES})
 add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp ${SOURCE_FILES})
 add_executable(video_encoder_test utils/VideoEncodingTester.cpp encoders/FrameEncoder.cpp utils/VideoEncodingTester.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/SimilarityMeasures.cpp ${SOURCE_FILES})
 

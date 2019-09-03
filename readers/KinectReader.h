@@ -87,7 +87,7 @@ private:
 
 public:
 
-    KinectReader(uint8_t _device_index, ExtendedAzureConfig &_device_config);
+    KinectReader(uint8_t _device_index, ExtendedAzureConfig _device_config);
 
     ~KinectReader();
 
