@@ -4,96 +4,90 @@
 
 #pragma once
 
-#include <iostream>
 #include <fstream>
-#include <vector>
+#include <iostream>
 #include <queue>
+#include <vector>
 
 #include <cereal/archives/binary.hpp>
 
 #include <yaml-cpp/yaml.h>
 
 extern "C" {
-#include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
-#include <libavutil/opt.h>
-#include <libavutil/imgutils.h>
 }
 
-#include "../structs/FrameStruct.hpp"
 #include "../readers/FrameReader.h"
+#include "../structs/FrameStruct.hpp"
 #include "../utils/ImageDecoder.h"
 #include "../utils/VideoUtils.h"
 
 class FrameEncoder {
 private:
+  unsigned int totalCurrentFrameCounter;
 
-    unsigned int totalCurrentFrameCounter;
+  AVCodecParameters *pCodecParametersEncoder;
+  AVCodecContext *pCodecContextEncoder;
+  AVCodec *pCodecEncoder;
 
-    AVCodecParameters *pCodecParametersEncoder;
-    AVCodecContext *pCodecContextEncoder;
-    AVCodec *pCodecEncoder;
+  AVFrame *pFrame;
+  AVPacket *pPacket;
 
-    AVFrame *pFrame;
-    AVPacket *pPacket;
+  struct SwsContext *sws_ctx;
 
-    struct SwsContext *sws_ctx;
+  YAML::Node codec_parameters;
 
+  ImageDecoder id;
 
-    YAML::Node codec_parameters;
+  uint fps;
 
-    ImageDecoder id;
+  bool ready;
 
-    uint fps;
+  void init(FrameStruct fs);
 
-    bool ready;
+  void encode();
 
-    void init(FrameStruct fs);
+  void encodeA(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt);
 
-    void encode();
+  void prepareFrame();
 
-    void encodeA(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt);
-
-    void prepareFrame();
-
-    std::vector<unsigned char> currentFrameBytes(AVPacket &packet);
+  std::vector<unsigned char> currentFrameBytes(AVPacket &packet);
 
 public:
+  std::queue<FrameStruct> buffer;
+  std::queue<AVPacket> pBuffer;
 
-    std::queue<FrameStruct> buffer;
-    std::queue<AVPacket> pBuffer;
+  FrameEncoder(std::string codec_parameters_file, uint fps);
 
-    FrameEncoder(std::string codec_parameters_file, uint fps);
+  FrameEncoder(YAML::Node &_codec_parameters, uint _fps);
 
-    FrameEncoder(YAML::Node &_codec_parameters, uint _fps);
+  ~FrameEncoder();
 
-    ~FrameEncoder();
+  void addFrameStruct(FrameStruct &fs);
 
-    void addFrameStruct(FrameStruct &fs);
+  void nextPacket();
 
-    void nextPacket();
+  bool hasNextPacket();
 
-    bool hasNextPacket();
+  FrameStruct currentFrame();
 
-    FrameStruct currentFrame();
+  FrameStruct currentFrameOriginal();
 
-    FrameStruct currentFrameOriginal();
+  CodecParamsStruct getCodecParamsStruct();
 
-    CodecParamsStruct getCodecParamsStruct();
+  unsigned int currentFrameId();
 
-    unsigned int currentFrameId();
-
-    uint getFps();
-
-
-
+  uint getFps();
 };
 
 static int readFunction(void *opaque, uint8_t *buf, int buf_size) {
-    auto &me = *reinterpret_cast<std::istream *>(opaque);
-    me.read(reinterpret_cast<char *>(buf), buf_size);
-    return me.gcount();
+  auto &me = *reinterpret_cast<std::istream *>(opaque);
+  me.read(reinterpret_cast<char *>(buf), buf_size);
+  return me.gcount();
 }

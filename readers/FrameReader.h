@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 #include <cereal/archives/binary.hpp>
@@ -15,44 +15,38 @@
 
 class FrameReader : public IReader {
 private:
+  unsigned int currentFrameCounter;
+  unsigned int fps;
+  std::string sceneDesc;
+  unsigned int sensorId;
+  unsigned int deviceId;
+  unsigned int frameType;
+  std::string streamId;
 
-    unsigned int currentFrameCounter;
-    unsigned int fps;
-    std::string sceneDesc;
-    unsigned int sensorId;
-    unsigned int deviceId;
-    unsigned int frameType;
-    std::string streamId;
+  FrameStruct currentFrameInternal;
 
-    FrameStruct currentFrameInternal;
+  std::vector<unsigned char> readFile(std::string &filename);
 
-    std::vector<unsigned char> readFile(std::string &filename);
+  FrameStruct createFrameStruct(unsigned int frameId);
 
-    FrameStruct createFrameStruct(unsigned int frameId);
+  std::string getStructBytes(FrameStruct frame);
 
-    std::string getStructBytes(FrameStruct frame);
-
-    std::vector<std::string> frameLines;
+  std::vector<std::string> frameLines;
 
 public:
+  FrameReader(std::string filename);
 
+  void reset();
 
-    FrameReader(std::string filename);
+  void goToFrame(uint frameId);
 
-    void reset();
+  bool hasNextFrame();
 
-    void goToFrame(uint frameId);
+  void nextFrame();
 
-    bool hasNextFrame();
+  std::vector<FrameStruct> currentFrame();
 
-    void nextFrame();
+  uint currentFrameId();
 
-    std::vector<FrameStruct> currentFrame();
-
-    uint currentFrameId();
-
-    uint getFps();
-
+  uint getFps();
 };
-
-

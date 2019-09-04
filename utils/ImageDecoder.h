@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <vector>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -20,36 +20,31 @@ extern "C" {
 class ImageDecoder {
 
 private:
+  AVFormatContext *pFormatContext = NULL;
+  AVIOContext *avio_ctx = NULL;
+  AVCodecParameters *pCodecParameters;
+  AVCodecContext *pCodecContext;
+  AVCodec *pCodec;
+  AVPacket *pPacket;
 
+  uint8_t *avio_ctx_buffer = NULL;
+  size_t avio_ctx_buffer_size = 4096;
 
-    AVFormatContext *pFormatContext = NULL;
-    AVIOContext *avio_ctx = NULL;
-    AVCodecParameters *pCodecParameters;
-    AVCodecContext *pCodecContext;
-    AVCodec *pCodec;
-    AVPacket *pPacket;
+  bool libAVReady;
 
-    uint8_t *avio_ctx_buffer = NULL;
-    size_t avio_ctx_buffer_size = 4096;
+  void init(std::vector<unsigned char> &buffer);
 
-    bool libAVReady;
-
-    void init(std::vector<unsigned char> &buffer);
-
-    int decode_packet(AVFrame *pFrame);
+  int decode_packet(AVFrame *pFrame);
 
 public:
+  ImageDecoder();
 
-    ImageDecoder();
+  ~ImageDecoder();
 
-    ~ImageDecoder();
+  int getWidth();
 
+  int getHeigth();
 
-    int getWidth();
-
-    int getHeigth();
-
-    void imageBufferToAVFrame(std::vector<unsigned char> &buffer, AVFrame *pFrame);
-
-
+  void imageBufferToAVFrame(std::vector<unsigned char> &buffer,
+                            AVFrame *pFrame);
 };

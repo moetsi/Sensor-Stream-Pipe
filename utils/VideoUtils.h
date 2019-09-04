@@ -6,15 +6,14 @@
 
 #include <ctime>
 #include <iostream>
-#include <string>
 #include <stdlib.h>
+#include <string>
 #include <thread>
 #include <unistd.h>
 
-
 extern "C" {
-#include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
@@ -32,15 +31,14 @@ extern "C" {
 #define MAX_DEPTH_VALUE_11_BITS 2048
 #define MAX_DEPTH_VALUE_8_BITS 256
 
-
 void avframeToMatYUV(const AVFrame *frame, cv::Mat &image);
 
 void avframeToMatGray(const AVFrame *frame, cv::Mat &image);
 
-void prepareDecodingStruct(FrameStruct &f, std::unordered_map<std::string, AVCodec *> &pCodecs,
-                           std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
-                           std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
-
+void prepareDecodingStruct(
+    FrameStruct &f, std::unordered_map<std::string, AVCodec *> &pCodecs,
+    std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
+    std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
 
 cv::Mat getFloat(cv::Mat &input);
 
@@ -58,19 +56,17 @@ void prepareGrayDepthFrame(AVFrame *pFrameO, AVFrame *pFrame);
 
 void prepareDepthFrame(AVFrame *pFrameO, AVFrame *pFrame);
 
-
-
-template<typename T>
+template <typename T>
 void minMaxFilter(cv::Mat &inmat, cv::Mat &outmat, double min, double max) {
-    inmat.copyTo(outmat);
-    for (uint i = 0; i < outmat.rows; i++) {
-        for (uint j = 0; j < outmat.cols; j++) {
-            if (outmat.at<T>(i, j) < min) {
-                outmat.at<T>(i, j) = min;
-            }
-            if (outmat.at<T>(i, j) > max) {
-                outmat.at<T>(i, j) = max;
-            }
-        }
+  inmat.copyTo(outmat);
+  for (uint i = 0; i < outmat.rows; i++) {
+    for (uint j = 0; j < outmat.cols; j++) {
+      if (outmat.at<T>(i, j) < min) {
+        outmat.at<T>(i, j) = min;
+      }
+      if (outmat.at<T>(i, j) > max) {
+        outmat.at<T>(i, j) = max;
+      }
     }
+  }
 }
