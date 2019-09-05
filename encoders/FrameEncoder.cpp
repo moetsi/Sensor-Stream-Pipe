@@ -169,27 +169,6 @@ void FrameEncoder::init(FrameStruct fs) {
   pPacket = av_packet_alloc();
   pCodecParametersEncoder = avcodec_parameters_alloc();
 
-  // http://git.videolan.org/?p=ffmpeg.git;a=blob;f=libavcodec/options_table.h;hb=HEAD
-  // https://stackoverflow.com/questions/3553003/how-to-encode-h-264-with-libavcodec-x264
-  // TODO: adapt to use variable bitrate and check the links above for more
-  // parameters: bitrate versus crf check what other parameters are required for
-  // different codecs
-  pCodecContextEncoder->bit_rate = codec_parameters["bitrate"].as<int>();
-  av_opt_set(pCodecContextEncoder->priv_data, "preset", "b",
-             codec_parameters["bitrate"].as<int>());
-
-  /* get resolution from image file
-  std::stringstream ss;
-  ss << "/home/amourao/example" << totalCurrentFrameCounter << ".jpg";
-  std::ofstream hFile;
-  hFile.open(ss.str(), std::ios::out | std::ios::binary);
-  if (hFile.is_open())
-  {
-      hFile.write((char *)&fs.frame[0],
-  static_cast<std::streamsize>(fs.frame.size())); hFile.close();
-  }
-  cv::Mat frameOri = cv::imread(ss.str(), cv::IMREAD_UNCHANGED);
-   */
   AVFrame *pFrameO = av_frame_alloc();
   id.imageBufferToAVFrame(fs.frame, pFrameO);
 
@@ -209,10 +188,8 @@ void FrameEncoder::init(FrameStruct fs) {
 
   // TDOO: check delay:
   // https://ffmpeg.org/pipermail/libav-user/2014-December/007672.html
-  // TODO: check what other parameters are required for different codecs
-  pCodecContextEncoder->gop_size = codec_parameters["gop_size"].as<int>(); // 10
-  pCodecContextEncoder->max_b_frames =
-      codec_parameters["max_b_frames"].as<int>(); // 1
+  pCodecContextEncoder->max_b_frames = 0;                                  // 1
+  pCodecContextEncoder->bit_rate = codec_parameters["bit_rate"].as<int>(); // 1
 
   // fmpeg -h encoder=hevc
   // libx264:                 yuv420p yuvj420p yuv422p yuvj422p yuv444p yuvj444p
@@ -225,7 +202,16 @@ void FrameEncoder::init(FrameStruct fs) {
 
   pCodecContextEncoder->pix_fmt =
       av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str());
-  // TODO: B frames and the GPU
+
+  YAML::Node codec_parameters_options = codec_parameters["options"];
+
+  for (YAML::const_iterator it = codec_parameters_options.begin();
+       it != codec_parameters_options.end(); ++it) {
+    av_opt_set(pCodecContextEncoder->priv_data,
+               it->first.as<std::string>().c_str(),
+               it->second.as<std::string>().c_str(), AV_OPT_SEARCH_CHILDREN);
+  }
+
   av_opt_set(pCodecContextEncoder->priv_data, "tune", "zerolatency", 0);
   av_opt_set(pCodecContextEncoder->priv_data, "rcParams", "zeroReorderDelay",
              1);
@@ -245,11 +231,6 @@ void FrameEncoder::init(FrameStruct fs) {
 
   pCodecParametersEncoder->color_space = pCodecContextEncoder->colorspace;
   pCodecParametersEncoder->sample_rate = pCodecContextEncoder->sample_rate;
-
-  // TODO: does this parameter really matter?
-  if (pCodecEncoder->id == AV_CODEC_ID_H264 ||
-      pCodecEncoder->id == AV_CODEC_ID_H265)
-    av_opt_set(pCodecContextEncoder->priv_data, "preset", "ultrafast", 0);
 
   ret = avcodec_open2(pCodecContextEncoder, pCodecEncoder, NULL);
   if (ret < 0) {

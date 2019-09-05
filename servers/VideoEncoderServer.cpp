@@ -19,7 +19,6 @@ extern "C" {
 
 #include <yaml-cpp/yaml.h>
 #include <zmq.hpp>
-
 #include "../encoders/FrameEncoder.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
