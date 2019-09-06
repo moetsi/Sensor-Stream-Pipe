@@ -127,6 +127,8 @@ KinectReader::KinectReader(uint8_t _device_index,
   frameTemplate.deviceId = 0;
 
   frameTemplate.messageType = 0;
+
+  frameTemplate.frameDataType = 0;
   frameTemplate.sceneDesc = "kinect";
   frameTemplate.streamId = randomString(16);
 
@@ -175,13 +177,19 @@ void KinectReader::nextFrame() {
         size_t size = k4a_image_get_size(colorImage);
 
         if (k4a_image_get_format(colorImage) == K4A_IMAGE_FORMAT_COLOR_MJPG) {
+          s.frameDataType = 0;
           s.frame = std::vector<uchar>(buffer, buffer + size);
         } else {
+          s.frameDataType = 2;
+
           int rows = k4a_image_get_height_pixels(colorImage);
           int cols = k4a_image_get_width_pixels(colorImage);
-          cv::Mat colorMat(rows, cols, CV_8UC4, (void *)buffer,
-                           cv::Mat::AUTO_STEP);
-          imencode(".png", colorMat, s.frame);
+
+          s.frame.resize(size + 2 * sizeof(int));
+
+          memcpy(&s.frame[0], &cols, sizeof(int));
+          memcpy(&s.frame[4], &rows, sizeof(int));
+          memcpy(&s.frame[8], buffer, size);
         }
         currFrame.push_back(s);
       }
@@ -192,18 +200,24 @@ void KinectReader::nextFrame() {
 
       k4a_image_t depthImage = k4a_capture_get_depth_image(capture);
       if (depthImage && k4a_image_get_format(depthImage) != 6) {
+
         FrameStruct s = frameTemplate;
         s.sensorId = 1;
         s.frameType = 1;
+        s.frameDataType = 3;
         s.frameId = currentFrameCounter.at(1)++;
         uint8_t *buffer = k4a_image_get_buffer(depthImage);
+        size_t size = k4a_image_get_size(depthImage);
         // convert the raw buffer to cv::Mat
         int rows = k4a_image_get_height_pixels(depthImage);
         int cols = k4a_image_get_width_pixels(depthImage);
-        // TODO: allow sending raw slab of memory instead png
-        cv::Mat depthMat(rows, cols, CV_16UC1, (void *)buffer,
-                         cv::Mat::AUTO_STEP);
-        imencode(".png", depthMat, s.frame);
+
+        s.frame.resize(size + 2 * sizeof(int));
+
+        memcpy(&s.frame[0], &cols, sizeof(int));
+        memcpy(&s.frame[4], &rows, sizeof(int));
+        memcpy(&s.frame[8], buffer, size);
+
         currFrame.push_back(s);
       }
       k4a_image_release(depthImage);
@@ -217,13 +231,20 @@ void KinectReader::nextFrame() {
         s.sensorId = 2;
         s.frameType = 2;
         s.frameId = currentFrameCounter.at(2)++;
+        s.frameDataType = 3;
+        s.frameId = currentFrameCounter.at(1)++;
         uint8_t *buffer = k4a_image_get_buffer(irImage);
+        size_t size = k4a_image_get_size(irImage);
         // convert the raw buffer to cv::Mat
         int rows = k4a_image_get_height_pixels(irImage);
         int cols = k4a_image_get_width_pixels(irImage);
-        // TODO: allow sending raw slab of memory instead png
-        cv::Mat irMat(rows, cols, CV_16UC1, (void *)buffer, cv::Mat::AUTO_STEP);
-        imencode(".png", irMat, s.frame);
+
+        s.frame.resize(size + 2 * sizeof(int));
+
+        memcpy(&s.frame[0], &cols, sizeof(int));
+        memcpy(&s.frame[4], &rows, sizeof(int));
+        memcpy(&s.frame[8], buffer, size);
+
         currFrame.push_back(s);
       }
 

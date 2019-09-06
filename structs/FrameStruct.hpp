@@ -26,7 +26,7 @@ struct CodecParamsStruct {
   CodecParamsStruct() {}
 
   CodecParamsStruct(std::vector<unsigned char> d, std::vector<unsigned char> ed)
-      : data(d), extra_data(ed) {}
+          : data(d), extra_data(ed) {}
 
   void setData(std::vector<unsigned char> &d) { data = d; }
 
@@ -38,21 +38,26 @@ struct CodecParamsStruct {
     results->extradata_size = 0;
     memcpy(results, &data[0], data.size());
     results->extradata =
-        (uint8_t *)av_mallocz(extra_data.size() + AV_INPUT_BUFFER_PADDING_SIZE);
+            (uint8_t *) av_mallocz(extra_data.size() + AV_INPUT_BUFFER_PADDING_SIZE);
     memcpy(results->extradata, &extra_data[0], extra_data.size());
     results->extradata_size = extra_data.size();
     return results;
   }
 
-  template <class Archive> void serialize(Archive &ar) { ar(data, extra_data); }
+  template<class Archive>
+  void serialize(Archive &ar) { ar(data, extra_data); }
 };
 
 struct FrameStruct {
-  // 0 for image frames, 1 for libav packets
+
+  // message id, currenly set to 0
   unsigned short messageType;
 
   // 0 for color, 1 for depth
-  unsigned short frameType = -1;
+  unsigned short frameType;
+
+  // 0 for image frames, 1 for libav packets, 2 for raw RGBA data
+  unsigned short frameDataType;
 
   // random 16 char string that uniquely ids the frame stream
   std::string streamId;
@@ -79,13 +84,14 @@ struct FrameStruct {
   // TODO: fill with capture and processing timestamps
   std::vector<unsigned long> timestamps;
 
-  template <class Archive> void serialize(Archive &ar) {
-    ar(messageType, frameType, streamId, frame, codec_data, sceneDesc, sensorId,
+  template<class Archive>
+  void serialize(Archive &ar) {
+    ar(messageType, frameType, frameDataType, streamId, frame, codec_data, sceneDesc, sensorId,
        deviceId, frameId, timestamps);
   }
 };
 
-template <typename T>
+template<typename T>
 static const std::string cerealStructToString(const T &t) {
   std::ostringstream os(std::ios::binary);
   {
@@ -96,7 +102,8 @@ static const std::string cerealStructToString(const T &t) {
   return os.str();
 }
 
-template <typename T> static T parseCerealStructFromString(std::string &data) {
+template<typename T>
+static T parseCerealStructFromString(std::string &data) {
   T frameIn;
   std::istringstream is(data, std::ios::binary);
   {

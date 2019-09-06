@@ -81,7 +81,9 @@ int main(int argc, char *argv[]) {
         start_time = last_time;
       }
       frameStruct.codec_data = videoReader.getCodecParamsStruct();
-      frameStruct.messageType = 1;
+      frameStruct.messageType = 0;
+
+      frameStruct.frameDataType = 1;
       frameStruct.frame = videoReader.currentFrameBytes();
       frameStruct.frameId = videoReader.currentFrameId();
       frameStruct.streamId = videoReader.getStreamID();

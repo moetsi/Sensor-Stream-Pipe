@@ -93,10 +93,22 @@ int main(int argc, char *argv[]) {
 
       for (FrameStruct f : f_list) {
         cv::Mat img;
-        if (f.messageType == 0) {
+        if (f.frameDataType == 0) {
           img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
           imgChanged = true;
-        } else if (f.messageType == 1) {
+        } else if (f.frameDataType == 2) {
+          int rows, cols;
+          memcpy(&cols, &f.frame[0], sizeof(int));
+          memcpy(&rows, &f.frame[4], sizeof(int));
+          img = cv::Mat(rows, cols, CV_8UC4, (void *) &f.frame[8], cv::Mat::AUTO_STEP);
+          imgChanged = true;
+        } else if (f.frameDataType == 3) {
+          int rows, cols;
+          memcpy(&cols, &f.frame[0], sizeof(int));
+          memcpy(&rows, &f.frame[4], sizeof(int));
+          img = cv::Mat(rows, cols, CV_16UC1, (void *) &f.frame[8], cv::Mat::AUTO_STEP);
+          imgChanged = true;
+        } else if (f.frameDataType == 1) {
           if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) ==
               pCodecs.end()) {
             prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
