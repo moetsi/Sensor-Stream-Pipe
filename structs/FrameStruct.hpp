@@ -56,7 +56,7 @@ struct FrameStruct {
   // 0 for color, 1 for depth
   unsigned short frameType;
 
-  // 0 for image frames, 1 for libav packets, 2 for raw RGBA data
+  // 0 for image frames, 1 for libav packets, 2 for raw RGBA data, 3 for raw GRAY16LE data
   unsigned short frameDataType;
 
   // random 16 char string that uniquely ids the frame stream

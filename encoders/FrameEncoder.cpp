@@ -57,16 +57,31 @@ void FrameEncoder::prepareFrame() {
 
   } else if (buffer.front().frameDataType == 3) {
     if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
-      //TODO: currently it only can send kinect depth data as GRAY16 ou GRAY12
       // TODO: replace with straight mem copy
       int i = 0;
       uint8_t *data = &frameData[8];
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
+          uint lower = data[i];
+          uint upper = data[i + 1];
 
-          pFrame->data[0][i] = data[i];
+          pFrame->data[0][i] = lower;
           i++;
-          pFrame->data[0][i] = data[i];
+          pFrame->data[0][i] = upper;
+          i++;
+        }
+      }
+    } else if (pFrame->format == AV_PIX_FMT_GRAY16BE) { // PNG GRAY16 TO gray12le
+      int i = 0;
+      uint8_t *data = &frameData[8];
+      for (uint y = 0; y < pFrame->height; y++) {
+        for (uint x = 0; x < pFrame->width; x++) {
+          uint lower = data[i];
+          uint upper = data[i + 1];
+
+          pFrame->data[0][i] = upper;
+          i++;
+          pFrame->data[0][i] = lower;
           i++;
         }
       }
@@ -219,7 +234,7 @@ void FrameEncoder::init(FrameStruct fs) {
 
   int width, height, pxl_format;
 
-  if (fs.frameDataType == 1) {
+  if (fs.frameDataType == 0 || fs.frameDataType == 1) {
     AVFrame *pFrameO = av_frame_alloc();
 
     id.imageBufferToAVFrame(fs.frame, pFrameO);
