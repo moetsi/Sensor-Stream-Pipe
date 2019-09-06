@@ -1,6 +1,0 @@
----
-codec_name: "hevc_nvenc"
-bitrate: 480000
-gop_size: 10
-max_b_frames: 0
-pix_fmt: "yuv420p"

@@ -1,0 +1,12 @@
+---
+kinect_parameters:
+  0: #parameters for the first Kinect
+    stream_color_video: True
+    stream_depth_video: True
+    stream_ir_video: False
+    streaming_color_format: "K4A_IMAGE_FORMAT_COLOR_MJPG"
+    streaming_color_resolution: "K4A_COLOR_RESOLUTION_2160P"
+    streaming_depth_mode: "K4A_DEPTH_MODE_NFOV_UNBINNED"
+    wired_sync_mode: "K4A_WIRED_SYNC_MODE_STANDALONE"
+    streaming_rate: "K4A_FRAMES_PER_SECOND_30"
+    absoluteExposureValue: 0

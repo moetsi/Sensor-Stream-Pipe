@@ -1,6 +1,0 @@
----
-codec_name: "libx265"
-bitrate: 1960000
-gop_size: 10
-max_b_frames: 0
-pix_fmt: "yuv420p"

@@ -56,16 +56,38 @@ void FrameEncoder::prepareFrame() {
               0, pFrame->height, pFrame->data, pFrame->linesize);
 
   } else if (buffer.front().frameDataType == 3) {
-    //TODO: currently it only can send kinect depth data as GRAY16 ou GRAY12
-    int i = 0;
-    uint8_t *data = &frameData[8];
-    for (uint y = 0; y < pFrame->height; y++) {
-      for (uint x = 0; x < pFrame->width; x++) {
+    if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
+      //TODO: currently it only can send kinect depth data as GRAY16 ou GRAY12
+      // TODO: replace with straight mem copy
+      int i = 0;
+      uint8_t *data = &frameData[8];
+      for (uint y = 0; y < pFrame->height; y++) {
+        for (uint x = 0; x < pFrame->width; x++) {
 
-        pFrame->data[0][i] = data[i];
-        i++;
-        pFrame->data[0][i] = data[i];
-        i++;
+          pFrame->data[0][i] = data[i];
+          i++;
+          pFrame->data[0][i] = data[i];
+          i++;
+        }
+      }
+    } else {
+      int i = 0;
+      uint8_t *data = &frameData[8];
+      float coeff = (float) MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
+      for (uint y = 0; y < pFrame->height; y++) {
+        for (uint x = 0; x < pFrame->width; x++) {
+          uint lower = data[i * 2];
+          uint upper = data[i * 2 + 1];
+          ushort value = upper << 8 | lower;
+
+          pFrame->data[0][i++] = std::min((ushort) (value * coeff), (ushort) 255);
+        }
+      }
+      for (uint y = 0; y < pFrame->height / 2; y++) {
+        for (uint x = 0; x < pFrame->width / 2; x++) {
+          pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
+          pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
+        }
       }
     }
 
