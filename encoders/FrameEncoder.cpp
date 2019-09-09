@@ -95,7 +95,7 @@ void FrameEncoder::prepareFrame() {
           uint upper = data[i * 2 + 1];
           ushort value = upper << 8 | lower;
 
-          pFrame->data[0][i++] = std::min((ushort) (value * coeff), (ushort) 255);
+          pFrame->data[0][i++] = std::min((uint) (value * coeff), (uint) 255);
         }
       }
       for (uint y = 0; y < pFrame->height / 2; y++) {

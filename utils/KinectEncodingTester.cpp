@@ -68,6 +68,8 @@ int main(int argc, char *argv[]) {
 
   std::vector<uint> types;
   types.push_back(0);
+  types.push_back(1);
+  types.push_back(2);
 
   for (uint type : types) {
     YAML::Node v = codec_parameters["video_encoder"][type];
@@ -130,7 +132,7 @@ int main(int argc, char *argv[]) {
       if (response >= 0) {
         i++;
 
-        if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
+        if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE || pCodecContext->pix_fmt == AV_PIX_FMT_GRAY16BE) {
           avframeToMatGray(pFrame, img);
         } else {
           avframeToMatYUV(pFrame, img);
@@ -161,7 +163,7 @@ int main(int argc, char *argv[]) {
         frameOri = cv::Mat(rows, cols, CV_16UC1, (void *) &fo.frame[8], cv::Mat::AUTO_STEP);
       }
 
-      if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
+      if (f.frameType == 1 && pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
 
         cv::Mat frameOriSquached;
         minMaxFilter<ushort>(frameOri, frameOriSquached, 0,
@@ -180,11 +182,29 @@ int main(int argc, char *argv[]) {
         cv::applyColorMap(img, img, cv::COLORMAP_JET);
         cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
         cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
+      } else if (f.frameType == 1 && pCodecContext->pix_fmt == AV_PIX_FMT_GRAY16BE) {
+
+        psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_12_BITS);
+        img *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
+        frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
+
+        img.convertTo(img, CV_8U);
+        frameOri.convertTo(frameOri, CV_8U);
+
+        absdiff(frameOri, img, frameDiff);
+        mssim += getMSSIM(frameOri, img);
+
+        cv::applyColorMap(img, img, cv::COLORMAP_JET);
+        cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
+        cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
+
+
       } else if (f.frameType == 1) {
 
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
 
         img.convertTo(img, CV_16U);
+        //img *= MAX_DEPTH_VALUE_12_BITS/MAX_DEPTH_VALUE_8_BITS;
 
         cv::Mat frameOriSquached;
         minMaxFilter<ushort>(frameOri, frameOriSquached, 0,
