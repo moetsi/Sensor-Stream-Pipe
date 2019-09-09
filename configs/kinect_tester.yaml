@@ -1,0 +1,35 @@
+---
+kinect_parameters:
+  0: #parameters for the first Kinect
+    stream_color_video: True
+    stream_depth_video: False
+    stream_ir_video: False
+    streaming_color_format: "K4A_IMAGE_FORMAT_COLOR_BGRA32"
+    streaming_color_resolution: "K4A_COLOR_RESOLUTION_720P"
+    streaming_depth_mode: "K4A_DEPTH_MODE_NFOV_UNBINNED"
+    wired_sync_mode: "K4A_WIRED_SYNC_MODE_STANDALONE"
+    streaming_rate: "K4A_FRAMES_PER_SECOND_30"
+    absoluteExposureValue: 0
+video_encoder:
+  0: #color
+    codec_name: "hevc_nvenc"
+    pix_fmt: "yuv420p"
+    bit_rate: 8000000
+    options:
+      preset: "ll"
+      crf: "23"
+      delay: 0
+  1: #depth
+    codec_name: "hevc_nvenc"
+    pix_fmt: "yuv420p"
+    bit_rate: 8000000
+    options:
+      preset: "llhq"
+      crf: "23"
+  2: #ir
+    codec_name: "hevc_nvenc"
+    pix_fmt: "yuv420p"
+    bit_rate: 8000000
+    options:
+      preset: "llhq"
+      crf: "23"

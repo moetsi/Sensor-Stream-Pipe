@@ -189,7 +189,7 @@ void FrameEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
     fprintf(stderr, "Error sending a frame for encoding\n");
     exit(1);
   }
-  while (ret >= 0) {
+
     ret = avcodec_receive_packet(enc_ctx, pkt);
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
       return;
@@ -205,7 +205,7 @@ void FrameEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
                          1]);
     memcpy(newPacket.data, pPacket->data, pPacket->size);
     pBuffer.emplace(newPacket);
-  }
+
 }
 
 void FrameEncoder::encode() {
@@ -260,6 +260,13 @@ void FrameEncoder::init(FrameStruct fs) {
   /* frames per second */
   pCodecContextEncoder->time_base = (AVRational) {1, (int) fps};
   pCodecContextEncoder->framerate = (AVRational) {(int) fps, 1};
+  pCodecContextEncoder->gop_size = 0;
+
+  pCodecContextEncoder->bit_rate_tolerance = 0;
+  pCodecContextEncoder->rc_max_rate = 0;
+  pCodecContextEncoder->rc_buffer_size = 0;
+  pCodecContextEncoder->max_b_frames = 0;
+  pCodecContextEncoder->delay = 0;
 
   /* emit one intra frame every ten frames
    * check frame pict_type before passing frame
@@ -270,7 +277,7 @@ void FrameEncoder::init(FrameStruct fs) {
 
   // TDOO: check delay:
   // https://ffmpeg.org/pipermail/libav-user/2014-December/007672.html
-  pCodecContextEncoder->max_b_frames = 0;                                  // 1
+  // 1
   pCodecContextEncoder->bit_rate = codec_parameters["bit_rate"].as<int>(); // 1
 
   // fmpeg -h encoder=hevc
@@ -294,7 +301,8 @@ void FrameEncoder::init(FrameStruct fs) {
                it->second.as<std::string>().c_str(), AV_OPT_SEARCH_CHILDREN);
   }
 
-  av_opt_set(pCodecContextEncoder->priv_data, "tune", "zerolatency", 0);
+  av_opt_set(pCodecContextEncoder->priv_data, "tune", "delay", 0);
+  av_opt_set(pCodecContextEncoder->priv_data, "tune", "zerolatency", 1);
   av_opt_set(pCodecContextEncoder->priv_data, "rcParams", "zeroReorderDelay",
              1);
 
