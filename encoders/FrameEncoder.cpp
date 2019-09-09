@@ -10,6 +10,7 @@ FrameEncoder::FrameEncoder(std::string codec_parameters_file, uint _fps) {
   av_register_all();
 
   ready = false;
+  cParamsStruct = NULL;
   totalCurrentFrameCounter = 0;
 }
 
@@ -19,11 +20,12 @@ FrameEncoder::FrameEncoder(YAML::Node &_codec_parameters, uint _fps) {
   av_register_all();
 
   ready = false;
+  cParamsStruct = NULL;
   totalCurrentFrameCounter = 0;
 }
 
-std::vector<unsigned char> FrameEncoder::currentFrameBytes(AVPacket &packet) {
-  return std::vector<unsigned char>(packet.data, packet.data + packet.size);
+std::vector<unsigned char> FrameEncoder::currentFrameBytes() {
+  return std::vector<unsigned char>(pBuffer.front().data, pBuffer.front().data + pBuffer.front().size);
 }
 
 FrameEncoder::~FrameEncoder() {
@@ -45,11 +47,8 @@ void FrameEncoder::nextPacket() {
 
 void FrameEncoder::prepareFrame() {
 
-  std::vector<unsigned char> frameData = buffer.front().frame;
-
-
   if (buffer.front().frameDataType == 2) {
-    uint8_t *inData[1] = {&frameData[8]};
+    uint8_t *inData[1] = {&buffer.front().frame[8]};
     int inLinesize[1] = {4 * pFrame->width};
 
     sws_scale(sws_ctx, (const uint8_t *const *) inData, inLinesize,
@@ -59,7 +58,9 @@ void FrameEncoder::prepareFrame() {
     if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
       // TODO: replace with straight mem copy
       int i = 0;
-      uint8_t *data = &frameData[8];
+      uint8_t *data = &buffer.front().frame[8];
+      memcpy(pFrame->data[0], data, pFrame->height * pFrame->width);
+      /*
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
           uint lower = data[i];
@@ -71,23 +72,20 @@ void FrameEncoder::prepareFrame() {
           i++;
         }
       }
+       */
     } else if (pFrame->format == AV_PIX_FMT_GRAY16BE) { // PNG GRAY16 TO gray12le
       int i = 0;
-      uint8_t *data = &frameData[8];
+      uint8_t *data = &buffer.front().frame[8];
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
-          uint lower = data[i];
-          uint upper = data[i + 1];
-
-          pFrame->data[0][i] = upper;
-          i++;
-          pFrame->data[0][i] = lower;
-          i++;
+          pFrame->data[0][i] = data[i + 1];
+          pFrame->data[0][i + 1] = data[i];
+          i += 2;
         }
       }
     } else {
       int i = 0;
-      uint8_t *data = &frameData[8];
+      uint8_t *data = &buffer.front().frame[8];
       float coeff = (float) MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
@@ -109,6 +107,8 @@ void FrameEncoder::prepareFrame() {
   } else if (buffer.front().frameDataType == 0) {
 
     AVFrame *pFrameO = av_frame_alloc();
+
+    std::vector<unsigned char> frameData = buffer.front().frame;
 
     id.imageBufferToAVFrame(frameData, pFrameO);
 
@@ -199,12 +199,13 @@ void FrameEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
     }
 
     AVPacket newPacket(*pPacket);
-    newPacket.data = reinterpret_cast<uint8_t *>(
+  pBuffer.push(newPacket);
+  pBuffer.back().data = reinterpret_cast<uint8_t *>(
             new uint64_t[(pPacket->size + FF_INPUT_BUFFER_PADDING_SIZE) /
                          sizeof(uint64_t) +
                          1]);
-    memcpy(newPacket.data, pPacket->data, pPacket->size);
-    pBuffer.emplace(newPacket);
+  memcpy(pBuffer.back().data, pPacket->data, pPacket->size);
+
 
 }
 
@@ -357,19 +358,23 @@ void FrameEncoder::init(FrameStruct fs) {
 }
 
 CodecParamsStruct FrameEncoder::getCodecParamsStruct() {
-  void *sEPointer = pCodecParametersEncoder->extradata;
-  size_t sESize = pCodecParametersEncoder->extradata_size;
-  size_t sSize = sizeof(*pCodecParametersEncoder);
 
-  std::vector<unsigned char> e(sSize);
-  std::vector<unsigned char> ed(sESize);
+  if (cParamsStruct == NULL) {
 
-  memcpy(&e[0], pCodecParametersEncoder, sSize);
-  memcpy(&ed[0], sEPointer, sESize);
+    void *sEPointer = pCodecParametersEncoder->extradata;
+    size_t sESize = pCodecParametersEncoder->extradata_size;
+    size_t sSize = sizeof(*pCodecParametersEncoder);
 
-  CodecParamsStruct cParamsStruct(e, ed);
+    std::vector<unsigned char> e(sSize);
+    std::vector<unsigned char> ed(sESize);
 
-  return cParamsStruct;
+    memcpy(&e[0], pCodecParametersEncoder, sSize);
+    memcpy(&ed[0], sEPointer, sESize);
+    cParamsStruct = new CodecParamsStruct(e, ed);
+
+  }
+
+  return *cParamsStruct;
 }
 
 unsigned int FrameEncoder::currentFrameId() { return totalCurrentFrameCounter; }
@@ -380,7 +385,7 @@ FrameStruct FrameEncoder::currentFrame() {
   f.messageType = 0;
   f.frameDataType = 1;
   f.codec_data = getCodecParamsStruct();
-  f.frame = currentFrameBytes(pBuffer.front());
+  f.frame = currentFrameBytes();
   f.frameId = totalCurrentFrameCounter;
 
   return f;

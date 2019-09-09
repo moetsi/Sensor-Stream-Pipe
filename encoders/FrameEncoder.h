@@ -39,6 +39,8 @@ private:
   AVFrame *pFrame;
   AVPacket *pPacket;
 
+  CodecParamsStruct *cParamsStruct;
+
   struct SwsContext *sws_ctx;
 
   YAML::Node codec_parameters;
@@ -57,7 +59,7 @@ private:
 
   void prepareFrame();
 
-  std::vector<unsigned char> currentFrameBytes(AVPacket &packet);
+  std::vector<unsigned char> currentFrameBytes();
 
 public:
   std::queue<FrameStruct> buffer;
