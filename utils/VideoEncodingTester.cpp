@@ -62,17 +62,17 @@ int main(int argc, char *argv[]) {
   while (reader.hasNextFrame() || frameEncoder.hasNextPacket()) {
 
     while (!frameEncoder.hasNextPacket()) {
-      frameEncoder.addFrameStruct(reader.currentFrame().front());
+      frameEncoder.addFrameStruct(&reader.currentFrame().front());
       reader.nextFrame();
     }
 
-    FrameStruct f = frameEncoder.currentFrame();
+    FrameStruct f = *frameEncoder.currentFrame();
     std::vector<FrameStruct> v;
     v.push_back(f);
 
     if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) ==
         pCodecs.end()) {
-      prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
+      prepareDecodingStruct(&f, pCodecs, pCodecContexts, pCodecParameters);
     }
 
     AVCodecContext *pCodecContext =
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
               << " received; size " << f.frame.size() << std::endl;
 
     if (imgChanged) {
-      FrameStruct fo = frameEncoder.currentFrameOriginal();
+      FrameStruct fo = *frameEncoder.currentFrameOriginal();
       cv::Mat frameOri = cv::imdecode(fo.frame, CV_LOAD_IMAGE_UNCHANGED);
       cv::Mat frameDiff;
       if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {

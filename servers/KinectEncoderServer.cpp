@@ -78,16 +78,19 @@ int main(int argc, char *argv[]) {
       }
 
       std::vector<FrameStruct> v;
+      std::vector<FrameStruct *> vO;
 
       // TODO: document what is happening with the Encoders and Queue
       while (v.empty()) {
-        std::vector<FrameStruct> frameStruct = reader.currentFrame();
-        for (FrameStruct frameStruct : frameStruct) {
-          FrameEncoder *frameEncoder = encoders[frameStruct.frameType];
+        std::vector<FrameStruct *> frameStruct = reader.currentFrame();
+        for (FrameStruct *frameStruct : frameStruct) {
+          FrameEncoder *frameEncoder = encoders[frameStruct->frameType];
 
           frameEncoder->addFrameStruct(frameStruct);
           if (frameEncoder->hasNextPacket()) {
-            v.push_back(frameEncoder->currentFrame());
+            FrameStruct *f = frameEncoder->currentFrame();
+            vO.push_back(f);
+            v.push_back(*f);
             frameEncoder->nextPacket();
           }
         }
@@ -125,8 +128,10 @@ int main(int argc, char *argv[]) {
                   << " Mbps expected " << std::endl;
         for (uint i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
+          f.frame.clear();
           std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";"
                     << f.frameId << " sent" << std::endl;
+          delete vO.at(i);
         }
       }
     }

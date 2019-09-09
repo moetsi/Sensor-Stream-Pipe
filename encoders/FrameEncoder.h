@@ -51,7 +51,7 @@ private:
 
   bool ready;
 
-  void init(FrameStruct fs);
+  void init(FrameStruct *fs);
 
   void encode();
 
@@ -62,8 +62,8 @@ private:
   std::vector<unsigned char> currentFrameBytes();
 
 public:
-  std::queue<FrameStruct> buffer;
-  std::queue<AVPacket> pBuffer;
+  std::queue<FrameStruct *> buffer;
+  std::queue<AVPacket *> pBuffer;
 
   FrameEncoder(std::string codec_parameters_file, uint fps);
 
@@ -71,17 +71,17 @@ public:
 
   ~FrameEncoder();
 
-  void addFrameStruct(FrameStruct &fs);
+  void addFrameStruct(FrameStruct *fs);
 
   void nextPacket();
 
   bool hasNextPacket();
 
-  FrameStruct currentFrame();
+  FrameStruct *currentFrame();
 
-  FrameStruct currentFrameOriginal();
+  FrameStruct *currentFrameOriginal();
 
-  CodecParamsStruct getCodecParamsStruct();
+  CodecParamsStruct *getCodecParamsStruct();
 
   unsigned int currentFrameId();
 

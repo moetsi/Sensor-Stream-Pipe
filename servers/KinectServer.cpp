@@ -61,7 +61,8 @@ int main(int argc, char *argv[]) {
         start_time = last_time;
       }
 
-      std::vector<FrameStruct> v = reader.currentFrame();
+      std::vector<FrameStruct *> vo = reader.currentFrame();
+      std::vector<FrameStruct> v;
 
       if (reader.hasNextFrame())
         reader.nextFrame();
@@ -69,7 +70,12 @@ int main(int argc, char *argv[]) {
         reader.reset();
       }
 
-      if (!v.empty()) {
+      if (!vo.empty()) {
+
+        for (int i = 0; i < vo.size(); i++) {
+          v.push_back(*vo.at(i));
+        }
+
 
         std::string message = cerealStructToString(v);
 
@@ -104,6 +110,8 @@ int main(int argc, char *argv[]) {
           FrameStruct f = v.at(i);
           std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";"
                     << f.frameId << " sent" << std::endl;
+          f.frame.clear();
+          delete vo.at(i);
         }
       }
     }

@@ -87,14 +87,18 @@ int main(int argc, char *argv[]) {
     // TODO: document what is happening with the Encoders and Queue
     while (v.empty()) {
 
-      std::vector<FrameStruct> frameStruct = reader.currentFrame();
-      for (FrameStruct frameStruct : frameStruct) {
-        FrameEncoder *frameEncoder = encoders[frameStruct.frameType];
+      std::vector<FrameStruct *> frameStruct = reader.currentFrame();
+      for (FrameStruct *frameStruct : frameStruct) {
+        FrameEncoder *frameEncoder = encoders[frameStruct->frameType];
 
         frameEncoder->addFrameStruct(frameStruct);
         if (frameEncoder->hasNextPacket()) {
-          v.push_back(frameEncoder->currentFrame());
-          buffer.push(frameEncoder->currentFrameOriginal());
+          FrameStruct f = *frameEncoder->currentFrame();
+          FrameStruct fo = *frameEncoder->currentFrameOriginal();
+
+          v.push_back(f);
+          buffer.push(fo);
+
           frameEncoder->nextPacket();
 
         }
@@ -108,7 +112,7 @@ int main(int argc, char *argv[]) {
 
     if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) ==
         pCodecs.end()) {
-      prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
+      prepareDecodingStruct(&f, pCodecs, pCodecContexts, pCodecParameters);
     }
 
     AVCodecContext *pCodecContext =

@@ -47,11 +47,11 @@ void avframeToMatGray(const AVFrame *frame, cv::Mat &image) {
 }
 
 void prepareDecodingStruct(
-    FrameStruct &f, std::unordered_map<std::string, AVCodec *> &pCodecs,
-    std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
-    std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters) {
-  AVCodecParameters *pCodecParameter = f.codec_data.getParams();
-  AVCodec *pCodec = avcodec_find_decoder(f.codec_data.getParams()->codec_id);
+        FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
+        std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
+        std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters) {
+  AVCodecParameters *pCodecParameter = f->codec_data.getParams();
+  AVCodec *pCodec = avcodec_find_decoder(f->codec_data.getParams()->codec_id);
   AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
 
   if (!pCodecContext) {
@@ -69,9 +69,9 @@ void prepareDecodingStruct(
     exit(1);
   }
 
-  pCodecs[f.streamId + std::to_string(f.sensorId)] = pCodec;
-  pCodecContexts[f.streamId + std::to_string(f.sensorId)] = pCodecContext;
-  pCodecParameters[f.streamId + std::to_string(f.sensorId)] = pCodecParameter;
+  pCodecs[f->streamId + std::to_string(f->sensorId)] = pCodec;
+  pCodecContexts[f->streamId + std::to_string(f->sensorId)] = pCodecContext;
+  pCodecParameters[f->streamId + std::to_string(f->sensorId)] = pCodecParameter;
 }
 
 cv::Mat getFloat(cv::Mat &input) {

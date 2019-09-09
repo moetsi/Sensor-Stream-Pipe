@@ -149,9 +149,9 @@ KinectReader::~KinectReader() {
 }
 
 void KinectReader::nextFrame() {
-  for (FrameStruct fs : currFrame) {
-    fs.frame.clear();
-  }
+  //for (FrameStruct* fs : currFrame) {
+  //  fs->frame.clear();
+  //}
   currFrame.clear();
 
   do {
@@ -168,28 +168,28 @@ void KinectReader::nextFrame() {
         device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF) {
       k4a_image_t colorImage = k4a_capture_get_color_image(capture);
       if (colorImage && k4a_image_get_format(colorImage) != 6) {
-        FrameStruct s = frameTemplate;
-        s.sensorId = 0;
-        s.frameType = 0;
-        s.frameId = currentFrameCounter.at(0)++;
+        FrameStruct *s = new FrameStruct(frameTemplate);
+        s->sensorId = 0;
+        s->frameType = 0;
+        s->frameId = currentFrameCounter.at(0)++;
 
         uint8_t *buffer = k4a_image_get_buffer(colorImage);
         size_t size = k4a_image_get_size(colorImage);
 
         if (k4a_image_get_format(colorImage) == K4A_IMAGE_FORMAT_COLOR_MJPG) {
-          s.frameDataType = 0;
-          s.frame = std::vector<uchar>(buffer, buffer + size);
+          s->frameDataType = 0;
+          s->frame = std::vector<uchar>(buffer, buffer + size);
         } else {
-          s.frameDataType = 2;
+          s->frameDataType = 2;
 
           int rows = k4a_image_get_height_pixels(colorImage);
           int cols = k4a_image_get_width_pixels(colorImage);
 
-          s.frame.resize(size + 2 * sizeof(int));
+          s->frame.resize(size + 2 * sizeof(int));
 
-          memcpy(&s.frame[0], &cols, sizeof(int));
-          memcpy(&s.frame[4], &rows, sizeof(int));
-          memcpy(&s.frame[8], buffer, size);
+          memcpy(&s->frame[0], &cols, sizeof(int));
+          memcpy(&s->frame[4], &rows, sizeof(int));
+          memcpy(&s->frame[8], buffer, size);
         }
         currFrame.push_back(s);
       }
@@ -201,22 +201,22 @@ void KinectReader::nextFrame() {
       k4a_image_t depthImage = k4a_capture_get_depth_image(capture);
       if (depthImage && k4a_image_get_format(depthImage) != 6) {
 
-        FrameStruct s = frameTemplate;
-        s.sensorId = 1;
-        s.frameType = 1;
-        s.frameDataType = 3;
-        s.frameId = currentFrameCounter.at(1)++;
+        FrameStruct *s = new FrameStruct(frameTemplate);
+        s->sensorId = 1;
+        s->frameType = 1;
+        s->frameDataType = 3;
+        s->frameId = currentFrameCounter.at(1)++;
         uint8_t *buffer = k4a_image_get_buffer(depthImage);
         size_t size = k4a_image_get_size(depthImage);
         // convert the raw buffer to cv::Mat
         int rows = k4a_image_get_height_pixels(depthImage);
         int cols = k4a_image_get_width_pixels(depthImage);
 
-        s.frame.resize(size + 2 * sizeof(int));
+        s->frame.resize(size + 2 * sizeof(int));
 
-        memcpy(&s.frame[0], &cols, sizeof(int));
-        memcpy(&s.frame[4], &rows, sizeof(int));
-        memcpy(&s.frame[8], buffer, size);
+        memcpy(&s->frame[0], &cols, sizeof(int));
+        memcpy(&s->frame[4], &rows, sizeof(int));
+        memcpy(&s->frame[8], buffer, size);
 
         currFrame.push_back(s);
       }
@@ -227,23 +227,23 @@ void KinectReader::nextFrame() {
 
       k4a_image_t irImage = k4a_capture_get_ir_image(capture);
       if (irImage && k4a_image_get_format(irImage) != 6) {
-        FrameStruct s = frameTemplate;
-        s.sensorId = 2;
-        s.frameType = 2;
-        s.frameId = currentFrameCounter.at(2)++;
-        s.frameDataType = 3;
-        s.frameId = currentFrameCounter.at(1)++;
+        FrameStruct *s = new FrameStruct(frameTemplate);
+        s->sensorId = 2;
+        s->frameType = 2;
+        s->frameId = currentFrameCounter.at(2)++;
+        s->frameDataType = 3;
+        s->frameId = currentFrameCounter.at(1)++;
         uint8_t *buffer = k4a_image_get_buffer(irImage);
         size_t size = k4a_image_get_size(irImage);
         // convert the raw buffer to cv::Mat
         int rows = k4a_image_get_height_pixels(irImage);
         int cols = k4a_image_get_width_pixels(irImage);
 
-        s.frame.resize(size + 2 * sizeof(int));
+        s->frame.resize(size + 2 * sizeof(int));
 
-        memcpy(&s.frame[0], &cols, sizeof(int));
-        memcpy(&s.frame[4], &rows, sizeof(int));
-        memcpy(&s.frame[8], buffer, size);
+        memcpy(&s->frame[0], &cols, sizeof(int));
+        memcpy(&s->frame[4], &rows, sizeof(int));
+        memcpy(&s->frame[8], buffer, size);
 
         currFrame.push_back(s);
       }
@@ -258,16 +258,16 @@ bool KinectReader::hasNextFrame() { return true; }
 
 void KinectReader::reset() {}
 
-std::vector<FrameStruct> KinectReader::currentFrame() { return currFrame; }
+std::vector<FrameStruct *> KinectReader::currentFrame() {
+  return currFrame;
+}
 
-FrameStruct KinectReader::currentFrame(uint type) {
-  for (FrameStruct fs : currFrame) {
-    std::cout << "b " << fs.frameType << " " << type << std::endl;
-    if (fs.frameType == type)
+FrameStruct *KinectReader::currentFrame(uint type) {
+  for (FrameStruct *fs : currFrame) {
+    if (fs->frameType == type)
       return fs;
   }
-  // TODO: fix to add null
-  return FrameStruct();
+  return NULL;
 }
 
 uint KinectReader::getFps() {

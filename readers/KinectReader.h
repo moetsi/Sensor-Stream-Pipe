@@ -78,7 +78,7 @@ private:
 
   FrameStruct frameTemplate;
 
-  std::vector<FrameStruct> currFrame;
+  std::vector<FrameStruct *> currFrame;
 
 public:
   KinectReader(uint8_t _device_index, ExtendedAzureConfig _device_config);
@@ -91,9 +91,9 @@ public:
 
   void nextFrame();
 
-  std::vector<FrameStruct> currentFrame();
+  std::vector<FrameStruct *> currentFrame();
 
-  FrameStruct currentFrame(uint type);
+  FrameStruct *currentFrame(uint type);
 
   uint getFps();
 

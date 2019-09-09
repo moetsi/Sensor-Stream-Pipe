@@ -36,9 +36,9 @@ void avframeToMatYUV(const AVFrame *frame, cv::Mat &image);
 void avframeToMatGray(const AVFrame *frame, cv::Mat &image);
 
 void prepareDecodingStruct(
-    FrameStruct &f, std::unordered_map<std::string, AVCodec *> &pCodecs,
-    std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
-    std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
+        FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
+        std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
+        std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
 
 cv::Mat getFloat(cv::Mat &input);
 

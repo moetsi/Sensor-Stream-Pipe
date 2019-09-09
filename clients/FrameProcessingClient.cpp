@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
         } else if (f.frameDataType == 1) {
           if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) ==
               pCodecs.end()) {
-            prepareDecodingStruct(f, pCodecs, pCodecContexts, pCodecParameters);
+            prepareDecodingStruct(&f, pCodecs, pCodecContexts, pCodecParameters);
           }
 
           AVCodecContext *pCodecContext =

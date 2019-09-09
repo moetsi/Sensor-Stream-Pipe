@@ -25,7 +25,7 @@ FrameEncoder::FrameEncoder(YAML::Node &_codec_parameters, uint _fps) {
 }
 
 std::vector<unsigned char> FrameEncoder::currentFrameBytes() {
-  return std::vector<unsigned char>(pBuffer.front().data, pBuffer.front().data + pBuffer.front().size);
+  return std::vector<unsigned char>(pBuffer.front()->data, pBuffer.front()->data + pBuffer.front()->size);
 }
 
 FrameEncoder::~FrameEncoder() {
@@ -36,29 +36,35 @@ FrameEncoder::~FrameEncoder() {
 
 void FrameEncoder::nextPacket() {
   if (!buffer.empty()) {
+    FrameStruct *f = buffer.front();
     buffer.pop();
+    f->frame.clear();
+    delete f;
+
   }
   if (!pBuffer.empty()) {
-    AVPacket p = pBuffer.front();
-    delete[] p.data;
+    AVPacket *p = pBuffer.front();
     pBuffer.pop();
+    delete[] p->data;
+    delete p;
+
   }
 }
 
 void FrameEncoder::prepareFrame() {
 
-  if (buffer.front().frameDataType == 2) {
-    uint8_t *inData[1] = {&buffer.front().frame[8]};
+  if (buffer.front()->frameDataType == 2) {
+    uint8_t *inData[1] = {&buffer.front()->frame[8]};
     int inLinesize[1] = {4 * pFrame->width};
 
     sws_scale(sws_ctx, (const uint8_t *const *) inData, inLinesize,
               0, pFrame->height, pFrame->data, pFrame->linesize);
 
-  } else if (buffer.front().frameDataType == 3) {
+  } else if (buffer.front()->frameDataType == 3) {
     if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
       // TODO: replace with straight mem copy
       int i = 0;
-      uint8_t *data = &buffer.front().frame[8];
+      uint8_t *data = &buffer.front()->frame[8];
       memcpy(pFrame->data[0], data, pFrame->height * pFrame->width);
       /*
       for (uint y = 0; y < pFrame->height; y++) {
@@ -75,7 +81,7 @@ void FrameEncoder::prepareFrame() {
        */
     } else if (pFrame->format == AV_PIX_FMT_GRAY16BE) { // PNG GRAY16 TO gray12le
       int i = 0;
-      uint8_t *data = &buffer.front().frame[8];
+      uint8_t *data = &buffer.front()->frame[8];
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
           pFrame->data[0][i] = data[i + 1];
@@ -85,7 +91,7 @@ void FrameEncoder::prepareFrame() {
       }
     } else {
       int i = 0;
-      uint8_t *data = &buffer.front().frame[8];
+      uint8_t *data = &buffer.front()->frame[8];
       float coeff = (float) MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
@@ -104,11 +110,11 @@ void FrameEncoder::prepareFrame() {
       }
     }
 
-  } else if (buffer.front().frameDataType == 0) {
+  } else if (buffer.front()->frameDataType == 0) {
 
     AVFrame *pFrameO = av_frame_alloc();
 
-    std::vector<unsigned char> frameData = buffer.front().frame;
+    std::vector<unsigned char> frameData = buffer.front()->frame;
 
     id.imageBufferToAVFrame(frameData, pFrameO);
 
@@ -198,13 +204,12 @@ void FrameEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
       exit(1);
     }
 
-    AVPacket newPacket(*pPacket);
+  AVPacket *newPacket = new AVPacket(*pPacket);
   pBuffer.push(newPacket);
-  pBuffer.back().data = reinterpret_cast<uint8_t *>(
-            new uint64_t[(pPacket->size + FF_INPUT_BUFFER_PADDING_SIZE) /
-                         sizeof(uint64_t) +
-                         1]);
-  memcpy(pBuffer.back().data, pPacket->data, pPacket->size);
+  pBuffer.back()->data = reinterpret_cast<uint8_t *>(new uint64_t[
+  (pPacket->size + FF_INPUT_BUFFER_PADDING_SIZE) / sizeof(uint64_t) + 1]);
+  memcpy(pBuffer.back()->data, pPacket->data, pPacket->size);
+
 
 
 }
@@ -222,7 +227,7 @@ void FrameEncoder::encode() {
   encodeA(pCodecContextEncoder, pFrame, pPacket);
 }
 
-void FrameEncoder::init(FrameStruct fs) {
+void FrameEncoder::init(FrameStruct *fs) {
   int ret;
 
   std::cout << codec_parameters << std::endl;
@@ -235,23 +240,23 @@ void FrameEncoder::init(FrameStruct fs) {
 
   int width, height, pxl_format;
 
-  if (fs.frameDataType == 0 || fs.frameDataType == 1) {
+  if (fs->frameDataType == 0 || fs->frameDataType == 1) {
     AVFrame *pFrameO = av_frame_alloc();
 
-    id.imageBufferToAVFrame(fs.frame, pFrameO);
+    id.imageBufferToAVFrame(fs->frame, pFrameO);
 
     width = pFrameO->width;
     height = pFrameO->height;
     pxl_format = pFrameO->format;
 
     av_frame_free(&pFrameO);
-  } else if (fs.frameDataType == 2) {
-    memcpy(&width, &fs.frame[0], sizeof(int));
-    memcpy(&height, &fs.frame[4], sizeof(int));
+  } else if (fs->frameDataType == 2) {
+    memcpy(&width, &fs->frame[0], sizeof(int));
+    memcpy(&height, &fs->frame[4], sizeof(int));
     pxl_format = AV_PIX_FMT_BGRA;
-  } else if (fs.frameDataType == 3) {
-    memcpy(&width, &fs.frame[0], sizeof(int));
-    memcpy(&height, &fs.frame[4], sizeof(int));
+  } else if (fs->frameDataType == 3) {
+    memcpy(&width, &fs->frame[0], sizeof(int));
+    memcpy(&height, &fs->frame[4], sizeof(int));
     pxl_format = AV_PIX_FMT_GRAY16LE;
   }
 
@@ -357,7 +362,7 @@ void FrameEncoder::init(FrameStruct fs) {
 
 }
 
-CodecParamsStruct FrameEncoder::getCodecParamsStruct() {
+CodecParamsStruct *FrameEncoder::getCodecParamsStruct() {
 
   if (cParamsStruct == NULL) {
 
@@ -374,30 +379,30 @@ CodecParamsStruct FrameEncoder::getCodecParamsStruct() {
 
   }
 
-  return *cParamsStruct;
+  return cParamsStruct;
 }
 
 unsigned int FrameEncoder::currentFrameId() { return totalCurrentFrameCounter; }
 
-FrameStruct FrameEncoder::currentFrame() {
-  FrameStruct f = buffer.front();
+FrameStruct *FrameEncoder::currentFrame() {
+  FrameStruct *f = new FrameStruct(*buffer.front());
 
-  f.messageType = 0;
-  f.frameDataType = 1;
-  f.codec_data = getCodecParamsStruct();
-  f.frame = currentFrameBytes();
-  f.frameId = totalCurrentFrameCounter;
+  f->messageType = 0;
+  f->frameDataType = 1;
+  f->codec_data = *getCodecParamsStruct();
+  f->frame = currentFrameBytes();
+  f->frameId = totalCurrentFrameCounter;
 
   return f;
 }
 
-FrameStruct FrameEncoder::currentFrameOriginal() {
+FrameStruct *FrameEncoder::currentFrameOriginal() {
   if (buffer.empty())
-    return FrameStruct();
+    return NULL;
   return buffer.front();
 }
 
-void FrameEncoder::addFrameStruct(FrameStruct &fs) {
+void FrameEncoder::addFrameStruct(FrameStruct *fs) {
   if (!ready) {
     ready = true;
     init(fs);

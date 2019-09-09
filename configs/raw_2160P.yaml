@@ -8,5 +8,5 @@ kinect_parameters:
     streaming_color_resolution: "K4A_COLOR_RESOLUTION_2160P"
     streaming_depth_mode: "K4A_DEPTH_MODE_NFOV_UNBINNED"
     wired_sync_mode: "K4A_WIRED_SYNC_MODE_STANDALONE"
-    streaming_rate: "K4A_FRAMES_PER_SECOND_30"
+    streaming_rate: "K4A_FRAMES_PER_SECOND_5"
     absoluteExposureValue: 0

@@ -103,6 +103,18 @@ static const std::string cerealStructToString(const T &t) {
 }
 
 template<typename T>
+static const std::string frameStructToString(const T *t) {
+  std::ostringstream os(std::ios::binary);
+  {
+    cereal::BinaryOutputArchive oarchive(os);
+    oarchive(*t);
+  }
+
+  return os.str();
+}
+
+
+template<typename T>
 static T parseCerealStructFromString(std::string &data) {
   T frameIn;
   std::istringstream is(data, std::ios::binary);

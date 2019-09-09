@@ -2,8 +2,8 @@
 kinect_parameters:
   0: #parameters for the first Kinect
     stream_color_video: False
-    stream_depth_video: True
-    stream_ir_video: False
+    stream_depth_video: False
+    stream_ir_video: True
     streaming_color_format: "K4A_IMAGE_FORMAT_COLOR_BGRA32"
     streaming_color_resolution: "K4A_COLOR_RESOLUTION_720P"
     streaming_depth_mode: "K4A_DEPTH_MODE_NFOV_UNBINNED"

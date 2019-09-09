@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
       }
 
       while (!frameEncoder.hasNextPacket()) {
-        frameEncoder.addFrameStruct(reader.currentFrame().front());
+        frameEncoder.addFrameStruct(&reader.currentFrame().front());
         if (!reader.hasNextFrame()) {
           reader.reset();
           stopAfter--;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
         reader.nextFrame();
       }
 
-      FrameStruct f = frameEncoder.currentFrame();
+      FrameStruct f = *frameEncoder.currentFrame();
       std::vector<FrameStruct> v;
       v.push_back(f);
 
