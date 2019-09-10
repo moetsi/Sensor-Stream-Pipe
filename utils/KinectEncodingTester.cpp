@@ -49,12 +49,13 @@ int main(int argc, char *argv[]) {
 
   av_register_all();
 
-  if (argc < 2) {
-    std::cerr << "Usage: kinect_encoder_test <codec parameters>"
+  if (argc < 3) {
+    std::cerr << "Usage: kinect_encoder_test <codec parameters> <time in seconds>"
               << std::endl;
     return 1;
   }
   std::string codec_parameters_file = std::string(argv[1]);
+  uint time_in_seconds = std::stoul(argv[2]);
 
   YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
@@ -79,8 +80,9 @@ int main(int argc, char *argv[]) {
 
   std::queue<FrameStruct> buffer;
 
+  uint64_t start_time = currentTimeMs();
   // This class only reads the file once
-  while (reader.hasNextFrame()) {
+  while ((currentTimeMs() - start_time) <= time_in_seconds * 1000) {
 
     std::vector<FrameStruct> v;
 
@@ -226,6 +228,25 @@ int main(int argc, char *argv[]) {
         cv::applyColorMap(img, img, cv::COLORMAP_JET);
         cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
         cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
+
+      } else if (f.frameType == 2) {
+
+        if (img.type() == CV_8UC3) {
+          cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+          img.convertTo(img, CV_16UC1);
+        }
+
+        //img *= MAX_DEPTH_VALUE_12_BITS/MAX_DEPTH_VALUE_8_BITS;
+
+        psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_12_BITS);
+        mssim += getMSSIM(frameOri, img);
+        img.convertTo(img, CV_8U);
+
+        frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
+
+        frameOri.convertTo(frameOri, CV_8U);
+
+        absdiff(frameOri, img, frameDiff);
 
       } else {
         cv::cvtColor(frameOri, frameOri, COLOR_BGRA2BGR);
