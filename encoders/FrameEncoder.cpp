@@ -52,20 +52,19 @@ void FrameEncoder::nextPacket() {
 }
 
 void FrameEncoder::prepareFrame() {
-
-  if (buffer.front()->frameDataType == 2) {
-    uint8_t *inData[1] = {&buffer.front()->frame[8]};
+  FrameStruct *f = buffer.front();
+  if (f->frameDataType == 2) {
+    uint8_t *inData[1] = {&f->frame[8]};
     int inLinesize[1] = {4 * pFrame->width};
 
     sws_scale(sws_ctx, (const uint8_t *const *) inData, inLinesize,
               0, pFrame->height, pFrame->data, pFrame->linesize);
 
-  } else if (buffer.front()->frameDataType == 3) {
+  } else if (f->frameDataType == 3) {
     if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
-      // TODO: replace with straight mem copy
       int i = 0;
-      uint8_t *data = &buffer.front()->frame[8];
-      memcpy(pFrame->data[0], data, pFrame->height * pFrame->width);
+      uint8_t *data = &f->frame[8];
+      memcpy(pFrame->data[0], data, pFrame->height * pFrame->width * 2);
       /*
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
@@ -81,7 +80,7 @@ void FrameEncoder::prepareFrame() {
        */
     } else if (pFrame->format == AV_PIX_FMT_GRAY16BE) { // PNG GRAY16 TO gray12le
       int i = 0;
-      uint8_t *data = &buffer.front()->frame[8];
+      uint8_t *data = &f->frame[8];
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
           pFrame->data[0][i] = data[i + 1];
@@ -91,7 +90,7 @@ void FrameEncoder::prepareFrame() {
       }
     } else {
       int i = 0;
-      uint8_t *data = &buffer.front()->frame[8];
+      uint8_t *data = &f->frame[8];
       float coeff = (float) MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
@@ -102,19 +101,17 @@ void FrameEncoder::prepareFrame() {
           pFrame->data[0][i++] = std::min((uint) (value * coeff), (uint) 255);
         }
       }
-      for (uint y = 0; y < pFrame->height / 2; y++) {
-        for (uint x = 0; x < pFrame->width / 2; x++) {
-          pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
-          pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
-        }
-      }
+
+      memset(&pFrame->data[1][0], 128, pFrame->height * pFrame->width / 4);
+      memset(&pFrame->data[2][0], 128, pFrame->height * pFrame->width / 4);
+
     }
 
-  } else if (buffer.front()->frameDataType == 0) {
+  } else if (f->frameDataType == 0) {
 
     AVFrame *pFrameO = av_frame_alloc();
 
-    std::vector<unsigned char> frameData = buffer.front()->frame;
+    std::vector<unsigned char> frameData = f->frame;
 
     id.imageBufferToAVFrame(frameData, pFrameO);
 
@@ -126,11 +123,19 @@ void FrameEncoder::prepareFrame() {
       int i = 0;
       for (uint y = 0; y < pFrameO->height; y++) {
         for (uint x = 0; x < pFrameO->width; x++) {
-          uint lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
-          uint upper = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2 + 1];
+          ushort lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
+          ushort upper = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2 + 1];
+          ushort value = lower << 8 | upper;
 
-          pFrame->data[0][i++] = upper;
-          pFrame->data[0][i++] = lower;
+          //TODO: check what is happening!
+          if (value >= MAX_DEPTH_VALUE_12_BITS) {
+            pFrame->data[0][i++] = 255;
+            pFrame->data[0][i++] = 255;
+          } else {
+            pFrame->data[0][i++] = upper;
+            pFrame->data[0][i++] = lower;
+          }
+
         }
       }
     } else if (pFrameO->format == AV_PIX_FMT_GRAY16BE &&
