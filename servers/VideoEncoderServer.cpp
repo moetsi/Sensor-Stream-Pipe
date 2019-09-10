@@ -52,7 +52,8 @@ int main(int argc, char *argv[]) {
     FrameReader reader(frame_file);
 
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
-    FrameEncoder frameEncoder(codec_parameters, reader.getFps());
+    YAML::Node v = codec_parameters["video_encoder"][reader.getFrameType()];
+    FrameEncoder frameEncoder(v, reader.getFps());
 
     uint fps = reader.getFps();
 
@@ -79,15 +80,16 @@ int main(int argc, char *argv[]) {
       }
 
       while (!frameEncoder.hasNextPacket()) {
-        frameEncoder.addFrameStruct(&reader.currentFrame().front());
+        frameEncoder.addFrameStruct(reader.currentFrame().front());
         if (!reader.hasNextFrame()) {
           reader.reset();
           stopAfter--;
         }
         reader.nextFrame();
       }
-
-      FrameStruct f = *frameEncoder.currentFrame();
+      std::vector<FrameStruct *> vO;
+      vO.push_back(frameEncoder.currentFrame());
+      FrameStruct f = *vO.at(0);
       std::vector<FrameStruct> v;
       v.push_back(f);
 
@@ -123,6 +125,9 @@ int main(int argc, char *argv[]) {
         FrameStruct f = v.at(i);
         std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId
                   << " sent" << std::endl;
+        FrameStruct *fO = vO.at(i);;
+        fO->frame.clear();
+        delete fO;
       }
     }
   } catch (std::exception &e) {

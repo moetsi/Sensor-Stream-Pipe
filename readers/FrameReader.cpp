@@ -59,7 +59,7 @@ std::vector<unsigned char> FrameReader::readFile(std::string &filename) {
   return fileData;
 }
 
-FrameStruct FrameReader::createFrameStruct(unsigned int frameId) {
+FrameStruct *FrameReader::createFrameStruct(unsigned int frameId) {
   // 0;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg
 
   std::string line = frameLines[frameId];
@@ -78,28 +78,28 @@ FrameStruct FrameReader::createFrameStruct(unsigned int frameId) {
               << std::endl;
 
   std::vector<unsigned char> fileData = readFile(framePath);
-  FrameStruct frame = FrameStruct();
+  FrameStruct *frame = new FrameStruct();
 
-  frame.messageType = 0;
+  frame->messageType = 0;
 
-  frame.frameDataType = 0;
-  frame.sceneDesc = sceneDesc;
-  frame.deviceId = deviceId;
-  frame.sensorId = sensorId;
-  frame.frameType = frameType;
+  frame->frameDataType = 0;
+  frame->sceneDesc = sceneDesc;
+  frame->deviceId = deviceId;
+  frame->sensorId = sensorId;
+  frame->frameType = frameType;
 
-  frame.frameId = readFrameId;
+  frame->frameId = readFrameId;
 
-  frame.frame = fileData;
-  frame.streamId = streamId;
+  frame->frame = fileData;
+  frame->streamId = streamId;
 
   return frame;
 }
 
 unsigned int FrameReader::currentFrameId() { return currentFrameCounter; }
 
-std::vector<FrameStruct> FrameReader::currentFrame() {
-  std::vector<FrameStruct> v;
+std::vector<FrameStruct *> FrameReader::currentFrame() {
+  std::vector<FrameStruct *> v;
   v.push_back(currentFrameInternal);
   return v;
 }
@@ -124,3 +124,7 @@ void FrameReader::reset() {
 }
 
 unsigned int FrameReader::getFps() { return fps; }
+
+uint FrameReader::getFrameType() {
+  return frameType;
+}

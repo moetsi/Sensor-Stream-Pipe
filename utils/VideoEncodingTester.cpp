@@ -56,17 +56,23 @@ int main(int argc, char *argv[]) {
   std::string codec_parameters_file = std::string(argv[2]);
 
   FrameReader reader(frame_file);
-  FrameEncoder frameEncoder(codec_parameters_file, reader.getFps());
+
+  YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
+  YAML::Node v = codec_parameters["video_encoder"][reader.getFrameType()];
+  FrameEncoder frameEncoder(v, reader.getFps());
 
   // This class only reads the file once
   while (reader.hasNextFrame() || frameEncoder.hasNextPacket()) {
 
     while (!frameEncoder.hasNextPacket()) {
-      frameEncoder.addFrameStruct(&reader.currentFrame().front());
+      FrameStruct *f = reader.currentFrame().front();
+      frameEncoder.addFrameStruct(f);
       reader.nextFrame();
     }
 
-    FrameStruct f = *frameEncoder.currentFrame();
+    std::vector<FrameStruct *> vO;
+    vO.push_back(frameEncoder.currentFrame());
+    FrameStruct f = *vO.at(0);
     std::vector<FrameStruct> v;
     v.push_back(f);
 
@@ -172,6 +178,15 @@ int main(int argc, char *argv[]) {
       cv::waitKey(1);
       imgChanged = false;
     }
+
+
+    for (uint i = 0; i < v.size(); i++) {
+      FrameStruct f = v.at(i);
+      FrameStruct *fO = vO.at(i);;
+      fO->frame.clear();
+      delete fO;
+    }
+
     frameEncoder.nextPacket();
   }
   std::cout << frameEncoder.currentFrameId() << " " << i << " " << j << " "

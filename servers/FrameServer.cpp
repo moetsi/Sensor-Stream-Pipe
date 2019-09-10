@@ -67,7 +67,10 @@ int main(int argc, char *argv[]) {
         start_time = last_time;
       }
 
-      std::vector<FrameStruct> v = reader.currentFrame();
+      std::vector<FrameStruct *> vO = reader.currentFrame();
+      std::vector<FrameStruct> v;
+      FrameStruct f = *vO.front();
+      v.push_back(f);
 
       if (!v.empty()) {
 

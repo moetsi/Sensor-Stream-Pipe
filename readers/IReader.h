@@ -9,7 +9,7 @@
 class IReader {
 
 public:
-  virtual std::vector<FrameStruct> currentFrame() = 0;
+  virtual std::vector<FrameStruct *> currentFrame() = 0;
 
   virtual bool hasNextFrame() = 0;
 

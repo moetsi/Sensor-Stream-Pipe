@@ -23,13 +23,13 @@ private:
   unsigned int frameType;
   std::string streamId;
 
-  FrameStruct currentFrameInternal;
+  FrameStruct *currentFrameInternal;
 
   std::vector<unsigned char> readFile(std::string &filename);
 
-  FrameStruct createFrameStruct(unsigned int frameId);
+  FrameStruct *createFrameStruct(unsigned int frameId);
 
-  std::string getStructBytes(FrameStruct frame);
+  std::string getStructBytes(FrameStruct *frame);
 
   std::vector<std::string> frameLines;
 
@@ -44,9 +44,11 @@ public:
 
   void nextFrame();
 
-  std::vector<FrameStruct> currentFrame();
+  std::vector<FrameStruct *> currentFrame();
 
   uint currentFrameId();
 
   uint getFps();
+
+  uint getFrameType();
 };

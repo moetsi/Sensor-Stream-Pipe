@@ -175,7 +175,7 @@ void ImageDecoder::imageBufferToAVFrame(std::vector<unsigned char> &buffer,
   av_read_frame(pFormatContext, pPacket);
   response = decode_packet(pFrame);
 
-  buffer.clear();
+
   av_packet_free(&pPacket);
   avcodec_free_context(&pCodecContext);
   // avformat_free_context(pFormatContext);
@@ -185,7 +185,8 @@ void ImageDecoder::imageBufferToAVFrame(std::vector<unsigned char> &buffer,
     av_freep(&avio_ctx->buffer);
     av_freep(&avio_ctx);
   }
-  buffer.clear();
+  //buffer.clear();
+
 }
 
 /*
