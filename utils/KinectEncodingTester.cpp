@@ -37,6 +37,9 @@ int main(int argc, char *argv[]) {
   int i = 0;
   int j = 0;
 
+  uint64_t original_size = 0;
+  uint64_t compressed_size = 0;
+
   std::unordered_map<std::string, AVCodec *> pCodecs;
   std::unordered_map<std::string, AVCodecContext *> pCodecContexts;
   std::unordered_map<std::string, AVCodecParameters *> pCodecParameters;
@@ -97,7 +100,8 @@ int main(int argc, char *argv[]) {
         if (frameEncoder->hasNextPacket()) {
           FrameStruct f = *frameEncoder->currentFrame();
           FrameStruct fo = *frameEncoder->currentFrameOriginal();
-
+          original_size += fo.frame.size();
+          compressed_size += f.frame.size();
           v.push_back(f);
           buffer.push(fo);
 
@@ -156,7 +160,27 @@ int main(int argc, char *argv[]) {
       cv::Mat frameOri;
       cv::Mat frameDiff;
       if (fo.frameDataType == 0) {
-        frameOri = cv::imdecode(fo.frame, CV_LOAD_IMAGE_UNCHANGED);
+        ImageDecoder id;
+        AVFrame *frame = av_frame_alloc();
+        id.imageBufferToAVFrame(fo.frame, frame);
+        int width = frame->width;
+        int height = frame->height;
+
+        SwsContext *conversion;
+
+        frameOri = cv::Mat(height, width, CV_8UC3);
+        conversion =
+                sws_getContext(width, height, (AVPixelFormat) frame->format, width, height,
+                               AV_PIX_FMT_BGR24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+        int cvLinesizes[1];
+        cvLinesizes[0] = img.step1();
+
+        // Convert the colour format and write directly to the opencv matrix
+        sws_scale(conversion, frame->data, frame->linesize, 0, height, &frameOri.data,
+                  cvLinesizes);
+        sws_freeContext(conversion);
+        av_frame_free(&frame);
+
       } else if (fo.frameDataType == 2) {
         int rows, cols;
         memcpy(&cols, &fo.frame[0], sizeof(int));
@@ -249,7 +273,8 @@ int main(int argc, char *argv[]) {
         absdiff(frameOri, img, frameDiff);
 
       } else {
-        cv::cvtColor(frameOri, frameOri, COLOR_BGRA2BGR);
+        if (frameOri.channels() == 4)
+          cv::cvtColor(frameOri, frameOri, COLOR_BGRA2BGR);
         absdiff(frameOri, img, frameDiff);
         psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
         mssim += getMSSIM(frameOri, img);
@@ -267,9 +292,11 @@ int main(int argc, char *argv[]) {
       imgChanged = false;
     }
   }
-  std::cout << encoders[0]->currentFrameId() << " " << i << " " << j << " "
-            << encoders[0]->buffer.size() << " " << std::endl;
   std::cout << "Avg PSNR: " << psnr / i << std::endl;
   std::cout << "Avg MSSIM: " << mssim / i << std::endl;
+  std::cout << "original_size: " << original_size << " bytes" << std::endl;
+  std::cout << "compressed_size: " << compressed_size << " bytes, fps: " << (i / time_in_seconds) << ", bitrate: "
+            << (8 * compressed_size) / (1000000.0 * (i / time_in_seconds)) << " Mbps" << std::endl;
+  std::cout << "ratio: " << original_size / compressed_size << "x" << std::endl;
   return 0;
 }
