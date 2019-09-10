@@ -35,6 +35,9 @@ int main(int argc, char *argv[]) {
   int i = 0;
   int j = 0;
 
+  uint64_t original_size = 0;
+  uint64_t compressed_size = 0;
+
   std::unordered_map<std::string, AVCodec *> pCodecs;
   std::unordered_map<std::string, AVCodecContext *> pCodecContexts;
   std::unordered_map<std::string, AVCodecParameters *> pCodecParameters;
@@ -66,6 +69,7 @@ int main(int argc, char *argv[]) {
 
     while (!frameEncoder.hasNextPacket()) {
       FrameStruct *f = reader.currentFrame().front();
+      original_size += f->frame.size();
       frameEncoder.addFrameStruct(f);
       reader.nextFrame();
     }
@@ -73,6 +77,8 @@ int main(int argc, char *argv[]) {
     std::vector<FrameStruct *> vO;
     vO.push_back(frameEncoder.currentFrame());
     FrameStruct f = *vO.at(0);
+
+    compressed_size += f.frame.size();
     std::vector<FrameStruct> v;
     v.push_back(f);
 
@@ -189,9 +195,13 @@ int main(int argc, char *argv[]) {
 
     frameEncoder.nextPacket();
   }
-  std::cout << frameEncoder.currentFrameId() << " " << i << " " << j << " "
-            << frameEncoder.buffer.size() << " " << std::endl;
+
   std::cout << "Avg PSNR: " << psnr / i << std::endl;
   std::cout << "Avg MSSIM: " << mssim / i << std::endl;
+  std::cout << "original_size: " << original_size << " bytes" << std::endl;
+  std::cout << "compressed_size: " << compressed_size << " bytes, bitrate: "
+            << (8 * compressed_size) / (1000000.0 * reader.getFps()) << " Mbps" << std::endl;
+  std::cout << "ratio: " << original_size / compressed_size << "x" << std::endl;
+
   return 0;
 }
