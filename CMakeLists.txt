@@ -33,6 +33,9 @@ add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/Fram
 add_executable(video_encoder_test utils/VideoEncodingTester.cpp encoders/FrameEncoder.cpp utils/VideoEncodingTester.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/SimilarityMeasures.cpp ${SOURCE_FILES})
 add_executable(kinect_encoder_test utils/KinectEncodingTester.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp ${SOURCE_FILES})
 
+
+add_executable(kinect_nvpipe encoders/NvEncoder.cpp readers/KinectReader.cpp utils/VideoUtils.cpp utils/KinectUtils.cpp ${SOURCE_FILES})
+
 target_link_libraries(client swscale)
 target_link_libraries(client zmq)
 target_link_libraries(client ${FFMPEG_LIBRARIES})
@@ -51,6 +54,18 @@ target_link_libraries(kinect_server k4a)
 target_link_libraries(kinect_server depthengine)
 target_link_libraries(kinect_server k4arecord)
 target_link_libraries(kinect_server yaml-cpp)
+
+target_link_libraries(kinect_nvpipe swscale)
+target_link_libraries(kinect_nvpipe zmq)
+target_link_libraries(kinect_nvpipe ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(kinect_nvpipe ${FFMPEG_LIBRARIES})
+target_link_libraries(kinect_nvpipe ${OpenCV_LIBS})
+target_link_libraries(kinect_nvpipe k4a)
+target_link_libraries(kinect_nvpipe depthengine)
+target_link_libraries(kinect_nvpipe k4arecord)
+target_link_libraries(kinect_nvpipe NvPipe)
+target_link_libraries(kinect_nvpipe yaml-cpp)
+
 
 target_link_libraries(kinect_encoder_server swscale)
 target_link_libraries(kinect_encoder_server zmq)
