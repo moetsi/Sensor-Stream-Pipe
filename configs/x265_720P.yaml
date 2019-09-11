@@ -14,14 +14,14 @@ video_encoder:
   0: #color
     codec_name: "libx265"
     pix_fmt: "yuv420p"
-    bit_rate: 8000000
+    bit_rate: 80000
     options:
       preset: "veryfast"
       crf: "23"
   1: #depth
     codec_name: "libx265"
     pix_fmt: "gray12le"
-    bit_rate: 8000000
+    bit_rate: 80000
     options:
       preset: "veryfast"
       crf: "23"
