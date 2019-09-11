@@ -240,7 +240,7 @@ CodecParamsStruct VideoFileReader::getCodecParamsStruct() {
   memcpy(&e[0], pCodecParameters, sSize);
   memcpy(&ed[0], sEPointer, sESize);
 
-  CodecParamsStruct cParamsStruct(e, ed);
+  CodecParamsStruct cParamsStruct(0, e, ed);
 
   return cParamsStruct;
 }

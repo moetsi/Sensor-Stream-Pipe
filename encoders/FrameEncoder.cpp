@@ -380,7 +380,7 @@ CodecParamsStruct *FrameEncoder::getCodecParamsStruct() {
 
     memcpy(&e[0], pCodecParametersEncoder, sSize);
     memcpy(&ed[0], sEPointer, sESize);
-    cParamsStruct = new CodecParamsStruct(e, ed);
+    cParamsStruct = new CodecParamsStruct(0, e, ed);
 
   }
 

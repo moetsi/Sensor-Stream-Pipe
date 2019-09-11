@@ -20,19 +20,22 @@ extern "C" {
 #include "../utils/Utils.h"
 
 struct CodecParamsStruct {
+  uint type;
   std::vector<unsigned char> data;
   std::vector<unsigned char> extra_data;
 
   CodecParamsStruct() {}
 
-  CodecParamsStruct(std::vector<unsigned char> d, std::vector<unsigned char> ed)
-          : data(d), extra_data(ed) {}
+  CodecParamsStruct(uint t, std::vector<unsigned char> d, std::vector<unsigned char> ed)
+          : type(t), data(d), extra_data(ed) {}
 
   void setData(std::vector<unsigned char> &d) { data = d; }
 
   void setExtraData(std::vector<unsigned char> &ed) { extra_data = ed; }
 
   AVCodecParameters *getParams() {
+    if (type != 0)
+      return NULL;
     AVCodecParameters *results = avcodec_parameters_alloc();
     results->extradata = NULL;
     results->extradata_size = 0;
@@ -45,7 +48,7 @@ struct CodecParamsStruct {
   }
 
   template<class Archive>
-  void serialize(Archive &ar) { ar(data, extra_data); }
+  void serialize(Archive &ar) { ar(type, data, extra_data); }
 };
 
 struct FrameStruct {
