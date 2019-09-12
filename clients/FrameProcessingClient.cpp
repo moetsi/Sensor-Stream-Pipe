@@ -18,6 +18,8 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
+#include "../decoders/FrameDecoder.h"
+#include "../decoders/IDecoder.h"
 #include "../readers/FrameReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
@@ -41,24 +43,7 @@ int main(int argc, char *argv[]) {
     uint64_t rec_frames = 0;
     double rec_mbytes = 0;
 
-    std::unordered_map<std::string, AVCodec *> pCodecs;
-    std::unordered_map<std::string, AVCodecContext *> pCodecContexts;
-    std::unordered_map<std::string, AVCodecParameters *> pCodecParameters;
-
-    AVPacket *pPacket = av_packet_alloc();
-    AVFrame *pFrame = av_frame_alloc();
-    if (!pFrame) {
-      std::cout << ("failed to allocated memory for AVFrame") << std::endl;
-      return -1;
-    }
-    // https://ffmpeg.org/doxygen/trunk/structAVPacket.html
-
-    if (!pPacket) {
-      std::cout << ("failed to allocated memory for AVPacket") << std::endl;
-      return -1;
-    }
-
-    av_register_all();
+    std::unordered_map<std::string, IDecoder *> decoders;
 
     bool imgChanged = false;
 
@@ -89,6 +74,7 @@ int main(int argc, char *argv[]) {
 
       std::vector<FrameStruct> f_list =
           parseCerealStructFromString<std::vector<FrameStruct>>(result);
+
       rec_mbytes += request.size() / 1000;
 
       for (FrameStruct f : f_list) {
@@ -109,43 +95,23 @@ int main(int argc, char *argv[]) {
           img = cv::Mat(rows, cols, CV_16UC1, (void *) &f.frame[8], cv::Mat::AUTO_STEP);
           imgChanged = true;
         } else if (f.frameDataType == 1) {
-          if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) ==
-              pCodecs.end()) {
-            prepareDecodingStruct(&f, pCodecs, pCodecContexts, pCodecParameters);
-          }
 
-          AVCodecContext *pCodecContext =
-              pCodecContexts[f.streamId + std::to_string(f.sensorId)];
+          IDecoder *decoder;
 
-          pPacket->data = &f.frame[0];
-          pPacket->size = f.frame.size();
-
-          if (f.frameId == 1) { // reset the codec context on video reset
-            std::cout << "Resetting stream" << std::endl;
-            avcodec_flush_buffers(
-                pCodecContexts[f.streamId + std::to_string(f.sensorId)]);
-          }
-
-          int response = avcodec_send_packet(pCodecContext, pPacket);
-          if (response >= 0) {
-            // Return decoded output data (into a frame) from a decoder
-            response = avcodec_receive_frame(pCodecContext, pFrame);
-            if (response >= 0) {
-              if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE ||
-                  pCodecContext->pix_fmt == AV_PIX_FMT_GRAY16BE) {
-                avframeToMatGray(pFrame, img);
-              } else {
-                avframeToMatYUV(pFrame, img);
-              }
-              imgChanged = true;
-            } else {
-              std::cerr << "avcodec_receive_frame: " << av_err2str(response)
-                        << std::endl;
+          if (decoders.find(f.streamId + std::to_string(f.sensorId)) ==
+              decoders.end()) {
+            CodecParamsStruct data = f.codec_data;
+            if (data.type == 0) {
+              FrameDecoder *fd = new FrameDecoder();
+              fd->init(data.getParams());
+              decoders[f.streamId + std::to_string(f.sensorId)] = fd;
             }
-          } else {
-            std::cerr << "avcodec_send_packet: " << av_err2str(response)
-                      << std::endl;
           }
+
+          decoder = decoders[f.streamId + std::to_string(f.sensorId)];
+
+          img = decoder->decode(&f.frame);
+          imgChanged = true;
 
           f.frame.clear();
         }
