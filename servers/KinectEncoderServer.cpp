@@ -16,6 +16,7 @@
 #include <zmq.hpp>
 
 #include "../encoders/FrameEncoder.h"
+#include "../encoders/NvEncoder.h"
 #include "../readers/KinectReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/KinectUtils.h"
@@ -49,13 +50,18 @@ int main(int argc, char *argv[]) {
     KinectReader reader(0, c);
 
     // TODO: use smarter pointers
-    std::unordered_map<uint, FrameEncoder *> encoders;
+    std::unordered_map<uint, IEncoder *> encoders;
 
     std::vector<uint> types = reader.getType();
 
     for (uint type : types) {
       YAML::Node v = codec_parameters["video_encoder"][type];
-      FrameEncoder *fe = new FrameEncoder(v, reader.getFps());
+      std::string encoder_type = v["type"].as<std::string>();
+      IEncoder *fe;
+      if (encoder_type == "libav")
+        fe = new FrameEncoder(v, reader.getFps());
+      else if (encoder_type == "nvenc")
+        fe = new NvEncoder(v, reader.getFps());
       encoders[type] = fe;
     }
 
@@ -84,11 +90,11 @@ int main(int argc, char *argv[]) {
       while (v.empty()) {
         std::vector<FrameStruct *> frameStruct = reader.currentFrame();
         for (FrameStruct *frameStruct : frameStruct) {
-          FrameEncoder *frameEncoder = encoders[frameStruct->frameType];
+          IEncoder *frameEncoder = encoders[frameStruct->frameType];
 
           frameEncoder->addFrameStruct(frameStruct);
           if (frameEncoder->hasNextPacket()) {
-            FrameStruct *f = frameEncoder->currentFrame();
+            FrameStruct *f = frameEncoder->currentFrameEncoded();
             vO.push_back(f);
             v.push_back(*f);
             frameEncoder->nextPacket();

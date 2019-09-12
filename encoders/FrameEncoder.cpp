@@ -387,9 +387,7 @@ CodecParamsStruct *FrameEncoder::getCodecParamsStruct() {
   return cParamsStruct;
 }
 
-unsigned int FrameEncoder::currentFrameId() { return totalCurrentFrameCounter; }
-
-FrameStruct *FrameEncoder::currentFrame() {
+FrameStruct *FrameEncoder::currentFrameEncoded() {
   FrameStruct *f = new FrameStruct(*buffer.front());
 
   f->messageType = 0;

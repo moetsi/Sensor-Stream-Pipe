@@ -13,149 +13,204 @@
 #include <thread>
 
 #include <yaml-cpp/yaml.h>
-#include <zmq.hpp>
 
-#include <NvPipe.h>
-#include <opencv2/imgproc.hpp>
+//#include <opencv2/imgproc.hpp>
 
-#include "../encoders/FrameEncoder.h"
 #include "../readers/KinectReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/KinectUtils.h"
 #include "../utils/Utils.h"
+#include "NvEncoder.h"
 
+NvEncoder::NvEncoder(YAML::Node _codec_parameters, uint _fps) {
+  buildEncoder(_codec_parameters, _fps);
+  fps = _fps;
+  int bufferSize = width * height * 4;
+  compressed.resize(bufferSize);
+  paramsStruct = nullptr;
+  frameCompressed = nullptr;
+  frameOriginal = nullptr;
+  getCodecParamsStruct();
+}
 
+NvEncoder::~NvEncoder() {}
 
+void NvEncoder::addFrameStruct(FrameStruct *fs) {
+  frameOriginal = fs;
 
+  if (frameOriginal == nullptr) {
+    frameCompressed = nullptr;
+  } else {
 
-int main(int argc, char *argv[]) {
+    if (frameCompressed == nullptr)
+      frameCompressed = new FrameStruct();
+    frameCompressed->codec_data = *paramsStruct;
+    frameCompressed->deviceId = fs->deviceId;
+    frameCompressed->frameDataType = 4;
+    frameCompressed->frameId = totalCurrentFrameCounter;
+    frameCompressed->frameType = fs->frameType;
+    frameCompressed->messageType = fs->messageType;
+    frameCompressed->sensorId = fs->sensorId;
+    frameCompressed->sceneDesc = fs->sceneDesc;
 
-  srand(time(NULL) * getpid());
+    uint64_t srcPitch = width;
 
-  try {
-    av_log_set_level(AV_LOG_QUIET);
+    if (frameCompressed->frameType == 0) {
+      srcPitch *= 4;
+    } else {
+      srcPitch *= 1;
+    }
 
-    if (argc < 3) {
-      std::cerr << "Usage: server <host> <port> <codec_parameters_file>"
+    uint64_t compressedSize =
+        NvPipe_Encode(encoder, &fs->frame[0], srcPitch, compressed.data(),
+                      compressed.size(), width, height, false);
+
+    frameCompressed->frame.clear();
+    frameCompressed->frame = std::vector<unsigned char>(
+        compressed.data(), compressed.data() + compressedSize);
+
+    totalCurrentFrameCounter++;
+  }
+}
+
+void NvEncoder::nextPacket() {
+  frameOriginal = nullptr;
+  frameCompressed = nullptr;
+}
+
+bool NvEncoder::hasNextPacket() { return frameCompressed != nullptr; }
+
+FrameStruct *NvEncoder::currentFrameEncoded() { return frameCompressed; }
+
+FrameStruct *NvEncoder::currentFrameOriginal() { return frameOriginal; }
+
+CodecParamsStruct *NvEncoder::getCodecParamsStruct() {
+  if (paramsStruct == NULL) {
+    paramsStruct = new CodecParamsStruct();
+    paramsStruct->type = 1;
+    paramsStruct->data.resize(4 + 4 + 1 + 1);
+
+    memcpy(&paramsStruct->data[0], &width, sizeof(int));
+    memcpy(&paramsStruct->data[4], &height, sizeof(int));
+
+    ushort format_ushort, codec_ushort;
+
+    if (format == NVPIPE_RGBA32) {
+      format_ushort = 0;
+    } else if (format == NVPIPE_UINT4) {
+      format_ushort = 1;
+    } else if (format == NVPIPE_UINT8) {
+      format_ushort = 2;
+    } else if (format == NVPIPE_UINT16) {
+      format_ushort = 3;
+    } else if (format == NVPIPE_UINT32) {
+      format_ushort = 4;
+    }
+    paramsStruct->data[8] = (uchar)format_ushort;
+
+    if (codec == NVPIPE_H264) {
+      codec_ushort = 0;
+    } else if (codec == NVPIPE_HEVC) {
+      codec_ushort = 1;
+    }
+
+    paramsStruct->data[9] = (uchar)codec_ushort;
+  }
+}
+
+uint NvEncoder::getFps() { return fps; }
+
+void NvEncoder::buildEncoder(YAML::Node config, uint fps) {
+
+  if (!config["codec_name"].IsDefined()) {
+    std::cout << "WARNING: Missing key: \"codec_name\"" << std::endl;
+    std::cout << "Using default: NVPIPE_H264" << std::endl;
+    codec = NVPIPE_H264;
+  } else {
+    std::string codec_str = config["codec_name"].as<std::string>();
+    if (codec_str == "NVPIPE_H264") {
+      codec = NVPIPE_H264;
+    } else if (codec_str == "NVPIPE_HEVC") {
+      codec = NVPIPE_HEVC;
+      ;
+    } else {
+      std::cerr << "Invalid value for: \"codec_name\": " << codec_str
                 << std::endl;
-      return 1;
+      std::cerr << "Supported values are NVPIPE_H264 and "
+                   "NVPIPE_HEVC"
+                << std::endl;
+      throw "Invalid value for: \"codec_name\"";
     }
-
-    zmq::context_t context(1);
-    zmq::socket_t socket(context, ZMQ_PUSH);
-
-    std::string host = std::string(argv[1]);
-    uint port = std::stoul(argv[2]);
-    std::string codec_parameters_file = std::string(argv[3]);
-
-    YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
-
-    ExtendedAzureConfig c =
-            buildKinectConfigFromYAML(codec_parameters["kinect_parameters"][0]);
-    KinectReader reader(0, c);
-
-    uint64_t last_time = currentTimeMs();
-    uint64_t start_time = last_time;
-    uint64_t start_frame_time = last_time;
-    uint64_t sent_frames = 0;
-    uint64_t processing_time = 0;
-
-    double sent_mbytes = 0;
-
-    socket.connect("tcp://" + host + ":" + std::string(argv[2]));
-
-
-
-    uint32_t width = 1920*2, height = 1080*2; // Image resolution
-    //width = 1280, height = 720; // Image resolution
-
-
-
-    int bufferSize = width * height * 4;
-    int bitrate = 8 * 1000 * 1000;
-    std::vector<uint8_t> compressed(bufferSize);
-    std::vector<uint8_t> decompressed(bufferSize);
-
-
-    NvPipe* encoder = NvPipe_CreateEncoder(NVPIPE_RGBA32, NVPIPE_HEVC, NVPIPE_LOSSY, bitrate, reader.getFps(), width, height); // 32 Mbps @ FPS
-
-    NvPipe* decoder = NvPipe_CreateDecoder(NVPIPE_RGBA32, NVPIPE_HEVC, width, height);
-
-    while (1) {
-      // maintain constant FPS by ignoring processing time
-      start_frame_time = currentTimeMs();
-
-      if (sent_frames == 0) {
-        last_time = currentTimeMs();
-        start_time = last_time;
-      }
-
-      std::vector<FrameStruct *> vo = reader.currentFrame();
-      std::vector<FrameStruct> v;
-
-      if (reader.hasNextFrame())
-        reader.nextFrame();
-      else {
-        reader.reset();
-      }
-
-      if (!vo.empty()) {
-
-        for (int i = 0; i < vo.size(); i++) {
-          FrameStruct* fs = vo.at(i);
-          uint64_t compressedSize = NvPipe_Encode(encoder, &vo.at(i)->frame[0], width * 4, compressed.data(), compressed.size(), width, height, false);
-
-          //int decodeStatus = NvPipe_Decode(decoder, compressed.data(), compressedSize, decompressed.data(), width, height);
-
-          //cv::Mat img(height, width, CV_8UC4, decompressed.data(), cv::Mat::AUTO_STEP);
-          //cv::imshow("A",img);
-          //cv::waitKey(1);
-
-          fs->frame = std::vector<unsigned char>(&decompressed[0], &decompressed[0]+compressedSize);
-          v.push_back(*fs);
-
-        }
-
-        std::string message = cerealStructToString(v);
-
-        zmq::message_t request(message.size());
-        memcpy(request.data(), message.c_str(), message.size());
-        socket.send(request);
-        sent_frames += 1;
-        sent_mbytes += message.size() / 1000.0;
-
-        uint64_t diff_time = currentTimeMs() - last_time;
-
-        double diff_start_time = (currentTimeMs() - start_time);
-        int64_t avg_fps;
-        if (diff_start_time == 0)
-          avg_fps = -1;
-        else {
-          double avg_time_per_frame_sent_ms =
-                  diff_start_time / (double)sent_frames;
-          avg_fps = 1000 / avg_time_per_frame_sent_ms;
-        }
-
-        last_time = currentTimeMs();
-        processing_time = last_time - start_frame_time;
-
-        std::cout << "Took " << diff_time << " ms; size " << message.size()
-                  << "; avg " << avg_fps << " fps; "
-                  << 8 * (sent_mbytes / diff_start_time) << " Mbps "
-                  << 8 * (sent_mbytes * reader.getFps() / (sent_frames * 1000))
-                  << " Mbps expected " << std::endl;
-        for (uint i = 0; i < v.size(); i++) {
-          FrameStruct f = v.at(i);
-          f.frame.clear();
-          std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";"
-                    << f.frameId << " sent" << std::endl;
-          delete vo.at(i);
-        }
-      }
-    }
-  } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
   }
 
-  return 0;
+  if (!config["compression"].IsDefined()) {
+    std::cout << "WARNING: Missing key: \"compression\"" << std::endl;
+    std::cout << "Using default: NVPIPE_LOSSY" << std::endl;
+    compression = NVPIPE_LOSSY;
+  } else {
+    std::string compression_str = config["compression"].as<std::string>();
+    if (compression_str == "NVPIPE_LOSSY") {
+      compression = NVPIPE_LOSSY;
+    } else if (compression_str == "NVPIPE_LOSSLESS") {
+      compression = NVPIPE_LOSSLESS;
+      ;
+    } else {
+      std::cerr << "Invalid value for: \"compression\": " << compression_str
+                << std::endl;
+      std::cerr << "Supported values are NVPIPE_LOSSY and "
+                   "NVPIPE_LOSSLESS"
+                << std::endl;
+      throw "Invalid value for: \"compression\"";
+    }
+  }
+
+  if (!config["input_format"].IsDefined()) {
+    std::cout << "Missing key: \"input_format\"" << std::endl;
+    std::cerr << "Supported values are NVPIPE_RGBA32, NVPIPE_UINT4, "
+                 "NVPIPE_UINT8, NVPIPE_UINT16 and NVPIPE_UINT32"
+              << std::endl;
+    throw "Invalid value for: \"input_format\"";
+  } else {
+    std::string input_format_str = config["input_format"].as<std::string>();
+    if (input_format_str == "NVPIPE_RGBA32") {
+      format = NVPIPE_RGBA32;
+    } else if (input_format_str == "NVPIPE_UINT4") {
+      format = NVPIPE_UINT4;
+    } else if (input_format_str == "NVPIPE_UINT8") {
+      format = NVPIPE_UINT8;
+    } else if (input_format_str == "NVPIPE_UINT16") {
+      format = NVPIPE_UINT16;
+    } else if (input_format_str == "NVPIPE_UINT32") {
+      format = NVPIPE_UINT32;
+    } else {
+      std::cerr << "Invalid value for: \"input_format\": " << input_format_str
+                << std::endl;
+      std::cerr << "Supported values are NVPIPE_RGBA32, NVPIPE_UINT4, "
+                   "NVPIPE_UINT8, NVPIPE_UINT16 and NVPIPE_UINT32"
+                << std::endl;
+      throw "Invalid value for: \"input_format\"";
+    }
+  }
+
+  uint bitrate = 8 * 1000 * 1000;
+  if (config["bit_rate"].IsDefined()) {
+    bitrate = config["bit_rate"].as<uint>();
+  } else {
+    std::cout << "Using default bit_rate = " << bitrate << std::endl;
+  }
+
+  if (config["width"].IsDefined()) {
+    width = config["width"].as<uint>();
+  } else {
+    throw "Invalid value for: \"width\"";
+  }
+
+  if (config["height"].IsDefined()) {
+    height = config["height"].as<uint>();
+  } else {
+    throw "Invalid value for: \"height\"";
+  }
+
+  encoder = NvPipe_CreateEncoder(format, codec, compression, bitrate, fps,
+                                 width, height);
 }

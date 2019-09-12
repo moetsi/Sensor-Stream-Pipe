@@ -12,24 +12,23 @@ kinect_parameters:
     absoluteExposureValue: 0
 video_encoder:
   0: #color
-    codec_name: "hevc_nvenc"
-    pix_fmt: "yuv420p"
-    bit_rate: 800000
-    options:
-      preset: "ll"
-      crf: "23"
-      delay: 0
+    type: "nvenc"
+    codec_name: "NVPIPE_H264"
+    input_format: "NVPIPE_RGBA32"
+    bit_rate: 8000000
+    width: 1280
+    height: 720
   1: #depth
-    codec_name: "hevc_nvenc"
-    pix_fmt: "yuv420p"
+    type: "nvenc"
+    codec_name: "NVPIPE_H264"
+    input_format: "NVPIPE_UINT16"
     bit_rate: 8000000
-    options:
-      preset: "ultrafast"
-      crf: "23"
+    width: 640
+    height: 576
   2: #ir
-    codec_name: "hevc_nvenc"
-    pix_fmt: "yuv420p"
+    type: "nvenc"
+    codec_name: "NVPIPE_H264"
+    input_format: "NVPIPE_UINT16"
     bit_rate: 8000000
-    options:
-      preset: "llhq"
-      crf: "23"
+    width: 640
+    height: 576 

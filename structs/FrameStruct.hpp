@@ -20,6 +20,7 @@ extern "C" {
 #include "../utils/Utils.h"
 
 struct CodecParamsStruct {
+  // 0: av parameters, 1: nvPipe parameters
   uint type;
   std::vector<unsigned char> data;
   std::vector<unsigned char> extra_data;
@@ -33,6 +34,8 @@ struct CodecParamsStruct {
 
   void setExtraData(std::vector<unsigned char> &ed) { extra_data = ed; }
 
+  // TODO: pull this function  into other file, to avoid unneeded AVCodec
+  // dependecy
   AVCodecParameters *getParams() {
     if (type != 0)
       return NULL;
@@ -59,7 +62,8 @@ struct FrameStruct {
   // 0 for color, 1 for depth
   unsigned short frameType;
 
-  // 0 for image frames, 1 for libav packets, 2 for raw RGBA data, 3 for raw GRAY16LE data
+  // 0 for image frames, 1 for libav packets, 2 for raw RGBA data, 3 for raw
+  // GRAY16LE data, 4 for NvPipe packets
   unsigned short frameDataType;
 
   // random 16 char string that uniquely ids the frame stream

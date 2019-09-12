@@ -12,6 +12,7 @@ kinect_parameters:
     absoluteExposureValue: 0
 video_encoder:
   0: #color
+    type: "libav"
     codec_name: "libx265"
     pix_fmt: "yuv420p"
     bit_rate: 80000
@@ -19,6 +20,7 @@ video_encoder:
       preset: "veryfast"
       crf: "23"
   1: #depth
+    type: "libav"
     codec_name: "libx265"
     pix_fmt: "gray12le"
     bit_rate: 80000
@@ -26,6 +28,7 @@ video_encoder:
       preset: "veryfast"
       crf: "23"
   2: #ir
+    type: "libav"
     codec_name: "libx265"
     pix_fmt: "yuv420p"
     bit_rate: 8000000

@@ -160,7 +160,6 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     device_config.depth_delay_off_color_usec =
         config["depth_delay_off_color_usec"].as<int>();
   } else {
-    ;
     std::cout << "Using default depth_delay_off_color_usec = 0" << std::endl;
   }
 

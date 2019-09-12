@@ -17,11 +17,12 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include <yaml-cpp/yaml.h>
-#include <zmq.hpp>
 #include "../encoders/FrameEncoder.h"
+#include "../encoders/NvEncoder.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
+#include <yaml-cpp/yaml.h>
+#include <zmq.hpp>
 
 int main(int argc, char *argv[]) {
 
@@ -53,7 +54,15 @@ int main(int argc, char *argv[]) {
 
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
     YAML::Node v = codec_parameters["video_encoder"][reader.getFrameType()];
-    FrameEncoder frameEncoder(v, reader.getFps());
+
+    IEncoder* frameEncoder;
+
+    std::string encoder_type = v["type"].as<std::string>();
+
+    if (encoder_type == "libav")
+      frameEncoder = new FrameEncoder(v, reader.getFps());
+    else if (encoder_type == "nvenc")
+      frameEncoder = new NvEncoder(v, reader.getFps());
 
     uint fps = reader.getFps();
 
@@ -79,8 +88,8 @@ int main(int argc, char *argv[]) {
         start_time = last_time;
       }
 
-      while (!frameEncoder.hasNextPacket()) {
-        frameEncoder.addFrameStruct(reader.currentFrame().front());
+      while (!frameEncoder->hasNextPacket()) {
+        frameEncoder->addFrameStruct(reader.currentFrame().front());
         if (!reader.hasNextFrame()) {
           reader.reset();
           stopAfter--;
@@ -88,12 +97,12 @@ int main(int argc, char *argv[]) {
         reader.nextFrame();
       }
       std::vector<FrameStruct *> vO;
-      vO.push_back(frameEncoder.currentFrame());
+      vO.push_back(frameEncoder->currentFrameEncoded());
       FrameStruct f = *vO.at(0);
       std::vector<FrameStruct> v;
       v.push_back(f);
 
-      frameEncoder.nextPacket();
+      frameEncoder->nextPacket();
 
       std::string message = cerealStructToString(v);
 

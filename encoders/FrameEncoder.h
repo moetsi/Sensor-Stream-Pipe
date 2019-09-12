@@ -28,7 +28,9 @@ extern "C" {
 #include "../utils/ImageDecoder.h"
 #include "../utils/VideoUtils.h"
 
-class FrameEncoder {
+#include "IEncoder.h"
+
+class FrameEncoder : public IEncoder {
 private:
   unsigned int totalCurrentFrameCounter;
 
@@ -47,6 +49,9 @@ private:
 
   ImageDecoder id;
 
+  std::queue<FrameStruct *> buffer;
+  std::queue<AVPacket *> pBuffer;
+
   uint fps;
 
   bool ready;
@@ -62,10 +67,7 @@ private:
   std::vector<unsigned char> currentFrameBytes();
 
 public:
-  std::queue<FrameStruct *> buffer;
-  std::queue<AVPacket *> pBuffer;
-
-  FrameEncoder(std::string codec_parameters_file, uint fps);
+  FrameEncoder(std::string codec_parameters_file, uint _fps);
 
   FrameEncoder(YAML::Node &_codec_parameters, uint _fps);
 
@@ -77,19 +79,11 @@ public:
 
   bool hasNextPacket();
 
-  FrameStruct *currentFrame();
+  FrameStruct *currentFrameEncoded();
 
   FrameStruct *currentFrameOriginal();
 
   CodecParamsStruct *getCodecParamsStruct();
 
-  unsigned int currentFrameId();
-
   uint getFps();
 };
-
-static int readFunction(void *opaque, uint8_t *buf, int buf_size) {
-  auto &me = *reinterpret_cast<std::istream *>(opaque);
-  me.read(reinterpret_cast<char *>(buf), buf_size);
-  return me.gcount();
-}

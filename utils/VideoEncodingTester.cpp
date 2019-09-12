@@ -62,20 +62,20 @@ int main(int argc, char *argv[]) {
 
   YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
   YAML::Node v = codec_parameters["video_encoder"][reader.getFrameType()];
-  FrameEncoder frameEncoder(v, reader.getFps());
+  IEncoder* frameEncoder = new FrameEncoder(v, reader.getFps());
 
   // This class only reads the file once
-  while (reader.hasNextFrame() || frameEncoder.hasNextPacket()) {
+  while (reader.hasNextFrame() || frameEncoder->hasNextPacket()) {
 
-    while (!frameEncoder.hasNextPacket()) {
+    while (!frameEncoder->hasNextPacket()) {
       FrameStruct *f = reader.currentFrame().front();
       original_size += f->frame.size();
-      frameEncoder.addFrameStruct(f);
+      frameEncoder->addFrameStruct(f);
       reader.nextFrame();
     }
 
     std::vector<FrameStruct *> vO;
-    vO.push_back(frameEncoder.currentFrame());
+    vO.push_back(frameEncoder->currentFrameEncoded());
     FrameStruct f = *vO.at(0);
 
     compressed_size += f.frame.size();
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
               << " received; size " << f.frame.size() << std::endl;
 
     if (imgChanged) {
-      FrameStruct fo = *frameEncoder.currentFrameOriginal();
+      FrameStruct fo = *frameEncoder->currentFrameOriginal();
       cv::Mat frameOri = cv::imdecode(fo.frame, CV_LOAD_IMAGE_UNCHANGED);
       cv::Mat frameDiff;
       if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
@@ -193,8 +193,10 @@ int main(int argc, char *argv[]) {
       delete fO;
     }
 
-    frameEncoder.nextPacket();
+    frameEncoder->nextPacket();
   }
+
+  delete frameEncoder;
 
   std::cout << "Avg PSNR: " << psnr / i << std::endl;
   std::cout << "Avg MSSIM: " << mssim / i << std::endl;
