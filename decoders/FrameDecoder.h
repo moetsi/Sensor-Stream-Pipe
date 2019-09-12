@@ -12,9 +12,6 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include <unordered_map>
-
-
 #include <iostream>
 #include <opencv2/core/mat.hpp>
 

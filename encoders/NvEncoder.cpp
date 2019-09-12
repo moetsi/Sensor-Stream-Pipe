@@ -46,7 +46,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
       frameCompressed = new FrameStruct();
     frameCompressed->codec_data = *paramsStruct;
     frameCompressed->deviceId = fs->deviceId;
-    frameCompressed->frameDataType = 4;
+    frameCompressed->frameDataType = 1;
     frameCompressed->frameId = totalCurrentFrameCounter;
     frameCompressed->frameType = fs->frameType;
     frameCompressed->messageType = fs->messageType;
@@ -58,11 +58,12 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     if (frameCompressed->frameType == 0) {
       srcPitch *= 4;
     } else {
-      srcPitch *= 1;
+      srcPitch *= 2;
     }
 
+    // fs->frame[8] ignores width and height set at [0] and [4] by KinectReader
     uint64_t compressedSize =
-        NvPipe_Encode(encoder, &fs->frame[0], srcPitch, compressed.data(),
+        NvPipe_Encode(encoder, &fs->frame[8], srcPitch, compressed.data(),
                       compressed.size(), width, height, false);
 
     frameCompressed->frame.clear();
@@ -74,6 +75,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
 }
 
 void NvEncoder::nextPacket() {
+  delete frameOriginal;
   frameOriginal = nullptr;
   frameCompressed = nullptr;
 }

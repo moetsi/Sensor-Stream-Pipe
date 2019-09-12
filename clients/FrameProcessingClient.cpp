@@ -20,6 +20,7 @@ extern "C" {
 
 #include "../decoders/FrameDecoder.h"
 #include "../decoders/IDecoder.h"
+#include "../decoders/NvDecoder.h"
 #include "../readers/FrameReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
@@ -104,6 +105,10 @@ int main(int argc, char *argv[]) {
             if (data.type == 0) {
               FrameDecoder *fd = new FrameDecoder();
               fd->init(data.getParams());
+              decoders[f.streamId + std::to_string(f.sensorId)] = fd;
+            } else if (data.type == 1) {
+              NvDecoder *fd = new NvDecoder();
+              fd->init(data.data);
               decoders[f.streamId + std::to_string(f.sensorId)] = fd;
             }
           }
