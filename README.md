@@ -24,7 +24,7 @@ Tested on Ubuntu 18.04.2
 sudo apt install libopencv-dev libopencv-core-dev uuid-dev
 ```
 
-#### Azure Kinect SDK 1.1
+#### Azure Kinect SDK 1.2
 
 
 Add the Linux Software Repository for Microsoft Products.
@@ -36,9 +36,9 @@ sudo apt-add-repository https://packages.microsoft.com/ubuntu/18.04/prod
 sudo apt-get update
 ```
 
-Install Azure Kinect SDK 1.1
+Install Azure Kinect SDK 1.2
 ```
-sudo apt install libk4a1.1 libk4a1.1-dev k4a-tools
+sudo apt install libk4a1.2 libk4a1.2-dev k4a-tools
 ```
 
 To be able to use the Kinect as non-root, please run the following:
