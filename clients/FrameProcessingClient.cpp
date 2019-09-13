@@ -44,6 +44,8 @@ int main(int argc, char *argv[]) {
     uint64_t rec_frames = 0;
     double rec_mbytes = 0;
 
+    std::unordered_map<std::string, double> rec_mbytes_per_stream;
+
     std::unordered_map<std::string, IDecoder *> decoders;
 
     bool imgChanged = false;
@@ -79,7 +81,10 @@ int main(int argc, char *argv[]) {
       rec_mbytes += request.size() / 1000;
 
       for (FrameStruct f : f_list) {
+        std::string decoder_id = f.streamId + std::to_string(f.sensorId);
+
         cv::Mat img;
+        rec_mbytes_per_stream[decoder_id] += f.frame.size() / 1000;
         if (f.frameDataType == 0) {
           img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
           imgChanged = true;
@@ -87,33 +92,34 @@ int main(int argc, char *argv[]) {
           int rows, cols;
           memcpy(&cols, &f.frame[0], sizeof(int));
           memcpy(&rows, &f.frame[4], sizeof(int));
-          img = cv::Mat(rows, cols, CV_8UC4, (void *) &f.frame[8], cv::Mat::AUTO_STEP);
+          img = cv::Mat(rows, cols, CV_8UC4, (void *)&f.frame[8],
+                        cv::Mat::AUTO_STEP);
           imgChanged = true;
         } else if (f.frameDataType == 3) {
           int rows, cols;
           memcpy(&cols, &f.frame[0], sizeof(int));
           memcpy(&rows, &f.frame[4], sizeof(int));
-          img = cv::Mat(rows, cols, CV_16UC1, (void *) &f.frame[8], cv::Mat::AUTO_STEP);
+          img = cv::Mat(rows, cols, CV_16UC1, (void *)&f.frame[8],
+                        cv::Mat::AUTO_STEP);
           imgChanged = true;
         } else if (f.frameDataType == 1) {
 
           IDecoder *decoder;
 
-          if (decoders.find(f.streamId + std::to_string(f.sensorId)) ==
-              decoders.end()) {
+          if (decoders.find(decoder_id) == decoders.end()) {
             CodecParamsStruct data = f.codec_data;
             if (data.type == 0) {
               FrameDecoder *fd = new FrameDecoder();
               fd->init(data.getParams());
-              decoders[f.streamId + std::to_string(f.sensorId)] = fd;
+              decoders[decoder_id] = fd;
             } else if (data.type == 1) {
               NvDecoder *fd = new NvDecoder();
               fd->init(data.data);
-              decoders[f.streamId + std::to_string(f.sensorId)] = fd;
+              decoders[decoder_id] = fd;
             }
           }
 
-          decoder = decoders[f.streamId + std::to_string(f.sensorId)];
+          decoder = decoders[decoder_id];
 
           img = decoder->decode(&f.frame);
           imgChanged = true;
@@ -141,17 +147,25 @@ int main(int argc, char *argv[]) {
             img.convertTo(img, CV_8U);
           }
 
-          cv::namedWindow(f.streamId + std::to_string(f.sensorId));
-          cv::imshow(f.streamId + std::to_string(f.sensorId), img);
+          cv::namedWindow(decoder_id);
+          cv::imshow(decoder_id, img);
           cv::waitKey(1);
           imgChanged = false;
         }
+      }
 
-        std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId
-                  << " received, took " << diff_time << " ms; size "
-                  << request.size() << "; avg " << avg_fps << " fps; "
-                  << 8 * (rec_mbytes / (currentTimeMs() - start_time))
-                  << " Mbps" << std::endl;
+      std::cout << "Message received, took " << diff_time << " ms; size "
+                << request.size() << "; avg " << avg_fps << " fps; "
+                << 8 * (rec_mbytes / (currentTimeMs() - start_time))
+                << " avg Mbps" << std::endl;
+
+      for (FrameStruct f : f_list) {
+        std::string decoder_id = f.streamId + std::to_string(f.sensorId);
+        std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId
+                  << " "
+                  << 8 * (rec_mbytes_per_stream[decoder_id] /
+                          (currentTimeMs() - start_time))
+                  << " avg Mbps received" << std::endl;
       }
     }
 

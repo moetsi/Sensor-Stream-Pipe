@@ -232,7 +232,7 @@ void KinectReader::nextFrame() {
         s->frameType = 2;
         s->frameId = currentFrameCounter.at(2)++;
         s->frameDataType = 3;
-        s->frameId = currentFrameCounter.at(1)++;
+
         uint8_t *buffer = k4a_image_get_buffer(irImage);
         size_t size = k4a_image_get_size(irImage);
         // convert the raw buffer to cv::Mat

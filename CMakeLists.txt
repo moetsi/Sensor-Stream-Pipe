@@ -31,7 +31,7 @@ add_executable(kinect_server servers/KinectServer.cpp readers/KinectReader.cpp u
 add_executable(kinect_encoder_server servers/KinectEncoderServer.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp encoders/NvEncoder.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp ${SOURCE_FILES})
 add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp encoders/NvEncoder.cpp ${SOURCE_FILES})
 add_executable(video_encoder_test utils/VideoEncodingTester.cpp encoders/FrameEncoder.cpp utils/VideoEncodingTester.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp ${SOURCE_FILES})
-add_executable(kinect_encoder_test utils/KinectEncodingTester.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp ${SOURCE_FILES})
+add_executable(kinect_encoder_test utils/KinectEncodingTester.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp decoders/FrameDecoder.cpp decoders/NvDecoder.cpp ${SOURCE_FILES})
 
 target_link_libraries(client swscale)
 target_link_libraries(client zmq)

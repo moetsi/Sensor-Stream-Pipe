@@ -22,6 +22,9 @@ extern "C" {
 #include "../structs/FrameStruct.hpp"
 #include <cv.hpp>
 
+#include "../decoders/FrameDecoder.h"
+#include "../decoders/IDecoder.h"
+#include "../decoders/NvDecoder.h"
 #include "../encoders/NvEncoder.h"
 #include "../readers/KinectReader.h"
 #include "KinectUtils.h"
@@ -41,12 +44,10 @@ int main(int argc, char *argv[]) {
   uint64_t original_size = 0;
   uint64_t compressed_size = 0;
 
-  std::unordered_map<std::string, AVCodec *> pCodecs;
-  std::unordered_map<std::string, AVCodecContext *> pCodecContexts;
-  std::unordered_map<std::string, AVCodecParameters *> pCodecParameters;
+  std::unordered_map<std::string, IDecoder *> decoders;
 
-  AVPacket *pPacket = av_packet_alloc();
-  AVFrame *pFrame = av_frame_alloc();
+  std::vector<cv::Mat> buffer_ori;
+  std::vector<cv::Mat> buffer_env;
 
   cv::Mat img;
   bool imgChanged = false;
@@ -121,41 +122,30 @@ int main(int argc, char *argv[]) {
 
     FrameStruct f = v.front();
 
-    if (pCodecs.find(f.streamId + std::to_string(f.sensorId)) ==
-        pCodecs.end()) {
-      prepareDecodingStruct(&f, pCodecs, pCodecContexts, pCodecParameters);
-    }
+    std::string decoder_id = f.streamId + std::to_string(f.sensorId);
 
-    AVCodecContext *pCodecContext =
-            pCodecContexts[f.streamId + std::to_string(f.sensorId)];
+    IDecoder *decoder;
 
-    pPacket->data = &f.frame[0];
-    pPacket->size = f.frame.size();
-
-    int response = avcodec_send_packet(pCodecContext, pPacket);
-    // std::cout << "avcodec_send_packet: " << response << " " <<
-    // av_err2str(response) << std::endl;
-    while (response >= 0) {
-      // Return decoded output data (into a frame) from a decoder
-      response = avcodec_receive_frame(pCodecContext, pFrame);
-      // std::cout << "avcodec_receive_frame: " << response << " " <<
-      // av_err2str(response) << std::endl;
-      if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
-        break;
-      }
-
-      if (response >= 0) {
-        i++;
-
-        if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE || pCodecContext->pix_fmt == AV_PIX_FMT_GRAY16BE) {
-          avframeToMatGray(pFrame, img);
-        } else {
-          avframeToMatYUV(pFrame, img);
-        }
-
-        imgChanged = true;
+    if (decoders.find(decoder_id) == decoders.end()) {
+      CodecParamsStruct data = f.codec_data;
+      if (data.type == 0) {
+        FrameDecoder *fd = new FrameDecoder();
+        fd->init(data.getParams());
+        decoders[decoder_id] = fd;
+      } else if (data.type == 1) {
+        NvDecoder *fd = new NvDecoder();
+        fd->init(data.data);
+        decoders[decoder_id] = fd;
       }
     }
+
+    decoder = decoders[decoder_id];
+
+    img = decoder->decode(&f.frame);
+    imgChanged = true;
+
+    f.frame.clear();
+
     std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId
               << " received; size " << f.frame.size() << std::endl;
 
@@ -197,8 +187,12 @@ int main(int argc, char *argv[]) {
         memcpy(&rows, &fo.frame[4], sizeof(int));
         frameOri = cv::Mat(rows, cols, CV_16UC1, (void *) &fo.frame[8], cv::Mat::AUTO_STEP);
       }
+      IEncoder *frameEncoder = encoders[f.frameType];
+      CodecParamsStruct *cds = frameEncoder->getCodecParamsStruct();
+      AVCodecParameters *avcp = cds->getParams();
 
-      if (f.frameType == 1 && pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE) {
+      if (f.frameType == 1 &&
+          (avcp != nullptr && avcp->format == AV_PIX_FMT_GRAY12LE)) {
 
         cv::Mat frameOriSquached;
         minMaxFilter<ushort>(frameOri, frameOriSquached, 0,
@@ -211,13 +205,14 @@ int main(int argc, char *argv[]) {
         img.convertTo(img, CV_8U);
         frameOri.convertTo(frameOri, CV_8U);
 
-        absdiff(frameOri, img, frameDiff);
-        mssim += getMSSIM(frameOri, img);
+        // absdiff(frameOri, img, frameDiff);
+        // mssim += getMSSIM(frameOri, img);
 
         cv::applyColorMap(img, img, cv::COLORMAP_JET);
         cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
         cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
-      } else if (f.frameType == 1 && pCodecContext->pix_fmt == AV_PIX_FMT_GRAY16BE) {
+      } else if (f.frameType == 1 &&
+                 (avcp != nullptr && avcp->format == AV_PIX_FMT_GRAY16BE)) {
 
         psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_12_BITS);
         img *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
@@ -226,20 +221,46 @@ int main(int argc, char *argv[]) {
         img.convertTo(img, CV_8U);
         frameOri.convertTo(frameOri, CV_8U);
 
-        absdiff(frameOri, img, frameDiff);
-        mssim += getMSSIM(frameOri, img);
+        // absdiff(frameOri, img, frameDiff);
+        // psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_12_BITS);
+        // mssim += getMSSIM(frameOri, img);
 
         cv::applyColorMap(img, img, cv::COLORMAP_JET);
         cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
         cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
 
+      } else if (f.frameType == 1 && avcp == nullptr) {
 
-      } else if (f.frameType == 1) {
-
-        cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+        if (img.channels() == 3)
+          cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
 
         img.convertTo(img, CV_16U);
         //img *= MAX_DEPTH_VALUE_12_BITS/MAX_DEPTH_VALUE_8_BITS;
+
+        cv::Mat frameOriSquached;
+        minMaxFilter<ushort>(frameOri, frameOriSquached, 0,
+                             MAX_DEPTH_VALUE_12_BITS);
+        // psnr += getPSNR(frameOriSquached, img, MAX_DEPTH_VALUE_12_BITS);
+        // mssim += getMSSIM(frameOriSquached, img);
+        img.convertTo(img, CV_8U);
+
+        frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
+
+        frameOri.convertTo(frameOri, CV_8U);
+
+        absdiff(frameOri, img, frameDiff);
+
+        cv::applyColorMap(img, img, cv::COLORMAP_JET);
+        cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
+        cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
+
+      } else if (f.frameType == 1 && avcp != nullptr) {
+
+        if (img.channels() == 3)
+          cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+
+        img.convertTo(img, CV_16U);
+        // img *= MAX_DEPTH_VALUE_12_BITS/MAX_DEPTH_VALUE_8_BITS;
 
         cv::Mat frameOriSquached;
         minMaxFilter<ushort>(frameOri, frameOriSquached, 0,
@@ -248,7 +269,7 @@ int main(int argc, char *argv[]) {
         mssim += getMSSIM(frameOriSquached, img);
         img.convertTo(img, CV_8U);
 
-        frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
+        frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
 
         frameOri.convertTo(frameOri, CV_8U);
 
@@ -267,8 +288,8 @@ int main(int argc, char *argv[]) {
 
         //img *= MAX_DEPTH_VALUE_12_BITS/MAX_DEPTH_VALUE_8_BITS;
 
-        psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_12_BITS);
-        mssim += getMSSIM(frameOri, img);
+        // psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_12_BITS);
+        // mssim += getMSSIM(frameOri, img);
         img.convertTo(img, CV_8U);
 
         frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float) MAX_DEPTH_VALUE_12_BITS);
@@ -280,10 +301,18 @@ int main(int argc, char *argv[]) {
       } else {
         if (frameOri.channels() == 4)
           cv::cvtColor(frameOri, frameOri, COLOR_BGRA2BGR);
-        absdiff(frameOri, img, frameDiff);
-        psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
-        mssim += getMSSIM(frameOri, img);
+        if (img.channels() == 4)
+          cv::cvtColor(img, img, COLOR_BGRA2BGR);
+
+        // absdiff(frameOri, img, frameDiff);
+        // psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
+        // mssim += getMSSIM(frameOri, img);
       }
+      buffer_ori.push_back(frameOri);
+      buffer_env.push_back(img);
+
+      f.frame.clear();
+      fo.frame.clear();
 
       cv::namedWindow("Original");
       cv::imshow("Original", frameOri);
@@ -295,13 +324,29 @@ int main(int argc, char *argv[]) {
 
       cv::waitKey(1);
       imgChanged = false;
+      i++;
     }
   }
+
+  std::cout << "original_size: " << original_size << " bytes" << std::endl;
+  std::cout << "compressed_size: " << compressed_size
+            << " bytes, fps: " << (i / time_in_seconds) << ", bitrate: "
+            << (8 * compressed_size) / (1000000.0 * (i / time_in_seconds))
+            << " Mbps" << std::endl;
+  std::cout << "ratio: " << original_size / compressed_size << "x" << std::endl;
+
+  for (int j = 0; j < buffer_env.size(); j++) {
+    img = buffer_env.at(j);
+    cv::Mat frameOri = buffer_ori.at(j);
+    if (img.channels() == 3)
+      psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
+    else
+      psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_12_BITS);
+    mssim += getMSSIM(frameOri, img);
+  }
+
   std::cout << "Avg PSNR: " << psnr / i << std::endl;
   std::cout << "Avg MSSIM: " << mssim / i << std::endl;
-  std::cout << "original_size: " << original_size << " bytes" << std::endl;
-  std::cout << "compressed_size: " << compressed_size << " bytes, fps: " << (i / time_in_seconds) << ", bitrate: "
-            << (8 * compressed_size) / (1000000.0 * (i / time_in_seconds)) << " Mbps" << std::endl;
-  std::cout << "ratio: " << original_size / compressed_size << "x" << std::endl;
+
   return 0;
 }
