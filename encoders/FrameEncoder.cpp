@@ -230,6 +230,8 @@ void FrameEncoder::encode() {
   pFrame->pts = totalCurrentFrameCounter++;
 
   encodeA(pCodecContextEncoder, pFrame, pPacket);
+
+  buffer.front()->timestamps.push_back(currentTimeMs());
 }
 
 void FrameEncoder::init(FrameStruct *fs) {
@@ -410,7 +412,7 @@ void FrameEncoder::addFrameStruct(FrameStruct *fs) {
     ready = true;
     init(fs);
   }
-
+  fs->timestamps.push_back(currentTimeMs());
   buffer.push(fs);
   encode();
 }
