@@ -9,31 +9,17 @@ VideoFileReader::VideoFileReader(std::string &filename) {
   std::vector<std::string> valuesAll = split(filename, "-");
   std::vector<std::string> values = split(valuesAll[0], ".");
 
-  if (values.size() == 3) {
-    sensorId = std::stoul(values[1]);
-    type = values[2];
-  } else {
-    sensorId = 0;
-    type = values[1];
-  }
-
-  deviceId = 0;
-
   currentFrameCounter = 0;
   eofReached = false;
   libAVReady = false;
 
   this->filename = filename;
-
-  streamId = randomString(16);
 }
 
 VideoFileReader::~VideoFileReader() {
   avformat_close_input(&pFormatContext);
   avformat_free_context(pFormatContext);
   av_packet_free(&pPacket);
-  av_frame_free(&pFrame);
-  avcodec_free_context(&pCodecContext);
 }
 
 void VideoFileReader::init(std::string &filename) {
@@ -86,11 +72,10 @@ void VideoFileReader::init(std::string &filename) {
 
   // this component describes the properties of a codec used by the stream i
   // https://ffmpeg.org/doxygen/trunk/structAVCodecParameters.html
-  pCodecParameters = NULL;
 
   // loop though all the streams and print its main information
   for (int i = 0; i < pFormatContext->nb_streams; i++) {
-    pCodecParameters = pFormatContext->streams[i]->codecpar;
+    AVCodecParameters *pCodecParameter = pFormatContext->streams[i]->codecpar;
     std::cout << "AVStream->time_base before open coded %d/%d"
               << " " << pFormatContext->streams[i]->time_base.num << " "
               << pFormatContext->streams[i]->time_base.den << std::endl;
@@ -103,40 +88,58 @@ void VideoFileReader::init(std::string &filename) {
               << pFormatContext->streams[i]->duration << std::endl;
     std::cout << "finding the proper decoder (CODEC)" << std::endl;
 
-    pCodec = avcodec_find_decoder(pCodecParameters->codec_id);
+    // if (pCodecParameters->codec_id == AV_CODEC_ID_RAWVIDEO)
+    //  pCodecParameters->format = AV_PIX_FMT_GBRP16LE;
 
+    AVCodec *pCodec = avcodec_find_decoder(pCodecParameter->codec_id);
     if (pCodec == NULL) {
       std::cout << "ERROR unsupported codec!" << std::endl;
-    } else if (pCodecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
-      video_stream_index = i;
+    } else if (pCodecParameter->codec_type == AVMEDIA_TYPE_VIDEO) {
+      video_stream_indexes.emplace(i);
       std::cout << "Video Codec: resolution %d x %d"
-                << " " << pCodecParameters->width << " "
-                << pCodecParameters->height << std::endl;
-      break;
+                << " " << pCodecParameter->width << " "
+                << pCodecParameter->height << std::endl;
+
+      AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
+      if (!pCodecContext) {
+        std::cout << "failed to allocated memory for AVCodecContext"
+                  << std::endl;
+        exit(-1);
+      }
+
+      if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
+        std::cout << "failed to copy codec params to codec context"
+                  << std::endl;
+        exit(-1);
+      }
+
+      if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
+        std::cout << "failed to open codec through avcodec_open2" << std::endl;
+        exit(-1);
+      }
+
+      pCodecContexts[i] = pCodecContext;
+      frameStructsBuffer = nullptr;
+
+      fps = av_q2d(
+          pFormatContext->streams[video_stream_indexes.begin().operator*()]
+              ->r_frame_rate);
+
+      void *sEPointer = pCodecParameter->extradata;
+      size_t sESize = pCodecParameter->extradata_size;
+      size_t sSize = sizeof(*pCodecParameter);
+
+      std::vector<unsigned char> e(sSize);
+      std::vector<unsigned char> ed(sESize);
+
+      memcpy(&e[0], pCodecParameter, sSize);
+      memcpy(&ed[0], sEPointer, sESize);
+
+      CodecParamsStruct codecParamsStruct(0, e, ed);
+      pCodecParameters[i] = codecParamsStruct;
+
+      avcodec_parameters_free(&pCodecParameter);
     }
-  }
-
-  pCodecContext = avcodec_alloc_context3(pCodec);
-  if (!pCodecContext) {
-    std::cout << "failed to allocated memory for AVCodecContext" << std::endl;
-    exit(-1);
-  }
-
-  if (avcodec_parameters_to_context(pCodecContext, pCodecParameters) < 0) {
-    std::cout << "failed to copy codec params to codec context" << std::endl;
-    exit(-1);
-  }
-
-  if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
-    std::cout << "failed to open codec through avcodec_open2" << std::endl;
-    exit(-1);
-  }
-
-  pFrame = av_frame_alloc();
-
-  if (!pFrame) {
-    std::cout << "failed to allocated memory for AVFrame" << std::endl;
-    exit(-1);
   }
 
   pPacket = av_packet_alloc();
@@ -145,43 +148,81 @@ void VideoFileReader::init(std::string &filename) {
     exit(-1);
   }
 
-  fps = av_q2d(pFormatContext->streams[video_stream_index]->r_frame_rate);
+  // frameStruct.codec_data = videoReader.getCodecParamsStruct();
+  frameStructTemplate.messageType = 0;
+
+  frameStructTemplate.frameDataType = 1;
+  frameStructTemplate.streamId = randomString(16);
+  frameStructTemplate.deviceId = 0;
 
   libAVReady = true;
 }
 
-unsigned int VideoFileReader::currentFrameId() { return currentFrameCounter; }
+int VideoFileReader::currentFrameId() { return currentFrameCounter; }
 
+/*
 std::vector<unsigned char> VideoFileReader::currentFrameBytes() {
   return std::vector<unsigned char>(pPacket->data,
                                     pPacket->data + pPacket->size);
 }
+ */
 
 void VideoFileReader::nextFrame() {
   if (!libAVReady)
     init(this->filename);
 
+  if (frameStructsBuffer != nullptr) {
+    frameStructs.clear();
+    frameStructs.push_back(frameStructsBuffer);
+    frameStructsBuffer = nullptr;
+  }
+
   av_packet_unref(pPacket);
   int error = 0;
-  while (error = av_read_frame(pFormatContext, pPacket) >= 0) {
+  while (error >= 0) {
+    error = av_read_frame(pFormatContext, pPacket);
     // if it's the video stream
-    if (pPacket->stream_index == video_stream_index) {
-      // std::cout << pPacket->size << " " << (int) pPacket->data[0] << " " <<
-      // (int) pPacket->data[1] << " "
-      //          << (int) pPacket->data[pPacket->size - 2] << " " << (int)
-      //          pPacket->data[pPacket->size - 1]
-      //          << std::endl;
-      break;
+    if (video_stream_indexes.find(pPacket->stream_index) !=
+        video_stream_indexes.end()) {
+
+      FrameStruct *frameStruct = new FrameStruct(frameStructTemplate);
+      frameStruct->frame = std::vector<unsigned char>(
+          &pPacket->data[0], &pPacket->data[0] + pPacket->size);
+      frameStruct->frameId = currentFrameCounter;
+      frameStruct->sensorId = pPacket->stream_index;
+      frameStruct->frameType = pPacket->stream_index;
+      frameStruct->timestamps.push_back(pPacket->pts);
+      frameStruct->codec_data = pCodecParameters[pPacket->stream_index];
+
+      if (frameStructs.empty() ||
+          (std::abs((long)(pPacket->pts -
+                           (long)frameStructs.front()->timestamps.front())) <
+           10000))
+        frameStructs.push_back(frameStruct);
+      else if (frameStructsBuffer != nullptr)
+        std::cout << "ERROR" << std::endl;
+      else {
+        frameStructsBuffer = frameStruct;
+        currentFrameCounter += 1;
+        frameStructsBuffer->frameId = currentFrameCounter;
+        break;
+      }
+    }
+
+    if (error == AVERROR_EOF) {
+      for (auto fs : frameStructs)
+        delete fs;
+      frameStructs.clear();
+      if (frameStructsBuffer != nullptr) {
+        delete frameStructsBuffer;
+        frameStructsBuffer = nullptr;
+      }
+      error = 1;
+      reset();
     }
     // https://ffmpeg.org/doxygen/trunk/group__lavc__packet.html#ga63d5a489b419bd5d45cfd09091cbcbc2
   }
-  if (error == 0)
-    eofReached = true;
-  else if (error == 1)
-    currentFrameCounter += 1;
-  else {
-    std::cerr << av_err2str(error) << std::endl;
-  }
+
   // std::cout << type << " Next frame: " << error << " " << av_err2str(error)
   // << " " << currentFrameCounter << std::endl;
 }
@@ -195,9 +236,7 @@ bool VideoFileReader::hasNextFrame() {
 void VideoFileReader::goToFrame(unsigned int frameId) {
   currentFrameCounter = frameId;
   eofReached = false;
-  int error = av_seek_frame(pFormatContext, video_stream_index, frameId,
-                            AVSEEK_FLAG_FRAME);
-
+  int error = av_seek_frame(pFormatContext, -1, frameId, AVSEEK_FLAG_FRAME);
   if (error < 0) {
     std::cerr << "Error " << error << " " << av_err2str(error) << std::endl;
   }
@@ -206,8 +245,8 @@ void VideoFileReader::goToFrame(unsigned int frameId) {
 void VideoFileReader::reset() {
   currentFrameCounter = 0;
   eofReached = false;
-  int error = av_seek_frame(pFormatContext, video_stream_index, 0,
-                            AVSEEK_FLAG_BACKWARD);
+
+  int error = av_seek_frame(pFormatContext, -1, 0, AVSEEK_FLAG_BACKWARD);
 
   if (error < 0) {
     std::cerr << "Error " << error << " " << av_err2str(error) << std::endl;
@@ -220,27 +259,9 @@ unsigned int VideoFileReader::getFps() {
   return fps;
 }
 
-unsigned int VideoFileReader::getSensorId() { return sensorId; }
-
-unsigned int VideoFileReader::getDeviceId() { return deviceId; }
-
-std::string VideoFileReader::getSceneDesc() { return sceneDesc; }
-
-std::string VideoFileReader::getStreamID() { return streamId; }
-
-CodecParamsStruct VideoFileReader::getCodecParamsStruct() {
-
-  void *sEPointer = pCodecParameters->extradata;
-  size_t sESize = pCodecParameters->extradata_size;
-  size_t sSize = sizeof(*pCodecParameters);
-
-  std::vector<unsigned char> e(sSize);
-  std::vector<unsigned char> ed(sESize);
-
-  memcpy(&e[0], pCodecParameters, sSize);
-  memcpy(&ed[0], sEPointer, sESize);
-
-  CodecParamsStruct cParamsStruct(0, e, ed);
-
-  return cParamsStruct;
+std::vector<FrameStruct *> VideoFileReader::currentFrame() {
+  return frameStructs;
 }
+/*
+
+ */

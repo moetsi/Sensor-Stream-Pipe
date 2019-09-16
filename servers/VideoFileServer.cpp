@@ -74,22 +74,11 @@ int main(int argc, char *argv[]) {
 
       videoReader.nextFrame();
 
-      FrameStruct frameStruct;
-
       if (sent_frames == 0) {
         last_time = currentTimeMs();
         start_time = last_time;
       }
-      frameStruct.codec_data = videoReader.getCodecParamsStruct();
-      frameStruct.messageType = 0;
 
-      frameStruct.frameDataType = 1;
-      frameStruct.frame = videoReader.currentFrameBytes();
-      frameStruct.frameId = videoReader.currentFrameId();
-      frameStruct.streamId = videoReader.getStreamID();
-      frameStruct.deviceId = videoReader.getDeviceId();
-      frameStruct.sensorId = videoReader.getSensorId();
-      frameStruct.frameType = video_type;
 
       if (!videoReader.hasNextFrame()) {
         videoReader.reset();
@@ -97,7 +86,11 @@ int main(int argc, char *argv[]) {
       }
 
       std::vector<FrameStruct> v;
-      v.push_back(frameStruct);
+      std::vector<FrameStruct *> vO = videoReader.currentFrame();
+
+      for (int i = 0; i < vO.size(); i++) {
+        v.push_back(*vO.at(i));
+      }
 
       std::string message = cerealStructToString(v);
       zmq::message_t request(message.size());
@@ -128,9 +121,10 @@ int main(int argc, char *argv[]) {
                 << 8 * (sent_mbytes * fps / (sent_frames * 1000))
                 << " Mbps expected " << std::endl;
       for (uint i = 0; i < v.size(); i++) {
-        FrameStruct f = v.at(i);
-        std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId
-                  << " sent" << std::endl;
+        FrameStruct *f = vO.at(i);
+        std::cout << "\t" << f->deviceId << ";" << f->sensorId << ";"
+                  << f->frameId << " sent" << std::endl;
+        delete f;
       }
     }
   } catch (std::exception &e) {

@@ -21,32 +21,30 @@ extern "C" {
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
 
-// TODO: add support to kinect video?
 class VideoFileReader {
 private:
   unsigned int fps;
   std::string sceneDesc;
   std::string type;
-  unsigned int sensorId;
-  unsigned int deviceId;
   std::string filename;
 
-  int video_stream_index;
+  std::set<uint> video_stream_indexes;
+  std::vector<FrameStruct *> frameStructs;
+  FrameStruct *frameStructsBuffer;
+  FrameStruct frameStructTemplate;
+
+  int currentFrameCounter;
 
   AVFormatContext *pFormatContext;
-  AVCodecParameters *pCodecParameters;
-  AVCodecContext *pCodecContext;
-  AVCodec *pCodec;
 
-  AVFrame *pFrame;
+  std::unordered_map<uint, CodecParamsStruct> pCodecParameters;
+  std::unordered_map<uint, AVCodecContext *> pCodecContexts;
+
   AVPacket *pPacket;
 
   bool libAVReady;
 
   bool eofReached;
-  unsigned int currentFrameCounter;
-
-  std::string streamId;
 
   void init(std::string &filename);
 
@@ -63,19 +61,9 @@ public:
 
   void nextFrame();
 
-  std::vector<unsigned char> currentFrameBytes();
+  std::vector<FrameStruct *> currentFrame();
 
-  unsigned int currentFrameId();
-
-  std::string getSceneDesc();
+  int currentFrameId();
 
   unsigned int getFps();
-
-  unsigned int getSensorId();
-
-  unsigned int getDeviceId();
-
-  CodecParamsStruct getCodecParamsStruct();
-
-  std::string getStreamID();
 };
