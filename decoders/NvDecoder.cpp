@@ -42,9 +42,10 @@ void NvDecoder::init(std::vector<unsigned char> parameter_data) {
   decoder = NvPipe_CreateDecoder(format, codec, width, height);
 }
 
-cv::Mat NvDecoder::decode(std::vector<unsigned char> *data) {
-  int decodeStatus = NvPipe_Decode(decoder, data->data(), data->size(),
-                                   decompressed.data(), width, height);
+cv::Mat NvDecoder::decode(FrameStruct *data) {
+  int decodeStatus =
+      NvPipe_Decode(decoder, data->frame.data(), data->frame.size(),
+                    decompressed.data(), width, height);
 
   cv::Mat img;
   if (format == NVPIPE_RGBA32)

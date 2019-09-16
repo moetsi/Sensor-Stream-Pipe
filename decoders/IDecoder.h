@@ -10,6 +10,5 @@
 class IDecoder {
 
 public:
-
-  virtual cv::Mat decode(std::vector<unsigned char>* data) = 0;
+  virtual cv::Mat decode(FrameStruct *data) = 0;
 };

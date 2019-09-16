@@ -64,20 +64,23 @@ void FrameEncoder::prepareFrame() {
     if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
       int i = 0;
       uint8_t *data = &f->frame[8];
-      memcpy(pFrame->data[0], data, pFrame->height * pFrame->width * 2);
-      /*
+      // memcpy(pFrame->data[0], data, pFrame->height * pFrame->width * 2);
+
       for (uint y = 0; y < pFrame->height; y++) {
         for (uint x = 0; x < pFrame->width; x++) {
-          uint lower = data[i];
-          uint upper = data[i + 1];
 
-          pFrame->data[0][i] = lower;
-          i++;
-          pFrame->data[0][i] = upper;
-          i++;
+          ushort value = data[i + 1] << 8 | data[i];
+          if (value >= MAX_DEPTH_VALUE_12_BITS) {
+            pFrame->data[0][i] = 13;
+            pFrame->data[0][i + 1] = 255;
+          } else {
+            pFrame->data[0][i] = data[i];
+            pFrame->data[0][i + 1] = data[i + 1];
+          }
+          i += 2;
         }
       }
-       */
+
     } else if (pFrame->format == AV_PIX_FMT_GRAY16BE) { // PNG GRAY16 TO gray12le
       int i = 0;
       uint8_t *data = &f->frame[8];
@@ -98,7 +101,8 @@ void FrameEncoder::prepareFrame() {
           uint upper = data[i * 2 + 1];
           ushort value = upper << 8 | lower;
 
-          pFrame->data[0][i++] = std::min((uint) (value * coeff), (uint) 255);
+          pFrame->data[0][i++] =
+              std::min((uint)(value * coeff), (uint)MAX_DEPTH_VALUE_8_BITS - 1);
         }
       }
 

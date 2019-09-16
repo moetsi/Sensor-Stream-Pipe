@@ -40,22 +40,6 @@ void prepareDecodingStruct(
         std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
         std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
 
-cv::Mat getFloat(cv::Mat &input);
-
-cv::Mat getUMat(cv::Mat &input);
-
-std::vector<ushort> unique(const cv::Mat &input, bool sort = false);
-
-void prepareGrayDepthFrame(cv::Mat &frame, AVFrame *pFrame);
-
-void prepareDepthFrame(cv::Mat &frame, AVFrame *pFrame);
-
-void prepareColorFrame(cv::Mat &frame, AVFrame *pFrame);
-
-void prepareGrayDepthFrame(AVFrame *pFrameO, AVFrame *pFrame);
-
-void prepareDepthFrame(AVFrame *pFrameO, AVFrame *pFrame);
-
 template <typename T>
 void minMaxFilter(cv::Mat &inmat, cv::Mat &outmat, double min, double max) {
   inmat.copyTo(outmat);

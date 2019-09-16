@@ -24,5 +24,5 @@ public:
   NvDecoder();
   ~NvDecoder();
   void init(std::vector<unsigned char> parameter_data);
-  cv::Mat decode(std::vector<unsigned char> *data);
+  cv::Mat decode(FrameStruct *frame);
 };

@@ -3,6 +3,7 @@
 //
 
 #include "FrameDecoder.h"
+#include <opencv2/imgproc.hpp>
 
 FrameDecoder::FrameDecoder() {}
 
@@ -10,8 +11,6 @@ FrameDecoder::~FrameDecoder() {}
 
 void FrameDecoder::init(AVCodecParameters *pCodecParameter) {
   av_register_all();
-
-  pFrame = av_frame_alloc();
 
   pCodec = avcodec_find_decoder(pCodecParameter->codec_id);
   pCodecContext = avcodec_alloc_context3(pCodec);
@@ -31,11 +30,12 @@ void FrameDecoder::init(AVCodecParameters *pCodecParameter) {
   }
 }
 
-cv::Mat FrameDecoder::decode(std::vector<unsigned char> *data) {
+cv::Mat FrameDecoder::decode(FrameStruct *frame) {
   AVPacket *pPacket = av_packet_alloc();
+  AVFrame *pFrame = av_frame_alloc();
 
-  pPacket->data = data->data();
-  pPacket->size = data->size();
+  pPacket->data = frame->frame.data();
+  pPacket->size = frame->frame.size();
 
   cv::Mat img;
   int response = avcodec_send_packet(pCodecContext, pPacket);
@@ -43,15 +43,22 @@ cv::Mat FrameDecoder::decode(std::vector<unsigned char> *data) {
     // Return decoded output data (into a frame) from a decoder
     response = avcodec_receive_frame(pCodecContext, pFrame);
     if (response >= 0) {
-      if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE ||
-          pCodecContext->pix_fmt == AV_PIX_FMT_GRAY16BE) {
-        avframeToMatGray(pFrame, img);
+      if (frame->frameType == 1 || frame->frameType == 2) {
+        if (pCodecContext->pix_fmt == AV_PIX_FMT_GRAY12LE ||
+            pCodecContext->pix_fmt == AV_PIX_FMT_GRAY16BE) {
+          avframeToMatGray(pFrame, img);
+        } else if (pCodecContext->pix_fmt == AV_PIX_FMT_YUV420P) {
+          avframeToMatYUV(pFrame, img);
+          cv::cvtColor(img, img, CV_BGR2GRAY);
+          img.convertTo(img, CV_16UC1);
+          img *= (MAX_DEPTH_VALUE_12_BITS / MAX_DEPTH_VALUE_8_BITS);
+        }
       } else {
         avframeToMatYUV(pFrame, img);
       }
     }
   }
-
+  av_frame_free(&pFrame);
   av_packet_free(&pPacket);
   return img;
 }

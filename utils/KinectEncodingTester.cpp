@@ -25,6 +25,7 @@ extern "C" {
 #include "../decoders/FrameDecoder.h"
 #include "../decoders/IDecoder.h"
 #include "../decoders/NvDecoder.h"
+#include "../encoders/NullEncoder.h"
 #include "../encoders/NvEncoder.h"
 #include "../readers/KinectReader.h"
 #include "KinectUtils.h"
@@ -143,7 +144,7 @@ int main(int argc, char *argv[]) {
 
     decoder = decoders[decoder_id];
 
-    img = decoder->decode(&f.frame);
+    img = decoder->decode(&f);
     imgChanged = true;
 
     f.frame.clear();

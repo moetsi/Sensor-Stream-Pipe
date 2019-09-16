@@ -25,15 +25,10 @@ private:
   AVCodecContext * pCodecContext;
   AVCodecParameters * pCodecParameter;
 
-  AVFrame* pFrame;
-
 public:
 
   FrameDecoder();
   ~FrameDecoder();
   void init(AVCodecParameters *pCodecParameter);
-  cv::Mat decode(std::vector<unsigned char>* data);
-
-
-
+  cv::Mat decode(FrameStruct *data);
 };

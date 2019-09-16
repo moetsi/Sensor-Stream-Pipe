@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
           decoder = decoders[decoder_id];
 
-          img = decoder->decode(&f.frame);
+          img = decoder->decode(&f);
           imgChanged = true;
 
           f.frame.clear();
@@ -144,9 +144,8 @@ int main(int argc, char *argv[]) {
             cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
           }
           if (f.frameType == 2) {
-            double min, max;
-            cv::minMaxIdx(img, &min, &max);
-            // max = 512;
+
+            double max = 1024;
             img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
             img.convertTo(img, CV_8U);
           }
