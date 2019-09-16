@@ -22,6 +22,8 @@ extern "C" {
 #include "../structs/FrameStruct.hpp"
 #include <cv.hpp>
 
+#include "../encoders/NullEncoder.h"
+#include "../encoders/NvEncoder.h"
 #include "SimilarityMeasures.h"
 #include "Utils.h"
 #include "VideoUtils.h"
@@ -62,7 +64,16 @@ int main(int argc, char *argv[]) {
 
   YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
   YAML::Node v = codec_parameters["video_encoder"][reader.getFrameType()];
-  IEncoder* frameEncoder = new FrameEncoder(v, reader.getFps());
+
+  IEncoder *frameEncoder = new FrameEncoder(v, reader.getFps());
+  std::string encoder_type = v["type"].as<std::string>();
+  IEncoder *fe;
+  if (encoder_type == "libav")
+    fe = new FrameEncoder(v, reader.getFps());
+  else if (encoder_type == "nvenc")
+    fe = new NvEncoder(v, reader.getFps());
+  else if (encoder_type == "null")
+    fe = new NullEncoder(reader.getFps());
 
   // This class only reads the file once
   while (reader.hasNextFrame() || frameEncoder->hasNextPacket()) {
@@ -185,10 +196,10 @@ int main(int argc, char *argv[]) {
       imgChanged = false;
     }
 
-
     for (uint i = 0; i < v.size(); i++) {
       FrameStruct f = v.at(i);
-      FrameStruct *fO = vO.at(i);;
+      FrameStruct *fO = vO.at(i);
+      ;
       fO->frame.clear();
       delete fO;
     }
@@ -202,7 +213,8 @@ int main(int argc, char *argv[]) {
   std::cout << "Avg MSSIM: " << mssim / i << std::endl;
   std::cout << "original_size: " << original_size << " bytes" << std::endl;
   std::cout << "compressed_size: " << compressed_size << " bytes, bitrate: "
-            << (8 * compressed_size) / (1000000.0 * reader.getFps()) << " Mbps" << std::endl;
+            << (8 * compressed_size) / (1000000.0 * reader.getFps()) << " Mbps"
+            << std::endl;
   std::cout << "ratio: " << original_size / compressed_size << "x" << std::endl;
 
   return 0;

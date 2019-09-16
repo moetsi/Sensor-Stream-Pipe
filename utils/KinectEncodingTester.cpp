@@ -84,6 +84,8 @@ int main(int argc, char *argv[]) {
       fe = new FrameEncoder(v, reader.getFps());
     else if (encoder_type == "nvenc")
       fe = new NvEncoder(v, reader.getFps());
+    else if (encoder_type == "null")
+      fe = new NullEncoder(reader.getFps());
     encoders[type] = fe;
   }
 

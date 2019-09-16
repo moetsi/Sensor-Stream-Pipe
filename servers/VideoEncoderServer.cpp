@@ -18,6 +18,7 @@ extern "C" {
 }
 
 #include "../encoders/FrameEncoder.h"
+#include "../encoders/NullEncoder.h"
 #include "../encoders/NvEncoder.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
@@ -63,6 +64,8 @@ int main(int argc, char *argv[]) {
       frameEncoder = new FrameEncoder(v, reader.getFps());
     else if (encoder_type == "nvenc")
       frameEncoder = new NvEncoder(v, reader.getFps());
+    else if (encoder_type == "null")
+      frameEncoder = new NullEncoder(reader.getFps());
 
     uint fps = reader.getFps();
 
