@@ -36,6 +36,7 @@ NvEncoder::NvEncoder(YAML::Node _codec_parameters, uint _fps) {
 NvEncoder::~NvEncoder() {}
 
 void NvEncoder::addFrameStruct(FrameStruct *fs) {
+
   frameOriginal = fs;
 
   if (frameOriginal == nullptr) {
@@ -52,6 +53,9 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->messageType = fs->messageType;
     frameCompressed->sensorId = fs->sensorId;
     frameCompressed->sceneDesc = fs->sceneDesc;
+    frameCompressed->timestamps.clear();
+    frameCompressed->timestamps.push_back(frameOriginal->timestamps.front());
+    frameCompressed->timestamps.push_back(currentTimeMs());
 
     uint64_t srcPitch = width;
 
@@ -69,7 +73,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->frame.clear();
     frameCompressed->frame = std::vector<unsigned char>(
         compressed.data(), compressed.data() + compressedSize);
-
+    frameCompressed->timestamps.push_back(currentTimeMs());
     totalCurrentFrameCounter++;
   }
 }

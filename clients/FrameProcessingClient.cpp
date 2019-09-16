@@ -80,6 +80,9 @@ int main(int argc, char *argv[]) {
 
       rec_mbytes += request.size() / 1000;
 
+      for (int i = 0; i < f_list.size(); i++) {
+        f_list.at(i).timestamps.push_back(currentTimeMs());
+      }
       for (FrameStruct f : f_list) {
         std::string decoder_id = f.streamId + std::to_string(f.sensorId);
 
@@ -143,6 +146,7 @@ int main(int argc, char *argv[]) {
           if (f.frameType == 2) {
             double min, max;
             cv::minMaxIdx(img, &min, &max);
+            // max = 512;
             img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
             img.convertTo(img, CV_8U);
           }
@@ -154,19 +158,27 @@ int main(int argc, char *argv[]) {
         }
       }
 
-      std::cout << "Message received, took " << diff_time << " ms; size "
-                << request.size() << "; avg " << avg_fps << " fps; "
+      std::cout << "Message received, took " << diff_time
+                << " ms; "
+                //<< "packet size " << request.size()
+                << "; avg " << avg_fps << " fps; "
                 << 8 * (rec_mbytes / (currentTimeMs() - start_time))
-                << " avg Mbps" << std::endl;
+                << " avg Mbps"
+                << " latency: "
+                << (f_list.front().timestamps.back() -
+                    f_list.front().timestamps.front())
+                << " ms" << std::endl;
 
-      for (FrameStruct f : f_list) {
+      /*for (FrameStruct f : f_list) {
         std::string decoder_id = f.streamId + std::to_string(f.sensorId);
         std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId
                   << " "
                   << 8 * (rec_mbytes_per_stream[decoder_id] /
                           (currentTimeMs() - start_time))
-                  << " avg Mbps received" << std::endl;
-      }
+                  << " avg Mbps received"
+                  << " latency: " << (f.timestamps.back() -
+      f.timestamps.front()) << " ms" << std::endl;
+      }*/
     }
 
   } catch (std::exception &e) {
