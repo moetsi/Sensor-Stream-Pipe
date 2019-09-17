@@ -1,5 +1,4 @@
 //
-#include "../readers/VideoFilereader->h"
 // Created by amourao on 14-08-2019.
 //
 

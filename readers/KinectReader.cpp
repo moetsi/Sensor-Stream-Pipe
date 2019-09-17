@@ -172,6 +172,8 @@ void KinectReader::nextFrame() {
         s->sensorId = 0;
         s->frameType = 0;
         s->frameId = currentFrameCounter.at(0)++;
+        s->timestamps.push_back(
+            k4a_image_get_device_timestamp_usec(colorImage) / 1000);
         s->timestamps.push_back(capture_timestamp);
 
         uint8_t *buffer = k4a_image_get_buffer(colorImage);
@@ -207,6 +209,8 @@ void KinectReader::nextFrame() {
         s->frameType = 1;
         s->frameDataType = 3;
         s->frameId = currentFrameCounter.at(1)++;
+        s->timestamps.push_back(
+            k4a_image_get_device_timestamp_usec(depthImage) / 1000);
         s->timestamps.push_back(capture_timestamp);
         uint8_t *buffer = k4a_image_get_buffer(depthImage);
         size_t size = k4a_image_get_size(depthImage);
@@ -234,6 +238,8 @@ void KinectReader::nextFrame() {
         s->frameType = 2;
         s->frameId = currentFrameCounter.at(2)++;
         s->frameDataType = 3;
+        s->timestamps.push_back(k4a_image_get_device_timestamp_usec(irImage) /
+                                1000);
         s->timestamps.push_back(capture_timestamp);
         uint8_t *buffer = k4a_image_get_buffer(irImage);
         size_t size = k4a_image_get_size(irImage);

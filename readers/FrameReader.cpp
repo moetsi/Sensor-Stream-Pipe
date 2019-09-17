@@ -87,6 +87,8 @@ FrameStruct *FrameReader::createFrameStruct(unsigned int frameId) {
   frame->deviceId = deviceId;
   frame->sensorId = sensorId;
   frame->frameType = frameType;
+  frame->timestamps.push_back(1000.0 / fps * currentFrameCounter);
+  frame->timestamps.push_back(currentTimeMs());
 
   frame->frameId = readFrameId;
 

@@ -158,12 +158,12 @@ int main(int argc, char *argv[]) {
       }
 
       std::cout << "Message received, took " << diff_time << " ms "
-                << "; packet size " << request.size() << "; avg " << avg_fps << " fps; "
-                << 8 * (rec_mbytes / (currentTimeMs() - start_time))
+                << "; packet size " << request.size() << "; avg " << avg_fps
+                << " fps; " << 8 * (rec_mbytes / (currentTimeMs() - start_time))
                 << " avg Mbps"
-                << " latency: "
+                << " latency: " << (f_list.front().timestamps.at(0)) << " ms; "
                 << (f_list.front().timestamps.back() -
-                    f_list.front().timestamps.front())
+                    f_list.front().timestamps.at(1))
                 << " ms" << std::endl;
 
       for (FrameStruct f : f_list) {
@@ -173,8 +173,9 @@ int main(int argc, char *argv[]) {
                   << 8 * (rec_mbytes_per_stream[decoder_id] /
                           (currentTimeMs() - start_time))
                   << " avg Mbps received"
-                  << " latency: " << (f.timestamps.back() -
-      f.timestamps.front()) << " ms" << std::endl;
+                  << " latency: " << (f_list.front().timestamps.at(0))
+                  << " ms; " << (f.timestamps.back() - f.timestamps.at(1))
+                  << " ms" << std::endl;
       }
     }
 

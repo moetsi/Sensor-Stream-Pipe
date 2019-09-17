@@ -195,6 +195,7 @@ void VideoFileReader::nextFrame() {
       frameStruct->sensorId = pPacket->stream_index;
       frameStruct->frameType = pPacket->stream_index;
       frameStruct->timestamps.push_back(pPacket->pts);
+      frameStruct->timestamps.push_back(currentTimeMs());
       frameStruct->codec_data = pCodecParameters[pPacket->stream_index];
 
       if (frameStructs.empty() ||
