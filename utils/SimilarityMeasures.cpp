@@ -5,6 +5,12 @@
 #include "SimilarityMeasures.h"
 #include <opencv2/imgproc.hpp>
 
+double getMSE(const Mat &I1, const Mat &I2) {
+  cv::Mat power;
+  cv::pow(I1 - I2, 2, power);
+  return cv::sum(cv::sum(power))[0];
+}
+
 double getPSNR(const Mat &I1, const Mat &I2, double max_value) {
   Mat s1;
   absdiff(I1, I2, s1);      // |I1 - I2|
