@@ -30,7 +30,7 @@ NvEncoder::NvEncoder(YAML::Node _codec_parameters, uint _fps) {
   paramsStruct = nullptr;
   frameCompressed = nullptr;
   frameOriginal = nullptr;
-  getCodecParamsStruct();
+  encoder = nullptr;
 }
 
 NvEncoder::~NvEncoder() {}
@@ -45,7 +45,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     // TODO: support stuff other than Kinect
     if (frameCompressed == nullptr)
       frameCompressed = new FrameStruct();
-    frameCompressed->codec_data = *paramsStruct;
+
     frameCompressed->deviceId = fs->deviceId;
     frameCompressed->frameDataType = 1;
     frameCompressed->frameId = totalCurrentFrameCounter;
@@ -57,6 +57,55 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->timestamps.push_back(frameOriginal->timestamps.front());
     frameCompressed->timestamps.push_back(currentTimeMs());
 
+    char *data;
+
+    AVFrame *pFrameO = nullptr;
+    AVFrame *pFrame = nullptr;
+
+    if (fs->frameDataType == 0 || fs->frameDataType == 1) {
+
+      pFrameO = av_frame_alloc();
+      pFrame = av_frame_alloc();
+
+      std::vector<unsigned char> frameData = fs->frame;
+      id.imageBufferToAVFrame(frameData, pFrameO);
+      width = pFrameO->width;
+      height = pFrameO->height;
+
+      struct SwsContext *sws_ctx;
+
+      if (fs->frameType == 0) {
+        pFrame->format = AV_PIX_FMT_BGRA;
+        pFrame->width = width;
+        pFrame->height = height;
+        av_frame_get_buffer(pFrame, 0);
+        sws_ctx = sws_getContext(width, height, (AVPixelFormat)pFrameO->format,
+                                 width, height, (AVPixelFormat)AV_PIX_FMT_BGRA,
+                                 SWS_BILINEAR, NULL, NULL, NULL);
+      } else {
+        pFrame->format = AV_PIX_FMT_GBRP16LE;
+        pFrame->width = width;
+        pFrame->height = height;
+        av_frame_get_buffer(pFrame, 0);
+        sws_ctx = sws_getContext(
+            width, height, (AVPixelFormat)pFrameO->format, width, height,
+            (AVPixelFormat)AV_PIX_FMT_GBRP16LE, SWS_BILINEAR, NULL, NULL, NULL);
+      }
+
+      sws_scale(sws_ctx, (const uint8_t *const *)pFrameO->data,
+                pFrameO->linesize, 0, pFrameO->height, pFrame->data,
+                pFrame->linesize);
+
+      data = reinterpret_cast<char *>(&pFrame->data[0][0]);
+
+    } else if (fs->frameDataType == 2 || fs->frameDataType == 3) {
+      // fs->frame[8] ignores width and height set at [0] and [4] by
+      // KinectReader
+      memcpy(&width, &fs->frame[0], sizeof(int));
+      memcpy(&height, &fs->frame[4], sizeof(int));
+      data = reinterpret_cast<char *>(&fs->frame[8]);
+    }
+
     uint64_t srcPitch = width;
 
     if (frameCompressed->frameType == 0) {
@@ -65,16 +114,27 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
       srcPitch *= 2;
     }
 
-    // fs->frame[8] ignores width and height set at [0] and [4] by KinectReader
-    uint64_t compressedSize =
-        NvPipe_Encode(encoder, &fs->frame[8], srcPitch, compressed.data(),
+    if (encoder == nullptr) {
+      getCodecParamsStruct();
+      frameCompressed->codec_data = *paramsStruct;
+      encoder = NvPipe_CreateEncoder(format, codec, compression, bitrate, fps,
+                                     width, height);
+    }
+
+    uint64_t compressed_size =
+        NvPipe_Encode(encoder, data, srcPitch, compressed.data(),
                       compressed.size(), width, height, false);
 
     frameCompressed->frame.clear();
     frameCompressed->frame = std::vector<unsigned char>(
-        compressed.data(), compressed.data() + compressedSize);
+        compressed.data(), compressed.data() + compressed_size);
     frameCompressed->timestamps.push_back(currentTimeMs());
     totalCurrentFrameCounter++;
+
+    if (pFrame != nullptr) {
+      av_frame_free(&pFrame);
+      av_frame_free(&pFrameO);
+    }
   }
 }
 
@@ -198,25 +258,10 @@ void NvEncoder::buildEncoder(YAML::Node config, uint fps) {
     }
   }
 
-  uint bitrate = 8 * 1000 * 1000;
+  bitrate = 8 * 1000 * 1000;
   if (config["bit_rate"].IsDefined()) {
     bitrate = config["bit_rate"].as<uint>();
   } else {
     std::cout << "Using default bit_rate = " << bitrate << std::endl;
   }
-
-  if (config["width"].IsDefined()) {
-    width = config["width"].as<uint>();
-  } else {
-    throw "Invalid value for: \"width\"";
-  }
-
-  if (config["height"].IsDefined()) {
-    height = config["height"].as<uint>();
-  } else {
-    throw "Invalid value for: \"height\"";
-  }
-
-  encoder = NvPipe_CreateEncoder(format, codec, compression, bitrate, fps,
-                                 width, height);
 }

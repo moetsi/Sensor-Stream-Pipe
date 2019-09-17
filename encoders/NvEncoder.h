@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "../utils/ImageDecoder.h"
 #include "IEncoder.h"
 #include <NvPipe.h>
 #include <yaml-cpp/yaml.h>
@@ -16,12 +17,15 @@ private:
   uint fps;
   uint totalCurrentFrameCounter;
   uint width, height;
+  uint bitrate;
   FrameStruct *frameOriginal;
   FrameStruct *frameCompressed;
   CodecParamsStruct *paramsStruct;
   NvPipe_Codec codec;
   NvPipe_Compression compression;
   NvPipe_Format format;
+
+  ImageDecoder id;
 
   void buildEncoder(YAML::Node _codec_parameters, uint fps);
 
