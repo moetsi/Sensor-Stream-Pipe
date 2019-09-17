@@ -18,7 +18,7 @@ extern "C" {
 #include "../utils/VideoUtils.h"
 #include "IDecoder.h"
 
-class FrameDecoder: public IDecoder {
+class LibAvDecoder : public IDecoder {
 private:
 
   AVCodec * pCodec;
@@ -26,9 +26,8 @@ private:
   AVCodecParameters * pCodecParameter;
 
 public:
-
-  FrameDecoder();
-  ~FrameDecoder();
+  LibAvDecoder();
+  ~LibAvDecoder();
   void init(AVCodecParameters *pCodecParameter);
   cv::Mat decode(FrameStruct *data);
 };

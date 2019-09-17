@@ -13,7 +13,7 @@
 #include "../structs/FrameStruct.hpp"
 #include "IReader.h"
 
-class FrameReader : public IReader {
+class ImageReader : public IReader {
 private:
   unsigned int currentFrameCounter;
   unsigned int fps;
@@ -34,7 +34,7 @@ private:
   std::vector<std::string> frameLines;
 
 public:
-  FrameReader(std::string filename);
+  ImageReader(std::string filename);
 
   void reset();
 

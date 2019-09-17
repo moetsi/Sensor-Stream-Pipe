@@ -17,12 +17,12 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include "../encoders/FrameEncoder.h"
+#include "../encoders/LibAvEncoder.h"
 #include "../structs/FrameStruct.hpp"
 #include <cv.hpp>
 
-#include "../decoders/FrameDecoder.h"
 #include "../decoders/IDecoder.h"
+#include "../decoders/LibAvDecoder.h"
 #include "../decoders/NvDecoder.h"
 #include "../encoders/NullEncoder.h"
 #include "../encoders/NvEncoder.h"
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     std::string encoder_type = v["type"].as<std::string>();
     IEncoder *fe;
     if (encoder_type == "libav")
-      fe = new FrameEncoder(v, reader->getFps());
+      fe = new LibAvEncoder(v, reader->getFps());
     else if (encoder_type == "nvenc")
       fe = new NvEncoder(v, reader->getFps());
     else if (encoder_type == "null")
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     if (decoders.find(decoder_id) == decoders.end()) {
       CodecParamsStruct data = f.codec_data;
       if (data.type == 0) {
-        FrameDecoder *fd = new FrameDecoder();
+        LibAvDecoder *fd = new LibAvDecoder();
         fd->init(data.getParams());
         decoders[decoder_id] = fd;
       } else if (data.type == 1) {

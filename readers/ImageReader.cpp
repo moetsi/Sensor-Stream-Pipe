@@ -2,9 +2,9 @@
 // Created by amourao on 26-06-2019.
 //
 
-#include "FrameReader.h"
+#include "ImageReader.h"
 
-FrameReader::FrameReader(std::string filename) {
+ImageReader::ImageReader(std::string filename) {
   // bundle_fusion_apt0;0;0;30
 
   // std::string sceneDesc;
@@ -46,7 +46,7 @@ FrameReader::FrameReader(std::string filename) {
   reset();
 }
 
-std::vector<unsigned char> FrameReader::readFile(std::string &filename) {
+std::vector<unsigned char> ImageReader::readFile(std::string &filename) {
   std::streampos fileSize;
   std::ifstream file(filename, std::ios::binary);
 
@@ -59,7 +59,7 @@ std::vector<unsigned char> FrameReader::readFile(std::string &filename) {
   return fileData;
 }
 
-FrameStruct *FrameReader::createFrameStruct(unsigned int frameId) {
+FrameStruct *ImageReader::createFrameStruct(unsigned int frameId) {
   // 0;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg
 
   std::string line = frameLines[frameId];
@@ -98,36 +98,36 @@ FrameStruct *FrameReader::createFrameStruct(unsigned int frameId) {
   return frame;
 }
 
-unsigned int FrameReader::currentFrameId() { return currentFrameCounter; }
+unsigned int ImageReader::currentFrameId() { return currentFrameCounter; }
 
-std::vector<FrameStruct *> FrameReader::currentFrame() {
+std::vector<FrameStruct *> ImageReader::currentFrame() {
   std::vector<FrameStruct *> v;
   v.push_back(currentFrameInternal);
   return v;
 }
 
-void FrameReader::nextFrame() {
+void ImageReader::nextFrame() {
   currentFrameCounter += 1;
   currentFrameInternal = createFrameStruct(currentFrameCounter);
 }
 
-bool FrameReader::hasNextFrame() {
+bool ImageReader::hasNextFrame() {
   return currentFrameCounter + 1 < frameLines.size();
 }
 
-void FrameReader::goToFrame(unsigned int frameId) {
+void ImageReader::goToFrame(unsigned int frameId) {
   currentFrameCounter = frameId;
   currentFrameInternal = createFrameStruct(currentFrameCounter);
 }
 
-void FrameReader::reset() {
+void ImageReader::reset() {
   currentFrameCounter = 0;
   currentFrameInternal = createFrameStruct(currentFrameCounter);
 }
 
-unsigned int FrameReader::getFps() { return fps; }
+unsigned int ImageReader::getFps() { return fps; }
 
-std::vector<uint> FrameReader::getType() {
+std::vector<uint> ImageReader::getType() {
   std::vector<uint> result;
   result.push_back(frameType);
   return result;

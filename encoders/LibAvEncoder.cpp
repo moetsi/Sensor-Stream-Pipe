@@ -2,9 +2,9 @@
 // Created by amourao on 26-06-2019.
 //
 
-#include "FrameEncoder.h"
+#include "LibAvEncoder.h"
 
-FrameEncoder::FrameEncoder(std::string codec_parameters_file, uint _fps) {
+LibAvEncoder::LibAvEncoder(std::string codec_parameters_file, uint _fps) {
   codec_parameters = YAML::LoadFile(codec_parameters_file);
   fps = _fps;
   av_register_all();
@@ -14,7 +14,7 @@ FrameEncoder::FrameEncoder(std::string codec_parameters_file, uint _fps) {
   totalCurrentFrameCounter = 0;
 }
 
-FrameEncoder::FrameEncoder(YAML::Node &_codec_parameters, uint _fps) {
+LibAvEncoder::LibAvEncoder(YAML::Node &_codec_parameters, uint _fps) {
   codec_parameters = _codec_parameters;
   fps = _fps;
   av_register_all();
@@ -24,17 +24,17 @@ FrameEncoder::FrameEncoder(YAML::Node &_codec_parameters, uint _fps) {
   totalCurrentFrameCounter = 0;
 }
 
-std::vector<unsigned char> FrameEncoder::currentFrameBytes() {
+std::vector<unsigned char> LibAvEncoder::currentFrameBytes() {
   return std::vector<unsigned char>(pBuffer.front()->data, pBuffer.front()->data + pBuffer.front()->size);
 }
 
-FrameEncoder::~FrameEncoder() {
+LibAvEncoder::~LibAvEncoder() {
   av_packet_free(&pPacket);
   av_frame_free(&pFrame);
   avcodec_free_context(&pCodecContextEncoder);
 }
 
-void FrameEncoder::nextPacket() {
+void LibAvEncoder::nextPacket() {
   if (!buffer.empty()) {
     FrameStruct *f = buffer.front();
     buffer.pop();
@@ -51,7 +51,7 @@ void FrameEncoder::nextPacket() {
   }
 }
 
-void FrameEncoder::prepareFrame() {
+void LibAvEncoder::prepareFrame() {
   FrameStruct *f = buffer.front();
   if (f->frameDataType == 2) {
     uint8_t *inData[1] = {&f->frame[8]};
@@ -195,7 +195,7 @@ void FrameEncoder::prepareFrame() {
    */
 }
 
-void FrameEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
+void LibAvEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
                            AVPacket *pkt) {
   int ret;
   /* send the frame to the encoder */
@@ -223,7 +223,7 @@ void FrameEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
 
 }
 
-void FrameEncoder::encode() {
+void LibAvEncoder::encode() {
 
   int ret;
 
@@ -238,7 +238,7 @@ void FrameEncoder::encode() {
   buffer.front()->timestamps.push_back(currentTimeMs());
 }
 
-void FrameEncoder::init(FrameStruct *fs) {
+void LibAvEncoder::init(FrameStruct *fs) {
   int ret;
 
   std::cout << codec_parameters << std::endl;
@@ -373,7 +373,7 @@ void FrameEncoder::init(FrameStruct *fs) {
 
 }
 
-CodecParamsStruct *FrameEncoder::getCodecParamsStruct() {
+CodecParamsStruct *LibAvEncoder::getCodecParamsStruct() {
 
   if (cParamsStruct == NULL) {
 
@@ -393,7 +393,7 @@ CodecParamsStruct *FrameEncoder::getCodecParamsStruct() {
   return cParamsStruct;
 }
 
-FrameStruct *FrameEncoder::currentFrameEncoded() {
+FrameStruct *LibAvEncoder::currentFrameEncoded() {
   FrameStruct *f = new FrameStruct(*buffer.front());
 
   f->messageType = 0;
@@ -405,13 +405,13 @@ FrameStruct *FrameEncoder::currentFrameEncoded() {
   return f;
 }
 
-FrameStruct *FrameEncoder::currentFrameOriginal() {
+FrameStruct *LibAvEncoder::currentFrameOriginal() {
   if (buffer.empty())
     return NULL;
   return buffer.front();
 }
 
-void FrameEncoder::addFrameStruct(FrameStruct *fs) {
+void LibAvEncoder::addFrameStruct(FrameStruct *fs) {
   if (!ready) {
     ready = true;
     init(fs);
@@ -421,6 +421,6 @@ void FrameEncoder::addFrameStruct(FrameStruct *fs) {
   encode();
 }
 
-uint FrameEncoder::getFps() { return fps; }
+uint LibAvEncoder::getFps() { return fps; }
 
-bool FrameEncoder::hasNextPacket() { return !pBuffer.empty(); }
+bool LibAvEncoder::hasNextPacket() { return !pBuffer.empty(); }

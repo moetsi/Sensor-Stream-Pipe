@@ -23,14 +23,14 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include "../readers/FrameReader.h"
+#include "../readers/ImageReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/ImageDecoder.h"
 #include "../utils/VideoUtils.h"
 
 #include "IEncoder.h"
 
-class FrameEncoder : public IEncoder {
+class LibAvEncoder : public IEncoder {
 private:
   unsigned int totalCurrentFrameCounter;
 
@@ -67,11 +67,11 @@ private:
   std::vector<unsigned char> currentFrameBytes();
 
 public:
-  FrameEncoder(std::string codec_parameters_file, uint _fps);
+  LibAvEncoder(std::string codec_parameters_file, uint _fps);
 
-  FrameEncoder(YAML::Node &_codec_parameters, uint _fps);
+  LibAvEncoder(YAML::Node &_codec_parameters, uint _fps);
 
-  ~FrameEncoder();
+  ~LibAvEncoder();
 
   void addFrameStruct(FrameStruct *fs);
 

@@ -17,7 +17,7 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include "../encoders/FrameEncoder.h"
+#include "../encoders/LibAvEncoder.h"
 #include "../encoders/NullEncoder.h"
 #include "../encoders/NvEncoder.h"
 #include "../structs/FrameStruct.hpp"
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
       stopAfter = std::stoi(argv[5]);
     }
 
-    IReader *reader = new FrameReader(frame_file);
+    IReader *reader = new ImageReader(frame_file);
 
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
     YAML::Node v = codec_parameters["video_encoder"][reader->getType().at(0)];
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     std::string encoder_type = v["type"].as<std::string>();
 
     if (encoder_type == "libav")
-      frameEncoder = new FrameEncoder(v, reader->getFps());
+      frameEncoder = new LibAvEncoder(v, reader->getFps());
     else if (encoder_type == "nvenc")
       frameEncoder = new NvEncoder(v, reader->getFps());
     else if (encoder_type == "null")

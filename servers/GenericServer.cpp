@@ -19,6 +19,7 @@
 #include "../encoders/NullEncoder.h"
 #include "../encoders/NvEncoder.h"
 #include "../readers/KinectReader.h"
+#include "../readers/VideoFileReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/KinectUtils.h"
 #include "../utils/Utils.h"
@@ -30,27 +31,39 @@ int main(int argc, char *argv[]) {
   try {
     av_log_set_level(AV_LOG_QUIET);
 
-    if (argc < 4) {
-      std::cerr << "Usage: server <host> <port> <codec_parameters_file>"
-                << std::endl;
+    if (argc < 2) {
+      std::cerr << "Usage: server <parameters_file>" << std::endl;
       return 1;
     }
 
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_PUSH);
 
-    std::string host = std::string(argv[1]);
-    uint port = std::stoul(argv[2]);
-    std::string codec_parameters_file = std::string(argv[3]);
-
+    std::string codec_parameters_file = std::string(argv[1]);
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
-    ExtendedAzureConfig c =
-        buildKinectConfigFromYAML(codec_parameters["kinect_parameters"][0]);
+    std::string host = codec_parameters["general"]["host"].as<std::string>();
+    uint port = codec_parameters["general"]["port"].as<uint>();
 
-    IReader *reader = new KinectReader(0, c);
+    IReader *reader = nullptr;
+    YAML::Node general_parameters = codec_parameters["general"];
+    std::string reader_type =
+        general_parameters["frame_source"]["type"].as<std::string>();
+    if (reader_type == "frames") {
+      reader = new ImageReader(
+          general_parameters["frame_source"]["parameters"]["path"]
+              .as<std::string>());
+    } else if (reader_type == "video") {
+      std::string path =
+          general_parameters["frame_source"]["parameters"]["path"]
+              .as<std::string>();
+      reader = new VideoFileReader(path);
+    } else if (reader_type == "kinect") {
+      ExtendedAzureConfig c = buildKinectConfigFromYAML(
+          general_parameters["frame_source"]["parameters"]);
+      reader = new KinectReader(0, c);
+    }
 
-    // TODO: use smarter pointers
     std::unordered_map<uint, IEncoder *> encoders;
 
     std::vector<uint> types = reader->getType();
@@ -76,9 +89,17 @@ int main(int argc, char *argv[]) {
 
     double sent_mbytes = 0;
 
-    socket.connect("tcp://" + host + ":" + std::string(argv[2]));
+    socket.connect("tcp://" + host + ":" + std::to_string(port));
+
+    uint fps = reader->getFps();
 
     while (1) {
+
+      uint64_t sleep_time = (1000 / fps) - processing_time;
+
+      if (sleep_time > 1)
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+
       start_frame_time = currentTimeMs();
 
       if (sent_frames == 0) {
@@ -103,7 +124,11 @@ int main(int argc, char *argv[]) {
             frameEncoder->nextPacket();
           }
         }
-        reader->nextFrame();
+        if (reader->hasNextFrame())
+          reader->nextFrame();
+        else {
+          reader->reset();
+        }
       }
 
       if (!v.empty()) {

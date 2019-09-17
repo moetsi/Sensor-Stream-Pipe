@@ -2,14 +2,14 @@
 // Created by amourao on 12-09-2019.
 //
 
-#include "FrameDecoder.h"
+#include "LibAvDecoder.h"
 #include <opencv2/imgproc.hpp>
 
-FrameDecoder::FrameDecoder() {}
+LibAvDecoder::LibAvDecoder() {}
 
-FrameDecoder::~FrameDecoder() {}
+LibAvDecoder::~LibAvDecoder() {}
 
-void FrameDecoder::init(AVCodecParameters *pCodecParameter) {
+void LibAvDecoder::init(AVCodecParameters *pCodecParameter) {
   av_register_all();
 
   pCodec = avcodec_find_decoder(pCodecParameter->codec_id);
@@ -30,7 +30,7 @@ void FrameDecoder::init(AVCodecParameters *pCodecParameter) {
   }
 }
 
-cv::Mat FrameDecoder::decode(FrameStruct *frame) {
+cv::Mat LibAvDecoder::decode(FrameStruct *frame) {
   AVPacket *pPacket = av_packet_alloc();
   AVFrame *pFrame = av_frame_alloc();
 

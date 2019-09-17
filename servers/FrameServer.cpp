@@ -12,7 +12,7 @@
 
 #include <zmq.hpp>
 
-#include "../readers/FrameReader.h"
+#include "../readers/ImageReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
       stopAfter = std::stoi(argv[4]);
     }
 
-    IReader *reader = new FrameReader(name);
+    IReader *reader = new ImageReader(name);
 
     uint fps = reader->getFps();
 

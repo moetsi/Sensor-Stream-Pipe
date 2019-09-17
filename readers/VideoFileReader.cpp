@@ -267,4 +267,8 @@ std::vector<FrameStruct *> VideoFileReader::currentFrame() {
   return frameStructs;
 }
 
-std::vector<uint> VideoFileReader::getType() { return video_stream_indexes; }
+std::vector<uint> VideoFileReader::getType() {
+  if (!libAVReady)
+    init(this->filename);
+  return video_stream_indexes;
+}

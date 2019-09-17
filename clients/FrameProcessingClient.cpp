@@ -18,10 +18,10 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include "../decoders/FrameDecoder.h"
 #include "../decoders/IDecoder.h"
+#include "../decoders/LibAvDecoder.h"
 #include "../decoders/NvDecoder.h"
-#include "../readers/FrameReader.h"
+#include "../readers/ImageReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
 #include "../utils/VideoUtils.h"
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
           if (decoders.find(decoder_id) == decoders.end()) {
             CodecParamsStruct data = f.codec_data;
             if (data.type == 0) {
-              FrameDecoder *fd = new FrameDecoder();
+              LibAvDecoder *fd = new LibAvDecoder();
               fd->init(data.getParams());
               decoders[decoder_id] = fd;
             } else if (data.type == 1) {
@@ -157,11 +157,11 @@ int main(int argc, char *argv[]) {
         }
       }
 
-      std::cout << "Message received, took " << diff_time << " ms "
-                << "; packet size " << request.size() << "; avg " << avg_fps
+      std::cout << "Message received, took " << diff_time << " ms;"
+                << " packet size " << request.size() << "; avg " << avg_fps
                 << " fps; " << 8 * (rec_mbytes / (currentTimeMs() - start_time))
-                << " avg Mbps"
-                << " latency: " << (f_list.front().timestamps.at(0)) << " ms; "
+                << " avg Mbps;"
+                << " latency: "
                 << (f_list.front().timestamps.back() -
                     f_list.front().timestamps.at(1))
                 << " ms" << std::endl;
@@ -172,9 +172,8 @@ int main(int argc, char *argv[]) {
                   << " "
                   << 8 * (rec_mbytes_per_stream[decoder_id] /
                           (currentTimeMs() - start_time))
-                  << " avg Mbps received"
-                  << " latency: " << (f_list.front().timestamps.at(0))
-                  << " ms; " << (f.timestamps.back() - f.timestamps.at(1))
+                  << " avg Mbps;"
+                  << " latency: " << (f.timestamps.back() - f.timestamps.at(1))
                   << " ms" << std::endl;
       }
     }
