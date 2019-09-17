@@ -112,8 +112,10 @@ int main(int argc, char *argv[]) {
                   << " Mbps expected " << std::endl;
         for (uint i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
+          f.frame.clear();
           std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";"
                     << f.frameId << " sent" << std::endl;
+          delete vO.at(i);
         }
       }
     }
