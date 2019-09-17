@@ -30,8 +30,8 @@ add_executable(video_file_server servers/VideoFileServer.cpp readers/VideoFileRe
 add_executable(kinect_server servers/KinectServer.cpp readers/KinectReader.cpp utils/VideoUtils.cpp utils/KinectUtils.cpp ${SOURCE_FILES})
 add_executable(kinect_encoder_server servers/KinectEncoderServer.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp ${SOURCE_FILES})
 add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp ${SOURCE_FILES})
-add_executable(video_encoder_test utils/VideoEncodingTester.cpp encoders/FrameEncoder.cpp utils/VideoEncodingTester.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp ${SOURCE_FILES})
-add_executable(kinect_encoder_test utils/KinectEncodingTester.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/FrameDecoder.cpp decoders/NvDecoder.cpp ${SOURCE_FILES})
+add_executable(video_encoder_test testers/VideoEncodingTester.cpp encoders/FrameEncoder.cpp testers/VideoEncodingTester.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp ${SOURCE_FILES})
+add_executable(kinect_encoder_test testers/KinectEncodingTester.cpp readers/KinectReader.cpp encoders/FrameEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/FrameDecoder.cpp decoders/NvDecoder.cpp ${SOURCE_FILES})
 
 target_link_libraries(client swscale)
 target_link_libraries(client zmq)

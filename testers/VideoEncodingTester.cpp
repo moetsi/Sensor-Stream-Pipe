@@ -23,9 +23,9 @@ extern "C" {
 
 #include "../encoders/NullEncoder.h"
 #include "../encoders/NvEncoder.h"
-#include "SimilarityMeasures.h"
-#include "Utils.h"
-#include "VideoUtils.h"
+#include "../utils/SimilarityMeasures.h"
+#include "../utils/Utils.h"
+#include "../utils/VideoUtils.h"
 
 int main(int argc, char *argv[]) {
   srand(time(NULL) * getpid());
