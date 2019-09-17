@@ -48,23 +48,23 @@ int main(int argc, char *argv[]) {
     ExtendedAzureConfig c =
         buildKinectConfigFromYAML(codec_parameters["kinect_parameters"][0]);
 
-    KinectReader reader(0, c);
+    IReader *reader = new KinectReader(0, c);
 
     // TODO: use smarter pointers
     std::unordered_map<uint, IEncoder *> encoders;
 
-    std::vector<uint> types = reader.getType();
+    std::vector<uint> types = reader->getType();
 
     for (uint type : types) {
       YAML::Node v = codec_parameters["video_encoder"][type];
       std::string encoder_type = v["type"].as<std::string>();
       IEncoder *fe;
       if (encoder_type == "libav")
-        fe = new FrameEncoder(v, reader.getFps());
+        fe = new FrameEncoder(v, reader->getFps());
       else if (encoder_type == "nvenc")
-        fe = new NvEncoder(v, reader.getFps());
+        fe = new NvEncoder(v, reader->getFps());
       else if (encoder_type == "null")
-        fe = new NullEncoder(reader.getFps());
+        fe = new NullEncoder(reader->getFps());
       encoders[type] = fe;
     }
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 
       // TODO: document what is happening with the Encoders and Queue
       while (v.empty()) {
-        std::vector<FrameStruct *> frameStruct = reader.currentFrame();
+        std::vector<FrameStruct *> frameStruct = reader->currentFrame();
         for (FrameStruct *frameStruct : frameStruct) {
           IEncoder *frameEncoder = encoders[frameStruct->frameType];
 
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
             frameEncoder->nextPacket();
           }
         }
-        reader.nextFrame();
+        reader->nextFrame();
       }
 
       if (!v.empty()) {
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Took " << diff_time << " ms; size " << message.size()
                   << "; avg " << avg_fps << " fps; "
                   << 8 * (sent_mbytes / diff_start_time) << " Mbps "
-                  << 8 * (sent_mbytes * reader.getFps() / (sent_frames * 1000))
+                  << 8 * (sent_mbytes * reader->getFps() / (sent_frames * 1000))
                   << " Mbps expected " << std::endl;
         for (uint i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);

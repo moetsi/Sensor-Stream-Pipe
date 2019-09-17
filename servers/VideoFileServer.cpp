@@ -19,6 +19,7 @@ extern "C" {
 
 #include <zmq.hpp>
 
+#include "../readers/IReader.h"
 #include "../readers/VideoFileReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
@@ -51,9 +52,9 @@ int main(int argc, char *argv[]) {
       stopAfter = std::stoi(argv[5]);
     }
 
-    VideoFileReader videoReader(video_name);
+    IReader *videoReader = new VideoFileReader(video_name);
 
-    uint fps = videoReader.getFps();
+    uint fps = videoReader->getFps();
 
     uint64_t last_time = currentTimeMs();
     uint64_t start_time = last_time;
@@ -72,21 +73,20 @@ int main(int argc, char *argv[]) {
       std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
       start_frame_time = currentTimeMs();
 
-      videoReader.nextFrame();
+      videoReader->nextFrame();
 
       if (sent_frames == 0) {
         last_time = currentTimeMs();
         start_time = last_time;
       }
 
-
-      if (!videoReader.hasNextFrame()) {
-        videoReader.reset();
+      if (!videoReader->hasNextFrame()) {
+        videoReader->reset();
         stopAfter--;
       }
 
       std::vector<FrameStruct> v;
-      std::vector<FrameStruct *> vO = videoReader.currentFrame();
+      std::vector<FrameStruct *> vO = videoReader->currentFrame();
 
       for (int i = 0; i < vO.size(); i++) {
         v.push_back(*vO.at(i));

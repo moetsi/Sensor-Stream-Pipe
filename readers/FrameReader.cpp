@@ -125,6 +125,8 @@ void FrameReader::reset() {
 
 unsigned int FrameReader::getFps() { return fps; }
 
-uint FrameReader::getFrameType() {
-  return frameType;
+std::vector<uint> FrameReader::getType() {
+  std::vector<uint> result;
+  result.push_back(frameType);
+  return result;
 }

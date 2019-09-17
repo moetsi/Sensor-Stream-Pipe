@@ -16,6 +16,7 @@
 #include "../structs/FrameStruct.hpp"
 #include "../utils/KinectUtils.h"
 #include "../utils/VideoUtils.h"
+#include "IReader.h"
 
 #include <k4a/k4a.h>
 #include <k4arecord/record.h>
@@ -53,7 +54,7 @@ inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps) {
     }                                                                          \
   }
 
-class KinectReader {
+class KinectReader : public IReader {
 private:
   std::vector<uint> currentFrameCounter;
   unsigned int fps;
@@ -94,6 +95,10 @@ public:
   std::vector<FrameStruct *> currentFrame();
 
   FrameStruct *currentFrame(uint type);
+
+  uint currentFrameId();
+
+  virtual void goToFrame(uint frameId);
 
   uint getFps();
 

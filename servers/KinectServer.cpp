@@ -12,10 +12,12 @@
 #include <string>
 #include <thread>
 
+#include <yaml-cpp/node/node.h>
 #include <zmq.hpp>
 
 #include "../readers/KinectReader.h"
 #include "../structs/FrameStruct.hpp"
+#include "../utils/KinectUtils.h"
 #include "../utils/Utils.h"
 
 int main(int argc, char *argv[]) {
@@ -40,7 +42,7 @@ int main(int argc, char *argv[]) {
 
     ExtendedAzureConfig c =
         buildKinectConfigFromYAML(codec_parameters["kinect_parameters"][0]);
-    KinectReader reader(0, c);
+    IReader *reader = new KinectReader(0, c);
 
     uint64_t last_time = currentTimeMs();
     uint64_t start_time = last_time;
@@ -61,13 +63,13 @@ int main(int argc, char *argv[]) {
         start_time = last_time;
       }
 
-      std::vector<FrameStruct *> vo = reader.currentFrame();
+      std::vector<FrameStruct *> vo = reader->currentFrame();
       std::vector<FrameStruct> v;
 
-      if (reader.hasNextFrame())
-        reader.nextFrame();
+      if (reader->hasNextFrame())
+        reader->nextFrame();
       else {
-        reader.reset();
+        reader->reset();
       }
 
       if (!vo.empty()) {
@@ -104,7 +106,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Took " << diff_time << " ms; size " << message.size()
                   << "; avg " << avg_fps << " fps; "
                   << 8 * (sent_mbytes / diff_start_time) << " Mbps "
-                  << 8 * (sent_mbytes * reader.getFps() / (sent_frames * 1000))
+                  << 8 * (sent_mbytes * reader->getFps() / (sent_frames * 1000))
                   << " Mbps expected " << std::endl;
         for (uint i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);

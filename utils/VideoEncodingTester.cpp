@@ -18,7 +18,6 @@ extern "C" {
 }
 
 #include "../encoders/FrameEncoder.h"
-#include "../readers/FrameReader.h"
 #include "../structs/FrameStruct.hpp"
 #include <cv.hpp>
 
@@ -32,7 +31,7 @@ int main(int argc, char *argv[]) {
   srand(time(NULL) * getpid());
   // srand(getpid());
 
-  double psnr = 0;
+  double psnr = 0, mmse = 0;
   cv::Scalar mssim;
   int i = 0;
   int j = 0;
@@ -60,29 +59,29 @@ int main(int argc, char *argv[]) {
   std::string frame_file = std::string(argv[1]);
   std::string codec_parameters_file = std::string(argv[2]);
 
-  FrameReader reader(frame_file);
+  IReader *reader = new FrameReader(frame_file);
 
   YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
-  YAML::Node v = codec_parameters["video_encoder"][reader.getFrameType()];
+  YAML::Node v = codec_parameters["video_encoder"][reader->getType().at(0)];
 
-  IEncoder *frameEncoder = new FrameEncoder(v, reader.getFps());
+  IEncoder *frameEncoder = new FrameEncoder(v, reader->getFps());
   std::string encoder_type = v["type"].as<std::string>();
   IEncoder *fe;
   if (encoder_type == "libav")
-    fe = new FrameEncoder(v, reader.getFps());
+    fe = new FrameEncoder(v, reader->getFps());
   else if (encoder_type == "nvenc")
-    fe = new NvEncoder(v, reader.getFps());
+    fe = new NvEncoder(v, reader->getFps());
   else if (encoder_type == "null")
-    fe = new NullEncoder(reader.getFps());
+    fe = new NullEncoder(reader->getFps());
 
   // This class only reads the file once
-  while (reader.hasNextFrame() || frameEncoder->hasNextPacket()) {
+  while (reader->hasNextFrame() || frameEncoder->hasNextPacket()) {
 
     while (!frameEncoder->hasNextPacket()) {
-      FrameStruct *f = reader.currentFrame().front();
+      FrameStruct *f = reader->currentFrame().front();
       original_size += f->frame.size();
       frameEncoder->addFrameStruct(f);
-      reader.nextFrame();
+      reader->nextFrame();
     }
 
     std::vector<FrameStruct *> vO;
@@ -141,7 +140,7 @@ int main(int argc, char *argv[]) {
         minMaxFilter<ushort>(frameOri, frameOriSquached, 0,
                              MAX_DEPTH_VALUE_12_BITS);
         psnr += getPSNR(frameOriSquached, img, MAX_DEPTH_VALUE_12_BITS);
-
+        mmse += getMSE(frameOriSquached, img);
         img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
         frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
 
@@ -165,6 +164,7 @@ int main(int argc, char *argv[]) {
                              MAX_DEPTH_VALUE_12_BITS);
         psnr += getPSNR(frameOriSquached, img, MAX_DEPTH_VALUE_12_BITS);
         mssim += getMSSIM(frameOriSquached, img);
+        mmse += getMSE(frameOriSquached, img);
         img.convertTo(img, CV_8U);
 
         frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
@@ -182,6 +182,7 @@ int main(int argc, char *argv[]) {
         absdiff(frameOri, img, frameDiff);
         psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
         mssim += getMSSIM(frameOri, img);
+        mmse += getMSE(frameOri, img);
       }
 
       cv::namedWindow("Original");
@@ -211,9 +212,11 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Avg PSNR: " << psnr / i << std::endl;
   std::cout << "Avg MSSIM: " << mssim / i << std::endl;
+  std::cout << "Avg MSE: " << mmse / i << " "
+            << " " << mmse / (i * img.cols * img.rows) << std::endl;
   std::cout << "original_size: " << original_size << " bytes" << std::endl;
   std::cout << "compressed_size: " << compressed_size << " bytes, bitrate: "
-            << (8 * compressed_size) / (1000000.0 * reader.getFps()) << " Mbps"
+            << (8 * compressed_size) / (1000000.0 * reader->getFps()) << " Mbps"
             << std::endl;
   std::cout << "ratio: " << original_size / compressed_size << "x" << std::endl;
 

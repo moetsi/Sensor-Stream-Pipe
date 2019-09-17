@@ -48,7 +48,8 @@ public:
 
   uint currentFrameId();
 
+  std::vector<uint> getType();
+
   uint getFps();
 
-  uint getFrameType();
 };

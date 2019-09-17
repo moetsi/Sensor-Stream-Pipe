@@ -20,15 +20,16 @@ extern "C" {
 
 #include "../structs/FrameStruct.hpp"
 #include "../utils/Utils.h"
+#include "IReader.h"
 
-class VideoFileReader {
+class VideoFileReader : public IReader {
 private:
   unsigned int fps;
   std::string sceneDesc;
   std::string type;
   std::string filename;
 
-  std::set<uint> video_stream_indexes;
+  std::vector<uint> video_stream_indexes;
   std::vector<FrameStruct *> frameStructs;
   FrameStruct *frameStructsBuffer;
   FrameStruct frameStructTemplate;
@@ -61,9 +62,11 @@ public:
 
   void nextFrame();
 
+  std::vector<uint> getType();
+
   std::vector<FrameStruct *> currentFrame();
 
-  int currentFrameId();
+  uint currentFrameId();
 
   unsigned int getFps();
 };

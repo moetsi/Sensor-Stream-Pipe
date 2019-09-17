@@ -294,3 +294,6 @@ std::vector<uint> KinectReader::getType() {
 
   return types;
 }
+
+void KinectReader::goToFrame(uint frameId) {}
+uint KinectReader::currentFrameId() { return currentFrameCounter.at(0); }

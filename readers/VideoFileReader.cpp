@@ -95,7 +95,7 @@ void VideoFileReader::init(std::string &filename) {
     if (pCodec == NULL) {
       std::cout << "ERROR unsupported codec!" << std::endl;
     } else if (pCodecParameter->codec_type == AVMEDIA_TYPE_VIDEO) {
-      video_stream_indexes.emplace(i);
+      video_stream_indexes.push_back(i);
       std::cout << "Video Codec: resolution %d x %d"
                 << " " << pCodecParameter->width << " "
                 << pCodecParameter->height << std::endl;
@@ -158,7 +158,7 @@ void VideoFileReader::init(std::string &filename) {
   libAVReady = true;
 }
 
-int VideoFileReader::currentFrameId() { return currentFrameCounter; }
+uint VideoFileReader::currentFrameId() { return currentFrameCounter; }
 
 /*
 std::vector<unsigned char> VideoFileReader::currentFrameBytes() {
@@ -182,8 +182,11 @@ void VideoFileReader::nextFrame() {
   while (error >= 0) {
     error = av_read_frame(pFormatContext, pPacket);
     // if it's the video stream
-    if (video_stream_indexes.find(pPacket->stream_index) !=
-        video_stream_indexes.end()) {
+    std::vector<uint>::iterator it;
+
+    it = find(video_stream_indexes.begin(), video_stream_indexes.end(),
+              pPacket->stream_index);
+    if (it != video_stream_indexes.end()) {
 
       FrameStruct *frameStruct = new FrameStruct(frameStructTemplate);
       frameStruct->frame = std::vector<unsigned char>(
@@ -262,6 +265,5 @@ unsigned int VideoFileReader::getFps() {
 std::vector<FrameStruct *> VideoFileReader::currentFrame() {
   return frameStructs;
 }
-/*
 
- */
+std::vector<uint> VideoFileReader::getType() { return video_stream_indexes; }

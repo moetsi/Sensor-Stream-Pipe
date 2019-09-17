@@ -41,9 +41,9 @@ int main(int argc, char *argv[]) {
       stopAfter = std::stoi(argv[4]);
     }
 
-    FrameReader reader(name);
+    IReader *reader = new FrameReader(name);
 
-    uint fps = reader.getFps();
+    uint fps = reader->getFps();
 
     uint64_t last_time = currentTimeMs();
     uint64_t start_time = last_time;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
         start_time = last_time;
       }
 
-      std::vector<FrameStruct *> vO = reader.currentFrame();
+      std::vector<FrameStruct *> vO = reader->currentFrame();
       std::vector<FrameStruct> v;
       FrameStruct f = *vO.front();
       v.push_back(f);
@@ -79,11 +79,11 @@ int main(int argc, char *argv[]) {
         zmq::message_t request(message.size());
         memcpy(request.data(), message.c_str(), message.size());
 
-        uint frameId = reader.currentFrameId();
-        if (reader.hasNextFrame())
-          reader.nextFrame();
+        uint frameId = reader->currentFrameId();
+        if (reader->hasNextFrame())
+          reader->nextFrame();
         else {
-          reader.reset();
+          reader->reset();
           stopAfter--;
         }
         socket.send(request);
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Took " << diff_time << " ms; size " << message.size()
                   << "; avg " << avg_fps << " fps; "
                   << 8 * (sent_mbytes / diff_start_time) << " Mbps "
-                  << 8 * (sent_mbytes * reader.getFps() / (sent_frames * 1000))
+                  << 8 * (sent_mbytes * reader->getFps() / (sent_frames * 1000))
                   << " Mbps expected " << std::endl;
         for (uint i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);

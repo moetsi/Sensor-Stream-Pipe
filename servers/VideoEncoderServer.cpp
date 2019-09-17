@@ -51,23 +51,23 @@ int main(int argc, char *argv[]) {
       stopAfter = std::stoi(argv[5]);
     }
 
-    FrameReader reader(frame_file);
+    IReader *reader = new FrameReader(frame_file);
 
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
-    YAML::Node v = codec_parameters["video_encoder"][reader.getFrameType()];
+    YAML::Node v = codec_parameters["video_encoder"][reader->getType().at(0)];
 
     IEncoder* frameEncoder;
 
     std::string encoder_type = v["type"].as<std::string>();
 
     if (encoder_type == "libav")
-      frameEncoder = new FrameEncoder(v, reader.getFps());
+      frameEncoder = new FrameEncoder(v, reader->getFps());
     else if (encoder_type == "nvenc")
-      frameEncoder = new NvEncoder(v, reader.getFps());
+      frameEncoder = new NvEncoder(v, reader->getFps());
     else if (encoder_type == "null")
-      frameEncoder = new NullEncoder(reader.getFps());
+      frameEncoder = new NullEncoder(reader->getFps());
 
-    uint fps = reader.getFps();
+    uint fps = reader->getFps();
 
     uint64_t last_time = currentTimeMs();
     uint64_t start_time = last_time;
@@ -92,12 +92,12 @@ int main(int argc, char *argv[]) {
       }
 
       while (!frameEncoder->hasNextPacket()) {
-        frameEncoder->addFrameStruct(reader.currentFrame().front());
-        if (!reader.hasNextFrame()) {
-          reader.reset();
+        frameEncoder->addFrameStruct(reader->currentFrame().front());
+        if (!reader->hasNextFrame()) {
+          reader->reset();
           stopAfter--;
         }
-        reader.nextFrame();
+        reader->nextFrame();
       }
       std::vector<FrameStruct *> vO;
       vO.push_back(frameEncoder->currentFrameEncoded());
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
       std::cout << "Took " << diff_time << " ms; size " << message.size()
                 << "; avg " << avg_fps << " fps; "
                 << 8 * (sent_mbytes / diff_start_time) << " Mbps "
-                << 8 * (sent_mbytes * reader.getFps() / (sent_frames * 1000))
+                << 8 * (sent_mbytes * reader->getFps() / (sent_frames * 1000))
                 << " Mbps expected " << std::endl;
       for (uint i = 0; i < v.size(); i++) {
         FrameStruct f = v.at(i);
