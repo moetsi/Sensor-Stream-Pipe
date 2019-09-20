@@ -12,6 +12,7 @@
 #include <string>
 #include <thread>
 
+#include <opencv2/imgproc.hpp>
 #include <yaml-cpp/yaml.h>
 
 //#include <opencv2/imgproc.hpp>
@@ -25,12 +26,13 @@
 NvEncoder::NvEncoder(YAML::Node _codec_parameters, uint _fps) {
   buildEncoder(_codec_parameters, _fps);
   fps = _fps;
-  int bufferSize = width * height * 4;
-  compressed.resize(bufferSize);
+  totalCurrentFrameCounter = 0;
   paramsStruct = nullptr;
   frameCompressed = nullptr;
   frameOriginal = nullptr;
   encoder = nullptr;
+  sws_ctx = nullptr;
+  fd = nullptr;
 }
 
 NvEncoder::~NvEncoder() {}
@@ -61,8 +63,9 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
 
     AVFrame *pFrameO = nullptr;
     AVFrame *pFrame = nullptr;
+    cv::Mat img;
 
-    if (fs->frameDataType == 0 || fs->frameDataType == 1) {
+    if (fs->frameDataType == 0) {
 
       pFrameO = av_frame_alloc();
       pFrame = av_frame_alloc();
@@ -72,31 +75,44 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
       width = pFrameO->width;
       height = pFrameO->height;
 
-      struct SwsContext *sws_ctx;
-
       if (fs->frameType == 0) {
         pFrame->format = AV_PIX_FMT_BGRA;
-        pFrame->width = width;
-        pFrame->height = height;
-        av_frame_get_buffer(pFrame, 0);
-        sws_ctx = sws_getContext(width, height, (AVPixelFormat)pFrameO->format,
-                                 width, height, (AVPixelFormat)AV_PIX_FMT_BGRA,
-                                 SWS_BILINEAR, NULL, NULL, NULL);
       } else {
         pFrame->format = AV_PIX_FMT_GBRP16LE;
-        pFrame->width = width;
-        pFrame->height = height;
-        av_frame_get_buffer(pFrame, 0);
-        sws_ctx = sws_getContext(
-            width, height, (AVPixelFormat)pFrameO->format, width, height,
-            (AVPixelFormat)AV_PIX_FMT_GBRP16LE, SWS_BILINEAR, NULL, NULL, NULL);
       }
+
+      pFrame->width = width;
+      pFrame->height = height;
+      av_frame_get_buffer(pFrame, 0);
+
+      if (sws_ctx == nullptr)
+        sws_ctx = sws_getContext(width, height, (AVPixelFormat)pFrameO->format,
+                                 width, height, (AVPixelFormat)pFrame->format,
+                                 SWS_BILINEAR, NULL, NULL, NULL);
 
       sws_scale(sws_ctx, (const uint8_t *const *)pFrameO->data,
                 pFrameO->linesize, 0, pFrameO->height, pFrame->data,
                 pFrame->linesize);
 
       data = reinterpret_cast<char *>(&pFrame->data[0][0]);
+
+    } else if (fs->frameDataType == 1) {
+
+      if (fd == nullptr) {
+        fd = new LibAvDecoder();
+        fd->init(fs->codec_data.getParams());
+      }
+
+      img = fd->decode(fs);
+
+      width = img.cols;
+      height = img.rows;
+
+      if (frameCompressed->frameType == 0) {
+        cv::cvtColor(img, img, CV_BGR2BGRA);
+      }
+
+      data = reinterpret_cast<char *>(img.data);
 
     } else if (fs->frameDataType == 2 || fs->frameDataType == 3) {
       // fs->frame[8] ignores width and height set at [0] and [4] by
@@ -155,6 +171,9 @@ CodecParamsStruct *NvEncoder::getCodecParamsStruct() {
     paramsStruct = new CodecParamsStruct();
     paramsStruct->type = 1;
     paramsStruct->data.resize(4 + 4 + 1 + 1);
+
+    int bufferSize = width * height * 5;
+    compressed.resize(bufferSize);
 
     memcpy(&paramsStruct->data[0], &width, sizeof(int));
     memcpy(&paramsStruct->data[4], &height, sizeof(int));

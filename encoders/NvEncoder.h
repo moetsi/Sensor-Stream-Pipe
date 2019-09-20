@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "../decoders/LibAvDecoder.h"
 #include "../utils/ImageDecoder.h"
 #include "IEncoder.h"
 #include <NvPipe.h>
@@ -21,9 +22,12 @@ private:
   FrameStruct *frameOriginal;
   FrameStruct *frameCompressed;
   CodecParamsStruct *paramsStruct;
+  struct SwsContext *sws_ctx;
   NvPipe_Codec codec;
   NvPipe_Compression compression;
   NvPipe_Format format;
+
+  LibAvDecoder *fd;
 
   ImageDecoder id;
 

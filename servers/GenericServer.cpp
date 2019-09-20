@@ -57,7 +57,15 @@ int main(int argc, char *argv[]) {
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
               .as<std::string>();
-      reader = new VideoFileReader(path);
+      if (general_parameters["frame_source"]["parameters"]["streams"]
+              .IsDefined()) {
+        std::vector<uint> streams =
+            general_parameters["frame_source"]["parameters"]["streams"]
+                .as<std::vector<uint>>();
+        reader = new VideoFileReader(path, streams);
+      } else {
+        reader = new VideoFileReader(path);
+      }
     } else if (reader_type == "kinect") {
       ExtendedAzureConfig c = buildKinectConfigFromYAML(
           general_parameters["frame_source"]["parameters"]);

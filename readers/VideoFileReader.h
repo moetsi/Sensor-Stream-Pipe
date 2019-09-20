@@ -30,6 +30,7 @@ private:
   std::string filename;
 
   std::vector<uint> video_stream_indexes;
+  bool video_stream_indexes_from_file;
   std::vector<FrameStruct *> frameStructs;
   FrameStruct *frameStructsBuffer;
   FrameStruct frameStructTemplate;
@@ -51,6 +52,8 @@ private:
 
 public:
   VideoFileReader(std::string &filename);
+  VideoFileReader(std::string &filename,
+                  std::vector<uint> &video_stream_indexes);
 
   ~VideoFileReader();
 

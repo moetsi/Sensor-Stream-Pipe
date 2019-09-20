@@ -4,16 +4,26 @@
 
 #include "VideoFileReader.h"
 
-VideoFileReader::VideoFileReader(std::string &filename) {
-  // get stream info from filename
-  std::vector<std::string> valuesAll = split(filename, "-");
-  std::vector<std::string> values = split(valuesAll[0], ".");
-
+VideoFileReader::VideoFileReader(std::string &_filename) {
   currentFrameCounter = 0;
   eofReached = false;
   libAVReady = false;
 
-  this->filename = filename;
+  filename = _filename;
+
+  video_stream_indexes_from_file = false;
+}
+
+VideoFileReader::VideoFileReader(std::string &_filename,
+                                 std::vector<uint> &_video_stream_indexes) {
+  currentFrameCounter = 0;
+  eofReached = false;
+  libAVReady = false;
+
+  filename = _filename;
+
+  video_stream_indexes = _video_stream_indexes;
+  video_stream_indexes_from_file = true;
 }
 
 VideoFileReader::~VideoFileReader() {
@@ -95,50 +105,59 @@ void VideoFileReader::init(std::string &filename) {
     if (pCodec == NULL) {
       std::cout << "ERROR unsupported codec!" << std::endl;
     } else if (pCodecParameter->codec_type == AVMEDIA_TYPE_VIDEO) {
-      video_stream_indexes.push_back(i);
-      std::cout << "Video Codec: resolution %d x %d"
-                << " " << pCodecParameter->width << " "
-                << pCodecParameter->height << std::endl;
+      if (!video_stream_indexes_from_file)
+        video_stream_indexes.push_back(i);
 
-      AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
-      if (!pCodecContext) {
-        std::cout << "failed to allocated memory for AVCodecContext"
-                  << std::endl;
-        exit(-1);
+      std::vector<uint>::iterator it;
+
+      it = find(video_stream_indexes.begin(), video_stream_indexes.end(), i);
+      if (it != video_stream_indexes.end()) {
+
+        std::cout << "Video Codec: resolution %d x %d"
+                  << " " << pCodecParameter->width << " "
+                  << pCodecParameter->height << std::endl;
+
+        AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
+        if (!pCodecContext) {
+          std::cout << "failed to allocated memory for AVCodecContext"
+                    << std::endl;
+          exit(-1);
+        }
+
+        if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
+          std::cout << "failed to copy codec params to codec context"
+                    << std::endl;
+          exit(-1);
+        }
+
+        if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
+          std::cout << "failed to open codec through avcodec_open2"
+                    << std::endl;
+          exit(-1);
+        }
+
+        pCodecContexts[i] = pCodecContext;
+        frameStructsBuffer = nullptr;
+
+        fps = av_q2d(
+            pFormatContext->streams[video_stream_indexes.begin().operator*()]
+                ->r_frame_rate);
+
+        void *sEPointer = pCodecParameter->extradata;
+        size_t sESize = pCodecParameter->extradata_size;
+        size_t sSize = sizeof(*pCodecParameter);
+
+        std::vector<unsigned char> e(sSize);
+        std::vector<unsigned char> ed(sESize);
+
+        memcpy(&e[0], pCodecParameter, sSize);
+        memcpy(&ed[0], sEPointer, sESize);
+
+        CodecParamsStruct codecParamsStruct(0, e, ed);
+        pCodecParameters[i] = codecParamsStruct;
+
+        avcodec_parameters_free(&pCodecParameter);
       }
-
-      if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
-        std::cout << "failed to copy codec params to codec context"
-                  << std::endl;
-        exit(-1);
-      }
-
-      if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
-        std::cout << "failed to open codec through avcodec_open2" << std::endl;
-        exit(-1);
-      }
-
-      pCodecContexts[i] = pCodecContext;
-      frameStructsBuffer = nullptr;
-
-      fps = av_q2d(
-          pFormatContext->streams[video_stream_indexes.begin().operator*()]
-              ->r_frame_rate);
-
-      void *sEPointer = pCodecParameter->extradata;
-      size_t sESize = pCodecParameter->extradata_size;
-      size_t sSize = sizeof(*pCodecParameter);
-
-      std::vector<unsigned char> e(sSize);
-      std::vector<unsigned char> ed(sESize);
-
-      memcpy(&e[0], pCodecParameter, sSize);
-      memcpy(&ed[0], sEPointer, sESize);
-
-      CodecParamsStruct codecParamsStruct(0, e, ed);
-      pCodecParameters[i] = codecParamsStruct;
-
-      avcodec_parameters_free(&pCodecParameter);
     }
   }
 
