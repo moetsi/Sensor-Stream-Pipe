@@ -3,6 +3,7 @@
 //
 
 #include "ImageReader.h"
+#include "../utils/ImageDecoder.h"
 
 ImageReader::ImageReader(std::string filename) {
   // bundle_fusion_apt0;0;0;30
@@ -43,6 +44,8 @@ ImageReader::ImageReader(std::string filename) {
               << std::endl;
 
   streamId = randomString(16);
+
+  cps = nullptr;
   reset();
 }
 
@@ -94,6 +97,16 @@ FrameStruct *ImageReader::createFrameStruct(unsigned int frameId) {
 
   frame->frame = fileData;
   frame->streamId = streamId;
+
+  if (cps == nullptr) {
+    ImageDecoder id;
+    AVFrame *avframe = av_frame_alloc();
+    id.imageBufferToAVFrame(frame, avframe);
+    cps = new CodecParamsStruct(frame->codec_data);
+    av_frame_free(&avframe);
+  } else {
+    frame->codec_data = *cps;
+  }
 
   return frame;
 }

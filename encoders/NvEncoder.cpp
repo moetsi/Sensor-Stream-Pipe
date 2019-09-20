@@ -70,8 +70,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
       pFrameO = av_frame_alloc();
       pFrame = av_frame_alloc();
 
-      std::vector<unsigned char> frameData = fs->frame;
-      id.imageBufferToAVFrame(frameData, pFrameO);
+      id.imageBufferToAVFrame(fs, pFrameO);
       width = pFrameO->width;
       height = pFrameO->height;
 

@@ -23,6 +23,8 @@ private:
   unsigned int frameType;
   std::string streamId;
 
+  CodecParamsStruct *cps;
+
   FrameStruct *currentFrameInternal;
 
   std::vector<unsigned char> readFile(std::string &filename);

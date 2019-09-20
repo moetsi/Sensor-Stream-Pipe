@@ -3,7 +3,7 @@ kinect_parameters:
   0: #parameters for the first Kinect
     stream_color_video: True
     stream_depth_video: True
-    stream_ir_video: False
+    stream_ir_video: True
     streaming_color_format: "K4A_IMAGE_FORMAT_COLOR_BGRA32"
     streaming_color_resolution: "K4A_COLOR_RESOLUTION_720P"
     streaming_depth_mode: "K4A_DEPTH_MODE_NFOV_UNBINNED"
@@ -26,9 +26,23 @@ video_encoder:
     width: 640
     height: 576
   2: #ir
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_UINT16"
+    bit_rate: 15000000
+    width: 640
+    height: 576
+  3: #ir
+    type: "libav"
+    codec_name: "png"
+    pix_fmt: "gray16be"
+    bit_rate: 8000000
+    options:
+      preset: "veryfast"
+  4: #ir
     type: "libav"
     codec_name: "libx265"
-    pix_fmt: "gray12le"
-    bit_rate: 8000000
+    pix_fmt: "yuv420p"
+    bit_rate: 15000000
     options:
       preset: "veryfast"

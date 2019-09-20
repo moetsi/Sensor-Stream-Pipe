@@ -26,6 +26,8 @@ extern "C" {
 #include "../utils/Utils.h"
 #include "../utils/VideoUtils.h"
 
+bool frameStructToMat(FrameStruct &f, cv::Mat &img,
+                      std::unordered_map<std::string, IDecoder *> &decoders);
 int main(int argc, char *argv[]) {
 
   srand(time(NULL) * getpid());
@@ -86,49 +88,9 @@ int main(int argc, char *argv[]) {
       for (FrameStruct f : f_list) {
         std::string decoder_id = f.streamId + std::to_string(f.sensorId);
 
-        cv::Mat img;
         rec_mbytes_per_stream[decoder_id] += f.frame.size() / 1000;
-        if (f.frameDataType == 0) {
-          img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
-          imgChanged = true;
-        } else if (f.frameDataType == 2) {
-          int rows, cols;
-          memcpy(&cols, &f.frame[0], sizeof(int));
-          memcpy(&rows, &f.frame[4], sizeof(int));
-          img = cv::Mat(rows, cols, CV_8UC4, (void *)&f.frame[8],
-                        cv::Mat::AUTO_STEP);
-          imgChanged = true;
-        } else if (f.frameDataType == 3) {
-          int rows, cols;
-          memcpy(&cols, &f.frame[0], sizeof(int));
-          memcpy(&rows, &f.frame[4], sizeof(int));
-          img = cv::Mat(rows, cols, CV_16UC1, (void *)&f.frame[8],
-                        cv::Mat::AUTO_STEP);
-          imgChanged = true;
-        } else if (f.frameDataType == 1) {
-
-          IDecoder *decoder;
-
-          if (decoders.find(decoder_id) == decoders.end()) {
-            CodecParamsStruct data = f.codec_data;
-            if (data.type == 0) {
-              LibAvDecoder *fd = new LibAvDecoder();
-              fd->init(data.getParams());
-              decoders[decoder_id] = fd;
-            } else if (data.type == 1) {
-              NvDecoder *fd = new NvDecoder();
-              fd->init(data.data);
-              decoders[decoder_id] = fd;
-            }
-          }
-
-          decoder = decoders[decoder_id];
-
-          img = decoder->decode(&f);
-          imgChanged = true;
-
-          f.frame.clear();
-        }
+        cv::Mat img;
+        imgChanged = frameStructToMat(f, img, decoders);
 
         if (imgChanged && !img.empty()) {
 

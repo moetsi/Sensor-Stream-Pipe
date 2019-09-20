@@ -22,6 +22,9 @@ extern "C" {
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
 
+#include "../decoders/IDecoder.h"
+#include "../decoders/LibAvDecoder.h"
+#include "../decoders/NvDecoder.h"
 #include "../structs/FrameStruct.hpp"
 
 #define MAX_DEPTH_VALUE_16_BITS 65536
@@ -39,6 +42,9 @@ void prepareDecodingStruct(
         FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
         std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
         std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
+
+bool frameStructToMat(FrameStruct &f, cv::Mat &img,
+                      std::unordered_map<std::string, IDecoder *> &decoders);
 
 template <typename T>
 void minMaxFilter(cv::Mat &inmat, cv::Mat &outmat, double min, double max) {

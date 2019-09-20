@@ -233,6 +233,7 @@ void VideoFileReader::nextFrame() {
     }
 
     if (error == AVERROR_EOF) {
+      eofReached = true;
       for (auto fs : frameStructs)
         delete fs;
       frameStructs.clear();
@@ -241,7 +242,7 @@ void VideoFileReader::nextFrame() {
         frameStructsBuffer = nullptr;
       }
       error = 1;
-      reset();
+      break;
     }
     // https://ffmpeg.org/doxygen/trunk/group__lavc__packet.html#ga63d5a489b419bd5d45cfd09091cbcbc2
   }

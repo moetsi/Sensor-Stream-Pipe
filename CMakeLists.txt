@@ -33,7 +33,7 @@ add_executable(video_encoder_server servers/VideoEncoderServer.cpp encoders/LibA
 add_executable(video_encoder_test testers/VideoEncodingTester.cpp encoders/LibAvEncoder.cpp testers/VideoEncodingTester.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/LibAvDecoder.cpp ${SOURCE_FILES})
 add_executable(kinect_encoder_test testers/KinectEncodingTester.cpp readers/KinectReader.cpp encoders/LibAvEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp ${SOURCE_FILES})
 add_executable(generic_server servers/GenericServer.cpp readers/VideoFileReader.cpp readers/KinectReader.cpp encoders/LibAvEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp ${SOURCE_FILES})
-
+add_executable(ssp_tester testers/Tester.cpp utils/VideoUtils.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp readers/VideoFileReader.cpp readers/KinectReader.cpp encoders/LibAvEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp ${SOURCE_FILES})
 
 target_link_libraries(client swscale)
 target_link_libraries(client zmq)
@@ -105,3 +105,13 @@ target_link_libraries(kinect_encoder_test depthengine)
 target_link_libraries(kinect_encoder_test k4arecord)
 target_link_libraries(kinect_encoder_test yaml-cpp)
 target_link_libraries(kinect_encoder_test NvPipe)
+
+target_link_libraries(ssp_tester swscale)
+target_link_libraries(ssp_tester ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(ssp_tester ${FFMPEG_LIBRARIES})
+target_link_libraries(ssp_tester ${OpenCV_LIBS})
+target_link_libraries(ssp_tester k4a)
+target_link_libraries(ssp_tester depthengine)
+target_link_libraries(ssp_tester k4arecord)
+target_link_libraries(ssp_tester yaml-cpp)
+target_link_libraries(ssp_tester NvPipe)

@@ -117,7 +117,7 @@ void LibAvEncoder::prepareFrame() {
 
     std::vector<unsigned char> frameData = f->frame;
 
-    id.imageBufferToAVFrame(frameData, pFrameO);
+    id.imageBufferToAVFrame(f, pFrameO);
 
     if (pFrameO->format == pFrame->format) {
       av_frame_copy(pFrame, pFrameO);
@@ -254,7 +254,7 @@ void LibAvEncoder::init(FrameStruct *fs) {
   if (fs->frameDataType == 0 || fs->frameDataType == 1) {
     AVFrame *pFrameO = av_frame_alloc();
 
-    id.imageBufferToAVFrame(fs->frame, pFrameO);
+    id.imageBufferToAVFrame(fs, pFrameO);
 
     width = pFrameO->width;
     height = pFrameO->height;

@@ -15,6 +15,7 @@ extern "C" {
 #include <libavutil/file.h>
 };
 
+#include "../structs/FrameStruct.hpp"
 #include "Utils.h"
 
 class ImageDecoder {
@@ -27,6 +28,8 @@ private:
   AVCodec *pCodec;
   AVPacket *pPacket;
 
+  CodecParamsStruct *cParamsStruct;
+
   uint8_t *avio_ctx_buffer = NULL;
   size_t avio_ctx_buffer_size = 4096;
 
@@ -35,16 +38,12 @@ private:
   void init(std::vector<unsigned char> &buffer);
 
   int decode_packet(AVFrame *pFrame);
+  CodecParamsStruct *getCodecParamsStruct();
 
 public:
   ImageDecoder();
 
   ~ImageDecoder();
 
-  int getWidth();
-
-  int getHeigth();
-
-  void imageBufferToAVFrame(std::vector<unsigned char> &buffer,
-                            AVFrame *pFrame);
+  void imageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame);
 };

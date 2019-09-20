@@ -28,12 +28,6 @@ int ImageDecoder::decode_packet(AVFrame *pFrame) {
     }
 
     if (response >= 0) {
-      std::cout
-          << "Frame %d (type=%c, size=%d bytes) pts %d key_frame %d [DTS %d]"
-          << " " << pCodecContext->frame_number << " "
-          << av_get_picture_type_char(pFrame->pict_type) << " "
-          << pFrame->pkt_size << " " << pFrame->pts << " " << pFrame->key_frame
-          << " " << pFrame->coded_picture_number << std::endl;
       break;
     }
   }
@@ -48,9 +42,6 @@ struct buffer_data {
 static int read_packet(void *opaque, uint8_t *buf, int buf_size) {
   struct buffer_data *bd = (struct buffer_data *)opaque;
   buf_size = FFMIN(buf_size, bd->size);
-
-  printf("ptr:%p size:%zu\n", bd->ptr, bd->size);
-
   /* copy internal buffer data to buf */
   memcpy(buf, bd->ptr, buf_size);
   bd->ptr += buf_size;
@@ -61,6 +52,7 @@ static int read_packet(void *opaque, uint8_t *buf, int buf_size) {
 
 ImageDecoder::ImageDecoder() {
   libAVReady = false;
+  cParamsStruct = NULL;
   av_register_all();
 }
 
@@ -110,26 +102,9 @@ void ImageDecoder::init(std::vector<unsigned char> &buffer) {
   // loop though all the streams and print its main information
   for (int i = 0; i < pFormatContext->nb_streams; i++) {
     pCodecParameters = pFormatContext->streams[i]->codecpar;
-    std::cout << "AVStream->time_base before open coded %d/%d"
-              << " " << pFormatContext->streams[i]->time_base.num << " "
-              << pFormatContext->streams[i]->time_base.den << std::endl;
-    std::cout << "AVStream->r_frame_rate before open coded %d/%d"
-              << " " << pFormatContext->streams[i]->r_frame_rate.num << " "
-              << pFormatContext->streams[i]->r_frame_rate.den << std::endl;
-    std::cout << "AVStream->start_time %" PRId64 << " "
-              << pFormatContext->streams[i]->start_time << std::endl;
-    std::cout << "AVStream->duration %" PRId64 << " "
-              << pFormatContext->streams[i]->duration << std::endl;
-    std::cout << "finding the proper decoder (CODEC)" << std::endl;
-
     pCodec = avcodec_find_decoder(pCodecParameters->codec_id);
 
-    if (pCodec == NULL) {
-      std::cout << "ERROR unsupported codec!" << std::endl;
-    } else if (pCodecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
-      std::cout << "Video Codec: resolution %d x %d"
-                << " " << pCodecParameters->width << " "
-                << pCodecParameters->height << std::endl;
+    if (pCodec != NULL && pCodecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
       break;
     }
   }
@@ -159,16 +134,34 @@ void ImageDecoder::init(std::vector<unsigned char> &buffer) {
   libAVReady = true;
 }
 
-int ImageDecoder::getWidth() { return 0; }
+CodecParamsStruct *ImageDecoder::getCodecParamsStruct() {
 
-int ImageDecoder::getHeigth() { return 0; }
+  if (cParamsStruct == NULL) {
+
+    void *sEPointer = pCodecParameters->extradata;
+    size_t sESize = pCodecParameters->extradata_size;
+    size_t sSize = sizeof(*pCodecParameters);
+
+    std::vector<unsigned char> e(sSize);
+    std::vector<unsigned char> ed(sESize);
+
+    memcpy(&e[0], pCodecParameters, sSize);
+    memcpy(&ed[0], sEPointer, sESize);
+    cParamsStruct = new CodecParamsStruct(0, e, ed);
+  }
+
+  return cParamsStruct;
+}
 
 // http://guru-coder.blogspot.com/2014/01/in-memory-jpeg-decode-using-ffmpeg.html
-void ImageDecoder::imageBufferToAVFrame(std::vector<unsigned char> &buffer,
-                                        AVFrame *pFrame) {
+void ImageDecoder::imageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame) {
+
+  std::vector<unsigned char> buffer = fs->frame;
 
   // TODO: do not create a decoder for each single frame
   init(buffer);
+
+  fs->codec_data = *getCodecParamsStruct();
 
   int response = 0;
 
