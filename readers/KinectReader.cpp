@@ -135,6 +135,10 @@ KinectReader::KinectReader(uint8_t _device_index,
   currentFrameCounter.push_back(0);
   currentFrameCounter.push_back(0);
   currentFrameCounter.push_back(0);
+
+  cpss.push_back(nullptr);
+  cpss.push_back(nullptr);
+  cpss.push_back(nullptr);
 }
 
 KinectReader::~KinectReader() {
@@ -149,7 +153,7 @@ KinectReader::~KinectReader() {
 }
 
 void KinectReader::nextFrame() {
-  //for (FrameStruct* fs : currFrame) {
+  // for (FrameStruct* fs : currFrame) {
   //  fs->frame.clear();
   //}
   currFrame.clear();
@@ -182,6 +186,14 @@ void KinectReader::nextFrame() {
         if (k4a_image_get_format(colorImage) == K4A_IMAGE_FORMAT_COLOR_MJPG) {
           s->frameDataType = 0;
           s->frame = std::vector<uchar>(buffer, buffer + size);
+          if (cpss.at(0) == nullptr) {
+            ImageDecoder id;
+            AVFrame *avframe = av_frame_alloc();
+            id.imageBufferToAVFrame(s->frame, avframe);
+            cpss.at(0) = new CodecParamsStruct(s->codec_data);
+            av_frame_free(&avframe);
+          }
+          s->codec_data = *cpss.at(0);
         } else {
           s->frameDataType = 2;
 
@@ -266,9 +278,7 @@ bool KinectReader::hasNextFrame() { return true; }
 
 void KinectReader::reset() {}
 
-std::vector<FrameStruct *> KinectReader::currentFrame() {
-  return currFrame;
-}
+std::vector<FrameStruct *> KinectReader::currentFrame() { return currFrame; }
 
 FrameStruct *KinectReader::currentFrame(uint type) {
   for (FrameStruct *fs : currFrame) {
@@ -291,12 +301,15 @@ uint KinectReader::getFps() {
 std::vector<uint> KinectReader::getType() {
   std::vector<uint> types;
 
-  if (stream_color)
+  if (stream_color) {
     types.push_back(0);
-  if (stream_depth)
+  }
+  if (stream_depth) {
     types.push_back(1);
-  if (stream_ir)
+  }
+  if (stream_ir) {
     types.push_back(2);
+  }
 
   return types;
 }

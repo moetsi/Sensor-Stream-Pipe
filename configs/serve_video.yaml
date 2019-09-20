@@ -1,0 +1,26 @@
+---
+general:
+  host: "localhost"
+  port: 9999
+  frame_source:
+    type: "video"
+    parameters:
+      path: "/home/amourao/output.mkv"
+      streams: [0, 1, 2]
+video_encoder:
+  0: #color
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_RGBA32"
+    bit_rate: 4000000
+  1: #depth
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_UINT16"
+    bit_rate: 15000000
+  2: #ir
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_UINT16"
+    bit_rate: 15000000
+    

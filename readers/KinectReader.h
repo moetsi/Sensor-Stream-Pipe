@@ -14,6 +14,7 @@
 #include <cereal/archives/binary.hpp>
 
 #include "../structs/FrameStruct.hpp"
+#include "../utils/ImageDecoder.h"
 #include "../utils/KinectUtils.h"
 #include "../utils/VideoUtils.h"
 #include "IReader.h"
@@ -78,6 +79,7 @@ private:
   clock_t recording_start;
 
   FrameStruct frameTemplate;
+  std::vector<CodecParamsStruct *> cpss;
 
   std::vector<FrameStruct *> currFrame;
 

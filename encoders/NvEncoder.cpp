@@ -70,7 +70,9 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
       pFrameO = av_frame_alloc();
       pFrame = av_frame_alloc();
 
-      id.imageBufferToAVFrame(fs, pFrameO);
+      std::vector<unsigned char> frameData = fs->frame;
+      id.imageBufferToAVFrame(frameData, pFrameO);
+
       width = pFrameO->width;
       height = pFrameO->height;
 
@@ -131,7 +133,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
 
     if (encoder == nullptr) {
       getCodecParamsStruct();
-      frameCompressed->codec_data = *paramsStruct;
+
       encoder = NvPipe_CreateEncoder(format, codec, compression, bitrate, fps,
                                      width, height);
     }
@@ -140,6 +142,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
         NvPipe_Encode(encoder, data, srcPitch, compressed.data(),
                       compressed.size(), width, height, false);
 
+    frameCompressed->codec_data = *paramsStruct;
     frameCompressed->frame.clear();
     frameCompressed->frame = std::vector<unsigned char>(
         compressed.data(), compressed.data() + compressed_size);

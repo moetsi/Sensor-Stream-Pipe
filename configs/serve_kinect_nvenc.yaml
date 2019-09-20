@@ -1,0 +1,33 @@
+---
+general:
+  host: "localhost"
+  port: 9999
+  frame_source:
+    type: "kinect"
+    parameters:
+      stream_color_video: True
+      stream_depth_video: True
+      stream_ir_video: True
+      streaming_color_format: "K4A_IMAGE_FORMAT_COLOR_BGRA32"
+      streaming_color_resolution: "K4A_COLOR_RESOLUTION_720P"
+      streaming_depth_mode: "K4A_DEPTH_MODE_NFOV_UNBINNED"
+      wired_sync_mode: "K4A_WIRED_SYNC_MODE_STANDALONE"
+      streaming_rate: "K4A_FRAMES_PER_SECOND_30"
+      absoluteExposureValue: 0
+video_encoder:
+  0: #color
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_RGBA32"
+    bit_rate: 4000000
+  1: #depth
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_UINT16"
+    bit_rate: 15000000
+  2: #ir
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_UINT16"
+    bit_rate: 15000000
+

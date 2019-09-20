@@ -1,0 +1,26 @@
+---
+general:
+  host: "localhost"
+  port: 9999
+  frame_source:
+    type: "frames"
+    parameters:
+      path: "/home/amourao/code/davp-data-scripts/stairs-seq-01-frames-depth.txt"
+video_encoder:
+  0: #color
+    type: "libav"
+    codec_name: "libx265"
+    input_format: "yuv420p"
+    bit_rate: 4000000
+    options:
+      preset: "veryfast"
+      crf: "23"
+  1: #depth
+    type: "libav"
+    codec_name: "libx265"
+    pix_fmt: "gray12le"
+    bit_rate: 8000000
+    options:
+      preset: "veryfast"
+      crf: "23"
+    

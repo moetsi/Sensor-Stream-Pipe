@@ -104,8 +104,7 @@ int main(int argc, char *argv[]) {
 
             img.convertTo(imgOut, CV_8U);
             cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
-          }
-          if (f.frameType == 2) {
+          } else if (f.frameType == 2) {
 
             double max = 1024;
             img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);

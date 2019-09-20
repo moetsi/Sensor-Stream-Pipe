@@ -182,6 +182,28 @@ void ImageDecoder::imageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame) {
 
 }
 
+void ImageDecoder::imageBufferToAVFrame(std::vector<unsigned char> &buffer,
+                                        AVFrame *pFrame) {
+
+  // TODO: do not create a decoder for each single frame
+
+  int response = 0;
+
+  av_read_frame(pFormatContext, pPacket);
+  response = decode_packet(pFrame);
+
+  av_packet_free(&pPacket);
+  avcodec_free_context(&pCodecContext);
+  // avformat_free_context(pFormatContext);
+
+  avformat_close_input(&pFormatContext);
+  if (avio_ctx) {
+    av_freep(&avio_ctx->buffer);
+    av_freep(&avio_ctx);
+  }
+  // buffer.clear();
+}
+
 /*
 int main(){
 

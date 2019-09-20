@@ -1,60 +1,50 @@
-# DAVP: Distributed Architecture for Video-stream Processing
+# Sensor Stream Pipe
 
-The goal of DAVP is to efficiently aggregate and process multiple of video streams from a set of diverse set of devices (smartphones, cameras, ...).
+The Sensor Stream Pipe is a C++ API that efficiently compresses and sends multiple types of video streams (color, depth, ...) over the network in real time.
+It's designed to simplify remote data rendering and processing of color and depth data.
+It supports the Azure Kinect DK RGB-D camera and existing datasets (Bundle Fusion, MS RGB-D 7 scenes).
 
-## Getting Started
+Frame data can be send in it's raw form (JPG/PNG frames), or compressed using a myriad of codecs, leveraged on FFmpeg/LibAV and NVPipe.
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+![ NVPipe example ](https://github.com/moetsi/davp-baseline/raw/master/examples/example.png)Here's a view from the client size, receiving data in real time from a Kinect DK and showing it on screen.
+Data was compressed from 400 Mbits to 20 Mbits (PSNR ~36), with a processing overhead of ~30 ms.
 
-### Prerequisites
+# Getting started
 
-* OpenCV 3.x, probably 4.x (tested on version available on 18.04 repo, 3.2.0)
-* Asio 1.13 (headers only lib)
-* cereal 1.2.2 (headers only lib)
-* zeroMQ (libzmq3 4.3.1, cppzmq 4.3.0)
-* yaml-cpp 0.6.0
+The Sensor Stream Pipe is designed to take over the encoding and processing of frames on the server and the decoding on the client, allowing to use the decoded frames as desired. 
+Currently, the example client converts the received frames into an OpenCV matrix and shows them on the screen.
 
-Tested on Ubuntu 18.04.2
+## Installation
 
-### Installing dependencies from repo
+The following steps were tested on Ubuntu 18.04 (both client and the servers).
+
+### Dependencies
+
+* [OpenCV](https://opencv.org/) 3.2.0 (tested on version available on Ubuntu 18.04 repo): Image processing;
+* [libav](https://github.com/libav/libav/) 3.4.6 (tested on version available on Ubuntu 18.04 repo): Encode, decode and process image frames;
+* [Cereal](https://uscilab.github.io/cereal/) 1.2.2 (headers only): Data serialization for network transmission;
+* [ZeroMQ](http://zeromq.org/) and [cppzmq](https://github.com/zeromq/cppzmq/) (libzmq3 4.3.1, cppzmq 4.3.0):  Network and low-level I/O;
+* [yaml-cpp](https://github.com/jbeder/yaml-cpp/) 0.6.0: Reading server configuration file;
+* [NvPipe](https://github.com/NVIDIA/NvPipe/) (*optional*, but **recommended if you have an NVidia GPU** ): Encode and decode frames;
+* [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/) 1.2 (*optional*): Access Kinect DK data.
+
+TODO: the remainder of this section may be better suited for an INSTALL.md file
+
+#### Download and install repo libraries
 
 #### OpenCV 3.2.0
 
 ```
 sudo apt install libopencv-dev libopencv-core-dev uuid-dev
 ```
-
-#### Azure Kinect SDK 1.2
-
-
-Add the Linux Software Repository for Microsoft Products.
-
-Note: Run any command as sudo to avoid getting a password prompt
-```
-curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-sudo apt-add-repository https://packages.microsoft.com/ubuntu/18.04/prod
-sudo apt-get update
-```
-
-Install Azure Kinect SDK 1.2
-```
-sudo apt install libk4a1.2 libk4a1.2-dev k4a-tools
-```
-
-To be able to use the Kinect as non-root, please run the following:
-```
-wget https://raw.githubusercontent.com/microsoft/Azure-Kinect-Sensor-SDK/develop/scripts/99-k4a.rules
-sudo cp 99-k4a.rules /etc/udev/rules.d/
-```
-
-On my installation, the link to the canonical version of the depth lib was missing.
-You can create it by running the following command:
+#### Libav 3.4.6
 
 ```
-sudo ln -s /usr/lib/x86_64-linux-gnu/libdepthengine.so.1.0 /usr/lib/x86_64-linux-gnu/libdepthengine.so
+sudo apt install libavformat-dev libavutil-dev libavcodec-dev libavfilter-dev
 ```
 
-## Download and extract "out-of-repo" libraries
+
+#### Download and extract "out-of-repo" libraries
 
 
 First, create a folder where local libs are to be installed:
@@ -115,18 +105,56 @@ cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install
 ```
 
-### Building
+#### NVPipe (optional, recommended for users with Nvidia GPU)
 
+```
+cd ~/libs/srcOriginal
+git clone git@github.com:NVIDIA/NvPipe.git
+cd NvPipe/
+mkdir build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
+make
+make install
+```
 
-Add header libraries to search path
+#### Azure Kinect SDK 1.2 (optional)
+
+*Note: to avoid getting a password prompt, run any command as sudo before starting this section of the tutorial* 
+
+1) Add the Linux Software Repository for Microsoft Products.
+```
+curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+sudo apt-add-repository https://packages.microsoft.com/ubuntu/18.04/prod
+sudo apt-get update
+```
+
+2) Install Azure Kinect SDK 1.2
+```
+sudo apt install libk4a1.2 libk4a1.2-dev k4a-tools
+```
+
+3) To be able to use the Kinect as non-root, please run the following:
+```
+wget https://raw.githubusercontent.com/microsoft/Azure-Kinect-Sensor-SDK/develop/scripts/99-k4a.rules
+sudo cp 99-k4a.rules /etc/udev/rules.d/
+```
+
+4) In the current package, the link to the canonical version of the depth lib is missing.
+You can create it by running the following command:
+
+```
+sudo ln -s /usr/lib/x86_64-linux-gnu/libdepthengine.so.2.0 /usr/lib/x86_64-linux-gnu/libdepthengine.so
+```
+### Building Sensor Stream Pipe
+
+1) Add header libraries to search path
 
 ```
 export CPATH=~/libs/include:$CPATH
 export C_INCLUDE_PATH =~/libs/include:$C_INCLUDE_PATH 
 ```
 
-
-Download and build the project
+2) Download and build the project (server and client)
 
 ```
 git clone git@github.com:moetsi/davp-baseline.git
@@ -135,188 +163,203 @@ cmake .
 make
 ```
 
-## Running
+## Usage
 
-The project is divided into two types of components:
-* servers: read frames on disk and sends them over the network
-* clients: receive network frames and decodes them into cv::Mat
+The project is divided into two components:
+* **server**: read frames on disk and sends them over the network
+* **client**: receive network frames and decodes them into cv::Mat
+
+### Server
+
+The server can stream three types of data:
+* **frames**: sends frames over the network compressed or in their original formats (png, jpg);
+* **video**: sends encoded frames (with or without reencoding) from a previously encoded video. Supports all video types supported by FFmpeg;
+* **kinect**: encodes Kinect DK frame data to video in real time.
+
+For all these data types, the data can be sent raw (no compression, very high bandwidth requirements) or compressed (high quality, 20-50x lower bandwidth requirements), using libav or NVCodec (though NVPipe).
+
+
+#### Running the server
+
+```
+./bin/ssp_server <configuration file>
+```
+
+By default, the server will start streaming frame data, even if no client is connected.
+If no client joins, it'll store 1000 frame packets in a buffer, and I'll stop reading frames from the selected input (image files, video or Kinect).
+When a client connects, packets in buffer will be sent first, and, as the buffer empties, the server will resume reading frames from the selected input.
+
+#### Server configuration format
+
+Server configuration (client host and port, input data configuration and encoding/encoding configuration) is stored in a YAML file.
+The format of the file (encoding Kinect DK frame data with the Nvidia encoder) is as follows:
+
+```
+general:
+  host: "192.168.1.64"
+  port: 9999
+  frame_source: 
+    type: "kinect"
+    parameters:
+        stream_color_video: True
+        stream_depth_video: True
+        stream_ir_video: True
+        streaming_color_format: "K4A_IMAGE_FORMAT_COLOR_BGRA32"
+        streaming_color_resolution: "K4A_COLOR_RESOLUTION_720P"
+        streaming_depth_mode: "K4A_DEPTH_MODE_NFOV_UNBINNED"
+        wired_sync_mode: "K4A_WIRED_SYNC_MODE_STANDALONE"
+        streaming_rate: "K4A_FRAMES_PER_SECOND_30"
+        absoluteExposureValue: 0
+video_encoder:
+  0: #color
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_RGBA32"
+    bit_rate: 4000000
+  1: #depth
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_UINT16"
+    bit_rate: 15000000
+  2: #ir
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_UINT16"
+    bit_rate: 15000000
+
+```
+ 
+The ```configs/``` folder includes a set of examples for all types of data using multiple encoders, codecs and parameters.
+
+#### Generating frame list file
+
+To stream image frame data, you need to generate a frame list file.
+The ```examples/``` folder includes a set of example frame files for Bundle Fusion and MS RGB-D datasets.
+See the [davp-data-scripts](https://github.com/moetsi/davp-data-scripts) to see how to generate the frame files.
+
+```
+wget http://download.microsoft.com/download/2/8/5/28564B23-0828-408F-8631-23B1EFF1DAC8/stairs.zip
+unzip stairs.zip
+cd strais
+unzip seq-01.zip
+```
+
+After extracting the paths, change the paths in the ```examples/stairs-seq-01-frames-color.txt``` and ```examples/stairs-seq-01-frames-depth.txt``` to match your images location.
 
 ### Client
 
-The client can handle all types for frames (color, depth) for all formats (images and packets):
+The client application receives network packets from the server, de-serializes and decodes them, and makes them available for processing.
+In this example, it'll convert the encoded frames into OpenCV matrices and show them to the user.
+The goal is for users to adapt this code for they final processing goal.
 
 ```
-client <port>
+./bin/ssp_client <port>
 ```
+Due to the queuing process described in the server section, it is recommended you start the client application first.
 
+#### Parallel processing
 
-### Servers:
+By default, the client can receive frames from multiple servers in parallel, and will process the input using a [fair queuing method](http://zguide.zeromq.org/page:all#Divide-and-Conquer).
 
+## System Architecture
 
-The project is divided into two types of components:
-* frame_server: sends frames over the network in their original format (png, jpg)
-* video_file_server: sends encoded frames from a previously encoded video
-* video_encoder_server: encodes RAW png or jpg images into video live and sends them over the network
-
-
-```
-./bin/frame_server <host> <port> <frame list file (see below how to generate a file)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
-./bin/video_file_server <host> <port> <video file> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
-./bin/video_encoder_server <host> <port> <frame list file (see below how to generate a file)> <video parameters (see below)> <stop after (optional, number of times to stream the full frame set, defaults to MAX_INT)>
-```
-
-#### Video parametrization format
-
-This is a [YAML](https://en.wikipedia.org/wiki/YAML) file that contains the parameters for libAV live video encoding (codec, bitrate, pixel format, I-B-P frame ratio, ...):
+### Server
 
 ```
-codec_name: "libx264"
-bitrate: 1960000
-gop_size: 10
-max_b_frames: 1
-pix_fmt: "yuv420p"
+//start zeromq socket
+zmq::context_t context(1);
+zmq::socket_t socket(context, ZMQ_PUSH);
+
+//reading parameters and preparing Reader and Encoder
+std::string codec_parameters_file = std::string(argv[1]);
+YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
+
+...
+
+socket.connect("tcp://" + host + ":" + std::to_string(port));
+
+while (1) {
+
+  while (v.empty()) {
+    ... // get frame from reader
+  }
+
+  if (!v.empty()) {
+    // serialize and send message reader
+    std::string message = cerealStructToString(v);
+
+    zmq::message_t request(message.size());
+    memcpy(request.data(), message.c_str(), message.size());
+    socket.send(request);
+  }
+}
 ```
 
-### Example 1: Stream six parallel raw frame streams to a client
-
-The output for the server and client follows this format:
+### Client 
 
 ```
-<device id>;<sensor id>;<frame id> sent/received, took <time to frame> ms; size <packet size in bytes>; avg <avg fps since first frame sent/received> fps; <avg bandwidth since first frame sent/received> Mbps
+// prepare socket
+...
+zmq::context_t context(1);
+zmq::socket_t socket(context, ZMQ_PULL);
+socket.bind("tcp://*:" + std::string(argv[1]));
+...
+
+for (;;) {
+  // Receive frame set
+  zmq::message_t request;
+
+  socket.recv(&request);
+  ...
+  // Unserialize frame set
+  std::string result =
+      std::string(static_cast<char *>(request.data()), request.size());
+
+  std::vector<FrameStruct> f_list =
+      parseCerealStructFromString<std::vector<FrameStruct>>(result);
+  ...
+  
+  for (FrameStruct f : f_list) {
+    // Decode frame
+    ...
+    
+    if (imgChanged && !img.empty()) {
+      // Prepare frame for display
+      ...
+      
+      // The frame is ready in img, your application can plug here for additional processing
+      cv::namedWindow(decoder_id);
+      cv::imshow(decoder_id, img);
+      cv::waitKey(1);
+      imgChanged = false;
+    }
+  }
+}
 ```
 
+### Encoding color frames
 
-**Terminal 1:**
+TODO: add details on how color and depth frames are encoded and the tradeoffs between methods.
 
-Run the frame processing client 
-
-```
-./bin/client 9999
-``` 
-
-**Terminal 2:**
-
-Start the frame streaming devices:
-
-```
-./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-01-frames-color.txt &
-./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-02-frames-color.txt &
-./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-03-frames-color.txt &
-./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-04-frames-color.txt &
-./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-05-frames-color.txt &
-./bin/frame_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-06-frames-color.txt &
-```
-
-**Real frame_server output running on a 4 core i5-2500k at 4.4 GHz**
+### Encoding depth frames
 
 
-Server sending a stream.
+## Benchmark:
 
-```
-# ./server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-01-frames.txt
-1;0;0 sent, took 2 ms; size 494433; avg 500 fps; 1977.73 Mbps
-1;0;1 sent, took 32 ms; size 493917; avg 58 fps; 232.553 Mbps
-1;0;2 sent, took 33 ms; size 493629; avg 44 fps; 176.953 Mbps
-1;0;3 sent, took 33 ms; size 492412; avg 40 fps; 157.951 Mbps
-1;0;4 sent, took 33 ms; size 493412; avg 37 fps; 148.439 Mbps
-1;0;5 sent, took 33 ms; size 493059; avg 36 fps; 142.692 Mbps
-1;0;6 sent, took 34 ms; size 493019; avg 35 fps; 138.155 Mbps
-1;0;7 sent, took 33 ms; size 492996; avg 34 fps; 135.515 Mbps
-1;0;8 sent, took 34 ms; size 494131; avg 33 fps; 133.064 Mbps
-1;0;9 sent, took 34 ms; size 493278; avg 33 fps; 131.144 Mbps
-1;0;10 sent, took 32 ms; size 493279; avg 33 fps; 130.392 Mbps
-.....
-```
-
-Client receiving six parallel streams.
-
-```
-# ./bin/client 9999
-.....
-2;0;232 received, took 13 ms; size 504917; avg 77 fps; 312.452 Mbps
-3;0;232 received, took 11 ms; size 458153; avg 77 fps; 312.448 Mbps
-4;0;232 received, took 12 ms; size 490571; avg 77 fps; 312.439 Mbps
-6;0;232 received, took 13 ms; size 478814; avg 77 fps; 312.444 Mbps
-5;0;232 received, took 13 ms; size 501322; avg 77 fps; 312.423 Mbps
-1;0;213 received, took 13 ms; size 537060; avg 77 fps; 312.436 Mbps
-2;0;233 received, took 13 ms; size 503478; avg 77 fps; 312.469 Mbps
-3;0;233 received, took 11 ms; size 457584; avg 77 fps; 312.464 Mbps
-4;0;233 received, took 12 ms; size 489986; avg 77 fps; 312.456 Mbps
-.....
-```
-
-### Example 2: Stream six parallel raw frame streams to a client
-
-
-**Terminal 1:**
-
-Run the frame processing client
-
-```
-./bin/client 9999
-```
-
-**Terminal 2:**
-
-Start the frame streaming devices:
-
-```
-./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-01-frames-color.txt config/color_h264.yaml &
-./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-02-frames-color.txt config/color_h264.yaml &
-./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-03-frames-color.txt config/color_h264.yaml &
-./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-04-frames-color.txt config/color_h264.yaml &
-./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-05-frames-color.txt config/color_h264.yaml &
-./bin/video_encoder_server localhost 9999 ~/data/ms_rgbd_7s/stairs-seq-06-frames-color.txt config/color_h264.yaml &
-```
-
-### Generating frame list file
-
-See the [davp-data-scripts](https://github.com/moetsi/davp-data-scripts) to see how to generate the frame files.
-
-## Notes:
-
-### Frame Client
+TODO: add compression ratio, PSNR (color frames), MSE (depth frames) and latency
 
 #### MS RGB-D 7-Scenes
 
-Initial results show that a single thread takes **6-7 ms** to transform image bytes into a cv::Mat.
-
-This means it takes about **12-14 ms** per FrameStruct, restricting to about **75-85 fps** per thread just to transform two images into cv::Mat.  
-
-**75-85 fps** restricts it to a little below **2.5-2.8** streams per thread.
-
 #### BundleFusion
 
-BundleFusion results are much better.
-Initial results show that a single thread takes **2-3 ms** to transform image bytes into a cv::Mat.
+#### Kinect DK data
 
-This means it takes about **4-5 ms** per FrameStruct, restricting to about **200 fps** per thread to transform two images into cv::Mat.  
+## Roadmap
 
-**200 fps** allows about **6.6** streams per thread.
-
-This difference in performance is cause by:
- * Frame format: BundleFusion uses **JPG** for color frames, while MS RGB-D 7-Scenes uses **PNG**. 
- * Bandwidth requirements: **PNG** images are much larger, meaning that the amount of data pushed is much higher: **33 Mbps** vs **125 Mbps**.
- 
- Additional experiments must be performed to check which factor is more important and how they can be mitigated.
-
-### Additional notes
-
-Note that the thread is also dealing with network communication, meaning that there may be some slight boosts by decomposing the client app into more threads.
-
-In addition, network requirements are also high: **33 Mbps** for the Bundle Fusion dataset and **125 Mbps** for the MS RGB-D 7-Scenes at **30Hz**.  
-
-## Built With
-
-* [ZeroMQ](http://zeromq.org/) and [cppzmq](https://github.com/zeromq/cppzmq) - Network and low-level I/O programming
-* [Cereal](https://uscilab.github.io/cereal/) - Serialization library
-* [OpenCV](https://opencv.org/) - Turn frames to cv::Mat
-* [libav](https://github.com/libav/libav/) - Encodes and decodes images into video
-* [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK) - Access Azure Kinect DK
+TODO: do you think this is a good idea
 
 ## Authors
 
 * **André Mourão** - [amourao](https://github.com/amourao)
-
 
 

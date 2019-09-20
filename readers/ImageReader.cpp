@@ -104,9 +104,8 @@ FrameStruct *ImageReader::createFrameStruct(unsigned int frameId) {
     id.imageBufferToAVFrame(frame, avframe);
     cps = new CodecParamsStruct(frame->codec_data);
     av_frame_free(&avframe);
-  } else {
-    frame->codec_data = *cps;
   }
+  frame->codec_data = *cps;
 
   return frame;
 }
