@@ -109,7 +109,7 @@ make install
 
 ```
 cd ~/libs/srcOriginal
-git clone git@github.com:NVIDIA/NvPipe.git
+git clone https://github.com/NVIDIA/NvPipe.git
 cd NvPipe/
 mkdir build && cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
