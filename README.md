@@ -6,12 +6,12 @@ It supports the Azure Kinect DK RGB-D camera and existing datasets (Bundle Fusio
 
 Frame data can be send in it's raw form (JPG/PNG frames), or compressed using a myriad of codecs, leveraged on FFmpeg/LibAV and NVPipe.
 
-![ NVPipe example ](https://github.com/moetsi/davp-baseline/raw/master/examples/example.png)Here's a view from the client size, receiving data in real time from a Kinect DK and showing it on screen.
+![ NVPipe example ](https://github.com/moetsi/Sensor-Stream-Pipe/raw/master/examples/example.png)Here's a view from the client size, receiving data in real time from a Kinect DK and showing it on screen.
 Data was compressed from 400 Mbits to 20 Mbits (PSNR ~36), with a processing overhead of ~30 ms.
 
 # Getting started
 
-The Sensor Stream Pipe is designed to take over the encoding and processing of frames on the server and the decoding on the client, allowing to use the decoded frames as desired. 
+The Sensor Stream Pipe is designed to take over the encoding and processing of frames on the server and the decoding on the client, allowing to use the decoded frames as desired.
 Currently, the example client converts the received frames into an OpenCV matrix and shows them on the screen.
 
 ## Installation
@@ -119,7 +119,7 @@ make install
 
 #### Azure Kinect SDK 1.2 (optional)
 
-*Note: to avoid getting a password prompt, run any command as sudo before starting this section of the tutorial* 
+*Note: to avoid getting a password prompt, run any command as sudo before starting this section of the tutorial*
 
 1) Add the Linux Software Repository for Microsoft Products.
 ```
@@ -151,14 +151,14 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libdepthengine.so.2.0 /usr/lib/x86_64-linux
 
 ```
 export CPATH=~/libs/include:$CPATH
-export C_INCLUDE_PATH =~/libs/include:$C_INCLUDE_PATH 
+export C_INCLUDE_PATH =~/libs/include:$C_INCLUDE_PATH
 ```
 
 2) Download and build the project (server and client)
 
 ```
-git clone git@github.com:moetsi/davp-baseline.git
-cd davp-baseline
+git clone git@github.com:moetsi/Sensor-Stream-Pipe.git
+cd Sensor-Stream-Pipe
 cmake .
 make
 ```
@@ -198,7 +198,7 @@ The format of the file (encoding Kinect DK frame data with the Nvidia encoder) i
 general:
   host: "192.168.1.64"
   port: 9999
-  frame_source: 
+  frame_source:
     type: "kinect"
     parameters:
         stream_color_video: True
@@ -228,14 +228,14 @@ video_encoder:
     bit_rate: 15000000
 
 ```
- 
+
 The ```configs/``` folder includes a set of examples for all types of data using multiple encoders, codecs and parameters.
 
 #### Generating frame list file
 
 To stream image frame data, you need to generate a frame list file.
 The ```examples/``` folder includes a set of example frame files for Bundle Fusion and MS RGB-D datasets.
-See the [davp-data-scripts](https://github.com/moetsi/davp-data-scripts) to see how to generate the frame files.
+See the [ssp-data-scripts](https://github.com/moetsi/ssp-data-scripts) to see how to generate the frame files.
 
 ```
 wget http://download.microsoft.com/download/2/8/5/28564B23-0828-408F-8631-23B1EFF1DAC8/stairs.zip
@@ -295,7 +295,7 @@ while (1) {
 }
 ```
 
-### Client 
+### Client
 
 ```
 // prepare socket
@@ -318,15 +318,15 @@ for (;;) {
   std::vector<FrameStruct> f_list =
       parseCerealStructFromString<std::vector<FrameStruct>>(result);
   ...
-  
+
   for (FrameStruct f : f_list) {
     // Decode frame
     ...
-    
+
     if (imgChanged && !img.empty()) {
       // Prepare frame for display
       ...
-      
+
       // The frame is ready in img, your application can plug here for additional processing
       cv::namedWindow(decoder_id);
       cv::imshow(decoder_id, img);
@@ -361,5 +361,4 @@ TODO: do you think this is a good idea
 ## Authors
 
 * **André Mourão** - [amourao](https://github.com/amourao)
-
-
+* **Adam Polak** - [adammpolak](https://github.com/adammpolak)
