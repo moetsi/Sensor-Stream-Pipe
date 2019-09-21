@@ -151,7 +151,7 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libdepthengine.so.2.0 /usr/lib/x86_64-linux
 
 ```
 export CPATH=~/libs/include:$CPATH
-export C_INCLUDE_PATH =~/libs/include:$C_INCLUDE_PATH
+export C_INCLUDE_PATH=~/libs/include:$C_INCLUDE_PATH
 ```
 
 2) Download and build the project (server and client)
