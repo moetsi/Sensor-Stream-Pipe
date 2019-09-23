@@ -6,7 +6,7 @@ general:
     type: "video"
     parameters:
       path: "/home/amourao/output.mkv"
-      streams: [0, 1, 2]
+      streams: [1]
 video_encoder:
   0: #color
     type: "nvenc"
@@ -14,13 +14,7 @@ video_encoder:
     input_format: "NVPIPE_RGBA32"
     bit_rate: 4000000
   1: #depth
-    type: "nvenc"
-    codec_name: "NVPIPE_HEVC"
-    input_format: "NVPIPE_UINT16"
-    bit_rate: 15000000
+    type: "zdepth"
   2: #ir
-    type: "nvenc"
-    codec_name: "NVPIPE_HEVC"
-    input_format: "NVPIPE_UINT16"
-    bit_rate: 15000000
+    type: "zdepth"
     

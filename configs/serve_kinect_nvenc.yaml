@@ -7,7 +7,7 @@ general:
     parameters:
       stream_color_video: True
       stream_depth_video: True
-      stream_ir_video: True
+      stream_ir_video: False
       streaming_color_format: "K4A_IMAGE_FORMAT_COLOR_BGRA32"
       streaming_color_resolution: "K4A_COLOR_RESOLUTION_720P"
       streaming_depth_mode: "K4A_DEPTH_MODE_NFOV_UNBINNED"
@@ -21,10 +21,7 @@ video_encoder:
     input_format: "NVPIPE_RGBA32"
     bit_rate: 4000000
   1: #depth
-    type: "nvenc"
-    codec_name: "NVPIPE_HEVC"
-    input_format: "NVPIPE_UINT16"
-    bit_rate: 15000000
+    type: "zdepth"
   2: #ir
     type: "nvenc"
     codec_name: "NVPIPE_HEVC"
