@@ -46,5 +46,4 @@ public:
   ~ImageDecoder();
 
   void imageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame);
-  void imageBufferToAVFrame(std::vector<unsigned char> &fs, AVFrame *pFrame);
 };

@@ -189,7 +189,7 @@ void KinectReader::nextFrame() {
           if (cpss.at(0) == nullptr) {
             ImageDecoder id;
             AVFrame *avframe = av_frame_alloc();
-            id.imageBufferToAVFrame(s->frame, avframe);
+            id.imageBufferToAVFrame(s, avframe);
             cpss.at(0) = new CodecParamsStruct(s->codec_data);
             av_frame_free(&avframe);
           }
