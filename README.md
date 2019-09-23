@@ -105,6 +105,20 @@ cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install
 ```
 
+#### Zdepth
+
+```
+cd ~/libs/srcOriginal
+git clone git@github.com:catid/Zdepth.git
+cd Zdepth
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
+make install
+cp libzdepth.a ~/libs/lib/
+cp zstd/libzstd.a ~/libs/lib/
+```
+
 #### NVPipe (optional, recommended for users with Nvidia GPU)
 
 ```
