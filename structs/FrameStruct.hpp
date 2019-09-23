@@ -20,7 +20,7 @@ extern "C" {
 #include "../utils/Utils.h"
 
 struct CodecParamsStruct {
-  // 0: av parameters, 1: nvPipe parameters
+  // 0: av parameters, 1: nvPipe parameters, 2: zDepth parameters
   uint type;
   std::vector<unsigned char> data;
   std::vector<unsigned char> extra_data;
@@ -88,7 +88,6 @@ struct FrameStruct {
   // current frame number (increases over time)
   unsigned int frameId;
 
-  // TODO: fill with capture and processing timestamps
   std::vector<unsigned long> timestamps;
 
   template<class Archive>

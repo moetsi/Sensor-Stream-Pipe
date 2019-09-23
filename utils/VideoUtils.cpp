@@ -1,4 +1,5 @@
 #include "VideoUtils.h"
+#include "../decoders/ZDepthDecoder.h"
 
 void avframeToMatYUV(const AVFrame *frame, cv::Mat &image) {
   int width = frame->width;
@@ -83,6 +84,10 @@ bool frameStructToMat(FrameStruct &f, cv::Mat &img,
       decoders[decoder_id] = fd;
     } else if (data.type == 1) {
       NvDecoder *fd = new NvDecoder();
+      fd->init(data.data);
+      decoders[decoder_id] = fd;
+    } else if (data.type == 2) {
+      ZDepthDecoder *fd = new ZDepthDecoder();
       fd->init(data.data);
       decoders[decoder_id] = fd;
     }

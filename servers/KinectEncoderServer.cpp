@@ -18,6 +18,7 @@
 #include "../encoders/LibAvEncoder.h"
 #include "../encoders/NullEncoder.h"
 #include "../encoders/NvEncoder.h"
+#include "../encoders/ZDepthEncoder.h"
 #include "../readers/KinectReader.h"
 #include "../structs/FrameStruct.hpp"
 #include "../utils/KinectUtils.h"
@@ -63,6 +64,8 @@ int main(int argc, char *argv[]) {
         fe = new LibAvEncoder(v, reader->getFps());
       else if (encoder_type == "nvenc")
         fe = new NvEncoder(v, reader->getFps());
+      else if (encoder_type == "zdepth")
+        fe = new ZDepthEncoder(reader->getFps());
       else if (encoder_type == "null")
         fe = new NullEncoder(reader->getFps());
       encoders[type] = fe;

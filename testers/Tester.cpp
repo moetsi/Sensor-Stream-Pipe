@@ -24,6 +24,7 @@ extern "C" {
 #include "../decoders/LibAvDecoder.h"
 #include "../decoders/NvDecoder.h"
 #include "../encoders/NullEncoder.h"
+#include "../encoders/ZDepthEncoder.h"
 #include "../encoders/NvEncoder.h"
 #include "../readers/KinectReader.h"
 #include "../readers/VideoFileReader.h"
@@ -107,6 +108,8 @@ int main(int argc, char *argv[]) {
       fe = new LibAvEncoder(v, reader->getFps());
     else if (encoder_type == "nvenc")
       fe = new NvEncoder(v, reader->getFps());
+    else if (encoder_type == "zdepth")
+      fe = new ZDepthEncoder(reader->getFps());
     else if (encoder_type == "null")
       fe = new NullEncoder(reader->getFps());
     encoders[type] = fe;

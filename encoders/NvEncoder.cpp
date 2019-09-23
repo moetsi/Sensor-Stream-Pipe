@@ -44,7 +44,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
   if (frameOriginal == nullptr) {
     frameCompressed = nullptr;
   } else {
-    // TODO: support stuff other than Kinect
+
     if (frameCompressed == nullptr)
       frameCompressed = new FrameStruct();
 
