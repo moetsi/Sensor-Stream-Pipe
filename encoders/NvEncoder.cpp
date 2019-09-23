@@ -137,6 +137,14 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
                                      width, height);
     }
 
+    if (encoder == nullptr) {
+      std::cerr << "Cannot create new NVEncoder:" << std::endl;
+      std::cerr << "Did you reach the number of parallel encoding sessions "
+                   "possible? (2 on non-Quadro cards)"
+                << std::endl;
+      exit(1);
+    }
+
     uint64_t compressed_size =
         NvPipe_Encode(encoder, data, srcPitch, compressed.data(),
                       compressed.size(), width, height, false);
