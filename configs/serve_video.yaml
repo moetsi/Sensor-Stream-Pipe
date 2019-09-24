@@ -5,7 +5,7 @@ general:
   frame_source:
     type: "video"
     parameters:
-      path: "/home/amourao/output.mkv"
+      path: "/home/amourao/output2.mkv"
       streams: [1]
 video_encoder:
   0: #color
