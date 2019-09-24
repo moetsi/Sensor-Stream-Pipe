@@ -111,6 +111,9 @@ int main(int argc, char *argv[]) {
     encoders[type] = fe;
   }
 
+  std::vector<FrameStruct *> fs;
+  std::vector<FrameStruct *> fOs;
+
   std::queue<FrameStruct> buffer;
 
   // This class only reads the file once
@@ -128,8 +131,14 @@ int main(int argc, char *argv[]) {
 
         frameEncoder->addFrameStruct(frameStruct);
         if (frameEncoder->hasNextPacket()) {
-          FrameStruct f = *frameEncoder->currentFrameEncoded();
-          FrameStruct fo = *frameEncoder->currentFrameOriginal();
+
+          FrameStruct *pf = frameEncoder->currentFrameEncoded();
+          FrameStruct *pfo = frameEncoder->currentFrameOriginal();
+
+          fs.push_back(pf);
+          fOs.push_back(pfo);
+          FrameStruct f = *pf;
+          FrameStruct fo = *pfo;
           original_size += fo.frame.size();
           compressed_size += f.frame.size();
           v.push_back(f);
@@ -163,6 +172,9 @@ int main(int argc, char *argv[]) {
       frameStructToMat(fo, frameOri, decoders);
       fo.frame.clear();
 
+      frameOri = frameOri.clone();
+      img = img.clone();
+
       if (frameOri.channels() == 4)
         cv::cvtColor(frameOri, frameOri, COLOR_BGRA2BGR);
       if (img.channels() == 4)
@@ -190,6 +202,9 @@ int main(int argc, char *argv[]) {
         absdiff(frameOri, img, frameDiff);
 
       } else if (f.frameType == 1) {
+
+        absdiff(frameOri, img, frameDiff);
+
         if (img.type() == CV_16U) {
           // Compress images to show up on a 255 valued color map
           img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
@@ -199,8 +214,6 @@ int main(int argc, char *argv[]) {
           // Compress images to show up on a 255 valued color map
           frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
         }
-
-        absdiff(frameOri, img, frameDiff);
 
         img.convertTo(img, CV_8U);
         frameOri.convertTo(frameOri, CV_8U);

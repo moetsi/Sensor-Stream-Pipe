@@ -190,8 +190,8 @@ void VideoFileReader::nextFrame() {
     init(this->filename);
 
   if (frameStructsBuffer != nullptr) {
-    for (auto fs : frameStructs)
-      delete fs;
+    for (FrameStruct *f : frameStructs)
+      f->frame.clear();
     frameStructs.clear();
     frameStructs.push_back(frameStructsBuffer);
     frameStructsBuffer = nullptr;
