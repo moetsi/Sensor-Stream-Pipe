@@ -49,8 +49,8 @@ bool frameStructToMat(FrameStruct &f, cv::Mat &img,
 template <typename T>
 void minMaxFilter(cv::Mat &inmat, cv::Mat &outmat, double min, double max) {
   inmat.copyTo(outmat);
-  for (uint i = 0; i < outmat.rows; i++) {
-    for (uint j = 0; j < outmat.cols; j++) {
+  for (int i = 0; i < outmat.rows; i++) {
+    for (int j = 0; j < outmat.cols; j++) {
       if (outmat.at<T>(i, j) < min) {
         outmat.at<T>(i, j) = min;
       }

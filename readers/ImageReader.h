@@ -37,6 +37,7 @@ private:
 
 public:
   ImageReader(std::string filename);
+  ~ImageReader();
 
   void reset();
 

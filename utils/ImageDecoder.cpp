@@ -60,7 +60,7 @@ ImageDecoder::~ImageDecoder() {}
 
 void ImageDecoder::init(std::vector<unsigned char> &buffer) {
 
-  struct buffer_data bd = {0};
+  struct buffer_data bd = {0, 0};
   bd.ptr = (uint8_t *)&buffer[0];
   bd.size = buffer.size();
 
@@ -100,7 +100,7 @@ void ImageDecoder::init(std::vector<unsigned char> &buffer) {
   pCodecParameters = NULL;
 
   // loop though all the streams and print its main information
-  for (int i = 0; i < pFormatContext->nb_streams; i++) {
+  for (uint i = 0; i < pFormatContext->nb_streams; i++) {
     pCodecParameters = pFormatContext->streams[i]->codecpar;
     pCodec = avcodec_find_decoder(pCodecParameters->codec_id);
 
@@ -163,11 +163,8 @@ void ImageDecoder::imageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame) {
 
   fs->codec_data = *getCodecParamsStruct();
 
-  int response = 0;
-
   av_read_frame(pFormatContext, pPacket);
-  response = decode_packet(pFrame);
-
+  decode_packet(pFrame);
 
   av_packet_free(&pPacket);
   avcodec_free_context(&pCodecContext);

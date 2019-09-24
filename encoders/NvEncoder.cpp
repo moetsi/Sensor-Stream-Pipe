@@ -24,7 +24,7 @@
 #include "NvEncoder.h"
 
 NvEncoder::NvEncoder(YAML::Node _codec_parameters, uint _fps) {
-  buildEncoder(_codec_parameters, _fps);
+  buildEncoder(_codec_parameters);
   fps = _fps;
   totalCurrentFrameCounter = 0;
   paramsStruct = nullptr;
@@ -54,6 +54,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->frameType = fs->frameType;
     frameCompressed->messageType = fs->messageType;
     frameCompressed->sensorId = fs->sensorId;
+    frameCompressed->streamId = fs->streamId;
     frameCompressed->sceneDesc = fs->sceneDesc;
     frameCompressed->timestamps.clear();
     frameCompressed->timestamps.push_back(frameOriginal->timestamps.front());
@@ -164,7 +165,8 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
 }
 
 void NvEncoder::nextPacket() {
-  delete frameOriginal;
+  if (frameOriginal == nullptr)
+    delete frameOriginal;
   frameOriginal = nullptr;
   frameCompressed = nullptr;
 }
@@ -210,11 +212,12 @@ CodecParamsStruct *NvEncoder::getCodecParamsStruct() {
 
     paramsStruct->data[9] = (uchar)codec_ushort;
   }
+  return paramsStruct;
 }
 
 uint NvEncoder::getFps() { return fps; }
 
-void NvEncoder::buildEncoder(YAML::Node config, uint fps) {
+void NvEncoder::buildEncoder(YAML::Node config) {
 
   if (!config["codec_name"].IsDefined()) {
     std::cout << "WARNING: Missing key: \"codec_name\"" << std::endl;

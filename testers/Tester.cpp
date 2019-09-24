@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
   double mse_comp = 0;
   cv::Scalar mssim;
   int i = 0;
-  int j = 0;
 
   uint64_t original_size = 0;
   uint64_t compressed_size = 0;
@@ -65,9 +64,6 @@ int main(int argc, char *argv[]) {
   uint stopAfter = time_in_seconds;
 
   YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
-
-  std::string host = codec_parameters["general"]["host"].as<std::string>();
-  uint port = codec_parameters["general"]["port"].as<uint>();
 
   IReader *reader = nullptr;
   YAML::Node general_parameters = codec_parameters["general"];
@@ -117,7 +113,6 @@ int main(int argc, char *argv[]) {
 
   std::queue<FrameStruct> buffer;
 
-  uint64_t start_time = currentTimeMs();
   // This class only reads the file once
   // while ((currentTimeMs() - start_time) <= time_in_seconds * 1000) {
   while (stopAfter > 0) {
@@ -260,6 +255,13 @@ int main(int argc, char *argv[]) {
             << std::endl;
   std::cout << "Avg MSE (4096 mm): " << mse_comp / i << " "
             << mse_comp / (i * img.cols * img.rows) << std::endl;
+
+  delete reader;
+  for (auto const &x : encoders)
+    delete x.second;
+
+  for (auto const &x : decoders)
+    delete x.second;
 
   return 0;
 }

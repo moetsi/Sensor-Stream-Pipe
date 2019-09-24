@@ -24,8 +24,8 @@ void avframeToMatGray(const AVFrame *frame, cv::Mat &image) {
   int height = frame->height;
 
   image = cv::Mat(height, width, CV_16UC1);
-  for (uint y = 0; y < frame->height; y++) {
-    for (uint x = 0; x < frame->width; x++) {
+  for (int y = 0; y < frame->height; y++) {
+    for (int x = 0; x < frame->width; x++) {
       ushort lower = frame->data[0][y * frame->linesize[0] + x * 2];
       ushort upper = frame->data[0][y * frame->linesize[0] + x * 2 + 1];
       ushort value;
@@ -74,7 +74,6 @@ void prepareDecodingStruct(
 bool frameStructToMat(FrameStruct &f, cv::Mat &img,
                       std::unordered_map<std::string, IDecoder *> &decoders) {
   std::string decoder_id = f.streamId + std::to_string(f.sensorId);
-  IDecoder *decoder;
 
   if (decoders.find(decoder_id) == decoders.end()) {
     CodecParamsStruct data = f.codec_data;

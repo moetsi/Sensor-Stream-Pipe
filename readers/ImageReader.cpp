@@ -9,7 +9,7 @@ ImageReader::ImageReader(std::string filename) {
   // bundle_fusion_apt0;0;0;30
 
   // std::string sceneDesc;
-  // unsigned int sensorId;
+  // unsigned int sensocpsrId;
   // unsigned int deviceId;
 
   std::ifstream file(filename);
@@ -47,6 +47,11 @@ ImageReader::ImageReader(std::string filename) {
 
   cps = nullptr;
   reset();
+}
+
+ImageReader::~ImageReader() {
+  if (cps != nullptr)
+    delete cps;
 }
 
 std::vector<unsigned char> ImageReader::readFile(std::string &filename) {

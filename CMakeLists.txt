@@ -8,8 +8,9 @@ find_package(Threads)
 find_package(OpenCV REQUIRED)
 find_package(Yaml-cpp)
 
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
+
 find_package(FFmpeg REQUIRED) #add here the list of ffmpeg components required
 
 if (FFMPEG_FOUND)

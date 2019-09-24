@@ -21,9 +21,6 @@
 #include "../encoders/ZDepthEncoder.h"
 #include "../readers/KinectReader.h"
 #include "../readers/VideoFileReader.h"
-#include "../structs/FrameStruct.hpp"
-#include "../utils/KinectUtils.h"
-#include "../utils/Utils.h"
 
 int main(int argc, char *argv[]) {
 
@@ -121,7 +118,6 @@ int main(int argc, char *argv[]) {
       std::vector<FrameStruct> v;
       std::vector<FrameStruct *> vO;
 
-      // TODO: document what is happening with the Encoders and Queue
       while (v.empty()) {
         std::vector<FrameStruct *> frameStruct = reader->currentFrame();
         for (FrameStruct *frameStruct : frameStruct) {
@@ -180,6 +176,9 @@ int main(int argc, char *argv[]) {
         }
       }
     }
+    delete reader;
+    for (auto const &x : encoders)
+      delete x.second;
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
   }

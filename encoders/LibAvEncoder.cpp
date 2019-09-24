@@ -25,13 +25,29 @@ LibAvEncoder::LibAvEncoder(YAML::Node &_codec_parameters, uint _fps) {
 }
 
 std::vector<unsigned char> LibAvEncoder::currentFrameBytes() {
-  return std::vector<unsigned char>(pBuffer.front()->data, pBuffer.front()->data + pBuffer.front()->size);
+  return std::vector<unsigned char>(
+      pBuffer.front()->data, pBuffer.front()->data + pBuffer.front()->size);
 }
 
 LibAvEncoder::~LibAvEncoder() {
   av_packet_free(&pPacket);
   av_frame_free(&pFrame);
   avcodec_free_context(&pCodecContextEncoder);
+  avcodec_parameters_free(&pCodecParametersEncoder);
+  sws_freeContext(sws_ctx);
+  delete cParamsStruct;
+
+  while (!buffer.empty()) {
+    FrameStruct *q_element = buffer.front();
+    delete q_element;
+    buffer.pop();
+  }
+
+  while (!pBuffer.empty()) {
+    AVPacket *q_element = pBuffer.front();
+    av_packet_free(&q_element);
+    buffer.pop();
+  }
 }
 
 void LibAvEncoder::nextPacket() {
@@ -40,14 +56,12 @@ void LibAvEncoder::nextPacket() {
     buffer.pop();
     f->frame.clear();
     delete f;
-
   }
   if (!pBuffer.empty()) {
     AVPacket *p = pBuffer.front();
     pBuffer.pop();
     delete[] p->data;
     delete p;
-
   }
 }
 
@@ -57,8 +71,8 @@ void LibAvEncoder::prepareFrame() {
     uint8_t *inData[1] = {&f->frame[8]};
     int inLinesize[1] = {4 * pFrame->width};
 
-    sws_scale(sws_ctx, (const uint8_t *const *) inData, inLinesize,
-              0, pFrame->height, pFrame->data, pFrame->linesize);
+    sws_scale(sws_ctx, (const uint8_t *const *)inData, inLinesize, 0,
+              pFrame->height, pFrame->data, pFrame->linesize);
 
   } else if (f->frameDataType == 3) {
     if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
@@ -66,8 +80,8 @@ void LibAvEncoder::prepareFrame() {
       uint8_t *data = &f->frame[8];
       // memcpy(pFrame->data[0], data, pFrame->height * pFrame->width * 2);
 
-      for (uint y = 0; y < pFrame->height; y++) {
-        for (uint x = 0; x < pFrame->width; x++) {
+      for (int y = 0; y < pFrame->height; y++) {
+        for (int x = 0; x < pFrame->width; x++) {
 
           ushort value = data[i + 1] << 8 | data[i];
           if (value >= MAX_DEPTH_VALUE_12_BITS) {
@@ -81,11 +95,12 @@ void LibAvEncoder::prepareFrame() {
         }
       }
 
-    } else if (pFrame->format == AV_PIX_FMT_GRAY16BE) { // PNG GRAY16 TO gray12le
+    } else if (pFrame->format ==
+               AV_PIX_FMT_GRAY16BE) { // PNG GRAY16 TO gray12le
       int i = 0;
       uint8_t *data = &f->frame[8];
-      for (uint y = 0; y < pFrame->height; y++) {
-        for (uint x = 0; x < pFrame->width; x++) {
+      for (int y = 0; y < pFrame->height; y++) {
+        for (int x = 0; x < pFrame->width; x++) {
           pFrame->data[0][i] = data[i + 1];
           pFrame->data[0][i + 1] = data[i];
           i += 2;
@@ -94,9 +109,9 @@ void LibAvEncoder::prepareFrame() {
     } else {
       int i = 0;
       uint8_t *data = &f->frame[8];
-      float coeff = (float) MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
-      for (uint y = 0; y < pFrame->height; y++) {
-        for (uint x = 0; x < pFrame->width; x++) {
+      float coeff = (float)MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
+      for (int y = 0; y < pFrame->height; y++) {
+        for (int x = 0; x < pFrame->width; x++) {
           uint lower = data[i * 2];
           uint upper = data[i * 2 + 1];
           ushort value = upper << 8 | lower;
@@ -108,7 +123,6 @@ void LibAvEncoder::prepareFrame() {
 
       memset(&pFrame->data[1][0], 128, pFrame->height * pFrame->width / 4);
       memset(&pFrame->data[2][0], 128, pFrame->height * pFrame->width / 4);
-
     }
 
   } else if (f->frameDataType == 0) {
@@ -123,15 +137,16 @@ void LibAvEncoder::prepareFrame() {
       av_frame_copy(pFrame, pFrameO);
 
     } else if (pFrameO->format == AV_PIX_FMT_GRAY16BE &&
-               pFrame->format == AV_PIX_FMT_GRAY12LE) { // PNG GRAY16 TO gray12le
+               pFrame->format ==
+                   AV_PIX_FMT_GRAY12LE) { // PNG GRAY16 TO gray12le
       int i = 0;
-      for (uint y = 0; y < pFrameO->height; y++) {
-        for (uint x = 0; x < pFrameO->width; x++) {
+      for (int y = 0; y < pFrameO->height; y++) {
+        for (int x = 0; x < pFrameO->width; x++) {
           ushort lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
           ushort upper = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2 + 1];
           ushort value = lower << 8 | upper;
 
-          //TODO: check what is happening!
+          // TODO: check what is happening!
           if (value >= MAX_DEPTH_VALUE_12_BITS) {
             pFrame->data[0][i++] = 255;
             pFrame->data[0][i++] = 255;
@@ -139,7 +154,6 @@ void LibAvEncoder::prepareFrame() {
             pFrame->data[0][i++] = upper;
             pFrame->data[0][i++] = lower;
           }
-
         }
       }
     } else if (pFrameO->format == AV_PIX_FMT_GRAY16BE &&
@@ -147,24 +161,22 @@ void LibAvEncoder::prepareFrame() {
                 pFrame->format == AV_PIX_FMT_YUV422P ||
                 pFrame->format == AV_PIX_FMT_YUV444P)) { // PNG GRAY16 TO YUV
       // TODO: remove redundant call
-      sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data, pFrameO->linesize,
-                0, pFrameO->height, pFrame->data, pFrame->linesize);
+      sws_scale(sws_ctx, (const uint8_t *const *)pFrameO->data,
+                pFrameO->linesize, 0, pFrameO->height, pFrame->data,
+                pFrame->linesize);
 
       int i = 0;
-      float coeff = (float) MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
-      // TODO: replace with straight mem copy
-      for (uint y = 0; y < pFrameO->height; y++) {
-        for (uint x = 0; x < pFrameO->width; x++) {
+      float coeff = (float)MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
+      for (int y = 0; y < pFrameO->height; y++) {
+        for (int x = 0; x < pFrameO->width; x++) {
           uint lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
           uint upper = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2 + 1];
           ushort value = lower << 8 | upper;
 
-          pFrame->data[0][i++] = std::min((ushort) (value * coeff), (ushort) 255);
+          pFrame->data[0][i++] = std::min((ushort)(value * coeff), (ushort)255);
         }
       }
 
-      // TODO: encode the missing bits in the other channels (see the research
-      // papers)
       /*
       for (uint y = 0; y < pFrame->height; y++) {
           for (uint x = 0; x < pFrame->width; x++) {
@@ -174,8 +186,9 @@ void LibAvEncoder::prepareFrame() {
       }*/
     } else {
       // YUV to YUV
-      sws_scale(sws_ctx, (const uint8_t *const *) pFrameO->data, pFrameO->linesize,
-                0, pFrameO->height, pFrame->data, pFrame->linesize);
+      sws_scale(sws_ctx, (const uint8_t *const *)pFrameO->data,
+                pFrameO->linesize, 0, pFrameO->height, pFrame->data,
+                pFrame->linesize);
     }
 
     av_frame_free(&pFrameO);
@@ -205,29 +218,24 @@ void LibAvEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
     exit(1);
   }
 
-    ret = avcodec_receive_packet(enc_ctx, pkt);
-    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-      return;
-    else if (ret < 0) {
-      fprintf(stderr, "Error during encoding\n");
-      exit(1);
-    }
+  ret = avcodec_receive_packet(enc_ctx, pkt);
+  if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+    return;
+  else if (ret < 0) {
+    fprintf(stderr, "Error during encoding\n");
+    exit(1);
+  }
 
   AVPacket *newPacket = new AVPacket(*pPacket);
   pBuffer.push(newPacket);
-  pBuffer.back()->data = reinterpret_cast<uint8_t *>(new uint64_t[
-  (pPacket->size + FF_INPUT_BUFFER_PADDING_SIZE) / sizeof(uint64_t) + 1]);
+  pBuffer.back()->data = reinterpret_cast<uint8_t *>(
+      new uint64_t[(pPacket->size + FF_INPUT_BUFFER_PADDING_SIZE) /
+                       sizeof(uint64_t) +
+                   1]);
   memcpy(pBuffer.back()->data, pPacket->data, pPacket->size);
-
-
-
 }
 
 void LibAvEncoder::encode() {
-
-  int ret;
-
-  int i = 0;
 
   prepareFrame();
 
@@ -244,7 +252,7 @@ void LibAvEncoder::init(FrameStruct *fs) {
   std::cout << codec_parameters << std::endl;
 
   pCodecEncoder = avcodec_find_encoder_by_name(
-          codec_parameters["codec_name"].as<std::string>().c_str());
+      codec_parameters["codec_name"].as<std::string>().c_str());
   pCodecContextEncoder = avcodec_alloc_context3(pCodecEncoder);
   pPacket = av_packet_alloc();
   pCodecParametersEncoder = avcodec_parameters_alloc();
@@ -271,12 +279,11 @@ void LibAvEncoder::init(FrameStruct *fs) {
     pxl_format = AV_PIX_FMT_GRAY16LE;
   }
 
-
   pCodecContextEncoder->width = width;
   pCodecContextEncoder->height = height;
   /* frames per second */
-  pCodecContextEncoder->time_base = (AVRational) {1, (int) fps};
-  pCodecContextEncoder->framerate = (AVRational) {(int) fps, 1};
+  pCodecContextEncoder->time_base = (AVRational){1, (int)fps};
+  pCodecContextEncoder->framerate = (AVRational){(int)fps, 1};
   pCodecContextEncoder->gop_size = 0;
 
   pCodecContextEncoder->bit_rate_tolerance = 0;
@@ -307,7 +314,7 @@ void LibAvEncoder::init(FrameStruct *fs) {
   // yuv444p16le bgr0 rgb0 cuda
 
   pCodecContextEncoder->pix_fmt =
-          av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str());
+      av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str());
 
   YAML::Node codec_parameters_options = codec_parameters["options"];
 
@@ -323,16 +330,15 @@ void LibAvEncoder::init(FrameStruct *fs) {
   av_opt_set(pCodecContextEncoder->priv_data, "rcParams", "zeroReorderDelay",
              1);
 
-
   pCodecParametersEncoder->codec_type = AVMEDIA_TYPE_VIDEO;
 
   pCodecParametersEncoder->codec_id = pCodecEncoder->id;
   pCodecParametersEncoder->codec_tag = pCodecContextEncoder->codec_tag;
   pCodecParametersEncoder->bit_rate = pCodecContextEncoder->bit_rate;
   pCodecParametersEncoder->bits_per_coded_sample =
-          pCodecContextEncoder->bits_per_coded_sample;
+      pCodecContextEncoder->bits_per_coded_sample;
   pCodecParametersEncoder->bits_per_raw_sample =
-          pCodecContextEncoder->bits_per_raw_sample;
+      pCodecContextEncoder->bits_per_raw_sample;
   pCodecParametersEncoder->profile = pCodecContextEncoder->level;
   pCodecParametersEncoder->width = pCodecContextEncoder->width;
   pCodecParametersEncoder->height = pCodecContextEncoder->height;
@@ -365,12 +371,9 @@ void LibAvEncoder::init(FrameStruct *fs) {
     exit(1);
   }
 
-  sws_ctx = sws_getContext(width, height,
-                           (AVPixelFormat) pxl_format, pFrame->width,
-                           pFrame->height, (AVPixelFormat) pFrame->format,
-                           SWS_BILINEAR, NULL, NULL, NULL);
-
-
+  sws_ctx = sws_getContext(
+      width, height, (AVPixelFormat)pxl_format, pFrame->width, pFrame->height,
+      (AVPixelFormat)pFrame->format, SWS_BILINEAR, NULL, NULL, NULL);
 }
 
 CodecParamsStruct *LibAvEncoder::getCodecParamsStruct() {
@@ -387,7 +390,6 @@ CodecParamsStruct *LibAvEncoder::getCodecParamsStruct() {
     memcpy(&e[0], pCodecParametersEncoder, sSize);
     memcpy(&ed[0], sEPointer, sESize);
     cParamsStruct = new CodecParamsStruct(0, e, ed);
-
   }
 
   return cParamsStruct;

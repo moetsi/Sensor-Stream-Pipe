@@ -13,7 +13,18 @@ ZDepthEncoder::ZDepthEncoder(int _fps) {
   fd = nullptr;
 }
 
-ZDepthEncoder::~ZDepthEncoder() {}
+ZDepthEncoder::~ZDepthEncoder() {
+  if (frameCompressed != nullptr)
+    delete frameCompressed;
+  if (frameOriginal != nullptr)
+    delete frameOriginal;
+  if (paramsStruct != nullptr)
+    delete paramsStruct;
+  if (fd != nullptr)
+    delete fd;
+  if (sws_ctx != nullptr)
+    sws_freeContext(sws_ctx);
+}
 
 void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
   frameOriginal = fs;
@@ -31,6 +42,7 @@ void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->frameType = fs->frameType;
     frameCompressed->messageType = fs->messageType;
     frameCompressed->sensorId = fs->sensorId;
+    frameCompressed->streamId = fs->streamId;
     frameCompressed->sceneDesc = fs->sceneDesc;
     frameCompressed->timestamps.clear();
     frameCompressed->timestamps = std::vector<unsigned long>();
@@ -136,6 +148,7 @@ CodecParamsStruct *ZDepthEncoder::getCodecParamsStruct() {
     memcpy(&paramsStruct->data[0], &width, sizeof(int));
     memcpy(&paramsStruct->data[4], &height, sizeof(int));
   }
+  return paramsStruct;
 }
 
 uint ZDepthEncoder::getFps() { return fps; }

@@ -147,15 +147,19 @@ KinectReader::~KinectReader() {
   CHECK(k4a_record_flush(recording), device);
   k4a_record_close(recording);
 
-  std::cout << "Done" << std::endl;
-
   k4a_device_close(device);
+
+  for (uint i = 0; i < cpss.size(); i++)
+    if (cpss[i] != nullptr)
+      delete cpss[i];
+
+  for (uint i = 0; i < currFrame.size(); i++)
+    if (cpss[i] != nullptr)
+      delete currFrame[i];
 }
 
 void KinectReader::nextFrame() {
-  // for (FrameStruct* fs : currFrame) {
-  //  fs->frame.clear();
-  //}
+
   currFrame.clear();
 
   do {

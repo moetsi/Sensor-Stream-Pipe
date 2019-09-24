@@ -31,7 +31,7 @@ private:
 
   ImageDecoder id;
 
-  void buildEncoder(YAML::Node _codec_parameters, uint fps);
+  void buildEncoder(YAML::Node _codec_parameters);
 
 public:
   NvEncoder(YAML::Node _codec_parameters, uint _fps);

@@ -26,8 +26,6 @@ extern "C" {
 #include "../utils/Utils.h"
 #include "../utils/VideoUtils.h"
 
-bool frameStructToMat(FrameStruct &f, cv::Mat &img,
-                      std::unordered_map<std::string, IDecoder *> &decoders);
 int main(int argc, char *argv[]) {
 
   srand(time(NULL) * getpid());
@@ -82,7 +80,7 @@ int main(int argc, char *argv[]) {
 
       rec_mbytes += request.size() / 1000;
 
-      for (int i = 0; i < f_list.size(); i++) {
+      for (uint i = 0; i < f_list.size(); i++) {
         f_list.at(i).timestamps.push_back(currentTimeMs());
       }
       for (FrameStruct f : f_list) {
@@ -142,12 +140,6 @@ int main(int argc, char *argv[]) {
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
   }
-
-  // avformat_close_input(&pFormatContext);
-  // avformat_free_context(pFormatContext);
-  // av_packet_free(&pPacket);
-  // av_frame_free(&pFrame);
-  // avcodec_free_context(&pCodecContextEncoder);
 
   return 0;
 }

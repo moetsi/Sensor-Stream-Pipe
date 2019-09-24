@@ -4,7 +4,10 @@
 #include "NullEncoder.h"
 
 NullEncoder::NullEncoder(int _fps) { fps = _fps; }
-NullEncoder::~NullEncoder() {}
+NullEncoder::~NullEncoder() {
+  if (frame != nullptr)
+    delete frame;
+}
 
 void NullEncoder::addFrameStruct(FrameStruct *fs) { frame = fs; }
 void NullEncoder::nextPacket() {}

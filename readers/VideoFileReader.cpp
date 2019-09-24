@@ -30,6 +30,11 @@ VideoFileReader::~VideoFileReader() {
   avformat_close_input(&pFormatContext);
   avformat_free_context(pFormatContext);
   av_packet_free(&pPacket);
+
+  if (frameStructsBuffer != nullptr)
+    delete frameStructsBuffer;
+  for (auto const &x : pCodecContexts)
+    delete x.second;
 }
 
 void VideoFileReader::init(std::string &filename) {
@@ -84,7 +89,7 @@ void VideoFileReader::init(std::string &filename) {
   // https://ffmpeg.org/doxygen/trunk/structAVCodecParameters.html
 
   // loop though all the streams and print its main information
-  for (int i = 0; i < pFormatContext->nb_streams; i++) {
+  for (uint i = 0; i < pFormatContext->nb_streams; i++) {
     AVCodecParameters *pCodecParameter = pFormatContext->streams[i]->codecpar;
     std::cout << "AVStream->time_base before open coded %d/%d"
               << " " << pFormatContext->streams[i]->time_base.num << " "
@@ -179,13 +184,6 @@ void VideoFileReader::init(std::string &filename) {
 
 uint VideoFileReader::currentFrameId() { return currentFrameCounter; }
 
-/*
-std::vector<unsigned char> VideoFileReader::currentFrameBytes() {
-  return std::vector<unsigned char>(pPacket->data,
-                                    pPacket->data + pPacket->size);
-}
- */
-
 void VideoFileReader::nextFrame() {
   if (!libAVReady)
     init(this->filename);
@@ -196,7 +194,6 @@ void VideoFileReader::nextFrame() {
     frameStructsBuffer = nullptr;
   }
 
-  av_packet_unref(pPacket);
   int error = 0;
   while (error >= 0) {
     error = av_read_frame(pFormatContext, pPacket);

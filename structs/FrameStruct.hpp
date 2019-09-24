@@ -34,8 +34,6 @@ struct CodecParamsStruct {
 
   void setExtraData(std::vector<unsigned char> &ed) { extra_data = ed; }
 
-  // TODO: pull this function  into other file, to avoid unneeded AVCodec
-  // dependecy
   AVCodecParameters *getParams() {
     if (type != 0)
       return NULL;
