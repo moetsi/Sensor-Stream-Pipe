@@ -112,7 +112,8 @@ void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
       getCodecParamsStruct();
 
     compressed.clear();
-    compressor.Compress(width, height, data, compressed, true);
+    compressor.Compress(width, height, data, compressed,
+                        totalCurrentFrameCounter == 0);
 
     frameCompressed->codec_data = *paramsStruct;
     frameCompressed->frame = std::vector<unsigned char>(

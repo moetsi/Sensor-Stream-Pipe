@@ -24,8 +24,8 @@ extern "C" {
 #include "../decoders/LibAvDecoder.h"
 #include "../decoders/NvDecoder.h"
 #include "../encoders/NullEncoder.h"
-#include "../encoders/ZDepthEncoder.h"
 #include "../encoders/NvEncoder.h"
+#include "../encoders/ZDepthEncoder.h"
 #include "../readers/KinectReader.h"
 #include "../readers/VideoFileReader.h"
 #include "../utils/KinectUtils.h"
@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
   double mse_comp = 0;
   cv::Scalar mssim;
   int i = 0;
+
+  uint frameType = 0;
 
   uint64_t original_size = 0;
   uint64_t compressed_size = 0;
@@ -109,6 +111,7 @@ int main(int argc, char *argv[]) {
     else if (encoder_type == "null")
       fe = new NullEncoder(reader->getFps());
     encoders[type] = fe;
+    frameType = type;
   }
 
   std::vector<FrameStruct *> fs;
@@ -236,10 +239,6 @@ int main(int argc, char *argv[]) {
         cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
       }
 
-      // absdiff(frameOri, img, frameDiff);
-      // psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
-      // mssim += getMSSIM(frameOri, img);
-
       cv::namedWindow("Original");
       cv::imshow("Original", frameOri);
       cv::namedWindow("Encoded");
@@ -254,20 +253,23 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  std::cout << "original_size: " << original_size << " bytes ";
-  std::cout << "compressed_size: " << compressed_size
-            << " bytes, fps: " << (i / time_in_seconds) << ", bitrate: "
-            << (8 * compressed_size) / (1000000.0 * (i / time_in_seconds))
-            << " Mbps" << std::endl;
+  std::cout << "original_size: " << original_size << " bytes " << std::endl;
+  std::cout << "compressed_size: " << compressed_size << " bytes" << std::endl;
+  // std::cout << "bitrate: "
+  //          << (8 * compressed_size) / (1000000.0 * (i / time_in_seconds))
+  //          << " Mbps" << std::endl;
   std::cout << "ratio: " << original_size / (float)compressed_size << "x"
             << std::endl;
 
-  std::cout << "Avg PSNR: " << psnr / i << std::endl;
-  std::cout << "Avg MSSIM: " << mssim / i << std::endl;
-  std::cout << "Avg MSE: " << mse / i << " " << mse / (i * img.cols * img.rows)
-            << std::endl;
-  std::cout << "Avg MSE (4096 mm): " << mse_comp / i << " "
-            << mse_comp / (i * img.cols * img.rows) << std::endl;
+  if (frameType == 0) {
+    std::cout << "Avg PSNR: " << psnr / i << std::endl;
+    std::cout << "Avg MSSIM: " << mssim / i << std::endl;
+  } else {
+    std::cout << "Avg MSE: " << mse / i << " "
+              << mse / (i * img.cols * img.rows) << std::endl;
+    std::cout << "Avg MSE (4096 mm): " << mse_comp / i << " "
+              << mse_comp / (i * img.cols * img.rows) << std::endl;
+  }
 
   delete reader;
   for (auto const &x : encoders)
