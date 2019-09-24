@@ -69,6 +69,9 @@ int main(int argc, char *argv[]) {
 
   IReader *reader = nullptr;
   YAML::Node general_parameters = codec_parameters["general"];
+
+  setupLogging(general_parameters);
+
   std::string reader_type =
       general_parameters["frame_source"]["type"].as<std::string>();
   if (reader_type == "frames") {
@@ -91,6 +94,11 @@ int main(int argc, char *argv[]) {
     ExtendedAzureConfig c = buildKinectConfigFromYAML(
         general_parameters["frame_source"]["parameters"]);
     reader = new KinectReader(0, c);
+  } else {
+    spdlog::error("Unknown reader type: \"{}\". Supported types are "
+                  "\"frames\", \"video\" and \"kinect\"",
+                  reader_type);
+    exit(1);
   }
 
   // TODO: use smarter pointers
@@ -101,7 +109,7 @@ int main(int argc, char *argv[]) {
   for (uint type : types) {
     YAML::Node v = codec_parameters["video_encoder"][type];
     std::string encoder_type = v["type"].as<std::string>();
-    IEncoder *fe;
+    IEncoder *fe = nullptr;
     if (encoder_type == "libav")
       fe = new LibAvEncoder(v, reader->getFps());
     else if (encoder_type == "nvenc")
@@ -110,12 +118,15 @@ int main(int argc, char *argv[]) {
       fe = new ZDepthEncoder(reader->getFps());
     else if (encoder_type == "null")
       fe = new NullEncoder(reader->getFps());
+    else {
+      spdlog::error("Unknown encoder type: \"{}\". Supported types are "
+                    "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
+                    encoder_type);
+      exit(1);
+    }
     encoders[type] = fe;
     frameType = type;
   }
-
-  std::vector<FrameStruct *> fs;
-  std::vector<FrameStruct *> fOs;
 
   std::queue<FrameStruct> buffer;
 
@@ -128,20 +139,16 @@ int main(int argc, char *argv[]) {
     // TODO: document what is happening with the Encoders and Queue
     while (v.empty()) {
 
-      std::vector<FrameStruct *> frameStruct = reader->currentFrame();
-      for (FrameStruct *frameStruct : frameStruct) {
+      std::vector<FrameStruct *> frameStructs = reader->currentFrame();
+      for (FrameStruct *frameStruct : frameStructs) {
         IEncoder *frameEncoder = encoders[frameStruct->frameType];
 
         frameEncoder->addFrameStruct(frameStruct);
         if (frameEncoder->hasNextPacket()) {
 
-          FrameStruct *pf = frameEncoder->currentFrameEncoded();
-          FrameStruct *pfo = frameEncoder->currentFrameOriginal();
+          FrameStruct f = FrameStruct(*frameEncoder->currentFrameEncoded());
+          FrameStruct fo = FrameStruct(*frameEncoder->currentFrameOriginal());
 
-          fs.push_back(pf);
-          fOs.push_back(pfo);
-          FrameStruct f = *pf;
-          FrameStruct fo = *pfo;
           original_size += fo.frame.size();
           compressed_size += f.frame.size();
           v.push_back(f);
@@ -162,9 +169,7 @@ int main(int argc, char *argv[]) {
     imgChanged = frameStructToMat(f, img, decoders);
 
     f.frame.clear();
-
-    std::cout << f.deviceId << ";" << f.sensorId << ";" << f.frameId
-              << " received" << std::endl;
+    spdlog::debug("\t{};{};{} received", f.deviceId, f.sensorId, f.frameId);
 
     if (!img.empty() && imgChanged) {
       FrameStruct fo = buffer.front();
@@ -253,22 +258,20 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  std::cout << "original_size: " << original_size << " bytes " << std::endl;
-  std::cout << "compressed_size: " << compressed_size << " bytes" << std::endl;
-  // std::cout << "bitrate: "
-  //          << (8 * compressed_size) / (1000000.0 * (i / time_in_seconds))
-  //          << " Mbps" << std::endl;
-  std::cout << "ratio: " << original_size / (float)compressed_size << "x"
-            << std::endl;
+  spdlog::critical("original_size: {} bytes", original_size);
+  spdlog::critical("compressed_size: {} bytes", compressed_size);
+  spdlog::critical("compression ratio: {}x",
+                   original_size / (float)compressed_size);
 
   if (frameType == 0) {
-    std::cout << "Avg PSNR: " << psnr / i << std::endl;
-    std::cout << "Avg MSSIM: " << mssim / i << std::endl;
+    spdlog::critical("Avg PSNR: {}", psnr / i);
+    cv::Vec<double, 4> mssimV = (mssim / i);
+    spdlog::critical("Avg MSSIM: ({};{};{};{})", mssimV(0), mssimV(1),
+                     mssimV(2), mssimV(3));
   } else {
-    std::cout << "Avg MSE: " << mse / i << " "
-              << mse / (i * img.cols * img.rows) << std::endl;
-    std::cout << "Avg MSE (4096 mm): " << mse_comp / i << " "
-              << mse_comp / (i * img.cols * img.rows) << std::endl;
+    spdlog::critical("Avg MSE per voxel: {}", mse / (i * img.cols * img.rows));
+    spdlog::critical("Avg MSE per voxel (4096 mm): {}",
+                     mse_comp / (i * img.cols * img.rows));
   }
 
   delete reader;

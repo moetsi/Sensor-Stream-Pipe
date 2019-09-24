@@ -14,6 +14,8 @@ extern "C" {
 
 #include <iostream>
 #include <opencv2/core/mat.hpp>
+#include <opencv2/imgproc.hpp>
+#include <spdlog/spdlog.h>
 
 #include "../utils/VideoUtils.h"
 #include "IDecoder.h"

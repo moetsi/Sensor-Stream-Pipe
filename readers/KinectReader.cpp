@@ -24,12 +24,13 @@ KinectReader::KinectReader(uint8_t _device_index,
 
   const uint32_t installed_devices = k4a_device_get_installed_count();
   if (device_index >= installed_devices) {
-    std::cerr << "Device not found." << std::endl;
+    spdlog::error("Kinect Device not found.");
     exit(1);
   }
 
   if (K4A_FAILED(k4a_device_open(device_index, &device))) {
-    std::cerr << "Runtime error: k4a_device_open() failed " << std::endl;
+    spdlog::error("Runtime error: k4a_device_open() failed.");
+    exit(1);
   }
 
   char serial_number_buffer[256];
@@ -38,32 +39,28 @@ KinectReader::KinectReader(uint8_t _device_index,
                                  &serial_number_buffer_size),
         device);
 
-  std::cout << "Device serial number: " << serial_number_buffer << std::endl;
-
   k4a_hardware_version_t version_info;
   CHECK(k4a_device_get_version(device, &version_info), device);
 
-  std::cout << "Device version: "
-            << (version_info.firmware_build == K4A_FIRMWARE_BUILD_RELEASE
+  spdlog::info("Kinect Device serial number: {}", serial_number_buffer);
+  spdlog::info("Kinect Device version: {}; C: {}.{}.{}; D: {}.{}.{} {}.{}; A: "
+               "{}.{}.{};  ",
+               (version_info.firmware_build == K4A_FIRMWARE_BUILD_RELEASE
                     ? "Rel"
-                    : "Dbg")
-            << "; C: " << version_info.rgb.major << "."
-            << version_info.rgb.minor << "." << version_info.rgb.iteration
-            << "; D: " << version_info.depth.major << "."
-            << version_info.depth.minor << "." << version_info.depth.iteration
-            << "[" << version_info.depth_sensor.major << "."
-            << version_info.depth_sensor.minor << "]"
-            << "; A: " << version_info.audio.major << "."
-            << version_info.audio.minor << "." << version_info.audio.iteration
-            << std::endl;
+                    : "Dbg"),
+               version_info.rgb.major, version_info.rgb.minor,
+               version_info.rgb.iteration, version_info.depth.major,
+               version_info.depth.minor, version_info.depth.iteration,
+               version_info.depth_sensor.major, version_info.depth_sensor.minor,
+               version_info.audio.major, version_info.audio.minor,
+               version_info.audio.iteration);
 
   uint32_t camera_fps = k4a_convert_fps_to_uint(device_config.camera_fps);
 
   if (camera_fps <= 0 ||
       (device_config.color_resolution == K4A_COLOR_RESOLUTION_OFF &&
        device_config.depth_mode == K4A_DEPTH_MODE_OFF)) {
-    std::cerr << "Either the color or depth modes must be enabled to record."
-              << std::endl;
+    spdlog::error("Either the color or depth modes must be enabled to record.");
     exit(1);
   }
 
@@ -71,15 +68,15 @@ KinectReader::KinectReader(uint8_t _device_index,
     if (K4A_FAILED(k4a_device_set_color_control(
             device, K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
             K4A_COLOR_CONTROL_MODE_MANUAL, absoluteExposureValue))) {
-      std::cerr << "Runtime error: k4a_device_set_color_control() failed "
-                << std::endl;
+      spdlog::error("Runtime error: k4a_device_set_color_control() failed.");
+      exit(1);
     }
   } else {
     if (K4A_FAILED(k4a_device_set_color_control(
             device, K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
             K4A_COLOR_CONTROL_MODE_AUTO, 0))) {
-      std::cerr << "Runtime error: k4a_device_set_color_control() failed "
-                << std::endl;
+      spdlog::error("Runtime error: k4a_device_set_color_control() failed.");
+      exit(1);
     }
   }
 
@@ -88,14 +85,13 @@ KinectReader::KinectReader(uint8_t _device_index,
     CHECK(k4a_device_start_imu(device), device);
   }
 
-  std::cout << "Device started" << std::endl;
+  spdlog::info("Kinect Device started");
 
   // Wait for the first capture before starting recording.
   int32_t timeout_sec_for_first_capture = 60;
   if (device_config.wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE) {
     timeout_sec_for_first_capture = 360;
-    std::cout << "[subordinate mode] Waiting for signal from master"
-              << std::endl;
+    spdlog::warn("[subordinate mode] Waiting for signal from master");
   }
   clock_t first_capture_start = clock();
   // Wait for the first capture in a loop so Ctrl-C will still exit.
@@ -106,17 +102,18 @@ KinectReader::KinectReader(uint8_t _device_index,
       k4a_capture_release(capture);
       break;
     } else if (result == K4A_WAIT_RESULT_FAILED) {
-      std::cerr << "Runtime error: k4a_device_get_capture() returned error: "
-                << result << std::endl;
+      spdlog::error(
+          "Runtime error: k4a_device_get_capture() returned error: {}", result);
       exit(1);
     }
   }
 
   if (exiting) {
+    spdlog::error("Exiting");
     k4a_device_close(device);
     exit(0);
   } else if (result == K4A_WAIT_RESULT_TIMEOUT) {
-    std::cerr << "Timed out waiting for first capture." << std::endl;
+    spdlog::error("Timed out waiting for first capture.");
     exit(1);
   }
 
@@ -144,9 +141,6 @@ KinectReader::KinectReader(uint8_t _device_index,
 KinectReader::~KinectReader() {
   k4a_device_stop_cameras(device);
 
-  CHECK(k4a_record_flush(recording), device);
-  k4a_record_close(recording);
-
   k4a_device_close(device);
 
   for (uint i = 0; i < cpss.size(); i++)
@@ -167,8 +161,8 @@ void KinectReader::nextFrame() {
     if (result == K4A_WAIT_RESULT_TIMEOUT) {
       continue;
     } else if (result != K4A_WAIT_RESULT_SUCCEEDED) {
-      std::cerr << "Runtime error: k4a_device_get_capture() returned " << result
-                << std::endl;
+      spdlog::error(
+          "Runtime error: k4a_device_get_capture() returned error: {}", result);
       break;
     }
     uint64_t capture_timestamp = currentTimeMs();
@@ -211,8 +205,9 @@ void KinectReader::nextFrame() {
           memcpy(&s->frame[8], buffer, size);
         }
         currFrame.push_back(s);
+        if (colorImage != nullptr)
+          k4a_image_release(colorImage);
       }
-      k4a_image_release(colorImage);
     }
 
     if (stream_depth && device_config.depth_mode != K4A_DEPTH_MODE_OFF) {
@@ -241,8 +236,9 @@ void KinectReader::nextFrame() {
         memcpy(&s->frame[8], buffer, size);
 
         currFrame.push_back(s);
+        if (depthImage != nullptr)
+          k4a_image_release(depthImage);
       }
-      k4a_image_release(depthImage);
     }
 
     if (stream_ir && device_config.depth_mode != K4A_DEPTH_MODE_OFF) {
@@ -270,9 +266,9 @@ void KinectReader::nextFrame() {
         memcpy(&s->frame[8], buffer, size);
 
         currFrame.push_back(s);
+        if (irImage != nullptr)
+          k4a_image_release(irImage);
       }
-
-      k4a_image_release(irImage);
     }
     k4a_capture_release(capture);
   } while (result == K4A_WAIT_RESULT_FAILED);

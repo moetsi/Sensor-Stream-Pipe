@@ -52,17 +52,17 @@ void prepareDecodingStruct(
   AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
 
   if (!pCodecContext) {
-    std::cerr << "failed to allocated memory for AVCodecContext" << std::endl;
+    spdlog::error("Failed to allocated memory for AVCodecContext.");
     exit(1);
   }
 
   if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
-    std::cerr << ("failed to copy codec params to codec context") << std::endl;
+    spdlog::error("Failed to copy codec params to codec context.");
     exit(1);
   }
 
   if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
-    std::cerr << ("failed to open codec through avcodec_open2") << std::endl;
+    spdlog::error("Failed to open codec through avcodec_open2.");
     exit(1);
   }
 

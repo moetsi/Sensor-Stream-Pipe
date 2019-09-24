@@ -5,7 +5,7 @@ general:
   frame_source:
     type: "frames"
     parameters:
-      path: "/home/amourao/code/davp-data-scripts/stairs-seq-01-frames-color.txt"
+      path: "/home/amourao/code/2019-05_moetsi/davp-data-scripts/stairs-seq-01-frames-color.txt"
 video_encoder:
   0: #color
     type: "libav"

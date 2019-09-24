@@ -10,8 +10,8 @@ int ImageDecoder::decode_packet(AVFrame *pFrame) {
   int response = avcodec_send_packet(pCodecContext, pPacket);
 
   if (response < 0) {
-    std::cout << "Error while sending a packet to the decoder: "
-              << av_err2str(response) << std::endl;
+    spdlog::error("Error while sending a packet to the decoder: {}",
+                  av_err2str(response));
     return response;
   }
 
@@ -22,8 +22,8 @@ int ImageDecoder::decode_packet(AVFrame *pFrame) {
     if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
       break;
     } else if (response < 0) {
-      std::cout << "Error while receiving a frame from the decoder: "
-                << av_err2str(response) << std::endl;
+      spdlog::error("Error while receiving a frame from the decoder: {}",
+                    av_err2str(response));
       return response;
     }
 
@@ -85,13 +85,13 @@ void ImageDecoder::init(std::vector<unsigned char> &buffer) {
 
   ret = avformat_open_input(&pFormatContext, NULL, NULL, NULL);
   if (ret < 0) {
-    fprintf(stderr, "Could not open input\n");
+    spdlog::error("Could not open input.");
     exit(1);
   }
 
   ret = avformat_find_stream_info(pFormatContext, NULL);
   if (ret < 0) {
-    fprintf(stderr, "Could not find stream information\n");
+    spdlog::error("Could not find stream information.");
     exit(1);
   }
 
@@ -111,23 +111,23 @@ void ImageDecoder::init(std::vector<unsigned char> &buffer) {
 
   pCodecContext = avcodec_alloc_context3(pCodec);
   if (!pCodecContext) {
-    std::cout << "failed to allocated memory for AVCodecContext" << std::endl;
+    spdlog::error("Failed to allocated memory for AVCodecContext.");
     exit(-1);
   }
 
   if (avcodec_parameters_to_context(pCodecContext, pCodecParameters) < 0) {
-    std::cout << "failed to copy codec params to codec context" << std::endl;
+    spdlog::error("Failed to copy codec params to codec context.");
     exit(-1);
   }
 
   if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
-    std::cout << "failed to open codec through avcodec_open2" << std::endl;
+    spdlog::error("Failed to open codec through avcodec_open2.");
     exit(-1);
   }
 
   pPacket = av_packet_alloc();
   if (!pPacket) {
-    std::cout << "failed to allocated memory for AVPacket" << std::endl;
+    spdlog::error("Failed to allocated memory for AVPacket.");
     exit(-1);
   }
 

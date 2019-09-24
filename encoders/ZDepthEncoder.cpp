@@ -11,6 +11,7 @@ ZDepthEncoder::ZDepthEncoder(int _fps) {
   frameOriginal = nullptr;
   paramsStruct = nullptr;
   fd = nullptr;
+  sws_ctx = nullptr;
 }
 
 ZDepthEncoder::~ZDepthEncoder() {
@@ -49,7 +50,7 @@ void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->timestamps.push_back(frameOriginal->timestamps.front());
     frameCompressed->timestamps.push_back(currentTimeMs());
 
-    uint16_t *data;
+    uint16_t *data = nullptr;
 
     AVFrame *pFrameO = nullptr;
     AVFrame *pFrame = nullptr;
@@ -129,7 +130,8 @@ void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
 }
 
 void ZDepthEncoder::nextPacket() {
-  delete frameOriginal;
+  if (frameOriginal != nullptr)
+    delete frameOriginal;
   frameOriginal = nullptr;
   frameCompressed = nullptr;
 }

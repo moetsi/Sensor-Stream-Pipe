@@ -9,9 +9,8 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
   k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
   if (!config["streaming_color_format"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"streaming_color_format\""
-              << std::endl;
-    std::cout << "Using default: K4A_IMAGE_FORMAT_COLOR_MJPG" << std::endl;
+    spdlog::warn("Missing key: \"streaming_color_format\", Using default: "
+                 "K4A_IMAGE_FORMAT_COLOR_MJPG");
     device_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
   } else {
     std::string streaming_color_format =
@@ -20,34 +19,27 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
       device_config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
     } else if (streaming_color_format == "K4A_IMAGE_FORMAT_COLOR_MJPG") {
       device_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    } else if (streaming_color_format == "K4A_IMAGE_FORMAT_COLOR_YUY2") {
+    } else if (streaming_color_format == "K4A_IMAGE_FORMAT_COLOR_YUY2" ||
+               streaming_color_format == "K4A_IMAGE_FORMAT_COLOR_NV12") {
       // device_config.color_format = K4A_IMAGE_FORMAT_COLOR_YUY2;
-      std::cerr << "Not supported: K4A_IMAGE_FORMAT_COLOR_YUY2" << std::endl;
-      std::cerr << "Supported values are K4A_IMAGE_FORMAT_COLOR_BGRA32 and "
-                   "K4A_IMAGE_FORMAT_COLOR_MJPG"
-                << std::endl;
-      throw "Not supported: K4A_IMAGE_FORMAT_COLOR_YUY2";
-    } else if (streaming_color_format == "K4A_IMAGE_FORMAT_COLOR_NV12") {
-      // device_config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-      std::cerr << "Not supported: K4A_IMAGE_FORMAT_COLOR_NV12" << std::endl;
-      std::cerr << "Supported values are K4A_IMAGE_FORMAT_COLOR_BGRA32 and "
-                   "K4A_IMAGE_FORMAT_COLOR_MJPG"
-                << std::endl;
-      throw "Not supported: K4A_IMAGE_FORMAT_COLOR_NV12";
+      spdlog::error(
+          "\"streaming_color_format\" not supported: {}, Supported values are "
+          "K4A_IMAGE_FORMAT_COLOR_BGRA32 and K4A_IMAGE_FORMAT_COLOR_MJPG",
+          streaming_color_format);
+      throw std::invalid_argument("Not supported: \"streaming_color_format\"");
     } else {
-      std::cerr << "Invalid value for: \"streaming_color_format\": "
-                << streaming_color_format << std::endl;
-      std::cerr << "Supported values are K4A_IMAGE_FORMAT_COLOR_BGRA32 and "
-                   "K4A_IMAGE_FORMAT_COLOR_MJPG"
-                << std::endl;
-      throw "Invalid value for: \"streaming_color_format\"";
+      spdlog::error(
+          "Invalid value for \"streaming_color_format\": {}, Supported values "
+          "are K4A_IMAGE_FORMAT_COLOR_BGRA32 and K4A_IMAGE_FORMAT_COLOR_MJPG",
+          streaming_color_format);
+      throw std::invalid_argument(
+          "Invalid value for: \"streaming_color_format\"");
     }
   }
 
   if (!config["streaming_color_resolution"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"streaming_color_resolution\""
-              << std::endl;
-    std::cout << "Using default: K4A_COLOR_RESOLUTION_720P" << std::endl;
+    spdlog::warn("Missing key: \"streaming_color_resolution\", Using default: "
+                 "K4A_COLOR_RESOLUTION_720P");
     device_config.color_resolution = K4A_COLOR_RESOLUTION_720P;
   } else {
     std::string streaming_color_resolution =
@@ -67,20 +59,20 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     } else if (streaming_color_resolution == "K4A_COLOR_RESOLUTION_OFF") {
       device_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
     } else {
-      std::cerr << "Invalid value for: \"streaming_color_resolution\": "
-                << streaming_color_resolution << std::endl;
-      std::cerr << "Supported values are K4A_COLOR_RESOLUTION_OFF, "
-                   "K4A_COLOR_RESOLUTION_720P, K4A_COLOR_RESOLUTION_1080P, "
-                   "K4A_COLOR_RESOLUTION_1440P, K4A_COLOR_RESOLUTION_1536P,  "
-                   "K4A_COLOR_RESOLUTION_2160P and K4A_COLOR_RESOLUTION_3072P"
-                << std::endl;
-      throw "Invalid value for: \"streaming_color_resolution\"";
+      spdlog::error("Invalid value for \"streaming_color_resolution\": {}, "
+                    "Supported values are K4A_COLOR_RESOLUTION_OFF and "
+                    "K4A_COLOR_RESOLUTION_720P, K4A_COLOR_RESOLUTION_1080P, "
+                    "K4A_COLOR_RESOLUTION_1440P, K4A_COLOR_RESOLUTION_1536P, "
+                    "K4A_COLOR_RESOLUTION_2160P and K4A_COLOR_RESOLUTION_3072P",
+                    streaming_color_resolution);
+      throw std::invalid_argument(
+          "Invalid value for: \"streaming_color_resolution\"");
     }
   }
 
   if (!config["streaming_depth_mode"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"streaming_depth_mode\"" << std::endl;
-    std::cout << "Using default: K4A_DEPTH_MODE_NFOV_UNBINNED" << std::endl;
+    spdlog::warn("Missing key: \"streaming_depth_mode\", Using default: "
+                 "K4A_DEPTH_MODE_NFOV_UNBINNED");
     device_config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
   } else {
     std::string streaming_depth_mode =
@@ -98,21 +90,21 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     } else if (streaming_depth_mode == "K4A_DEPTH_MODE_OFF") {
       device_config.depth_mode = K4A_DEPTH_MODE_OFF;
     } else {
-      std::cerr << "Invalid value for: \"streaming_depth_mode\": "
-                << streaming_depth_mode << std::endl;
-      std::cerr
-          << "Supported values are K4A_DEPTH_MODE_OFF, "
-             "K4A_DEPTH_MODE_NFOV_2X2BINNED, K4A_DEPTH_MODE_NFOV_UNBINNED, "
-             "K4A_DEPTH_MODE_WFOV_2X2BINNED, K4A_DEPTH_MODE_WFOV_UNBINNED, "
-             "K4A_DEPTH_MODE_PASSIVE_IR"
-          << std::endl;
-      throw "Invalid value for: \"streaming_depth_mode\"";
+      spdlog::error(
+          "Invalid value for \"streaming_depth_mode\": {}, "
+          "Supported values are K4A_DEPTH_MODE_OFF and "
+          "K4A_DEPTH_MODE_NFOV_2X2BINNED, K4A_DEPTH_MODE_NFOV_UNBINNED, "
+          "K4A_DEPTH_MODE_WFOV_2X2BINNED, K4A_DEPTH_MODE_WFOV_UNBINNED, "
+          "K4A_DEPTH_MODE_PASSIVE_IR",
+          streaming_depth_mode);
+      throw std::invalid_argument(
+          "Invalid value for: \"streaming_depth_mode\"");
     }
   }
 
   if (!config["streaming_rate"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"streaming_rate\"" << std::endl;
-    std::cout << "Using default: K4A_FRAMES_PER_SECOND_30" << std::endl;
+    spdlog::warn("Missing key: \"streaming_rate\", Using default: "
+                 "K4A_FRAMES_PER_SECOND_30");
     device_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
   } else {
     std::string fps_str = config["streaming_rate"].as<std::string>();
@@ -123,18 +115,18 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     } else if (fps_str == "K4A_FRAMES_PER_SECOND_30") {
       device_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     } else {
-      std::cerr << "Invalid value for: \"streaming_rate\": " << fps_str
-                << std::endl;
-      std::cerr << "Supported values are K4A_FRAMES_PER_SECOND_5, "
-                   "K4A_FRAMES_PER_SECOND_15, K4A_FRAMES_PER_SECOND_30"
-                << std::endl;
-      throw "Invalid value for: \"streaming_rate\"";
+      spdlog::error("Invalid value for \"streaming_rate\": {}, "
+                    "Supported values are K4A_FRAMES_PER_SECOND_5, "
+                    "K4A_FRAMES_PER_SECOND_15, "
+                    "K4A_FRAMES_PER_SECOND_30",
+                    fps_str);
+      throw std::invalid_argument("Invalid value for: \"streaming_rate\"");
     }
   }
 
   if (!config["wired_sync_mode"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"wired_sync_mode\"" << std::endl;
-    std::cout << "Using default: K4A_WIRED_SYNC_MODE_STANDALONE" << std::endl;
+    spdlog::warn("Missing key: \"wired_sync_mode\", Using default: "
+                 "K4A_WIRED_SYNC_MODE_STANDALONE");
     device_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
   } else {
     std::string wired_sync_mode = config["wired_sync_mode"].as<std::string>();
@@ -145,13 +137,12 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     } else if (wired_sync_mode == "K4A_WIRED_SYNC_MODE_STANDALONE") {
       device_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
     } else {
-      std::cerr << "Invalid value for: \"wired_sync_mode\": " << wired_sync_mode
-                << std::endl;
-      std::cerr
-          << "Supported values are K4A_WIRED_SYNC_MODE_MASTER, "
-             "K4A_WIRED_SYNC_MODE_SUBORDINATE, K4A_WIRED_SYNC_MODE_STANDALONE"
-          << std::endl;
-      throw "Invalid value for: \"wired_sync_mode\"";
+      spdlog::error(
+          "Invalid value for \"streaming_rate\": {}, "
+          "Supported values are K4A_WIRED_SYNC_MODE_MASTER, "
+          "K4A_WIRED_SYNC_MODE_SUBORDINATE and K4A_WIRED_SYNC_MODE_STANDALONE",
+          wired_sync_mode);
+      throw std::invalid_argument("Invalid value for: \"wired_sync_mode\"");
     }
   }
 
@@ -160,7 +151,7 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     device_config.depth_delay_off_color_usec =
         config["depth_delay_off_color_usec"].as<int>();
   } else {
-    std::cout << "Using default depth_delay_off_color_usec = 0" << std::endl;
+    spdlog::warn("Using default depth_delay_off_color_usec = 0");
   }
 
   device_config.subordinate_delay_off_master_usec = 0;
@@ -168,9 +159,7 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     device_config.subordinate_delay_off_master_usec =
         config["subordinate_delay_off_master_usec"].as<int>();
   } else {
-    ;
-    std::cout << "Using default subordinate_delay_off_master_usec = 0"
-              << std::endl;
+    spdlog::warn("Using default subordinate_delay_off_master_usec = 0");
   }
 
   int absoluteExposureValue = 0;
@@ -178,13 +167,14 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     absoluteExposureValue = config["absoluteExposureValue"].as<int>();
   } else {
     ;
-    std::cout << "Using default absoluteExposureValue = 0" << std::endl;
+    spdlog::warn("Using default absoluteExposureValue = 0");
   }
 
   bool stream_color_video = true;
+
   if (!config["stream_color_video"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"stream_color_video\"" << std::endl;
-    std::cout << "Using default: true" << std::endl;
+    spdlog::warn("Missing key: \"stream_color_video\", Using default: "
+                 "true");
   } else {
     stream_color_video = config["stream_color_video"].as<bool>();
     if (!stream_color_video) {
@@ -194,8 +184,8 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
 
   bool stream_depth_video = true;
   if (!config["stream_depth_video"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"stream_depth_video\"" << std::endl;
-    std::cout << "Using default: true" << std::endl;
+    spdlog::warn("Missing key: \"stream_depth_video\", Using default: "
+                 "true");
   } else {
     stream_depth_video = config["stream_depth_video"].as<bool>();
     if (!stream_depth_video) {
@@ -205,8 +195,8 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
 
   bool stream_ir_video = false;
   if (!config["stream_ir_video"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"stream_ir_video\"" << std::endl;
-    std::cout << "Using default: false" << std::endl;
+    spdlog::warn("Missing key: \"stream_ir_video\", Using default: "
+                 "false");
   } else {
     stream_ir_video = config["stream_ir_video"].as<bool>();
   }

@@ -54,7 +54,7 @@ mkdir ~/libs
 mkdir ~/libs/srcOriginal
 ```
 
-### Cereal 1.2.2
+#### Cereal 1.2.2
 
 ```
 cd ~/libs/srcOriginal
@@ -63,7 +63,7 @@ tar xf v1.2.2
 cp -r cereal-1.2.2/include ~/libs
 ```
 
-### ZeroMQ
+#### ZeroMQ
 
 
 #### libzmq3 4.3.1
@@ -117,6 +117,18 @@ cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install
 cp libzdepth.a ~/libs/lib/
 cp zstd/libzstd.a ~/libs/lib/
+```
+
+#### spdlog
+
+```
+cd ~/libs/srcOriginal
+wget https://github.com/gabime/spdlog/archive/v1.4.1.tar.gz
+tar xf v1.4.1.tar.gz
+cd spdlog-1.4.1 && mkdir build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
+make -j
+make install
 ```
 
 #### NVPipe (optional, recommended for users with Nvidia GPU)

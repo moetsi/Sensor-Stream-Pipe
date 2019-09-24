@@ -9,6 +9,8 @@
 class IEncoder {
 
 public:
+  virtual ~IEncoder() {}
+
   virtual void addFrameStruct(FrameStruct *fs) = 0;
 
   virtual void nextPacket() = 0;

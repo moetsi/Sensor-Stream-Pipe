@@ -9,6 +9,8 @@
 class IReader {
 
 public:
+  virtual ~IReader() {}
+
   virtual std::vector<FrameStruct *> currentFrame() = 0;
 
   virtual std::vector<uint> getType() = 0;

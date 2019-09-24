@@ -37,3 +37,18 @@ std::string randomString(size_t length) {
   std::generate_n(str.begin(), length, randchar);
   return str;
 }
+
+void setupLogging(YAML::Node &general_parameters) {
+  if (general_parameters["log_level"].IsDefined())
+    spdlog::set_level(spdlog::level::from_str(
+        general_parameters["log_level"].as<std::string>()));
+  if (general_parameters["log_file"].IsDefined())
+    spdlog::set_default_logger(spdlog::basic_logger_mt(
+        "basic_logger", general_parameters["log_file"].as<std::string>()));
+}
+
+void setupLogging(std::string &level, std::string &file) {
+  spdlog::set_level(spdlog::level::from_str(level));
+  if (!file.empty())
+    spdlog::set_default_logger(spdlog::basic_logger_mt("basic_logger", file));
+}

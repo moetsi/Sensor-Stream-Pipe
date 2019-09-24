@@ -24,13 +24,15 @@
 
 int main(int argc, char *argv[]) {
 
+  spdlog::set_level(spdlog::level::debug);
+
   srand(time(NULL) * getpid());
 
   try {
     av_log_set_level(AV_LOG_QUIET);
 
     if (argc < 2) {
-      std::cerr << "Usage: server <parameters_file>" << std::endl;
+      std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
       return 1;
     }
 
@@ -38,13 +40,17 @@ int main(int argc, char *argv[]) {
     zmq::socket_t socket(context, ZMQ_PUSH);
 
     std::string codec_parameters_file = std::string(argv[1]);
+
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
+
+    YAML::Node general_parameters = codec_parameters["general"];
+    setupLogging(general_parameters);
 
     std::string host = codec_parameters["general"]["host"].as<std::string>();
     uint port = codec_parameters["general"]["port"].as<uint>();
 
     IReader *reader = nullptr;
-    YAML::Node general_parameters = codec_parameters["general"];
+
     std::string reader_type =
         general_parameters["frame_source"]["type"].as<std::string>();
     if (reader_type == "frames") {
@@ -68,6 +74,11 @@ int main(int argc, char *argv[]) {
       ExtendedAzureConfig c = buildKinectConfigFromYAML(
           general_parameters["frame_source"]["parameters"]);
       reader = new KinectReader(0, c);
+    } else {
+      spdlog::error("Unknown reader type: \"{}\". Supported types are "
+                    "\"frames\", \"video\" and \"kinect\"",
+                    reader_type);
+      exit(1);
     }
 
     std::unordered_map<uint, IEncoder *> encoders;
@@ -77,7 +88,7 @@ int main(int argc, char *argv[]) {
     for (uint type : types) {
       YAML::Node v = codec_parameters["video_encoder"][type];
       std::string encoder_type = v["type"].as<std::string>();
-      IEncoder *fe;
+      IEncoder *fe = nullptr;
       if (encoder_type == "libav")
         fe = new LibAvEncoder(v, reader->getFps());
       else if (encoder_type == "nvenc")
@@ -86,6 +97,12 @@ int main(int argc, char *argv[]) {
         fe = new ZDepthEncoder(reader->getFps());
       else if (encoder_type == "null")
         fe = new NullEncoder(reader->getFps());
+      else {
+        spdlog::error("Unknown encoder type: \"{}\". Supported types are "
+                      "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
+                      encoder_type);
+        exit(1);
+      }
       encoders[type] = fe;
     }
 
@@ -162,16 +179,18 @@ int main(int argc, char *argv[]) {
         last_time = currentTimeMs();
         processing_time = last_time - start_frame_time;
 
-        std::cout << "Took " << diff_time << " ms; size " << message.size()
-                  << "; avg " << avg_fps << " fps; "
-                  << 8 * (sent_mbytes / diff_start_time) << " Mbps "
-                  << 8 * (sent_mbytes * reader->getFps() / (sent_frames * 1000))
-                  << " Mbps expected " << std::endl;
+        spdlog::debug(
+            "Message sent, took {} ms; packet size {}; avg {} fps; {} "
+            "Mbps; {} Mbps expected",
+            diff_time, request.size(), avg_fps,
+            8 * (sent_mbytes / (currentTimeMs() - start_time)),
+            8 * (sent_mbytes * reader->getFps() / (sent_frames * 1000)));
+
         for (uint i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
           f.frame.clear();
-          std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";"
-                    << f.frameId << " sent" << std::endl;
+          spdlog::debug("\t{};{};{} sent", f.deviceId, f.sensorId, f.frameId);
+          vO.at(i)->frame.clear();
           delete vO.at(i);
         }
       }
@@ -179,8 +198,12 @@ int main(int argc, char *argv[]) {
     delete reader;
     for (auto const &x : encoders)
       delete x.second;
+  } catch (YAML::Exception &e) {
+    spdlog::error("Error on the YAML configuration file");
+    spdlog::error(e.what());
   } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
+    spdlog::error("General Error");
+    spdlog::error(e.what());
   }
 
   return 0;

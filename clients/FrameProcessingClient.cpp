@@ -18,6 +18,8 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
+#include "spdlog/spdlog.h"
+
 #include "../decoders/IDecoder.h"
 #include "../decoders/LibAvDecoder.h"
 #include "../decoders/NvDecoder.h"
@@ -28,13 +30,25 @@ extern "C" {
 
 int main(int argc, char *argv[]) {
 
+  spdlog::set_level(spdlog::level::debug);
+
   srand(time(NULL) * getpid());
 
   try {
-    if (argc != 2) {
-      std::cerr << "Usage: client <port>" << std::endl;
+
+    if (argc < 2) {
+      std::cerr << "Usage: ssp_client <port> (<log level>) (<log file>)"
+                << std::endl;
       return 1;
     }
+    std::string log_level = "debug";
+    std::string log_file = "";
+
+    if (argc > 2)
+      log_level = argv[2];
+    if (argc > 3)
+      log_file = argv[3];
+
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_PULL);
     socket.bind("tcp://*:" + std::string(argv[1]));
@@ -43,6 +57,8 @@ int main(int argc, char *argv[]) {
     uint64_t start_time = last_time;
     uint64_t rec_frames = 0;
     double rec_mbytes = 0;
+
+    setupLogging(log_level, log_file);
 
     std::unordered_map<std::string, double> rec_mbytes_per_stream;
 
@@ -116,29 +132,24 @@ int main(int argc, char *argv[]) {
         }
       }
 
-      std::cout << "Message received, took " << diff_time << " ms;"
-                << " packet size " << request.size() << "; avg " << avg_fps
-                << " fps; " << 8 * (rec_mbytes / (currentTimeMs() - start_time))
-                << " avg Mbps;"
-                << " latency: "
-                << (f_list.front().timestamps.back() -
-                    f_list.front().timestamps.at(1))
-                << " ms" << std::endl;
-
+      spdlog::debug(
+          "Message received, took {} ms; packet size {}; avg {} fps; {} avg "
+          "Mbps; latency: {} ms",
+          diff_time, request.size(), avg_fps,
+          8 * (rec_mbytes / (currentTimeMs() - start_time)),
+          (f_list.front().timestamps.back() - f_list.front().timestamps.at(1)));
       for (FrameStruct f : f_list) {
         std::string decoder_id = f.streamId + std::to_string(f.sensorId);
-        std::cout << "\t" << f.deviceId << ";" << f.sensorId << ";" << f.frameId
-                  << " "
-                  << 8 * (rec_mbytes_per_stream[decoder_id] /
-                          (currentTimeMs() - start_time))
-                  << " avg Mbps;"
-                  << " latency: " << (f.timestamps.back() - f.timestamps.at(1))
-                  << " ms" << std::endl;
+        spdlog::debug("\t{};{};{} {} avg Mbps; latency: {} ms", f.deviceId,
+                      f.sensorId, f.frameId,
+                      8 * (rec_mbytes_per_stream[decoder_id] /
+                           (currentTimeMs() - start_time)),
+                      (f.timestamps.back() - f.timestamps.at(1)));
       }
     }
 
   } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
+    spdlog::error(e.what());
   }
 
   return 0;

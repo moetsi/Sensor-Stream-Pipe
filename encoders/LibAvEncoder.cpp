@@ -3,6 +3,7 @@
 //
 
 #include "LibAvEncoder.h"
+#include <spdlog/spdlog.h>
 
 LibAvEncoder::LibAvEncoder(std::string codec_parameters_file, uint _fps) {
   codec_parameters = YAML::LoadFile(codec_parameters_file);
@@ -193,19 +194,7 @@ void LibAvEncoder::prepareFrame() {
 
     av_frame_free(&pFrameO);
   }
-  /*
-  cv::Mat frameOri = cv::imdecode(frameData, CV_LOAD_IMAGE_UNCHANGED);
 
-  int ret = av_frame_make_writable(pFrame);
-  if (ret < 0) {
-      std::cerr << "Error making frames writable" << std::endl;
-      exit(1);
-  }
-  // yuv420p 640 320 320 format 0
-  // yuv422p 640 320 320 format 4
-
-
-   */
 }
 
 void LibAvEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
@@ -214,7 +203,7 @@ void LibAvEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
   /* send the frame to the encoder */
   ret = avcodec_send_frame(enc_ctx, frame);
   if (ret < 0) {
-    fprintf(stderr, "Error sending a frame for encoding\n");
+    spdlog::error("Error sending a frame for encoding.");
     exit(1);
   }
 
@@ -222,7 +211,7 @@ void LibAvEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
   if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
     return;
   else if (ret < 0) {
-    fprintf(stderr, "Error during encoding\n");
+    spdlog::error("Error during encoding.");
     exit(1);
   }
 
@@ -249,7 +238,7 @@ void LibAvEncoder::encode() {
 void LibAvEncoder::init(FrameStruct *fs) {
   int ret;
 
-  std::cout << codec_parameters << std::endl;
+  spdlog::info("Codec information:\n {}", codec_parameters);
 
   pCodecEncoder = avcodec_find_encoder_by_name(
       codec_parameters["codec_name"].as<std::string>().c_str());
@@ -257,7 +246,7 @@ void LibAvEncoder::init(FrameStruct *fs) {
   pPacket = av_packet_alloc();
   pCodecParametersEncoder = avcodec_parameters_alloc();
 
-  int width, height, pxl_format;
+  int width = 0, height = 0, pxl_format = 0;
 
   if (fs->frameDataType == 0 || fs->frameDataType == 1) {
     AVFrame *pFrameO = av_frame_alloc();
@@ -348,13 +337,13 @@ void LibAvEncoder::init(FrameStruct *fs) {
 
   ret = avcodec_open2(pCodecContextEncoder, pCodecEncoder, NULL);
   if (ret < 0) {
-    std::cerr << "Could not open codec: " << av_err2str(ret) << std::endl;
+    spdlog::error("Could not open codec: {}", av_err2str(ret));
     exit(1);
   }
 
   pFrame = av_frame_alloc();
   if (!pFrame) {
-    std::cerr << "Could not allocate video frame." << std::endl;
+    spdlog::error("Could not allocate video frame.");
     exit(1);
   }
 
@@ -367,7 +356,7 @@ void LibAvEncoder::init(FrameStruct *fs) {
 
   ret = av_frame_get_buffer(pFrame, 30);
   if (ret < 0) {
-    std::cerr << "Could not allocate the video frame data" << std::endl;
+    spdlog::error("Could not allocate the video frame data.");
     exit(1);
   }
 

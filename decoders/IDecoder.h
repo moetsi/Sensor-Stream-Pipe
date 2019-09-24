@@ -10,5 +10,7 @@
 class IDecoder {
 
 public:
+  virtual ~IDecoder() {}
+
   virtual cv::Mat decode(FrameStruct *data) = 0;
 };

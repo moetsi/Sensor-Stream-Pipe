@@ -11,6 +11,7 @@
 #include <cereal/archives/binary.hpp>
 
 #include "../structs/FrameStruct.hpp"
+#include "../utils/ImageDecoder.h"
 #include "IReader.h"
 
 class ImageReader : public IReader {

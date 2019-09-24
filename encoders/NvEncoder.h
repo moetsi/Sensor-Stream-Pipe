@@ -4,11 +4,17 @@
 
 #pragma once
 
+#include <NvPipe.h>
+#include <yaml-cpp/yaml.h>
+
 #include "../decoders/LibAvDecoder.h"
 #include "../utils/ImageDecoder.h"
 #include "IEncoder.h"
-#include <NvPipe.h>
-#include <yaml-cpp/yaml.h>
+#include "../readers/KinectReader.h"
+#include "../structs/FrameStruct.hpp"
+#include "../utils/KinectUtils.h"
+#include "../utils/Utils.h"
+
 
 class NvEncoder : public IEncoder {
 

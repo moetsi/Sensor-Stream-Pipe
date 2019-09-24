@@ -13,14 +13,11 @@
 #include <thread>
 
 #include <opencv2/imgproc.hpp>
+#include <spdlog/spdlog.h>
 #include <yaml-cpp/yaml.h>
 
 //#include <opencv2/imgproc.hpp>
 
-#include "../readers/KinectReader.h"
-#include "../structs/FrameStruct.hpp"
-#include "../utils/KinectUtils.h"
-#include "../utils/Utils.h"
 #include "NvEncoder.h"
 
 NvEncoder::NvEncoder(YAML::Node _codec_parameters, uint _fps) {
@@ -60,7 +57,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->timestamps.push_back(frameOriginal->timestamps.front());
     frameCompressed->timestamps.push_back(currentTimeMs());
 
-    char *data;
+    char *data = nullptr;
 
     AVFrame *pFrameO = nullptr;
     AVFrame *pFrame = nullptr;
@@ -139,10 +136,9 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     }
 
     if (encoder == nullptr) {
-      std::cerr << "Cannot create new NVEncoder:" << std::endl;
-      std::cerr << "Did you reach the number of parallel encoding sessions "
-                   "possible? (2 on non-Quadro cards)"
-                << std::endl;
+      spdlog::error("Could not create new NVEncoder");
+      spdlog::error("Did you reach the number of parallel encoding sessions "
+                    "available? (2 on non-Quadro cards)");
       exit(1);
     }
 
@@ -165,7 +161,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
 }
 
 void NvEncoder::nextPacket() {
-  if (frameOriginal == nullptr)
+  if (frameOriginal != nullptr)
     delete frameOriginal;
   frameOriginal = nullptr;
   frameCompressed = nullptr;
@@ -189,7 +185,7 @@ CodecParamsStruct *NvEncoder::getCodecParamsStruct() {
     memcpy(&paramsStruct->data[0], &width, sizeof(int));
     memcpy(&paramsStruct->data[4], &height, sizeof(int));
 
-    ushort format_ushort, codec_ushort;
+    ushort format_ushort = 0, codec_ushort = 0;
 
     if (format == NVPIPE_RGBA32) {
       format_ushort = 0;
@@ -202,6 +198,7 @@ CodecParamsStruct *NvEncoder::getCodecParamsStruct() {
     } else if (format == NVPIPE_UINT32) {
       format_ushort = 4;
     }
+
     paramsStruct->data[8] = (uchar)format_ushort;
 
     if (codec == NVPIPE_H264) {
@@ -220,8 +217,7 @@ uint NvEncoder::getFps() { return fps; }
 void NvEncoder::buildEncoder(YAML::Node config) {
 
   if (!config["codec_name"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"codec_name\"" << std::endl;
-    std::cout << "Using default: NVPIPE_H264" << std::endl;
+    spdlog::warn("Missing key: \"codec_name\", Using default: NVPIPE_H264");
     codec = NVPIPE_H264;
   } else {
     std::string codec_str = config["codec_name"].as<std::string>();
@@ -231,18 +227,15 @@ void NvEncoder::buildEncoder(YAML::Node config) {
       codec = NVPIPE_HEVC;
       ;
     } else {
-      std::cerr << "Invalid value for: \"codec_name\": " << codec_str
-                << std::endl;
-      std::cerr << "Supported values are NVPIPE_H264 and "
-                   "NVPIPE_HEVC"
-                << std::endl;
+      spdlog::error("Invalid value for: \"codec_name\": {}, Supported values "
+                    "are NVPIPE_H264 and NVPIPE_HEVC",
+                    codec_str);
       throw "Invalid value for: \"codec_name\"";
     }
   }
 
   if (!config["compression"].IsDefined()) {
-    std::cout << "WARNING: Missing key: \"compression\"" << std::endl;
-    std::cout << "Using default: NVPIPE_LOSSY" << std::endl;
+    spdlog::warn("Missing key: \"compression\", Using default: NVPIPE_LOSSY");
     compression = NVPIPE_LOSSY;
   } else {
     std::string compression_str = config["compression"].as<std::string>();
@@ -252,20 +245,17 @@ void NvEncoder::buildEncoder(YAML::Node config) {
       compression = NVPIPE_LOSSLESS;
       ;
     } else {
-      std::cerr << "Invalid value for: \"compression\": " << compression_str
-                << std::endl;
-      std::cerr << "Supported values are NVPIPE_LOSSY and "
-                   "NVPIPE_LOSSLESS"
-                << std::endl;
+      spdlog::error("Invalid value for: \"compression\": {}, Supported values "
+                    "are NVPIPE_LOSSY and NVPIPE_LOSSLESS",
+                    compression_str);
       throw "Invalid value for: \"compression\"";
     }
   }
 
   if (!config["input_format"].IsDefined()) {
-    std::cout << "Missing key: \"input_format\"" << std::endl;
-    std::cerr << "Supported values are NVPIPE_RGBA32, NVPIPE_UINT4, "
-                 "NVPIPE_UINT8, NVPIPE_UINT16 and NVPIPE_UINT32"
-              << std::endl;
+    spdlog::error("Missing value for: \"input_format\", Supported values are "
+                  "NVPIPE_RGBA32, NVPIPE_UINT4, NVPIPE_UINT8, NVPIPE_UINT16 "
+                  "and NVPIPE_UINT32");
     throw "Invalid value for: \"input_format\"";
   } else {
     std::string input_format_str = config["input_format"].as<std::string>();
@@ -280,11 +270,10 @@ void NvEncoder::buildEncoder(YAML::Node config) {
     } else if (input_format_str == "NVPIPE_UINT32") {
       format = NVPIPE_UINT32;
     } else {
-      std::cerr << "Invalid value for: \"input_format\": " << input_format_str
-                << std::endl;
-      std::cerr << "Supported values are NVPIPE_RGBA32, NVPIPE_UINT4, "
-                   "NVPIPE_UINT8, NVPIPE_UINT16 and NVPIPE_UINT32"
-                << std::endl;
+      spdlog::error("Invalid value for: \"input_format\": {}, Supported values "
+                    "are NVPIPE_RGBA32, NVPIPE_UINT4, NVPIPE_UINT8, "
+                    "NVPIPE_UINT16 and NVPIPE_UINT32",
+                    input_format_str);
       throw "Invalid value for: \"input_format\"";
     }
   }
@@ -293,6 +282,6 @@ void NvEncoder::buildEncoder(YAML::Node config) {
   if (config["bit_rate"].IsDefined()) {
     bitrate = config["bit_rate"].as<uint>();
   } else {
-    std::cout << "Using default bit_rate = " << bitrate << std::endl;
+    spdlog::warn("Missing key: \"bit_rate\", Using default: {}", bitrate);
   }
 }

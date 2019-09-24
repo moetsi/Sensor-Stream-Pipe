@@ -3,7 +3,6 @@
 //
 
 #include "ImageReader.h"
-#include "../utils/ImageDecoder.h"
 
 ImageReader::ImageReader(std::string filename) {
   // bundle_fusion_apt0;0;0;30
@@ -11,41 +10,47 @@ ImageReader::ImageReader(std::string filename) {
   // std::string sceneDesc;
   // unsigned int sensocpsrId;
   // unsigned int deviceId;
+  try {
 
-  std::ifstream file(filename);
-  std::string line;
-  getline(file, line);
-  std::string value;
+    std::ifstream file(filename);
+    std::string line;
+    getline(file, line);
+    std::string value;
 
-  std::stringstream ss(line);
-  getline(ss, sceneDesc, ';');
+    std::stringstream ss(line);
+    getline(ss, sceneDesc, ';');
 
-  std::string sensorIdStr, deviceIdStr, frameCountStr, fpsStr, frameTypeStr;
-  getline(ss, deviceIdStr, ';');
-  getline(ss, sensorIdStr, ';');
-  getline(ss, frameTypeStr, ';');
-  getline(ss, fpsStr);
+    std::string sensorIdStr, deviceIdStr, frameCountStr, fpsStr, frameTypeStr;
+    getline(ss, deviceIdStr, ';');
+    getline(ss, sensorIdStr, ';');
+    getline(ss, frameTypeStr, ';');
+    getline(ss, fpsStr);
 
-  sensorId = std::stoul(sensorIdStr);
-  deviceId = std::stoul(deviceIdStr);
-  frameType = std::stoul(frameTypeStr);
-  fps = std::stoul(fpsStr);
+    sensorId = std::stoul(sensorIdStr);
+    deviceId = std::stoul(deviceIdStr);
+    frameType = std::stoul(frameTypeStr);
+    fps = std::stoul(fpsStr);
 
-  // get frame count
-  getline(file, frameCountStr);
-  unsigned int frameCount = std::stoul(frameCountStr);
+    // get frame count
+    getline(file, frameCountStr);
+    unsigned int frameCount = std::stoul(frameCountStr);
 
-  while (getline(file, line))
-    frameLines.push_back(line);
+    while (getline(file, line))
+      frameLines.push_back(line);
 
-  if (frameCount != frameLines.size())
-    std::cerr << "Warning: lines read do not match expected size: "
-              << frameLines.size() << " read vs. " << frameCount << " expected."
-              << std::endl;
+    if (frameCount != frameLines.size())
+      spdlog::warn(
+          "Lines read do not match expected size: {} read vs. {} expected.",
+          frameLines.size(), frameCount);
 
-  streamId = randomString(16);
+    streamId = randomString(16);
 
-  cps = nullptr;
+    cps = nullptr;
+    currentFrameInternal = nullptr;
+
+  } catch (std::exception &e) {
+    throw std::invalid_argument("Error reading frame file");
+  }
   reset();
 }
 
@@ -81,9 +86,8 @@ FrameStruct *ImageReader::createFrameStruct(unsigned int frameId) {
   unsigned int readFrameId = std::stoul(frameIdStr);
 
   if (readFrameId != currentFrameCounter)
-    std::cerr << "Warning: frame ids do not match: " << readFrameId
-              << " read vs. " << currentFrameCounter << " expected."
-              << std::endl;
+    spdlog::warn("Frame ids do not match: {} read vs. {} expected.",
+                 readFrameId, currentFrameCounter);
 
   std::vector<unsigned char> fileData = readFile(framePath);
   FrameStruct *frame = new FrameStruct();

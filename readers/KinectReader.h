@@ -11,6 +11,8 @@
 
 #include <k4a/k4a.h>
 
+#include "spdlog/spdlog.h"
+
 #include <cereal/archives/binary.hpp>
 
 #include "../structs/FrameStruct.hpp"
@@ -18,9 +20,6 @@
 #include "../utils/KinectUtils.h"
 #include "../utils/VideoUtils.h"
 #include "IReader.h"
-
-#include <k4a/k4a.h>
-#include <k4arecord/record.h>
 
 extern std::atomic_bool exiting;
 
@@ -48,8 +47,7 @@ inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps) {
   {                                                                            \
     auto retval = (x);                                                         \
     if (retval) {                                                              \
-      std::cerr << "Runtime error: " << #x << " returned " << retval           \
-                << std::endl;                                                  \
+      spdlog::error("\"Runtime error: {} returned {} ", #x, retval);           \
       k4a_device_close(device);                                                \
       exit(1);                                                                 \
     }                                                                          \
@@ -72,7 +70,6 @@ private:
   bool record_imu;
   int32_t absoluteExposureValue;
   k4a_device_t device;
-  k4a_record_t recording;
   k4a_capture_t capture;
   k4a_wait_result_t result = K4A_WAIT_RESULT_TIMEOUT;
   int32_t timeout_ms;
