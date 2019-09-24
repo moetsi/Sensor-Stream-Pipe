@@ -30,6 +30,8 @@ NvEncoder::NvEncoder(YAML::Node _codec_parameters, uint _fps) {
   encoder = nullptr;
   sws_ctx = nullptr;
   fd = nullptr;
+
+  stream_id = randomString(16);
 }
 
 NvEncoder::~NvEncoder() {}
@@ -51,7 +53,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->frameType = fs->frameType;
     frameCompressed->messageType = fs->messageType;
     frameCompressed->sensorId = fs->sensorId;
-    frameCompressed->streamId = fs->streamId;
+    frameCompressed->streamId = stream_id;
     frameCompressed->sceneDesc = fs->sceneDesc;
     frameCompressed->timestamps.clear();
     frameCompressed->timestamps.push_back(frameOriginal->timestamps.front());

@@ -52,6 +52,8 @@ private:
   std::queue<FrameStruct *> buffer;
   std::queue<AVPacket *> pBuffer;
 
+  std::string stream_id;
+
   uint fps;
 
   bool ready;
@@ -86,4 +88,5 @@ public:
   CodecParamsStruct *getCodecParamsStruct();
 
   uint getFps();
+
 };

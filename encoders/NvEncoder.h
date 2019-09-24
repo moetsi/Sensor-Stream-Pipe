@@ -32,6 +32,7 @@ private:
   NvPipe_Codec codec;
   NvPipe_Compression compression;
   NvPipe_Format format;
+  std::string stream_id;
 
   LibAvDecoder *fd;
 

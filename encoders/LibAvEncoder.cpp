@@ -13,6 +13,8 @@ LibAvEncoder::LibAvEncoder(std::string codec_parameters_file, uint _fps) {
   ready = false;
   cParamsStruct = NULL;
   totalCurrentFrameCounter = 0;
+
+  stream_id = randomString(16);
 }
 
 LibAvEncoder::LibAvEncoder(YAML::Node &_codec_parameters, uint _fps) {
@@ -392,6 +394,7 @@ FrameStruct *LibAvEncoder::currentFrameEncoded() {
   f->codec_data = *getCodecParamsStruct();
   f->frame = currentFrameBytes();
   f->frameId = totalCurrentFrameCounter;
+  f->streamId = stream_id;
 
   return f;
 }

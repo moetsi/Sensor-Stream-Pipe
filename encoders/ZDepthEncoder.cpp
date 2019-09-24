@@ -12,6 +12,8 @@ ZDepthEncoder::ZDepthEncoder(int _fps) {
   paramsStruct = nullptr;
   fd = nullptr;
   sws_ctx = nullptr;
+
+  stream_id = randomString(16);
 }
 
 ZDepthEncoder::~ZDepthEncoder() {
@@ -43,7 +45,7 @@ void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->frameType = fs->frameType;
     frameCompressed->messageType = fs->messageType;
     frameCompressed->sensorId = fs->sensorId;
-    frameCompressed->streamId = fs->streamId;
+    frameCompressed->streamId = stream_id;
     frameCompressed->sceneDesc = fs->sceneDesc;
     frameCompressed->timestamps.clear();
     frameCompressed->timestamps = std::vector<unsigned long>();

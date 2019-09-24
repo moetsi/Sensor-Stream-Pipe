@@ -27,6 +27,8 @@ private:
   std::vector<uint8_t> compressed;
   CodecParamsStruct *paramsStruct;
 
+  std::string stream_id;
+
 public:
   ZDepthEncoder(int _fps);
 
@@ -45,6 +47,7 @@ public:
   CodecParamsStruct *getCodecParamsStruct();
 
   uint getFps();
+
 };
 
 
