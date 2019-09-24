@@ -30,7 +30,8 @@ VideoFileReader::~VideoFileReader() {
   avformat_close_input(&pFormatContext);
   avformat_free_context(pFormatContext);
   av_packet_free(&pPacket);
-
+  for (auto fs : frameStructs)
+    delete fs;
   if (frameStructsBuffer != nullptr)
     delete frameStructsBuffer;
   for (auto const &x : pCodecContexts)
@@ -189,6 +190,8 @@ void VideoFileReader::nextFrame() {
     init(this->filename);
 
   if (frameStructsBuffer != nullptr) {
+    for (auto fs : frameStructs)
+      delete fs;
     frameStructs.clear();
     frameStructs.push_back(frameStructsBuffer);
     frameStructsBuffer = nullptr;
@@ -225,10 +228,11 @@ void VideoFileReader::nextFrame() {
         frameStructsBuffer = frameStruct;
         currentFrameCounter += 1;
         frameStructsBuffer->frameId = currentFrameCounter;
+        av_packet_unref(pPacket);
         break;
       }
     }
-
+    av_packet_unref(pPacket);
     if (error == AVERROR_EOF) {
       eofReached = true;
       for (auto fs : frameStructs)
