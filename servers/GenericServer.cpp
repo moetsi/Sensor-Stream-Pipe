@@ -4,6 +4,7 @@
 
 #include <unistd.h>
 
+#include "../utils/Logger.h"
 #include <k4a/k4a.h>
 
 #include <ctime>

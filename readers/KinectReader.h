@@ -9,9 +9,8 @@
 #include <iostream>
 #include <vector>
 
+#include "../utils/Logger.h"
 #include <k4a/k4a.h>
-
-#include "spdlog/spdlog.h"
 
 #include <cereal/archives/binary.hpp>
 

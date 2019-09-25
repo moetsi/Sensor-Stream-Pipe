@@ -10,7 +10,7 @@
 #include <iostream>
 #include <vector>
 
-#include "spdlog/spdlog.h"
+#include "../utils/Logger.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include <yaml-cpp/yaml.h>
 

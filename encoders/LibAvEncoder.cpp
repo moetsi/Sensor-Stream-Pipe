@@ -3,7 +3,7 @@
 //
 
 #include "LibAvEncoder.h"
-#include <spdlog/spdlog.h>
+#include "../utils/Logger.h"
 
 LibAvEncoder::LibAvEncoder(std::string codec_parameters_file, uint _fps) {
   codec_parameters = YAML::LoadFile(codec_parameters_file);

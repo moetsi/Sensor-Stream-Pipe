@@ -4,6 +4,7 @@
 
 #include <unistd.h>
 
+#include "../utils/Logger.h"
 #include <k4a/k4a.h>
 
 #include <ctime>
@@ -13,7 +14,6 @@
 #include <thread>
 
 #include <opencv2/imgproc.hpp>
-#include <spdlog/spdlog.h>
 #include <yaml-cpp/yaml.h>
 
 //#include <opencv2/imgproc.hpp>
@@ -56,7 +56,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->streamId = stream_id;
     frameCompressed->sceneDesc = fs->sceneDesc;
     frameCompressed->timestamps.clear();
-    frameCompressed->timestamps.push_back(frameOriginal->timestamps.front());
+    frameCompressed->timestamps.push_back(fs->timestamps.front());
     frameCompressed->timestamps.push_back(currentTimeMs());
 
     char *data = nullptr;
@@ -181,7 +181,7 @@ CodecParamsStruct *NvEncoder::getCodecParamsStruct() {
     paramsStruct->type = 1;
     paramsStruct->data.resize(4 + 4 + 1 + 1);
 
-    int bufferSize = width * height * 5;
+    int bufferSize = width * height * 6;
     compressed.resize(bufferSize);
 
     memcpy(&paramsStruct->data[0], &width, sizeof(int));

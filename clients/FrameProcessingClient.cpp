@@ -18,7 +18,7 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include "spdlog/spdlog.h"
+#include "../utils/Logger.h"
 
 #include "../decoders/IDecoder.h"
 #include "../decoders/LibAvDecoder.h"

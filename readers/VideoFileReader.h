@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 
-#include <spdlog/spdlog.h>
+#include "../utils/Logger.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
