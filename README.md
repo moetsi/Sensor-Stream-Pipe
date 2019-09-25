@@ -109,7 +109,7 @@ make install
 
 ```
 cd ~/libs/srcOriginal
-https://github.com/catid/Zdepth.git
+git clone https://github.com/catid/Zdepth.git
 cd Zdepth
 mkdir build
 cd build
