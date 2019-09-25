@@ -5,13 +5,15 @@ include_directories("$ENV{HOME}/libs/include")
 link_directories("$ENV{HOME}/libs/lib")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;$ENV{HOME}/libs/lib)
 
-find_package(Threads)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules" "$ENV{HOME}/libs/lib")
+list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/libs/lib")
+
+find_package(Threads REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(Yaml-cpp)
+find_package(Yaml-cpp REQUIRED)
 find_package(spdlog REQUIRED)
-find_package(FFmpeg REQUIRED) #add here the list of ffmpeg components required
+find_package(FFmpeg REQUIRED)
 
 if (FFMPEG_FOUND)
     #  FFMPEG_INCLUDE_DIRS  - Include directory necessary for using the required components headers.
