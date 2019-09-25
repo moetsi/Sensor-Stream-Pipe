@@ -4,14 +4,13 @@ project(davp-baseline)
 include_directories("$ENV{HOME}/libs/include")
 link_directories("$ENV{HOME}/libs/lib")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;$ENV{HOME}/libs/lib)
+
 find_package(Threads)
 find_package(OpenCV REQUIRED)
 find_package(Yaml-cpp)
 find_package(spdlog REQUIRED)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
-
 find_package(FFmpeg REQUIRED) #add here the list of ffmpeg components required
 
 if (FFMPEG_FOUND)

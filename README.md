@@ -185,7 +185,9 @@ export C_INCLUDE_PATH=~/libs/include:$C_INCLUDE_PATH
 ```
 git clone git@github.com:moetsi/Sensor-Stream-Pipe.git
 cd Sensor-Stream-Pipe
-cmake .
+mkdir build
+cd build
+cmake ..
 make
 ```
 
