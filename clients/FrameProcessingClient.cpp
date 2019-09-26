@@ -7,6 +7,7 @@
 #include <thread>
 #include <unistd.h>
 
+#include <k4a/k4a.h>
 #include <opencv2/imgproc.hpp>
 #include <zmq.hpp>
 
@@ -101,6 +102,18 @@ int main(int argc, char *argv[]) {
       }
       for (FrameStruct f : f_list) {
         std::string decoder_id = f.streamId + std::to_string(f.sensorId);
+
+        if (f.camera_calibration_data.type == 0) {
+          k4a_calibration_t *calibration = new k4a_calibration_t();
+          k4a_calibration_get_from_raw(
+              reinterpret_cast<char *>(f.camera_calibration_data.data.data()),
+              f.camera_calibration_data.data.size(),
+              static_cast<const k4a_depth_mode_t>(
+                  f.camera_calibration_data.extra_data[0]),
+              static_cast<const k4a_color_resolution_t>(
+                  f.camera_calibration_data.extra_data[1]),
+              calibration);
+        }
 
         rec_mbytes_per_stream[decoder_id] += f.frame.size() / 1000;
         cv::Mat img;

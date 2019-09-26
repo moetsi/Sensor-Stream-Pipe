@@ -76,6 +76,8 @@ private:
 
   FrameStruct frameTemplate;
   std::vector<CodecParamsStruct *> cpss;
+  CameraCalibrationStruct * ccs;
+
 
   std::vector<FrameStruct *> currFrame;
 

@@ -19,9 +19,26 @@ extern "C" {
 
 #include "../utils/Utils.h"
 
+struct CameraCalibrationStruct {
+  // 0: Kinect parameters
+  short type = -1;
+  std::vector<unsigned char> data;
+  std::vector<unsigned char> extra_data;
+
+  CameraCalibrationStruct() {}
+
+  CameraCalibrationStruct(uint t, std::vector<unsigned char> d,
+                          std::vector<unsigned char> ed)
+      : type(t), data(d), extra_data(ed) {}
+
+  template <class Archive> void serialize(Archive &ar) {
+    ar(type, data, extra_data);
+  }
+};
+
 struct CodecParamsStruct {
   // 0: av parameters, 1: nvPipe parameters, 2: zDepth parameters
-  uint type;
+  short type = -1;
   std::vector<unsigned char> data;
   std::vector<unsigned char> extra_data;
 
@@ -73,6 +90,9 @@ struct FrameStruct {
   // codec info for video frames, null for image frames
   CodecParamsStruct codec_data;
 
+  // codec info for video frames, null for image frames
+  CameraCalibrationStruct camera_calibration_data;
+
   // optional: scene description
   std::string sceneDesc;
 
@@ -90,8 +110,8 @@ struct FrameStruct {
 
   template<class Archive>
   void serialize(Archive &ar) {
-    ar(messageType, frameType, frameDataType, streamId, frame, codec_data, sceneDesc, sensorId,
-       deviceId, frameId, timestamps);
+    ar(messageType, frameType, frameDataType, streamId, frame, codec_data,
+       camera_calibration_data, sceneDesc, sensorId, deviceId, frameId, timestamps);
   }
 };
 

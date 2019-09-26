@@ -139,6 +139,7 @@ int main(int argc, char *argv[]) {
       while (v.empty()) {
         std::vector<FrameStruct *> frameStruct = reader->currentFrame();
         for (FrameStruct *frameStruct : frameStruct) {
+
           IEncoder *frameEncoder = encoders[frameStruct->frameType];
 
           frameEncoder->addFrameStruct(frameStruct);

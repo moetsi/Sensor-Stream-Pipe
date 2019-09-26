@@ -37,6 +37,7 @@ target_link_libraries(ssp_client NvPipe)
 target_link_libraries(ssp_client zdepth)
 target_link_libraries(ssp_client yaml-cpp)
 target_link_libraries(ssp_client zstd)
+target_link_libraries(ssp_client k4a)
 
 target_link_libraries(ssp_server swscale)
 target_link_libraries(ssp_server zmq)

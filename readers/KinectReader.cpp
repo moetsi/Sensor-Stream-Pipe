@@ -117,6 +117,18 @@ KinectReader::KinectReader(uint8_t _device_index,
     exit(1);
   }
 
+  ccs = new CameraCalibrationStruct();
+
+  size_t buffer_size = 10000;
+  ccs->type = 0;
+  ccs->data.reserve(buffer_size);
+  k4a_buffer_result_t output_buffer_size = k4a_device_get_raw_calibration(
+      device, (uint8_t *)ccs->data.data(), &buffer_size);
+  ccs->data.resize(buffer_size);
+
+  ccs->extra_data.push_back(_device_config.device_config.depth_mode);
+  ccs->extra_data.push_back(_device_config.device_config.color_format);
+
   recording_start = clock();
   timeout_ms = 1000 / camera_fps;
 
@@ -191,6 +203,7 @@ void KinectReader::nextFrame() {
             cpss.at(0) = new CodecParamsStruct(s->codec_data);
             av_frame_free(&avframe);
           }
+          s->camera_calibration_data = *ccs;
           s->codec_data = *cpss.at(0);
         } else {
           s->frameDataType = 2;
@@ -223,6 +236,7 @@ void KinectReader::nextFrame() {
         s->timestamps.push_back(
             k4a_image_get_device_timestamp_usec(depthImage) / 1000);
         s->timestamps.push_back(capture_timestamp);
+        s->camera_calibration_data = *ccs;
         uint8_t *buffer = k4a_image_get_buffer(depthImage);
         size_t size = k4a_image_get_size(depthImage);
         // convert the raw buffer to cv::Mat
@@ -253,6 +267,7 @@ void KinectReader::nextFrame() {
         s->timestamps.push_back(k4a_image_get_device_timestamp_usec(irImage) /
                                 1000);
         s->timestamps.push_back(capture_timestamp);
+        s->camera_calibration_data = *ccs;
         uint8_t *buffer = k4a_image_get_buffer(irImage);
         size_t size = k4a_image_get_size(irImage);
         // convert the raw buffer to cv::Mat
