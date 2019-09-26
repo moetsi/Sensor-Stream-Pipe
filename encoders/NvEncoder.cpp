@@ -65,6 +65,8 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     AVFrame *pFrame = nullptr;
     cv::Mat img;
 
+    uint64_t compressed_size = 0;
+
     if (fs->frameDataType == 0) {
 
       pFrameO = av_frame_alloc();
@@ -122,6 +124,21 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
       data = reinterpret_cast<char *>(&fs->frame[8]);
     }
 
+    if (encoder == nullptr) {
+      getCodecParamsStruct();
+
+      if (frameCompressed->frameType == 0) {
+        encoder = NvPipe_CreateEncoder(format, codec, compression, bitrate, fps,
+                                       width, height);
+      } else {
+        // For some reason, NVPipe rebuilds the enconder if the frame size
+        // "changes". By using the expected width here, we avoid having the
+        // program crash due an invalid free on the encoder
+        encoder = NvPipe_CreateEncoder(format, codec, compression, bitrate, fps,
+                                       width * 2, height);
+      }
+    }
+
     uint64_t srcPitch = width;
 
     if (frameCompressed->frameType == 0) {
@@ -131,25 +148,16 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     }
 
     if (encoder == nullptr) {
-      getCodecParamsStruct();
-
-      encoder = NvPipe_CreateEncoder(format, codec, compression, bitrate, fps,
-                                     width, height);
-    }
-
-    if (encoder == nullptr) {
       spdlog::error("Could not create new NVEncoder");
+      spdlog::error(NvPipe_GetError(NULL));
       spdlog::error("Did you reach the number of parallel encoding sessions "
                     "available? (2 on non-Quadro cards)");
       exit(1);
     }
-
-    uint64_t compressed_size =
-        NvPipe_Encode(encoder, data, srcPitch, compressed.data(),
-                      compressed.size(), width, height, false);
+    compressed_size = NvPipe_Encode(encoder, data, srcPitch, compressed.data(),
+                                    compressed.size(), width, height, false);
 
     frameCompressed->codec_data = *paramsStruct;
-    frameCompressed->frame.clear();
     frameCompressed->frame = std::vector<unsigned char>(
         compressed.data(), compressed.data() + compressed_size);
     frameCompressed->timestamps.push_back(currentTimeMs());
@@ -181,7 +189,7 @@ CodecParamsStruct *NvEncoder::getCodecParamsStruct() {
     paramsStruct->type = 1;
     paramsStruct->data.resize(4 + 4 + 1 + 1);
 
-    int bufferSize = width * height * 6;
+    int bufferSize = width * height * 4;
     compressed.resize(bufferSize);
 
     memcpy(&paramsStruct->data[0], &width, sizeof(int));

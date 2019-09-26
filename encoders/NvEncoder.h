@@ -24,7 +24,7 @@ private:
   uint fps;
   uint totalCurrentFrameCounter;
   uint width, height;
-  uint bitrate;
+  uint64 bitrate;
   FrameStruct *frameOriginal;
   FrameStruct *frameCompressed;
   CodecParamsStruct *paramsStruct;
