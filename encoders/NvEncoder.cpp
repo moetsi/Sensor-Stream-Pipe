@@ -157,6 +157,12 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     compressed_size = NvPipe_Encode(encoder, data, srcPitch, compressed.data(),
                                     compressed.size(), width, height, false);
 
+    if (compressed_size == 0) {
+      spdlog::error("Could not encode frame on NVEncoder");
+      spdlog::error(NvPipe_GetError(NULL));
+      exit(1);
+    }
+
     frameCompressed->codec_data = *paramsStruct;
     frameCompressed->frame = std::vector<unsigned char>(
         compressed.data(), compressed.data() + compressed_size);

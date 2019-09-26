@@ -40,11 +40,23 @@ void NvDecoder::init(std::vector<unsigned char> parameter_data) {
   }
 
   decoder = NvPipe_CreateDecoder(format, codec, width, height);
+
+  if (decoder == nullptr) {
+    spdlog::error("Could not create new NVDecoder");
+    spdlog::error(NvPipe_GetError(NULL));
+    exit(1);
+  }
 }
 
 cv::Mat NvDecoder::decode(FrameStruct *data) {
   NvPipe_Decode(decoder, data->frame.data(), data->frame.size(),
                 decompressed.data(), width, height);
+
+  if (decompressed.size() == 0) {
+    spdlog::error("Could not decode frame on NvDecoder");
+    spdlog::error(NvPipe_GetError(NULL));
+    exit(1);
+  }
 
   cv::Mat img;
   if (format == NVPIPE_RGBA32)
