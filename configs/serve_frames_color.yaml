@@ -8,13 +8,10 @@ general:
       path: "/home/amourao/code/2019-05_moetsi/davp-data-scripts/stairs-seq-01-frames-color.txt"
 video_encoder:
   0: #color
-    type: "libav"
-    codec_name: "libx265"
-    pix_fmt: "yuv420p"
-    bit_rate: 4000000
-    options:
-      preset: "veryfast"
-      crf: "23"
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_RGBA32"
+    bit_rate: 15000000
   1: #depth
     type: "libav"
     codec_name: "libx265"

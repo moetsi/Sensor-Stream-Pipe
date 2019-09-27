@@ -6,7 +6,7 @@ general:
     type: "video"
     parameters:
       path: "/home/amourao/output2.mkv"
-      streams: [0]
+      streams: [2]
 video_encoder:
   0: #color
     type: "nvenc"

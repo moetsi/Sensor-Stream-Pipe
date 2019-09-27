@@ -2,14 +2,13 @@
 general:
   host: "localhost"
   port: 9999
-  log_file: "out.log"
-  log_level: "info"
+  log_level: "debug"
   frame_source:
     type: "kinect"
     parameters:
-      stream_color_video: False
+      stream_color_video: True
       stream_depth_video: True
-      stream_ir_video: False
+      stream_ir_video: True
       streaming_color_format: "K4A_IMAGE_FORMAT_COLOR_BGRA32"
       streaming_color_resolution: "K4A_COLOR_RESOLUTION_2160P"
       streaming_depth_mode: "K4A_DEPTH_MODE_NFOV_UNBINNED"
@@ -18,17 +17,11 @@ general:
       absoluteExposureValue: 0
 video_encoder:
   0: #color
-    type: "libav"
-    codec_name: "libx265"
-    pix_fmt: "yuv420p"
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_RGBA32"
     bit_rate: 4000000
-    options:
-      preset: "veryfast"
-      crf: "23"
   1: #depth
     type: "zdepth"
   2: #ir
-    type: "nvenc"
-    codec_name: "NVPIPE_HEVC"
-    input_format: "NVPIPE_UINT16"
-    bit_rate: 15000000
+    type: "zdepth"

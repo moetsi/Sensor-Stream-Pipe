@@ -190,6 +190,18 @@ int main(int argc, char *argv[]) {
 
         for (uint i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
+          if (f.camera_calibration_data.type == 0) {
+            k4a_calibration_t *calibration = new k4a_calibration_t();
+            k4a_calibration_get_from_raw(
+                    reinterpret_cast<char *>(f.camera_calibration_data.data.data()),
+                    f.camera_calibration_data.data.size(),
+                    static_cast<const k4a_depth_mode_t>(
+                            f.camera_calibration_data.extra_data[0]),
+                    static_cast<const k4a_color_resolution_t>(
+                            f.camera_calibration_data.extra_data[1]),
+                    calibration);
+          }
+
           f.frame.clear();
           spdlog::debug("\t{};{};{} sent", f.deviceId, f.sensorId, f.frameId);
           vO.at(i)->frame.clear();

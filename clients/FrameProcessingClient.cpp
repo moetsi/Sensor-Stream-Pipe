@@ -103,6 +103,8 @@ int main(int argc, char *argv[]) {
       for (FrameStruct f : f_list) {
         std::string decoder_id = f.streamId + std::to_string(f.sensorId);
 
+        // You can access Kinect camera parameters here
+        /*
         if (f.camera_calibration_data.type == 0) {
           k4a_calibration_t *calibration = new k4a_calibration_t();
           k4a_calibration_get_from_raw(
@@ -114,6 +116,7 @@ int main(int argc, char *argv[]) {
                   f.camera_calibration_data.extra_data[1]),
               calibration);
         }
+        */
 
         rec_mbytes_per_stream[decoder_id] += f.frame.size() / 1000;
         cv::Mat img;

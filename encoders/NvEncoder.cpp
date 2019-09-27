@@ -58,6 +58,7 @@ void NvEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->timestamps.clear();
     frameCompressed->timestamps.push_back(fs->timestamps.front());
     frameCompressed->timestamps.push_back(currentTimeMs());
+    frameCompressed->camera_calibration_data = fs->camera_calibration_data;
 
     char *data = nullptr;
 

@@ -121,10 +121,11 @@ KinectReader::KinectReader(uint8_t _device_index,
 
   size_t buffer_size = 10000;
   ccs->type = 0;
-  ccs->data.reserve(buffer_size);
+  ccs->data.resize(buffer_size);
   k4a_buffer_result_t output_buffer_size = k4a_device_get_raw_calibration(
       device, (uint8_t *)ccs->data.data(), &buffer_size);
-  ccs->data.resize(buffer_size);
+  ccs->data.resize(buffer_size + 1);
+  ccs->data[buffer_size] = '\0';
 
   ccs->extra_data.push_back(_device_config.device_config.depth_mode);
   ccs->extra_data.push_back(_device_config.device_config.color_format);

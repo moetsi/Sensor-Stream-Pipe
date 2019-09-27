@@ -51,6 +51,7 @@ void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
     frameCompressed->timestamps = std::vector<unsigned long>();
     frameCompressed->timestamps.push_back(frameOriginal->timestamps.front());
     frameCompressed->timestamps.push_back(currentTimeMs());
+    frameCompressed->camera_calibration_data = fs->camera_calibration_data;
 
     uint16_t *data = nullptr;
 

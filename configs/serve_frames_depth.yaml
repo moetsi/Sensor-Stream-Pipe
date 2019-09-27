@@ -16,5 +16,8 @@ video_encoder:
       preset: "veryfast"
       crf: "23"
   1: #depth
-    type: "zdepth"
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_UINT16"
+    bit_rate: 15000000
     
