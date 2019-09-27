@@ -25,9 +25,9 @@ endif ()
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(SOURCE_FILES readers/ImageReader.cpp structs/FrameStruct.hpp utils/Utils.cpp readers/IReader.h)
 
-add_executable(ssp_client clients/FrameProcessingClient.cpp utils/VideoUtils.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp utils/ImageDecoder.cpp decoders/ZDepthDecoder.cpp ${SOURCE_FILES})
-add_executable(ssp_server servers/GenericServer.cpp readers/VideoFileReader.cpp readers/KinectReader.cpp encoders/LibAvEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/ZDepthEncoder.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp decoders/ZDepthDecoder.cpp ${SOURCE_FILES} utils/Logger.h)
-add_executable(ssp_tester testers/Tester.cpp utils/VideoUtils.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp readers/VideoFileReader.cpp readers/KinectReader.cpp encoders/LibAvEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp encoders/ZDepthEncoder.cpp decoders/ZDepthDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp ${SOURCE_FILES})
+add_executable(ssp_client clients/SSPClient.cpp readers/NetworkReader.cpp utils/VideoUtils.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp utils/ImageDecoder.cpp decoders/ZDepthDecoder.cpp ${SOURCE_FILES})
+add_executable(ssp_server servers/SSPServer.cpp readers/VideoFileReader.cpp readers/KinectReader.cpp encoders/LibAvEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/ZDepthEncoder.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp decoders/ZDepthDecoder.cpp ${SOURCE_FILES} utils/Logger.h)
+add_executable(ssp_tester testers/SSPTester.cpp utils/VideoUtils.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp readers/VideoFileReader.cpp readers/KinectReader.cpp encoders/LibAvEncoder.cpp utils/VideoUtils.cpp utils/ImageDecoder.cpp encoders/ZDepthEncoder.cpp decoders/ZDepthDecoder.cpp utils/KinectUtils.cpp utils/SimilarityMeasures.cpp encoders/NvEncoder.cpp encoders/NullEncoder.cpp decoders/LibAvDecoder.cpp decoders/NvDecoder.cpp ${SOURCE_FILES})
 
 target_link_libraries(ssp_client swscale)
 target_link_libraries(ssp_client zmq)

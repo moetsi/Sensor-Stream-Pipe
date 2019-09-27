@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
         spdlog::debug(
             "Message sent, took {} ms; packet size {}; avg {} fps; {} "
             "Mbps; {} Mbps expected",
-            diff_time, request.size(), avg_fps,
+            diff_time, message.size(), avg_fps,
             8 * (sent_mbytes / (currentTimeMs() - start_time)),
             8 * (sent_mbytes * reader->getFps() / (sent_frames * 1000)));
 
