@@ -5,7 +5,7 @@ general:
   frame_source:
     type: "frames"
     parameters:
-      path: "/home/amourao/code/2019-05_moetsi/davp-data-scripts/stairs-seq-01-frames-depth.txt"
+      path: "/home/amourao/code/2019-05_moetsi/davp-data-scripts/apt0-frames-depth.txt"
 video_encoder:
   0: #color
     type: "libav"
@@ -16,8 +16,11 @@ video_encoder:
       preset: "veryfast"
       crf: "23"
   1: #depth
-    type: "nvenc"
-    codec_name: "NVPIPE_HEVC"
-    input_format: "NVPIPE_UINT16"
-    bit_rate: 15000000
+    type: "libav"
+    codec_name: "libx265"
+    pix_fmt: "gray12le"
+    bit_rate: 8000000
+    options:
+      preset: "veryfast"
+      crf: "21"
     

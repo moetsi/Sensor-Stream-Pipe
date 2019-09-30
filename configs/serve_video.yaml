@@ -2,11 +2,13 @@
 general:
   host: "localhost"
   port: 9999
+  log_level: "info"
+  show_graphical_output: False
   frame_source:
     type: "video"
     parameters:
-      path: "/home/amourao/output2.mkv"
-      streams: [2]
+      path: "/home/amourao/output2_short.mkv"
+      streams: [0]
 video_encoder:
   0: #color
     type: "nvenc"
@@ -16,5 +18,8 @@ video_encoder:
   1: #depth
     type: "zdepth"
   2: #ir
-    type: "zdepth"
+    type: "nvenc"
+    codec_name: "NVPIPE_HEVC"
+    input_format: "NVPIPE_UINT16"
+    bit_rate: 40000000
     
