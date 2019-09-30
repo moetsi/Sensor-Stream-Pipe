@@ -41,22 +41,21 @@ int main(int argc, char *argv[]) {
   srand(time(NULL) * getpid());
   // srand(getpid());
 
-  double psnr = 0;
-  double mse = 0;
-  double mse_comp = 0;
-  cv::Scalar mssim;
-  int i = 0;
-
-  uint frameType = 0;
-
-  uint64_t total_latency = 0;
-  uint64_t original_size = 0;
-  uint64_t compressed_size = 0;
-
   std::unordered_map<std::string, IDecoder *> decoders;
 
-  cv::Mat img;
-  bool imgChanged = false;
+  std::unordered_map<std::string, uint64_t> total_latencies;
+  std::unordered_map<std::string, uint64_t> original_sizes;
+  std::unordered_map<std::string, uint64_t> compressed_sizes;
+
+  std::unordered_map<std::string, double> psnrs;
+  std::unordered_map<std::string, double> mses;
+  std::unordered_map<std::string, double> mse_comps;
+  std::unordered_map<std::string, cv::Scalar> mssims;
+  std::unordered_map<std::string, int> counts;
+  std::unordered_map<std::string, int> rows;
+  std::unordered_map<std::string, int> cols;
+  std::unordered_map<std::string, uint> typesMap;
+  std::unordered_map<std::string, uint> fps;
 
   av_register_all();
 
@@ -68,6 +67,7 @@ int main(int argc, char *argv[]) {
   std::string codec_parameters_file = std::string(argv[1]);
   uint time_in_seconds = std::stoul(argv[2]);
   uint stopAfter = time_in_seconds;
+  uint i = 0;
 
   YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
@@ -134,7 +134,6 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
     encoders[type] = fe;
-    frameType = type;
   }
 
   std::queue<FrameStruct> buffer;
@@ -158,9 +157,28 @@ int main(int argc, char *argv[]) {
           FrameStruct f = FrameStruct(*frameEncoder->currentFrameEncoded());
           FrameStruct fo = FrameStruct(*frameEncoder->currentFrameOriginal());
 
-          original_size += fo.frame.size();
-          compressed_size += f.frame.size();
-          total_latency += f.timestamps.back() - f.timestamps.at(1);
+          std::string decoder_id = f.streamId + std::to_string(f.sensorId);
+
+          if (original_sizes.find(decoder_id) == original_sizes.end()) {
+            original_sizes[decoder_id] = 0;
+            compressed_sizes[decoder_id] = 0;
+            total_latencies[decoder_id] = 0;
+
+            psnrs[decoder_id] = 0;
+            mses[decoder_id] = 0;
+            mse_comps[decoder_id] = 0;
+
+            counts[decoder_id] = 0;
+
+            typesMap[decoder_id] = f.frameType;
+
+            fps[decoder_id] = reader->getFps();
+          }
+
+          original_sizes[decoder_id] += fo.frame.size();
+          compressed_sizes[decoder_id] += f.frame.size();
+          total_latencies[decoder_id] +=
+              f.timestamps.back() - f.timestamps.at(1);
           v.push_back(f);
           buffer.push(fo);
 
@@ -174,120 +192,150 @@ int main(int argc, char *argv[]) {
       reader->nextFrame();
     }
 
-    FrameStruct f = v.front();
+    spdlog::debug("Message {} processed", i++);
 
-    imgChanged = frameStructToMat(f, img, decoders);
+    for (FrameStruct f : v) {
+      std::string decoder_id = f.streamId + std::to_string(f.sensorId);
+      cv::Mat img;
+      bool imgChanged = frameStructToMat(f, img, decoders);
+      if (!img.empty() && imgChanged) {
 
-    f.frame.clear();
-    spdlog::debug("\t{};{};{} received", f.deviceId, f.sensorId, f.frameId);
+        cols[decoder_id] = img.cols;
+        rows[decoder_id] = img.rows;
 
-    if (!img.empty() && imgChanged) {
-      FrameStruct fo = buffer.front();
-      buffer.pop();
-      cv::Mat frameOri;
-      cv::Mat frameDiff;
+        FrameStruct fo = buffer.front();
+        buffer.pop();
+        cv::Mat frameOri;
+        cv::Mat frameDiff;
 
-      frameStructToMat(fo, frameOri, decoders);
-      fo.frame.clear();
+        frameStructToMat(fo, frameOri, decoders);
+        fo.frame.clear();
 
-      frameOri = frameOri.clone();
-      img = img.clone();
+        frameOri = frameOri.clone();
+        img = img.clone();
 
-      if (frameOri.channels() == 4)
-        cv::cvtColor(frameOri, frameOri, COLOR_BGRA2BGR);
-      if (img.channels() == 4)
-        cv::cvtColor(img, img, COLOR_BGRA2BGR);
+        if (frameOri.channels() == 4)
+          cv::cvtColor(frameOri, frameOri, COLOR_BGRA2BGR);
+        if (img.channels() == 4)
+          cv::cvtColor(img, img, COLOR_BGRA2BGR);
 
-      if (f.frameType == 0) {
-        if (img.channels() == 3)
-          psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
-        else
-          psnr += getPSNR(frameOri, img, MAX_DEPTH_VALUE_12_BITS);
-        mssim += getMSSIM(frameOri, img);
-        mse += getMSE(frameOri, img);
-      } else {
-        mse += getMSE(frameOri, img);
-        cv::Mat imgA, frameOriA;
-        img.convertTo(imgA, CV_16U);
-        frameOri.convertTo(frameOriA, CV_16U);
-        minMaxFilter<ushort>(imgA, imgA, 0, MAX_DEPTH_VALUE_12_BITS);
-        minMaxFilter<ushort>(frameOriA, frameOriA, 0, MAX_DEPTH_VALUE_12_BITS);
-        mse_comp += getMSE(frameOriA, imgA);
-      }
+        if (typesMap[decoder_id] == 0) {
+          if (img.channels() == 3)
+            psnrs[decoder_id] += getPSNR(frameOri, img, MAX_DEPTH_VALUE_8_BITS);
+          else
+            psnrs[decoder_id] +=
+                getPSNR(frameOri, img, MAX_DEPTH_VALUE_12_BITS);
+          mssims[decoder_id] += getMSSIM(frameOri, img);
+          mses[decoder_id] += getMSE(frameOri, img);
+        } else {
+          mses[decoder_id] += getMSE(frameOri, img);
+          cv::Mat imgA, frameOriA;
+          img.convertTo(imgA, CV_16U);
+          frameOri.convertTo(frameOriA, CV_16U);
+          minMaxFilter<ushort>(imgA, imgA, 0, MAX_DEPTH_VALUE_12_BITS);
+          minMaxFilter<ushort>(frameOriA, frameOriA, 0,
+                               MAX_DEPTH_VALUE_12_BITS);
+          mse_comps[decoder_id] += getMSE(frameOriA, imgA);
+        }
 
-      if (show_graphical_output) {
-        if (f.frameType == 0) {
+        if (show_graphical_output) {
+          if (f.frameType == 0) {
 
-          absdiff(frameOri, img, frameDiff);
+            absdiff(frameOri, img, frameDiff);
 
-        } else if (f.frameType == 1) {
+          } else if (f.frameType == 1) {
 
-          absdiff(frameOri, img, frameDiff);
+            absdiff(frameOri, img, frameDiff);
 
-          if (img.type() == CV_16U) {
-            // Compress images to show up on a 255 valued color map
-            img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+            if (img.type() == CV_16U) {
+              // Compress images to show up on a 255 valued color map
+              img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+            }
+
+            if (frameOri.type() == CV_16U) {
+              // Compress images to show up on a 255 valued color map
+              frameOri *=
+                  (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+            }
+
+            img.convertTo(img, CV_8U);
+            frameOri.convertTo(frameOri, CV_8U);
+            cv::applyColorMap(img, img, cv::COLORMAP_JET);
+            cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
+          }
+          if (f.frameType == 2) {
+            absdiff(frameOri, img, frameDiff);
+
+            double max = 1024;
+            img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
+            img.convertTo(img, CV_8U);
+
+            frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
+            frameOri.convertTo(frameOri, CV_8U);
           }
 
-          if (frameOri.type() == CV_16U) {
-            // Compress images to show up on a 255 valued color map
-            frameOri *=
-                (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+          if (frameDiff.channels() == 1) {
+            frameDiff.convertTo(frameDiff, CV_8UC1);
+            cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
           }
 
-          img.convertTo(img, CV_8U);
-          frameOri.convertTo(frameOri, CV_8U);
-          cv::applyColorMap(img, img, cv::COLORMAP_JET);
-          cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
+          cv::namedWindow("Original " + decoder_id);
+          cv::imshow("Original " + decoder_id, frameOri);
+          cv::namedWindow("Encoded " + decoder_id);
+          cv::imshow("Encoded " + decoder_id, img);
+          cv::namedWindow("Diff " + decoder_id);
+          cv::imshow("Diff " + decoder_id, frameDiff);
+
+          cv::waitKey(1);
         }
-        if (f.frameType == 2) {
-          absdiff(frameOri, img, frameDiff);
-
-          double max = 1024;
-          img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
-          img.convertTo(img, CV_8U);
-
-          frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
-          frameOri.convertTo(frameOri, CV_8U);
-        }
-
-        if (frameDiff.channels() == 1) {
-          frameDiff.convertTo(frameDiff, CV_8UC1);
-          cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
-        }
-
-        cv::namedWindow("Original");
-        cv::imshow("Original", frameOri);
-        cv::namedWindow("Encoded");
-        cv::imshow("Encoded", img);
-        cv::namedWindow("Diff");
-
-        cv::imshow("Diff", frameDiff);
-
-        cv::waitKey(1);
+        counts[decoder_id]++;
       }
-      imgChanged = false;
-      i++;
     }
   }
+  for (auto &it : typesMap) {
+    // Do stuff
+    std::string decoder_id = it.first;
 
-  spdlog::critical("[original_size];{};bytes", original_size);
-  spdlog::critical("[compressed_size];{};bytes", compressed_size);
-  spdlog::critical("[compression ratio];{};x",
-                   original_size / (float)compressed_size);
+    spdlog::critical("[statistics];[{}]", typesMap[decoder_id]);
 
-  spdlog::critical("[latency];{};ms", total_latency / (float)i);
+    double time = counts[decoder_id] / (double)fps[decoder_id];
+    spdlog::critical("\t[time];[{}];{};seconds", typesMap[decoder_id], time);
+    spdlog::critical("\t[original_size];[{}];{};bytes", typesMap[decoder_id],
+                     original_sizes[decoder_id]);
+    spdlog::critical("\t[compressed_size];[{}];{};bytes", typesMap[decoder_id],
+                     compressed_sizes[decoder_id]);
 
-  if (frameType == 0) {
-    spdlog::critical("[PSNR];{}", psnr / i);
-    cv::Vec<double, 4> mssimV = (mssim / i);
-    spdlog::critical("[MSSIM];{};{};{};{}", mssimV(0), mssimV(1), mssimV(2),
-                     mssimV(3));
-  } else {
-    spdlog::critical("[MSE];{}", mse / (i * img.cols * img.rows));
-    spdlog::critical("[MSE_4096];{}", mse_comp / (i * img.cols * img.rows));
+    spdlog::critical("\t[original_bandwidth];[{}];{};Mbps",
+                     typesMap[decoder_id],
+                     (original_sizes[decoder_id] * 8.0 / 1000000) / (time));
+    spdlog::critical("\t[compressed_bandwidth];[{}];{};Mbps",
+                     typesMap[decoder_id],
+                     (compressed_sizes[decoder_id] * 8.0 / 1000000) / (time));
+
+    spdlog::critical("\t[compression ratio];[{}];{};x", typesMap[decoder_id],
+                     original_sizes[decoder_id] /
+                         (float)compressed_sizes[decoder_id]);
+
+    spdlog::critical("\t[latency];[{}];{};ms", typesMap[decoder_id],
+                     total_latencies[decoder_id] / (float)counts[decoder_id]);
+
+    if (typesMap[decoder_id] == 0) {
+      spdlog::critical("\t[PSNR];[{}];{}", typesMap[decoder_id],
+                       psnrs[decoder_id] / counts[decoder_id]);
+      cv::Vec<double, 4> mssimV = (mssims[decoder_id] / counts[decoder_id]);
+      spdlog::critical("\t[MSSIM];[{}];{};{};{};{}", typesMap[decoder_id],
+                       mssimV(0), mssimV(1), mssimV(2), mssimV(3));
+    } else {
+      spdlog::critical(
+          "\t[MSE];[{}];{}", typesMap[decoder_id],
+          mses[decoder_id] /
+              (counts[decoder_id] * cols[decoder_id] * rows[decoder_id]));
+      spdlog::critical(
+          "\t[MSE_4096];[{}];{}", typesMap[decoder_id],
+          mse_comps[decoder_id] /
+              (counts[decoder_id] * cols[decoder_id] * rows[decoder_id]));
+    }
   }
-
   delete reader;
   for (auto const &x : encoders)
     delete x.second;
