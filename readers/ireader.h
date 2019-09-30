@@ -11,19 +11,19 @@ class IReader {
 public:
   virtual ~IReader() {}
 
-  virtual std::vector<FrameStruct *> currentFrame() = 0;
+  virtual std::vector<FrameStruct *> GetCurrentFrame() = 0;
 
-  virtual std::vector<uint> getType() = 0;
+  virtual std::vector<unsigned int> GetType() = 0;
 
-  virtual bool hasNextFrame() = 0;
+  virtual bool HasNextFrame() = 0;
 
-  virtual void nextFrame() = 0;
+  virtual void NextFrame() = 0;
 
-  virtual void reset() = 0;
+  virtual void Reset() = 0;
 
-  virtual void goToFrame(uint frameId) = 0;
+  virtual void GoToFrame(unsigned int frame_id) = 0;
 
-  virtual uint currentFrameId() = 0;
+  virtual unsigned int GetCurrentFrameId() = 0;
 
-  virtual uint getFps() = 0;
+  virtual unsigned int GetFps() = 0;
 };

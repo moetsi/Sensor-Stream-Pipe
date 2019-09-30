@@ -14,17 +14,13 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include <yaml-cpp/yaml.h>
 
+uint64_t CurrentTimeMs();
 
-uint64_t currentTimeMs();
+std::string RandomString(size_t length);
 
-std::vector<std::string> split(const std::string &str,
-                               const std::string &delim);
+void SetupLogging(YAML::Node &general_parameters);
 
-std::string randomString(size_t length);
-
-void setupLogging(YAML::Node& general_parameters);
-
-void setupLogging(std::string& level, std::string& file);
+void SetupLogging(std::string &level, std::string &file);
 
 #undef av_err2str
 #define av_err2str(errnum)                                                     \

@@ -18,138 +18,138 @@ ImageReader::ImageReader(std::string filename) {
     std::string value;
 
     std::stringstream ss(line);
-    getline(ss, sceneDesc, ';');
+    getline(ss, scene_desc_, ';');
 
-    std::string sensorIdStr, deviceIdStr, frameCountStr, fpsStr, frameTypeStr;
-    getline(ss, deviceIdStr, ';');
-    getline(ss, sensorIdStr, ';');
-    getline(ss, frameTypeStr, ';');
-    getline(ss, fpsStr);
+    std::string sensor_id_str, device_id_str, frame_count_str, fps_str, frame_type_str;
+    getline(ss, device_id_str, ';');
+    getline(ss, sensor_id_str, ';');
+    getline(ss, frame_type_str, ';');
+    getline(ss, fps_str);
 
-    sensorId = std::stoul(sensorIdStr);
-    deviceId = std::stoul(deviceIdStr);
-    frameType = std::stoul(frameTypeStr);
-    fps = std::stoul(fpsStr);
+    sensor_id_ = std::stoul(sensor_id_str);
+    device_id_ = std::stoul(device_id_str);
+    frame_type_ = std::stoul(frame_type_str);
+    fps_ = std::stoul(fps_str);
 
     // get frame count
-    getline(file, frameCountStr);
-    unsigned int frameCount = std::stoul(frameCountStr);
+    getline(file, frame_count_str);
+    unsigned int frame_count = std::stoul(frame_count_str);
 
     while (getline(file, line))
-      frameLines.push_back(line);
+      frame_lines_.push_back(line);
 
-    if (frameCount != frameLines.size())
+    if (frame_count != frame_lines_.size())
       spdlog::warn(
           "Lines read do not match expected size: {} read vs. {} expected.",
-          frameLines.size(), frameCount);
+          frame_lines_.size(), frame_count);
 
-    streamId = randomString(16);
+    stream_id_ = RandomString(16);
 
-    cps = nullptr;
-    currentFrameInternal = nullptr;
+    codec_params_struct_ = nullptr;
+    current_frame_internal_ = nullptr;
 
   } catch (std::exception &e) {
     throw std::invalid_argument("Error reading frame file");
   }
-  reset();
+  Reset();
 }
 
 ImageReader::~ImageReader() {
-  if (cps != nullptr)
-    delete cps;
+  if (codec_params_struct_ != nullptr)
+    delete codec_params_struct_;
 }
 
-std::vector<unsigned char> ImageReader::readFile(std::string &filename) {
-  std::streampos fileSize;
+std::vector<unsigned char> ImageReader::ReadFile(std::string &filename) {
+  std::streampos file_size;
   std::ifstream file(filename, std::ios::binary);
 
   file.seekg(0, std::ios::end);
-  fileSize = file.tellg();
+  file_size = file.tellg();
   file.seekg(0, std::ios::beg);
 
-  std::vector<unsigned char> fileData(fileSize);
-  file.read((char *)&fileData[0], fileSize);
-  return fileData;
+  std::vector<unsigned char> file_data(file_size);
+  file.read((char *)&file_data[0], file_size);
+  return file_data;
 }
 
-FrameStruct *ImageReader::createFrameStruct(unsigned int frameId) {
+FrameStruct *ImageReader::CreateFrameStruct(unsigned int frame_id) {
   // 0;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg
 
-  std::string line = frameLines[frameId];
+  std::string line = frame_lines_[frame_id];
   std::stringstream ss(line);
 
-  std::string frameIdStr, framePath;
+  std::string frame_id_str, frame_path;
 
-  getline(ss, frameIdStr, ';');
-  getline(ss, framePath);
+  getline(ss, frame_id_str, ';');
+  getline(ss, frame_path);
 
-  unsigned int readFrameId = std::stoul(frameIdStr);
+  unsigned int read_frame_id = std::stoul(frame_id_str);
 
-  if (readFrameId != currentFrameCounter)
+  if (read_frame_id != frame_counter_)
     spdlog::warn("Frame ids do not match: {} read vs. {} expected.",
-                 readFrameId, currentFrameCounter);
+                 read_frame_id, frame_counter_);
 
-  std::vector<unsigned char> fileData = readFile(framePath);
+  std::vector<unsigned char> file_data = ReadFile(frame_path);
   FrameStruct *frame = new FrameStruct();
 
-  frame->messageType = 0;
+  frame->message_type = 0;
 
-  frame->frameDataType = 0;
-  frame->sceneDesc = sceneDesc;
-  frame->deviceId = deviceId;
-  frame->sensorId = sensorId;
-  frame->frameType = frameType;
-  frame->timestamps.push_back(1000.0 / fps * currentFrameCounter);
-  frame->timestamps.push_back(currentTimeMs());
+  frame->frame_data_type = 0;
+  frame->scene_desc = scene_desc_;
+  frame->device_id = device_id_;
+  frame->sensor_id = sensor_id_;
+  frame->frame_type = frame_type_;
+  frame->timestamps.push_back(1000.0 / fps_ * frame_counter_);
+  frame->timestamps.push_back(CurrentTimeMs());
 
-  frame->frameId = readFrameId;
+  frame->frame_id = read_frame_id;
 
-  frame->frame = fileData;
-  frame->streamId = streamId;
+  frame->frame = file_data;
+  frame->stream_id = stream_id_;
 
-  if (cps == nullptr) {
-    ImageDecoder id;
-    AVFrame *avframe = av_frame_alloc();
-    id.imageBufferToAVFrame(frame, avframe);
-    cps = new CodecParamsStruct(frame->codec_data);
-    av_frame_free(&avframe);
+  if (codec_params_struct_ == nullptr) {
+    ImageDecoder image_decoder;
+    AVFrame *frame_av = av_frame_alloc();
+    image_decoder.ImageBufferToAVFrame(frame, frame_av);
+    codec_params_struct_ = new CodecParamsStruct(frame->codec_data);
+    av_frame_free(&frame_av);
   }
-  frame->codec_data = *cps;
+  frame->codec_data = *codec_params_struct_;
 
   return frame;
 }
 
-unsigned int ImageReader::currentFrameId() { return currentFrameCounter; }
+unsigned int ImageReader::GetCurrentFrameId() { return frame_counter_; }
 
-std::vector<FrameStruct *> ImageReader::currentFrame() {
+std::vector<FrameStruct *> ImageReader::GetCurrentFrame() {
   std::vector<FrameStruct *> v;
-  v.push_back(currentFrameInternal);
+  v.push_back(current_frame_internal_);
   return v;
 }
 
-void ImageReader::nextFrame() {
-  currentFrameCounter += 1;
-  currentFrameInternal = createFrameStruct(currentFrameCounter);
+void ImageReader::NextFrame() {
+  frame_counter_ += 1;
+  current_frame_internal_ = CreateFrameStruct(frame_counter_);
 }
 
-bool ImageReader::hasNextFrame() {
-  return currentFrameCounter + 1 < frameLines.size();
+bool ImageReader::HasNextFrame() {
+  return frame_counter_ + 1 < frame_lines_.size();
 }
 
-void ImageReader::goToFrame(unsigned int frameId) {
-  currentFrameCounter = frameId;
-  currentFrameInternal = createFrameStruct(currentFrameCounter);
+void ImageReader::GoToFrame(unsigned int frame_id) {
+  frame_counter_ = frame_id;
+  current_frame_internal_ = CreateFrameStruct(frame_counter_);
 }
 
-void ImageReader::reset() {
-  currentFrameCounter = 0;
-  currentFrameInternal = createFrameStruct(currentFrameCounter);
+void ImageReader::Reset() {
+  frame_counter_ = 0;
+  current_frame_internal_ = CreateFrameStruct(frame_counter_);
 }
 
-unsigned int ImageReader::getFps() { return fps; }
+unsigned int ImageReader::GetFps() { return fps_; }
 
-std::vector<uint> ImageReader::getType() {
-  std::vector<uint> result;
-  result.push_back(frameType);
+std::vector<unsigned int> ImageReader::GetType() {
+  std::vector<unsigned int> result;
+  result.push_back(frame_type_);
   return result;
 }

@@ -4,55 +4,52 @@
 
 #include "video_file_reader.h"
 
-VideoFileReader::VideoFileReader(std::string &_filename) {
-  currentFrameCounter = 0;
-  eofReached = false;
-  libAVReady = false;
+VideoFileReader::VideoFileReader(std::string &filename) {
+  current_frame_counter_ = 0;
+  eof_reached_ = false;
+  libav_ready_ = false;
 
-  filename = _filename;
+  filename_ = filename;
 
-  video_stream_indexes_from_file = false;
+  video_stream_indexes_from_file_ = false;
 }
 
-VideoFileReader::VideoFileReader(std::string &_filename,
-                                 std::vector<uint> &_video_stream_indexes) {
-  currentFrameCounter = 0;
-  eofReached = false;
-  libAVReady = false;
+VideoFileReader::VideoFileReader(
+    std::string &filename, std::vector<unsigned int> &_video_stream_indexes) {
+  current_frame_counter_ = 0;
+  eof_reached_ = false;
+  libav_ready_ = false;
 
-  filename = _filename;
+  filename_ = filename;
 
-  video_stream_indexes = _video_stream_indexes;
-  video_stream_indexes_from_file = true;
+  video_stream_indexes_ = _video_stream_indexes;
+  video_stream_indexes_from_file_ = true;
 }
 
 VideoFileReader::~VideoFileReader() {
-  av_packet_unref(pPacket);
-  av_packet_free(&pPacket);
+  av_packet_unref(packet_);
+  av_packet_free(&packet_);
 
-  for (auto const &x : pCodecContexts){
-    AVCodecContext * c = x.second;
+  for (auto const &x : av_codec_contexts_) {
+    AVCodecContext *c = x.second;
     avcodec_free_context(&c);
   }
 
-  avformat_close_input(&pFormatContext);
+  avformat_close_input(&av_format_context_);
 
-
-  for (auto fs : frameStructs)
+  for (auto fs : frame_structs_)
     delete fs;
-  if (frameStructsBuffer != nullptr)
-    delete frameStructsBuffer;
-
-
+  if (frame_struct_buffer_ != nullptr)
+    delete frame_struct_buffer_;
 }
 
-void VideoFileReader::init(std::string &filename) {
+void VideoFileReader::Init(std::string &filename) {
   av_register_all();
   spdlog::info("VideoFileReader: initializing all the containers, codecs and "
                "protocols.");
 
-  pFormatContext = avformat_alloc_context();
-  if (!pFormatContext) {
+  av_format_context_ = avformat_alloc_context();
+  if (!av_format_context_) {
     spdlog::error("Could not allocate memory for Format Context.");
     exit(1);
   }
@@ -61,18 +58,19 @@ void VideoFileReader::init(std::string &filename) {
       "Opening the input file and loading format (container) header {}",
       filename);
 
-  if (avformat_open_input(&pFormatContext, filename.c_str(), NULL, NULL) != 0) {
+  if (avformat_open_input(&av_format_context_, filename.c_str(), NULL, NULL) !=
+      0) {
     spdlog::error("Could not open the file.");
     exit(1);
   }
 
   spdlog::info("format {}, duration {} us, bit_rate {}",
-               pFormatContext->iformat->name, pFormatContext->duration,
-               pFormatContext->bit_rate);
+               av_format_context_->iformat->name, av_format_context_->duration,
+               av_format_context_->bit_rate);
 
   spdlog::info("Finding stream info from format.");
 
-  if (avformat_find_stream_info(pFormatContext, NULL) < 0) {
+  if (avformat_find_stream_info(av_format_context_, NULL) < 0) {
     spdlog::error("Could not get the stream info.");
     exit(-1);
   }
@@ -85,195 +83,197 @@ void VideoFileReader::init(std::string &filename) {
   // https://ffmpeg.org/doxygen/trunk/structAVCodecParameters.html
 
   // loop though all the streams and print its main information
-  for (uint i = 0; i < pFormatContext->nb_streams; i++) {
-    AVCodecParameters *pCodecParameter = pFormatContext->streams[i]->codecpar;
+  for (unsigned int i = 0; i < av_format_context_->nb_streams; i++) {
+    AVCodecParameters *codec_parameter =
+        av_format_context_->streams[i]->codecpar;
     spdlog::info("AVStream->time_base before open coded: {}/{}",
-                 pFormatContext->streams[i]->time_base.num,
-                 pFormatContext->streams[i]->time_base.den);
+                 av_format_context_->streams[i]->time_base.num,
+                 av_format_context_->streams[i]->time_base.den);
     spdlog::info("AVStream->r_frame_rate before open coded: {}/{}",
-                 pFormatContext->streams[i]->r_frame_rate.num,
-                 pFormatContext->streams[i]->r_frame_rate.den);
+                 av_format_context_->streams[i]->r_frame_rate.num,
+                 av_format_context_->streams[i]->r_frame_rate.den);
 
     spdlog::info("AVStream->start_time: {}",
-                 pFormatContext->streams[i]->start_time);
+                 av_format_context_->streams[i]->start_time);
     spdlog::info("AVStream->duration: {}",
-                 pFormatContext->streams[i]->duration);
+                 av_format_context_->streams[i]->duration);
 
     spdlog::info("finding the proper decoder (CODEC)",
-                 pFormatContext->streams[i]->duration);
+                 av_format_context_->streams[i]->duration);
 
-    AVCodec *pCodec = avcodec_find_decoder(pCodecParameter->codec_id);
-    if (pCodec == NULL) {
+    AVCodec *codec = avcodec_find_decoder(codec_parameter->codec_id);
+    if (codec == NULL) {
       spdlog::warn("Non video stream detected ({}), skipping", i);
-    } else if (pCodecParameter->codec_type == AVMEDIA_TYPE_VIDEO) {
+    } else if (codec_parameter->codec_type == AVMEDIA_TYPE_VIDEO) {
       spdlog::warn("Video stream detected ({})", i);
-      if (!video_stream_indexes_from_file)
-        video_stream_indexes.push_back(i);
+      if (!video_stream_indexes_from_file_)
+        video_stream_indexes_.push_back(i);
 
-      std::vector<uint>::iterator it;
+      std::vector<unsigned int>::iterator it;
 
-      it = find(video_stream_indexes.begin(), video_stream_indexes.end(), i);
-      if (it != video_stream_indexes.end()) {
+      it = find(video_stream_indexes_.begin(), video_stream_indexes_.end(), i);
+      if (it != video_stream_indexes_.end()) {
 
-        spdlog::info("Video Codec: resolution {}x{}", pCodecParameter->width,
-                     pCodecParameter->height);
+        spdlog::info("Video Codec: resolution {}x{}", codec_parameter->width,
+                     codec_parameter->height);
 
-        AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
-        if (!pCodecContext) {
+        AVCodecContext *codec_context = avcodec_alloc_context3(codec);
+        if (!codec_context) {
           spdlog::error("Failed to allocated memory for AVCodecContext.");
           exit(-1);
         }
 
-        if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
+        if (avcodec_parameters_to_context(codec_context, codec_parameter) < 0) {
           spdlog::error("Failed to copy codec params to codec context.");
           exit(-1);
         }
 
-        if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
+        if (avcodec_open2(codec_context, codec, NULL) < 0) {
           spdlog::error("Failed to open codec through avcodec_open2.");
           exit(-1);
         }
 
-        pCodecContexts[i] = pCodecContext;
-        frameStructsBuffer = nullptr;
+        av_codec_contexts_[i] = codec_context;
+        frame_struct_buffer_ = nullptr;
 
-        fps = av_q2d(
-            pFormatContext->streams[video_stream_indexes.begin().operator*()]
-                ->r_frame_rate);
+        fps_ = av_q2d(av_format_context_
+                          ->streams[video_stream_indexes_.begin().operator*()]
+                          ->r_frame_rate);
 
-        void *sEPointer = pCodecParameter->extradata;
-        size_t sESize = pCodecParameter->extradata_size;
-        size_t sSize = sizeof(*pCodecParameter);
+        void *sEPointer = codec_parameter->extradata;
+        size_t sESize = codec_parameter->extradata_size;
+        size_t sSize = sizeof(*codec_parameter);
 
         std::vector<unsigned char> e(sSize);
         std::vector<unsigned char> ed(sESize);
 
-        memcpy(&e[0], pCodecParameter, sSize);
+        memcpy(&e[0], codec_parameter, sSize);
         memcpy(&ed[0], sEPointer, sESize);
 
-        CodecParamsStruct codecParamsStruct(0, e, ed);
-        pCodecParameters[i] = codecParamsStruct;
+        CodecParamsStruct codec_params_struct(0, e, ed);
+        codec_params_structs_[i] = codec_params_struct;
 
-        //avcodec_parameters_free(&pCodecParameter);
+        // avcodec_parameters_free(&pCodecParameter);
       }
     }
   }
 
-  pPacket = av_packet_alloc();
-  if (!pPacket) {
+  packet_ = av_packet_alloc();
+  if (!packet_) {
     spdlog::error("Failed to allocated memory for AVPacket.");
     exit(-1);
   }
 
-  frameStructTemplate.messageType = 0;
+  frame_struct_template_.message_type = 0;
 
-  frameStructTemplate.frameDataType = 1;
-  frameStructTemplate.streamId = randomString(16);
-  frameStructTemplate.deviceId = 0;
+  frame_struct_template_.frame_data_type = 1;
+  frame_struct_template_.stream_id = RandomString(16);
+  frame_struct_template_.device_id = 0;
 
-  libAVReady = true;
+  libav_ready_ = true;
 }
 
-uint VideoFileReader::currentFrameId() { return currentFrameCounter; }
+unsigned int VideoFileReader::GetCurrentFrameId() {
+  return current_frame_counter_;
+}
 
-void VideoFileReader::nextFrame() {
-  if (!libAVReady)
-    init(this->filename);
+void VideoFileReader::NextFrame() {
+  if (!libav_ready_)
+    Init(this->filename_);
 
-  if (frameStructsBuffer != nullptr) {
-    frameStructs.clear();
-    frameStructs.push_back(frameStructsBuffer);
-    frameStructsBuffer = nullptr;
+  if (frame_struct_buffer_ != nullptr) {
+    frame_structs_.clear();
+    frame_structs_.push_back(frame_struct_buffer_);
+    frame_struct_buffer_ = nullptr;
   }
 
   int error = 0;
   while (error >= 0) {
-    error = av_read_frame(pFormatContext, pPacket);
+    error = av_read_frame(av_format_context_, packet_);
     // if it's the video stream
-    std::vector<uint>::iterator it;
+    std::vector<unsigned int>::iterator it;
 
-    it = find(video_stream_indexes.begin(), video_stream_indexes.end(),
-              pPacket->stream_index);
-    if (it != video_stream_indexes.end()) {
+    it = find(video_stream_indexes_.begin(), video_stream_indexes_.end(),
+              packet_->stream_index);
+    if (it != video_stream_indexes_.end()) {
 
-      FrameStruct *frameStruct = new FrameStruct(frameStructTemplate);
+      FrameStruct *frameStruct = new FrameStruct(frame_struct_template_);
       frameStruct->frame = std::vector<unsigned char>(
-          &pPacket->data[0], &pPacket->data[0] + pPacket->size);
-      frameStruct->frameId = currentFrameCounter;
-      frameStruct->sensorId = pPacket->stream_index;
-      frameStruct->frameType = pPacket->stream_index;
-      frameStruct->timestamps.push_back(pPacket->pts);
-      frameStruct->timestamps.push_back(currentTimeMs());
-      frameStruct->codec_data = pCodecParameters[pPacket->stream_index];
+          &packet_->data[0], &packet_->data[0] + packet_->size);
+      frameStruct->frame_id = current_frame_counter_;
+      frameStruct->sensor_id = packet_->stream_index;
+      frameStruct->frame_type = packet_->stream_index;
+      frameStruct->timestamps.push_back(packet_->pts);
+      frameStruct->timestamps.push_back(CurrentTimeMs());
+      frameStruct->codec_data = codec_params_structs_[packet_->stream_index];
 
-      if (frameStructs.empty() ||
-          (std::abs((long)(pPacket->pts -
-                           (long)frameStructs.front()->timestamps.front())) <
+      if (frame_structs_.empty() ||
+          (std::abs((long)(packet_->pts -
+                           (long)frame_structs_.front()->timestamps.front())) <
            10000)) {
-        frameStructs.push_back(frameStruct);
-      } else if (frameStructsBuffer == nullptr) {
-        frameStructsBuffer = frameStruct;
-        currentFrameCounter += 1;
-        frameStructsBuffer->frameId = currentFrameCounter;
-        av_packet_unref(pPacket);
+        frame_structs_.push_back(frameStruct);
+      } else if (frame_struct_buffer_ == nullptr) {
+        frame_struct_buffer_ = frameStruct;
+        current_frame_counter_ += 1;
+        frame_struct_buffer_->frame_id = current_frame_counter_;
+        av_packet_unref(packet_);
         break;
       }
     }
-    av_packet_unref(pPacket);
+    av_packet_unref(packet_);
     if (error == AVERROR_EOF) {
-      eofReached = true;
-      for (auto fs : frameStructs)
+      eof_reached_ = true;
+      for (auto fs : frame_structs_)
         delete fs;
-      frameStructs.clear();
-      if (frameStructsBuffer != nullptr) {
-        delete frameStructsBuffer;
-        frameStructsBuffer = nullptr;
+      frame_structs_.clear();
+      if (frame_struct_buffer_ != nullptr) {
+        delete frame_struct_buffer_;
+        frame_struct_buffer_ = nullptr;
       }
       error = 1;
       break;
     }
   }
-
 }
 
-bool VideoFileReader::hasNextFrame() {
-  if (!libAVReady)
-    init(this->filename);
-  return !eofReached;
+bool VideoFileReader::HasNextFrame() {
+  if (!libav_ready_)
+    Init(this->filename_);
+  return !eof_reached_;
 }
 
-void VideoFileReader::goToFrame(unsigned int frameId) {
-  currentFrameCounter = frameId;
-  eofReached = false;
-  int error = av_seek_frame(pFormatContext, -1, frameId, AVSEEK_FLAG_FRAME);
+void VideoFileReader::GoToFrame(unsigned int frame_id) {
+  current_frame_counter_ = frame_id;
+  eof_reached_ = false;
+  int error = av_seek_frame(av_format_context_, -1, frame_id, AVSEEK_FLAG_FRAME);
   if (error < 0) {
-    spdlog::error("Error seeking to frame {}: {}", frameId, av_err2str(error));
+    spdlog::error("Error seeking to frame {}: {}", frame_id, av_err2str(error));
   }
 }
 
-void VideoFileReader::reset() {
-  currentFrameCounter = 0;
-  eofReached = false;
+void VideoFileReader::Reset() {
+  current_frame_counter_ = 0;
+  eof_reached_ = false;
 
-  int error = av_seek_frame(pFormatContext, -1, 0, AVSEEK_FLAG_BACKWARD);
+  int error = av_seek_frame(av_format_context_, -1, 0, AVSEEK_FLAG_BACKWARD);
 
   if (error < 0) {
     spdlog::error("Error seeking to frame {}: {}", 0, av_err2str(error));
   }
 }
 
-unsigned int VideoFileReader::getFps() {
-  if (!libAVReady)
-    init(this->filename);
-  return fps;
+unsigned int VideoFileReader::GetFps() {
+  if (!libav_ready_)
+    Init(this->filename_);
+  return fps_;
 }
 
-std::vector<FrameStruct *> VideoFileReader::currentFrame() {
-  return frameStructs;
+std::vector<FrameStruct *> VideoFileReader::GetCurrentFrame() {
+  return frame_structs_;
 }
 
-std::vector<uint> VideoFileReader::getType() {
-  if (!libAVReady)
-    init(this->filename);
-  return video_stream_indexes;
+std::vector<unsigned int> VideoFileReader::GetType() {
+  if (!libav_ready_)
+    Init(this->filename_);
+  return video_stream_indexes_;
 }

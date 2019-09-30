@@ -9,10 +9,10 @@ NullEncoder::~NullEncoder() {
     delete frame;
 }
 
-void NullEncoder::addFrameStruct(FrameStruct *fs) { frame = fs; }
-void NullEncoder::nextPacket() {}
-bool NullEncoder::hasNextPacket() { return frame != nullptr; }
-FrameStruct *NullEncoder::currentFrameEncoded() { return frame; }
-FrameStruct *NullEncoder::currentFrameOriginal() { return frame; }
-CodecParamsStruct *NullEncoder::getCodecParamsStruct() { return nullptr; }
-uint NullEncoder::getFps() { return fps; }
+void NullEncoder::AddFrameStruct(FrameStruct *fs) { frame = fs; }
+void NullEncoder::NextPacket() {}
+bool NullEncoder::HasNextPacket() { return frame != nullptr; }
+FrameStruct *NullEncoder::CurrentFrameEncoded() { return frame; }
+FrameStruct *NullEncoder::CurrentFrameOriginal() { return frame; }
+CodecParamsStruct *NullEncoder::GetCodecParamsStruct() { return nullptr; }
+unsigned int NullEncoder::GetFps() { return fps; }

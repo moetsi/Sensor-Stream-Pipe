@@ -9,14 +9,14 @@
 
 class ZDepthDecoder : public IDecoder {
 private:
-  std::vector<uint16_t> decompressed;
-  int width;
-  int height;
-  zdepth::DepthCompressor decompressor;
+  std::vector<uint16_t> decompressed_buffer_;
+  int width_;
+  int height_;
+  zdepth::DepthCompressor decompressor_;
 
 public:
   ZDepthDecoder();
   ~ZDepthDecoder();
-  void init(std::vector<unsigned char> parameter_data);
+  void Init(std::vector<unsigned char> parameter_data);
   cv::Mat Decode(FrameStruct *frame);
 };

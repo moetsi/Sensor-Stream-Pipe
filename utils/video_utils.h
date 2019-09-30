@@ -34,28 +34,28 @@ extern "C" {
 #define MAX_DEPTH_VALUE_11_BITS 2048
 #define MAX_DEPTH_VALUE_8_BITS 256
 
-void avframeToMatYUV(const AVFrame *frame, cv::Mat &image);
+void AVFrameToMatYUV(const AVFrame *frame, cv::Mat &image);
 
-void avframeToMatGray(const AVFrame *frame, cv::Mat &image);
+void AVFrameToMatGray(const AVFrame *frame, cv::Mat &image);
 
-void prepareDecodingStruct(
-        FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
-        std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
-        std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
+void PrepareDecodingStruct(
+    FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
+    std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
+    std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
 
 bool frameStructToMat(FrameStruct &f, cv::Mat &img,
                       std::unordered_map<std::string, IDecoder *> &decoders);
 
 template <typename T>
-void minMaxFilter(cv::Mat &inmat, cv::Mat &outmat, double min, double max) {
-  inmat.copyTo(outmat);
-  for (int i = 0; i < outmat.rows; i++) {
-    for (int j = 0; j < outmat.cols; j++) {
-      if (outmat.at<T>(i, j) < min) {
-        outmat.at<T>(i, j) = min;
+void MinMaxFilter(cv::Mat &in_mat, cv::Mat &out_mat, double min, double max) {
+  in_mat.copyTo(out_mat);
+  for (int i = 0; i < out_mat.rows; i++) {
+    for (int j = 0; j < out_mat.cols; j++) {
+      if (out_mat.at<T>(i, j) < min) {
+        out_mat.at<T>(i, j) = min;
       }
-      if (outmat.at<T>(i, j) > max) {
-        outmat.at<T>(i, j) = max;
+      if (out_mat.at<T>(i, j) > max) {
+        out_mat.at<T>(i, j) = max;
       }
     }
   }

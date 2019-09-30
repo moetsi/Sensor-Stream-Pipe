@@ -27,7 +27,7 @@ struct CameraCalibrationStruct {
 
   CameraCalibrationStruct() {}
 
-  CameraCalibrationStruct(uint t, std::vector<unsigned char> d,
+  CameraCalibrationStruct(unsigned int t, std::vector<unsigned char> d,
                           std::vector<unsigned char> ed)
       : type(t), data(d), extra_data(ed) {}
 
@@ -44,12 +44,13 @@ struct CodecParamsStruct {
 
   CodecParamsStruct() {}
 
-  CodecParamsStruct(uint t, std::vector<unsigned char> d, std::vector<unsigned char> ed)
-          : type(t), data(d), extra_data(ed) {}
+  CodecParamsStruct(unsigned int t, std::vector<unsigned char> d,
+                    std::vector<unsigned char> ed)
+      : type(t), data(d), extra_data(ed) {}
 
-  void setData(std::vector<unsigned char> &d) { data = d; }
+  void SetData(std::vector<unsigned char> &d) { data = d; }
 
-  void setExtraData(std::vector<unsigned char> &ed) { extra_data = ed; }
+  void SetExtraData(std::vector<unsigned char> &ed) { extra_data = ed; }
 
   AVCodecParameters *getParams() {
     if (type != 0)
@@ -72,17 +73,17 @@ struct CodecParamsStruct {
 struct FrameStruct {
 
   // message id, currenly set to 0
-  unsigned short messageType;
+  unsigned short message_type;
 
   // 0 for color, 1 for depth
-  unsigned short frameType;
+  unsigned short frame_type;
 
   // 0 for image frames, 1 for libav packets, 2 for raw RGBA data, 3 for raw
   // GRAY16LE data, 4 for NvPipe packets
-  unsigned short frameDataType;
+  unsigned short frame_data_type;
 
   // random 16 char string that uniquely ids the frame stream
-  std::string streamId;
+  std::string stream_id;
 
   // frame binary data
   std::vector<unsigned char> frame;
@@ -94,29 +95,30 @@ struct FrameStruct {
   CameraCalibrationStruct camera_calibration_data;
 
   // optional: scene description
-  std::string sceneDesc;
+  std::string scene_desc;
 
   // 0 for color, 1 for depth: currently redundant with frameType, but
   // distinction may be needed in the future
-  unsigned int sensorId;
+  unsigned int sensor_id;
 
   // integer device id: distingish between devices in the same scene
-  unsigned int deviceId;
+  unsigned int device_id;
 
   // current frame number (increases over time)
-  unsigned int frameId;
+  unsigned int frame_id;
 
   std::vector<unsigned long> timestamps;
 
   template<class Archive>
   void serialize(Archive &ar) {
-    ar(messageType, frameType, frameDataType, streamId, frame, codec_data,
-       camera_calibration_data, sceneDesc, sensorId, deviceId, frameId, timestamps);
+    ar(message_type, frame_type, frame_data_type, stream_id, frame, codec_data,
+       camera_calibration_data, scene_desc, sensor_id, device_id, frame_id,
+       timestamps);
   }
 };
 
 template<typename T>
-static const std::string cerealStructToString(const T &t) {
+static const std::string CerealStructToString(const T &t) {
   std::ostringstream os(std::ios::binary);
   {
     cereal::BinaryOutputArchive oarchive(os);
@@ -126,8 +128,7 @@ static const std::string cerealStructToString(const T &t) {
   return os.str();
 }
 
-template<typename T>
-static const std::string frameStructToString(const T *t) {
+template<typename T> static const std::string FrameStructToString(const T *t) {
   std::ostringstream os(std::ios::binary);
   {
     cereal::BinaryOutputArchive oarchive(os);
@@ -138,13 +139,12 @@ static const std::string frameStructToString(const T *t) {
 }
 
 
-template<typename T>
-static T parseCerealStructFromString(std::string &data) {
-  T frameIn;
+template<typename T> static T ParseCerealStructFromString(std::string &data) {
+  T frame_in;
   std::istringstream is(data, std::ios::binary);
   {
     cereal::BinaryInputArchive iarchive(is);
-    iarchive(frameIn);
+    iarchive(frame_in);
   }
-  return frameIn;
+  return frame_in;
 }

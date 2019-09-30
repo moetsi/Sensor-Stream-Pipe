@@ -14,7 +14,7 @@ struct ExtendedAzureConfig {
   bool stream_color;
   bool stream_depth;
   bool stream_ir;
-  int absoluteExposureValue;
+  int absolute_exposure_value;
 };
 
-ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config);
+ExtendedAzureConfig BuildKinectConfigFromYAML(YAML::Node config);

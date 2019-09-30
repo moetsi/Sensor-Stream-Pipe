@@ -26,52 +26,50 @@ extern "C" {
 
 class VideoFileReader : public IReader {
 private:
-  unsigned int fps;
-  std::string sceneDesc;
-  std::string type;
-  std::string filename;
+  unsigned int fps_;
+  std::string filename_;
 
-  std::vector<uint> video_stream_indexes;
-  bool video_stream_indexes_from_file;
-  std::vector<FrameStruct *> frameStructs;
-  FrameStruct *frameStructsBuffer;
-  FrameStruct frameStructTemplate;
+  std::vector<unsigned int> video_stream_indexes_;
+  bool video_stream_indexes_from_file_;
+  std::vector<FrameStruct *> frame_structs_;
+  FrameStruct *frame_struct_buffer_;
+  FrameStruct frame_struct_template_;
 
-  int currentFrameCounter;
+  int current_frame_counter_;
 
-  AVFormatContext *pFormatContext;
+  AVFormatContext *av_format_context_;
 
-  std::unordered_map<uint, CodecParamsStruct> pCodecParameters;
-  std::unordered_map<uint, AVCodecContext *> pCodecContexts;
+  std::unordered_map<unsigned int, CodecParamsStruct> codec_params_structs_;
+  std::unordered_map<unsigned int, AVCodecContext *> av_codec_contexts_;
 
-  AVPacket *pPacket;
+  AVPacket *packet_;
 
-  bool libAVReady;
+  bool libav_ready_;
 
-  bool eofReached;
+  bool eof_reached_;
 
-  void init(std::string &filename);
+  void Init(std::string &filename);
 
 public:
   VideoFileReader(std::string &filename);
   VideoFileReader(std::string &filename,
-                  std::vector<uint> &video_stream_indexes);
+                  std::vector<unsigned int> &video_stream_indexes);
 
   ~VideoFileReader();
 
-  void reset();
+  void Reset();
 
-  void goToFrame(unsigned int frameId);
+  void GoToFrame(unsigned int frame_id);
 
-  bool hasNextFrame();
+  bool HasNextFrame();
 
-  void nextFrame();
+  void NextFrame();
 
-  std::vector<uint> getType();
+  std::vector<unsigned int> GetType();
 
-  std::vector<FrameStruct *> currentFrame();
+  std::vector<FrameStruct *> GetCurrentFrame();
 
-  uint currentFrameId();
+  unsigned int GetCurrentFrameId();
 
-  unsigned int getFps();
+  unsigned int GetFps();
 };

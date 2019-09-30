@@ -54,11 +54,11 @@ int main(int argc, char *argv[]) {
     std::unordered_map<std::string, IDecoder *> decoders;
 
     bool imgChanged = false;
-    while (reader.hasNextFrame()) {
-      reader.nextFrame();
-      std::vector<FrameStruct> f_list = reader.currentFrame();
+    while (reader.HasNextFrame()) {
+      reader.NextFrame();
+      std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
       for (FrameStruct f : f_list) {
-        std::string decoder_id = f.streamId + std::to_string(f.sensorId);
+        std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
         // You can access Kinect camera parameters here
         /*
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
         if (imgChanged && !img.empty()) {
 
           // Manipulate image to show as a color map
-          if (f.frameType == 1) {
+          if (f.frame_type == 1) {
             if (img.type() == CV_16U) {
               // Compress images to show up on a 255 valued color map
               img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
             img.convertTo(imgOut, CV_8U);
             cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
-          } else if (f.frameType == 2) {
+          } else if (f.frame_type == 2) {
 
             double max = 1024;
             img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);

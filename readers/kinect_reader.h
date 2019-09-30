@@ -54,53 +54,50 @@ inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps) {
 
 class KinectReader : public IReader {
 private:
-  std::vector<uint> currentFrameCounter;
-  unsigned int fps;
-  unsigned int sensorId;
-  unsigned int deviceId;
-  std::string streamId;
+  std::vector<unsigned int> frame_counter_;
 
-  bool stream_color;
-  bool stream_depth;
-  bool stream_ir;
+  bool stream_color_;
+  bool stream_depth_;
+  bool stream_ir_;
 
-  uint8_t device_index;
-  k4a_device_configuration_t device_config;
-  bool record_imu;
-  int32_t absoluteExposureValue;
-  k4a_device_t device;
-  k4a_capture_t capture;
-  k4a_wait_result_t result = K4A_WAIT_RESULT_TIMEOUT;
-  int32_t timeout_ms;
-  clock_t recording_start;
+  std::string stream_id_;
 
-  FrameStruct frameTemplate;
-  std::vector<CodecParamsStruct *> cpss;
-  CameraCalibrationStruct * ccs;
+  uint8_t device_index_;
+  k4a_device_configuration_t device_config_;
+  bool record_imu_;
+  int32_t absolute_exposure_value_;
+  k4a_device_t device_;
+  k4a_capture_t capture_;
+  k4a_wait_result_t result_ = K4A_WAIT_RESULT_TIMEOUT;
+  int32_t timeout_ms_;
+
+  FrameStruct frame_template_;
+  std::vector<CodecParamsStruct *> codec_params_structs_;
+  CameraCalibrationStruct * camera_calibration_struct_;
 
 
-  std::vector<FrameStruct *> currFrame;
+  std::vector<FrameStruct *> current_frame_;
 
 public:
-  KinectReader(uint8_t _device_index, ExtendedAzureConfig _device_config);
+  KinectReader(uint8_t device_index, ExtendedAzureConfig device_config);
 
   ~KinectReader();
 
-  void reset();
+  void Reset();
 
-  bool hasNextFrame();
+  bool HasNextFrame();
 
-  void nextFrame();
+  void NextFrame();
 
-  std::vector<FrameStruct *> currentFrame();
+  std::vector<FrameStruct *> GetCurrentFrame();
 
-  FrameStruct *currentFrame(uint type);
+  FrameStruct *CurrentFrame(unsigned int type);
 
-  uint currentFrameId();
+  unsigned int GetCurrentFrameId();
 
-  virtual void goToFrame(uint frameId);
+  virtual void GoToFrame(unsigned int frame_id);
 
-  uint getFps();
+  unsigned int GetFps();
 
-  std::vector<uint> getType();
+  std::vector<unsigned int> GetType();
 };

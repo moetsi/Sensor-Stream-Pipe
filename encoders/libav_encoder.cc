@@ -5,107 +5,107 @@
 #include "libav_encoder.h"
 #include "../utils/logger.h"
 
-LibAvEncoder::LibAvEncoder(std::string codec_parameters_file, uint _fps) {
-  codec_parameters = YAML::LoadFile(codec_parameters_file);
-  fps = _fps;
+LibAvEncoder::LibAvEncoder(std::string codec_parameters_file, unsigned int _fps) {
+  codec_parameters_ = YAML::LoadFile(codec_parameters_file);
+  fps_ = _fps;
   av_register_all();
 
-  ready = false;
-  cParamsStruct = NULL;
-  totalCurrentFrameCounter = 0;
+  ready_ = false;
+  codec_params_struct_ = NULL;
+  total_frame_counter_ = 0;
 
-  stream_id = randomString(16);
+  stream_id_ = RandomString(16);
 }
 
-LibAvEncoder::LibAvEncoder(YAML::Node &_codec_parameters, uint _fps) {
-  codec_parameters = _codec_parameters;
-  fps = _fps;
+LibAvEncoder::LibAvEncoder(YAML::Node &_codec_parameters, unsigned int _fps) {
+  codec_parameters_ = _codec_parameters;
+  fps_ = _fps;
   av_register_all();
 
-  ready = false;
-  cParamsStruct = NULL;
-  totalCurrentFrameCounter = 0;
+  ready_ = false;
+  codec_params_struct_ = NULL;
+  total_frame_counter_ = 0;
 }
 
-std::vector<unsigned char> LibAvEncoder::currentFrameBytes() {
+std::vector<unsigned char> LibAvEncoder::CurrentFrameBytes() {
   return std::vector<unsigned char>(
-      pBuffer.front()->data, pBuffer.front()->data + pBuffer.front()->size);
+      buffer_packet_.front()->data, buffer_packet_.front()->data + buffer_packet_.front()->size);
 }
 
 LibAvEncoder::~LibAvEncoder() {
-  av_packet_free(&pPacket);
-  av_frame_free(&pFrame);
-  avcodec_free_context(&pCodecContextEncoder);
-  avcodec_parameters_free(&pCodecParametersEncoder);
-  sws_freeContext(sws_ctx);
-  delete cParamsStruct;
+  av_packet_free(&packet_av_);
+  av_frame_free(&frame_av_);
+  avcodec_free_context(&av_codec_context_);
+  avcodec_parameters_free(&av_codec_parameters_);
+  sws_freeContext(sws_context_);
+  delete codec_params_struct_;
 
-  while (!buffer.empty()) {
-    FrameStruct *q_element = buffer.front();
+  while (!buffer_fs_.empty()) {
+    FrameStruct *q_element = buffer_fs_.front();
     delete q_element;
-    buffer.pop();
+    buffer_fs_.pop();
   }
 
-  while (!pBuffer.empty()) {
-    AVPacket *q_element = pBuffer.front();
+  while (!buffer_packet_.empty()) {
+    AVPacket *q_element = buffer_packet_.front();
     av_packet_free(&q_element);
-    buffer.pop();
+    buffer_fs_.pop();
   }
 }
 
-void LibAvEncoder::nextPacket() {
-  if (!buffer.empty()) {
-    FrameStruct *f = buffer.front();
-    buffer.pop();
+void LibAvEncoder::NextPacket() {
+  if (!buffer_fs_.empty()) {
+    FrameStruct *f = buffer_fs_.front();
+    buffer_fs_.pop();
     f->frame.clear();
     delete f;
   }
-  if (!pBuffer.empty()) {
-    AVPacket *p = pBuffer.front();
-    pBuffer.pop();
+  if (!buffer_packet_.empty()) {
+    AVPacket *p = buffer_packet_.front();
+    buffer_packet_.pop();
     delete[] p->data;
     delete p;
   }
 }
 
-void LibAvEncoder::prepareFrame() {
-  FrameStruct *f = buffer.front();
-  if (f->frameDataType == 2) {
-    uint8_t *inData[1] = {&f->frame[8]};
-    int inLinesize[1] = {4 * pFrame->width};
+void LibAvEncoder::PrepareFrame() {
+  FrameStruct *f = buffer_fs_.front();
+  if (f->frame_data_type == 2) {
+    uint8_t *in_data[1] = {&f->frame[8]};
+    int in_linesize[1] = {4 * frame_av_->width};
 
-    sws_scale(sws_ctx, (const uint8_t *const *)inData, inLinesize, 0,
-              pFrame->height, pFrame->data, pFrame->linesize);
+    sws_scale(sws_context_, (const uint8_t *const *)in_data, in_linesize, 0,
+              frame_av_->height, frame_av_->data, frame_av_->linesize);
 
-  } else if (f->frameDataType == 3) {
-    if (pFrame->format == AV_PIX_FMT_GRAY12LE) {
+  } else if (f->frame_data_type == 3) {
+    if (frame_av_->format == AV_PIX_FMT_GRAY12LE) {
       int i = 0;
       uint8_t *data = &f->frame[8];
-      // memcpy(pFrame->data[0], data, pFrame->height * pFrame->width * 2);
+      // memcpy(frame_av_->data[0], data, frame_av_->height * frame_av_->width * 2);
 
-      for (int y = 0; y < pFrame->height; y++) {
-        for (int x = 0; x < pFrame->width; x++) {
+      for (int y = 0; y < frame_av_->height; y++) {
+        for (int x = 0; x < frame_av_->width; x++) {
 
           ushort value = data[i + 1] << 8 | data[i];
           if (value >= MAX_DEPTH_VALUE_12_BITS) {
-            pFrame->data[0][i] = 13;
-            pFrame->data[0][i + 1] = 255;
+            frame_av_->data[0][i] = 13;
+            frame_av_->data[0][i + 1] = 255;
           } else {
-            pFrame->data[0][i] = data[i];
-            pFrame->data[0][i + 1] = data[i + 1];
+            frame_av_->data[0][i] = data[i];
+            frame_av_->data[0][i + 1] = data[i + 1];
           }
           i += 2;
         }
       }
 
-    } else if (pFrame->format ==
+    } else if (frame_av_->format ==
                AV_PIX_FMT_GRAY16BE) { // PNG GRAY16 TO gray12le
       int i = 0;
       uint8_t *data = &f->frame[8];
-      for (int y = 0; y < pFrame->height; y++) {
-        for (int x = 0; x < pFrame->width; x++) {
-          pFrame->data[0][i] = data[i + 1];
-          pFrame->data[0][i + 1] = data[i];
+      for (int y = 0; y < frame_av_->height; y++) {
+        for (int x = 0; x < frame_av_->width; x++) {
+          frame_av_->data[0][i] = data[i + 1];
+          frame_av_->data[0][i + 1] = data[i];
           i += 2;
         }
       }
@@ -113,93 +113,93 @@ void LibAvEncoder::prepareFrame() {
       int i = 0;
       uint8_t *data = &f->frame[8];
       float coeff = (float)MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
-      for (int y = 0; y < pFrame->height; y++) {
-        for (int x = 0; x < pFrame->width; x++) {
-          uint lower = data[i * 2];
-          uint upper = data[i * 2 + 1];
+      for (int y = 0; y < frame_av_->height; y++) {
+        for (int x = 0; x < frame_av_->width; x++) {
+          unsigned int lower = data[i * 2];
+          unsigned int upper = data[i * 2 + 1];
           ushort value = upper << 8 | lower;
 
-          pFrame->data[0][i++] =
-              std::min((uint)(value * coeff), (uint)MAX_DEPTH_VALUE_8_BITS - 1);
+          frame_av_->data[0][i++] =
+              std::min((unsigned int)(value * coeff), (unsigned int)MAX_DEPTH_VALUE_8_BITS - 1);
         }
       }
 
-      memset(&pFrame->data[1][0], 128, pFrame->height * pFrame->width / 4);
-      memset(&pFrame->data[2][0], 128, pFrame->height * pFrame->width / 4);
+      memset(&frame_av_->data[1][0], 128, frame_av_->height * frame_av_->width / 4);
+      memset(&frame_av_->data[2][0], 128, frame_av_->height * frame_av_->width / 4);
     }
 
-  } else if (f->frameDataType == 0) {
+  } else if (f->frame_data_type == 0) {
 
-    AVFrame *pFrameO = av_frame_alloc();
+    AVFrame *frame_av_O = av_frame_alloc();
 
     std::vector<unsigned char> frameData = f->frame;
 
-    id.imageBufferToAVFrame(f, pFrameO);
+    image_decoder_.ImageBufferToAVFrame(f, frame_av_O);
 
-    if (pFrameO->format == pFrame->format) {
-      av_frame_copy(pFrame, pFrameO);
+    if (frame_av_O->format == frame_av_->format) {
+      av_frame_copy(frame_av_, frame_av_O);
 
-    } else if (pFrameO->format == AV_PIX_FMT_GRAY16BE &&
-               pFrame->format ==
+    } else if (frame_av_O->format == AV_PIX_FMT_GRAY16BE &&
+               frame_av_->format ==
                    AV_PIX_FMT_GRAY12LE) { // PNG GRAY16 TO gray12le
       int i = 0;
-      for (int y = 0; y < pFrameO->height; y++) {
-        for (int x = 0; x < pFrameO->width; x++) {
-          ushort lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
-          ushort upper = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2 + 1];
+      for (int y = 0; y < frame_av_O->height; y++) {
+        for (int x = 0; x < frame_av_O->width; x++) {
+          ushort lower = frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2];
+          ushort upper = frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2 + 1];
           ushort value = lower << 8 | upper;
 
           // TODO: check what is happening!
           if (value >= MAX_DEPTH_VALUE_12_BITS) {
-            pFrame->data[0][i++] = 255;
-            pFrame->data[0][i++] = 255;
+            frame_av_->data[0][i++] = 255;
+            frame_av_->data[0][i++] = 255;
           } else {
-            pFrame->data[0][i++] = upper;
-            pFrame->data[0][i++] = lower;
+            frame_av_->data[0][i++] = upper;
+            frame_av_->data[0][i++] = lower;
           }
         }
       }
-    } else if (pFrameO->format == AV_PIX_FMT_GRAY16BE &&
-               (pFrame->format == AV_PIX_FMT_YUV420P ||
-                pFrame->format == AV_PIX_FMT_YUV422P ||
-                pFrame->format == AV_PIX_FMT_YUV444P)) { // PNG GRAY16 TO YUV
+    } else if (frame_av_O->format == AV_PIX_FMT_GRAY16BE &&
+               (frame_av_->format == AV_PIX_FMT_YUV420P ||
+                frame_av_->format == AV_PIX_FMT_YUV422P ||
+                frame_av_->format == AV_PIX_FMT_YUV444P)) { // PNG GRAY16 TO YUV
       // TODO: remove redundant call
-      sws_scale(sws_ctx, (const uint8_t *const *)pFrameO->data,
-                pFrameO->linesize, 0, pFrameO->height, pFrame->data,
-                pFrame->linesize);
+      sws_scale(sws_context_, (const uint8_t *const *)frame_av_O->data,
+                frame_av_O->linesize, 0, frame_av_O->height, frame_av_->data,
+                frame_av_->linesize);
 
       int i = 0;
       float coeff = (float)MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
-      for (int y = 0; y < pFrameO->height; y++) {
-        for (int x = 0; x < pFrameO->width; x++) {
-          uint lower = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2];
-          uint upper = pFrameO->data[0][y * pFrameO->linesize[0] + x * 2 + 1];
+      for (int y = 0; y < frame_av_O->height; y++) {
+        for (int x = 0; x < frame_av_O->width; x++) {
+          unsigned int lower = frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2];
+          unsigned int upper = frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2 + 1];
           ushort value = lower << 8 | upper;
 
-          pFrame->data[0][i++] = std::min((ushort)(value * coeff), (ushort)255);
+          frame_av_->data[0][i++] = std::min((ushort)(value * coeff), (ushort)255);
         }
       }
 
       /*
-      for (uint y = 0; y < pFrame->height; y++) {
-          for (uint x = 0; x < pFrame->width; x++) {
-              pFrame->data[1][y * pFrame->linesize[1] + x] = 128;
-              pFrame->data[2][y * pFrame->linesize[2] + x] = 128;
+      for (unsigned int y = 0; y < frame_av_->height; y++) {
+          for (unsigned int x = 0; x < frame_av_->width; x++) {
+              frame_av_->data[1][y * frame_av_->linesize[1] + x] = 128;
+              frame_av_->data[2][y * frame_av_->linesize[2] + x] = 128;
           }
       }*/
     } else {
       // YUV to YUV
-      sws_scale(sws_ctx, (const uint8_t *const *)pFrameO->data,
-                pFrameO->linesize, 0, pFrameO->height, pFrame->data,
-                pFrame->linesize);
+      sws_scale(sws_context_, (const uint8_t *const *)frame_av_O->data,
+                frame_av_O->linesize, 0, frame_av_O->height, frame_av_->data,
+                frame_av_->linesize);
     }
 
-    av_frame_free(&pFrameO);
+    av_frame_free(&frame_av_O);
   }
 
 }
 
-void LibAvEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
+void LibAvEncoder::EncodeA(AVCodecContext *enc_ctx, AVFrame *frame,
                            AVPacket *pkt) {
   int ret;
   /* send the frame to the encoder */
@@ -217,71 +217,71 @@ void LibAvEncoder::encodeA(AVCodecContext *enc_ctx, AVFrame *frame,
     exit(1);
   }
 
-  AVPacket *newPacket = new AVPacket(*pPacket);
-  pBuffer.push(newPacket);
-  pBuffer.back()->data = reinterpret_cast<uint8_t *>(
-      new uint64_t[(pPacket->size + FF_INPUT_BUFFER_PADDING_SIZE) /
+  AVPacket *new_packet = new AVPacket(*packet_av_);
+  buffer_packet_.push(new_packet);
+  buffer_packet_.back()->data = reinterpret_cast<uint8_t *>(
+      new uint64_t[(packet_av_->size + FF_INPUT_BUFFER_PADDING_SIZE) /
                        sizeof(uint64_t) +
                    1]);
-  memcpy(pBuffer.back()->data, pPacket->data, pPacket->size);
+  memcpy(buffer_packet_.back()->data, packet_av_->data, packet_av_->size);
 }
 
-void LibAvEncoder::encode() {
+void LibAvEncoder::Encode() {
 
-  prepareFrame();
+  PrepareFrame();
 
-  pFrame->pts = totalCurrentFrameCounter++;
+  frame_av_->pts = total_frame_counter_++;
 
-  encodeA(pCodecContextEncoder, pFrame, pPacket);
+  EncodeA(av_codec_context_, frame_av_, packet_av_);
 
-  buffer.front()->timestamps.push_back(currentTimeMs());
+  buffer_fs_.front()->timestamps.push_back(CurrentTimeMs());
 }
 
-void LibAvEncoder::init(FrameStruct *fs) {
+void LibAvEncoder::Init(FrameStruct *fs) {
   int ret;
 
-  spdlog::info("Codec information:\n {}", codec_parameters);
+  spdlog::info("Codec information:\n {}", codec_parameters_);
 
-  pCodecEncoder = avcodec_find_encoder_by_name(
-      codec_parameters["codec_name"].as<std::string>().c_str());
-  pCodecContextEncoder = avcodec_alloc_context3(pCodecEncoder);
-  pPacket = av_packet_alloc();
-  pCodecParametersEncoder = avcodec_parameters_alloc();
+  av_codec_ = avcodec_find_encoder_by_name(
+      codec_parameters_["codec_name"].as<std::string>().c_str());
+  av_codec_context_ = avcodec_alloc_context3(av_codec_);
+  packet_av_ = av_packet_alloc();
+  av_codec_parameters_ = avcodec_parameters_alloc();
 
   int width = 0, height = 0, pxl_format = 0;
 
-  if (fs->frameDataType == 0 || fs->frameDataType == 1) {
-    AVFrame *pFrameO = av_frame_alloc();
+  if (fs->frame_data_type == 0 || fs->frame_data_type == 1) {
+    AVFrame *frame_av_O = av_frame_alloc();
 
-    id.imageBufferToAVFrame(fs, pFrameO);
+    image_decoder_.ImageBufferToAVFrame(fs, frame_av_O);
 
-    width = pFrameO->width;
-    height = pFrameO->height;
-    pxl_format = pFrameO->format;
+    width = frame_av_O->width;
+    height = frame_av_O->height;
+    pxl_format = frame_av_O->format;
 
-    av_frame_free(&pFrameO);
-  } else if (fs->frameDataType == 2) {
+    av_frame_free(&frame_av_O);
+  } else if (fs->frame_data_type == 2) {
     memcpy(&width, &fs->frame[0], sizeof(int));
     memcpy(&height, &fs->frame[4], sizeof(int));
     pxl_format = AV_PIX_FMT_BGRA;
-  } else if (fs->frameDataType == 3) {
+  } else if (fs->frame_data_type == 3) {
     memcpy(&width, &fs->frame[0], sizeof(int));
     memcpy(&height, &fs->frame[4], sizeof(int));
     pxl_format = AV_PIX_FMT_GRAY16LE;
   }
 
-  pCodecContextEncoder->width = width;
-  pCodecContextEncoder->height = height;
+  av_codec_context_->width = width;
+  av_codec_context_->height = height;
   /* frames per second */
-  pCodecContextEncoder->time_base = (AVRational){1, (int)fps};
-  pCodecContextEncoder->framerate = (AVRational){(int)fps, 1};
-  pCodecContextEncoder->gop_size = 0;
+  av_codec_context_->time_base = (AVRational){1, (int)fps_};
+  av_codec_context_->framerate = (AVRational){(int)fps_, 1};
+  av_codec_context_->gop_size = 0;
 
-  pCodecContextEncoder->bit_rate_tolerance = 0;
-  pCodecContextEncoder->rc_max_rate = 0;
-  pCodecContextEncoder->rc_buffer_size = 0;
-  pCodecContextEncoder->max_b_frames = 0;
-  pCodecContextEncoder->delay = 0;
+  av_codec_context_->bit_rate_tolerance = 0;
+  av_codec_context_->rc_max_rate = 0;
+  av_codec_context_->rc_buffer_size = 0;
+  av_codec_context_->max_b_frames = 0;
+  av_codec_context_->delay = 0;
 
   /* emit one intra frame every ten frames
    * check frame pict_type before passing frame
@@ -293,7 +293,7 @@ void LibAvEncoder::init(FrameStruct *fs) {
   // TDOO: check delay:
   // https://ffmpeg.org/pipermail/libav-user/2014-December/007672.html
   // 1
-  pCodecContextEncoder->bit_rate = codec_parameters["bit_rate"].as<int>(); // 1
+  av_codec_context_->bit_rate = codec_parameters_["bit_rate"].as<int>(); // 1
 
   // fmpeg -h encoder=hevc
   // libx264:                 yuv420p yuvj420p yuv422p yuvj422p yuv444p yuvj444p
@@ -304,117 +304,117 @@ void LibAvEncoder::init(FrameStruct *fs) {
   // cuda nv12 p010le nvenc_h264 (gpu x264):   yuv420p nv12 p010le yuv444p
   // yuv444p16le bgr0 rgb0 cuda
 
-  pCodecContextEncoder->pix_fmt =
-      av_get_pix_fmt(codec_parameters["pix_fmt"].as<std::string>().c_str());
+  av_codec_context_->pix_fmt =
+      av_get_pix_fmt(codec_parameters_["pix_fmt"].as<std::string>().c_str());
 
-  YAML::Node codec_parameters_options = codec_parameters["options"];
+  YAML::Node codec_parameters_options = codec_parameters_["options"];
 
   for (YAML::const_iterator it = codec_parameters_options.begin();
        it != codec_parameters_options.end(); ++it) {
-    av_opt_set(pCodecContextEncoder->priv_data,
+    av_opt_set(av_codec_context_->priv_data,
                it->first.as<std::string>().c_str(),
                it->second.as<std::string>().c_str(), AV_OPT_SEARCH_CHILDREN);
   }
 
-  av_opt_set(pCodecContextEncoder->priv_data, "tune", "delay", 0);
-  av_opt_set(pCodecContextEncoder->priv_data, "tune", "zerolatency", 1);
-  av_opt_set(pCodecContextEncoder->priv_data, "rcParams", "zeroReorderDelay",
+  av_opt_set(av_codec_context_->priv_data, "tune", "delay", 0);
+  av_opt_set(av_codec_context_->priv_data, "tune", "zerolatency", 1);
+  av_opt_set(av_codec_context_->priv_data, "rcParams", "zeroReorderDelay",
              1);
 
-  pCodecParametersEncoder->codec_type = AVMEDIA_TYPE_VIDEO;
+  av_codec_parameters_->codec_type = AVMEDIA_TYPE_VIDEO;
 
-  pCodecParametersEncoder->codec_id = pCodecEncoder->id;
-  pCodecParametersEncoder->codec_tag = pCodecContextEncoder->codec_tag;
-  pCodecParametersEncoder->bit_rate = pCodecContextEncoder->bit_rate;
-  pCodecParametersEncoder->bits_per_coded_sample =
-      pCodecContextEncoder->bits_per_coded_sample;
-  pCodecParametersEncoder->bits_per_raw_sample =
-      pCodecContextEncoder->bits_per_raw_sample;
-  pCodecParametersEncoder->profile = pCodecContextEncoder->level;
-  pCodecParametersEncoder->width = pCodecContextEncoder->width;
-  pCodecParametersEncoder->height = pCodecContextEncoder->height;
+  av_codec_parameters_->codec_id = av_codec_->id;
+  av_codec_parameters_->codec_tag = av_codec_context_->codec_tag;
+  av_codec_parameters_->bit_rate = av_codec_context_->bit_rate;
+  av_codec_parameters_->bits_per_coded_sample =
+      av_codec_context_->bits_per_coded_sample;
+  av_codec_parameters_->bits_per_raw_sample =
+      av_codec_context_->bits_per_raw_sample;
+  av_codec_parameters_->profile = av_codec_context_->level;
+  av_codec_parameters_->width = av_codec_context_->width;
+  av_codec_parameters_->height = av_codec_context_->height;
 
-  pCodecParametersEncoder->color_space = pCodecContextEncoder->colorspace;
-  pCodecParametersEncoder->sample_rate = pCodecContextEncoder->sample_rate;
+  av_codec_parameters_->color_space = av_codec_context_->colorspace;
+  av_codec_parameters_->sample_rate = av_codec_context_->sample_rate;
 
-  ret = avcodec_open2(pCodecContextEncoder, pCodecEncoder, NULL);
+  ret = avcodec_open2(av_codec_context_, av_codec_, NULL);
   if (ret < 0) {
     spdlog::error("Could not open codec: {}", av_err2str(ret));
     exit(1);
   }
 
-  pFrame = av_frame_alloc();
-  if (!pFrame) {
+  frame_av_ = av_frame_alloc();
+  if (!frame_av_) {
     spdlog::error("Could not allocate video frame.");
     exit(1);
   }
 
-  pFrame->format = pCodecContextEncoder->pix_fmt;
-  pFrame->width = pCodecContextEncoder->width;
-  pFrame->height = pCodecContextEncoder->height;
+  frame_av_->format = av_codec_context_->pix_fmt;
+  frame_av_->width = av_codec_context_->width;
+  frame_av_->height = av_codec_context_->height;
 
-  pFrame->pts = 0;
-  pFrame->pkt_dts = 0;
+  frame_av_->pts = 0;
+  frame_av_->pkt_dts = 0;
 
-  ret = av_frame_get_buffer(pFrame, 30);
+  ret = av_frame_get_buffer(frame_av_, 30);
   if (ret < 0) {
     spdlog::error("Could not allocate the video frame data.");
     exit(1);
   }
 
-  sws_ctx = sws_getContext(
-      width, height, (AVPixelFormat)pxl_format, pFrame->width, pFrame->height,
-      (AVPixelFormat)pFrame->format, SWS_BILINEAR, NULL, NULL, NULL);
+  sws_context_ = sws_getContext(
+      width, height, (AVPixelFormat)pxl_format, frame_av_->width, frame_av_->height,
+      (AVPixelFormat)frame_av_->format, SWS_BILINEAR, NULL, NULL, NULL);
 }
 
-CodecParamsStruct *LibAvEncoder::getCodecParamsStruct() {
+CodecParamsStruct *LibAvEncoder::GetCodecParamsStruct() {
 
-  if (cParamsStruct == NULL) {
+  if (codec_params_struct_ == NULL) {
 
-    void *sEPointer = pCodecParametersEncoder->extradata;
-    size_t sESize = pCodecParametersEncoder->extradata_size;
-    size_t sSize = sizeof(*pCodecParametersEncoder);
+    void *extra_data_pointer = av_codec_parameters_->extradata;
+    size_t extra_data_size = av_codec_parameters_->extradata_size;
+    size_t data_size = sizeof(*av_codec_parameters_);
 
-    std::vector<unsigned char> e(sSize);
-    std::vector<unsigned char> ed(sESize);
+    std::vector<unsigned char> data_buffer(data_size);
+    std::vector<unsigned char> extra_data_buffer(extra_data_size);
 
-    memcpy(&e[0], pCodecParametersEncoder, sSize);
-    memcpy(&ed[0], sEPointer, sESize);
-    cParamsStruct = new CodecParamsStruct(0, e, ed);
+    memcpy(&data_buffer[0], av_codec_parameters_, data_size);
+    memcpy(&extra_data_buffer[0], extra_data_pointer, extra_data_size);
+    codec_params_struct_ = new CodecParamsStruct(0, data_buffer, extra_data_buffer);
   }
 
-  return cParamsStruct;
+  return codec_params_struct_;
 }
 
-FrameStruct *LibAvEncoder::currentFrameEncoded() {
-  FrameStruct *f = new FrameStruct(*buffer.front());
+FrameStruct *LibAvEncoder::CurrentFrameEncoded() {
+  FrameStruct *f = new FrameStruct(*buffer_fs_.front());
 
-  f->messageType = 0;
-  f->frameDataType = 1;
-  f->codec_data = *getCodecParamsStruct();
-  f->frame = currentFrameBytes();
-  f->frameId = totalCurrentFrameCounter;
-  f->streamId = stream_id;
+  f->message_type = 0;
+  f->frame_data_type = 1;
+  f->codec_data = *GetCodecParamsStruct();
+  f->frame = CurrentFrameBytes();
+  f->frame_id = total_frame_counter_;
+  f->stream_id = stream_id_;
 
   return f;
 }
 
-FrameStruct *LibAvEncoder::currentFrameOriginal() {
-  if (buffer.empty())
-    return NULL;
-  return buffer.front();
+FrameStruct *LibAvEncoder::CurrentFrameOriginal() {
+  if (buffer_fs_.empty())
+    return nullptr;
+  return buffer_fs_.front();
 }
 
-void LibAvEncoder::addFrameStruct(FrameStruct *fs) {
-  if (!ready) {
-    ready = true;
-    init(fs);
+void LibAvEncoder::AddFrameStruct(FrameStruct *fs) {
+  if (!ready_) {
+    ready_ = true;
+    Init(fs);
   }
-  fs->timestamps.push_back(currentTimeMs());
-  buffer.push(fs);
-  encode();
+  fs->timestamps.push_back(CurrentTimeMs());
+  buffer_fs_.push(fs);
+  Encode();
 }
 
-uint LibAvEncoder::getFps() { return fps; }
+unsigned int LibAvEncoder::GetFps() { return fps_; }
 
-bool LibAvEncoder::hasNextPacket() { return !pBuffer.empty(); }
+bool LibAvEncoder::HasNextPacket() { return !buffer_packet_.empty(); }

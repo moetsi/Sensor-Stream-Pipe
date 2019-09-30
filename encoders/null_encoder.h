@@ -8,24 +8,24 @@
 class NullEncoder : public IEncoder {
 private:
   FrameStruct *frame;
-  uint fps;
+  unsigned int fps;
 
 public:
   NullEncoder(int _fps);
 
   ~NullEncoder();
 
-  void addFrameStruct(FrameStruct *fs);
+  void AddFrameStruct(FrameStruct *fs);
 
-  void nextPacket();
+  void NextPacket();
 
-  bool hasNextPacket();
+  bool HasNextPacket();
 
-  FrameStruct *currentFrameEncoded();
+  FrameStruct *CurrentFrameEncoded();
 
-  FrameStruct *currentFrameOriginal();
+  FrameStruct *CurrentFrameOriginal();
 
-  CodecParamsStruct *getCodecParamsStruct();
+  CodecParamsStruct *GetCodecParamsStruct();
 
-  uint getFps();
+  unsigned int GetFps();
 };

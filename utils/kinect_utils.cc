@@ -4,8 +4,8 @@
 
 #include "kinect_utils.h"
 
-ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
-  ExtendedAzureConfig extendedAzureConfig;
+ExtendedAzureConfig BuildKinectConfigFromYAML(YAML::Node config) {
+  ExtendedAzureConfig extended_azure_config;
   k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
   if (!config["streaming_color_format"].IsDefined()) {
@@ -162,9 +162,9 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     spdlog::warn("Using default subordinate_delay_off_master_usec = 0");
   }
 
-  int absoluteExposureValue = 0;
+  int absolute_exposure_value = 0;
   if (config["absoluteExposureValue"].IsDefined()) {
-    absoluteExposureValue = config["absoluteExposureValue"].as<int>();
+    absolute_exposure_value = config["absoluteExposureValue"].as<int>();
   } else {
     ;
     spdlog::warn("Using default absoluteExposureValue = 0");
@@ -205,11 +205,11 @@ ExtendedAzureConfig buildKinectConfigFromYAML(YAML::Node config) {
     device_config.depth_mode = K4A_DEPTH_MODE_OFF;
   }
 
-  extendedAzureConfig.device_config = device_config;
-  extendedAzureConfig.stream_color = stream_color_video;
-  extendedAzureConfig.stream_depth = stream_depth_video;
-  extendedAzureConfig.stream_ir = stream_ir_video;
-  extendedAzureConfig.absoluteExposureValue = absoluteExposureValue;
+  extended_azure_config.device_config = device_config;
+  extended_azure_config.stream_color = stream_color_video;
+  extended_azure_config.stream_depth = stream_depth_video;
+  extended_azure_config.stream_ir = stream_ir_video;
+  extended_azure_config.absolute_exposure_value = absolute_exposure_value;
 
-  return extendedAzureConfig;
+  return extended_azure_config;
 }

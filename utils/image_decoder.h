@@ -22,29 +22,29 @@ extern "C" {
 class ImageDecoder {
 
 private:
-  AVFormatContext *pFormatContext = NULL;
-  AVIOContext *avio_ctx = NULL;
-  AVCodecParameters *pCodecParameters;
-  AVCodecContext *pCodecContext;
-  AVCodec *pCodec;
-  AVPacket *pPacket;
+  AVFormatContext *av_format_context_;
+  AVIOContext *avio_context_;
+  AVCodecParameters *av_codec_parameters_;
+  AVCodecContext *av_codec_context_;
+  AVCodec *codec_;
+  AVPacket *packet_;
 
-  CodecParamsStruct *cParamsStruct;
+  CodecParamsStruct *codec_params_struct_;
 
-  uint8_t *avio_ctx_buffer = NULL;
-  size_t avio_ctx_buffer_size = 4096;
+  uint8_t *avio_ctx_buffer_;
+  size_t avio_ctx_buffer_size_ = 4096;
 
-  bool libAVReady;
+  bool libav_ready_;
 
-  void init(std::vector<unsigned char> &buffer);
+  void Init(std::vector<unsigned char> &buffer);
 
-  int decode_packet(AVFrame *pFrame);
-  CodecParamsStruct *getCodecParamsStruct();
+  int DecodePacket(AVFrame *pFrame);
+  CodecParamsStruct *GetCodecParamsStruct();
 
 public:
   ImageDecoder();
 
   ~ImageDecoder();
 
-  void imageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame);
+  void ImageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame);
 };

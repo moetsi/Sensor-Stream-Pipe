@@ -19,43 +19,43 @@
 class NvEncoder : public IEncoder {
 
 private:
-  NvPipe *encoder;
-  std::vector<uint8_t> compressed;
-  uint fps;
-  uint totalCurrentFrameCounter;
-  uint width, height;
-  uint64 bitrate;
-  FrameStruct *frameOriginal;
-  FrameStruct *frameCompressed;
-  CodecParamsStruct *paramsStruct;
-  struct SwsContext *sws_ctx;
-  NvPipe_Codec codec;
-  NvPipe_Compression compression;
-  NvPipe_Format format;
-  std::string stream_id;
+  NvPipe *encoder_;
+  std::vector<uint8_t> compressed_buffer_;
+  unsigned int fps_;
+  unsigned int total_frame_counter_;
+  unsigned int width_, height_;
+  uint64 bitrate_;
+  FrameStruct *frame_original_;
+  FrameStruct *frame_compressed_;
+  CodecParamsStruct *codec_params_struct_;
+  struct SwsContext *sws_context_;
+  NvPipe_Codec codec_;
+  NvPipe_Compression compression_;
+  NvPipe_Format format_;
+  std::string stream_id_;
 
-  LibAvDecoder *fd;
+  LibAvDecoder *lib_av_decoder_;
 
-  ImageDecoder id;
+  ImageDecoder image_decoder_;
 
-  void buildEncoder(YAML::Node _codec_parameters);
+  void BuildEncoder(YAML::Node _codec_parameters);
 
 public:
-  NvEncoder(YAML::Node _codec_parameters, uint _fps);
+  NvEncoder(YAML::Node _codec_parameters, unsigned int _fps);
 
   ~NvEncoder();
 
-  void addFrameStruct(FrameStruct *fs);
+  void AddFrameStruct(FrameStruct *fs);
 
-  void nextPacket();
+  void NextPacket();
 
-  bool hasNextPacket();
+  bool HasNextPacket();
 
-  FrameStruct *currentFrameEncoded();
+  FrameStruct *CurrentFrameEncoded();
 
-  FrameStruct *currentFrameOriginal();
+  FrameStruct *CurrentFrameOriginal();
 
-  CodecParamsStruct *getCodecParamsStruct();
+  CodecParamsStruct *GetCodecParamsStruct();
 
-  uint getFps();
+  unsigned int GetFps();
 };

@@ -13,19 +13,19 @@
 class NetworkReader {
 
 private:
-  uint64_t last_time = currentTimeMs();
-  uint64_t start_time = last_time;
-  uint64_t rec_frames = 0;
-  double rec_mbytes = 0;
+  uint64_t last_time_;
+  uint64_t start_time_;
+  uint64_t rec_frames_;
+  double rec_mbytes_;
 
-  int currentFrameCounter;
+  int current_frame_counter_;
 
-  std::unordered_map<std::string, double> rec_mbytes_per_stream;
-  std::vector<FrameStruct> currentFrameInternal;
+  std::unordered_map<std::string, double> rec_mbytes_per_stream_;
+  std::vector<FrameStruct> current_frame_internal_;
 
-  int port;
-  zmq::context_t *context;
-  zmq::socket_t *socket;
+  int port_;
+  zmq::context_t *context_;
+  zmq::socket_t *socket_;
 
 public:
   NetworkReader(int port);
@@ -33,12 +33,12 @@ public:
 
   ~NetworkReader();
 
-  bool hasNextFrame();
+  bool HasNextFrame();
 
-  void nextFrame();
+  void NextFrame();
 
-  std::vector<FrameStruct> currentFrame();
+  std::vector<FrameStruct> GetCurrentFrame();
 
-  uint currentFrameId();
+  unsigned int GetCurrentFrameId();
 
 };

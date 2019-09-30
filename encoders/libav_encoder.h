@@ -32,61 +32,61 @@ extern "C" {
 
 class LibAvEncoder : public IEncoder {
 private:
-  unsigned int totalCurrentFrameCounter;
+  unsigned int total_frame_counter_;
 
-  AVCodecParameters *pCodecParametersEncoder;
-  AVCodecContext *pCodecContextEncoder;
-  AVCodec *pCodecEncoder;
+  AVCodecParameters *av_codec_parameters_;
+  AVCodecContext *av_codec_context_;
+  AVCodec *av_codec_;
 
-  AVFrame *pFrame;
-  AVPacket *pPacket;
+  AVFrame *frame_av_;
+  AVPacket *packet_av_;
 
-  CodecParamsStruct *cParamsStruct;
+  CodecParamsStruct *codec_params_struct_;
 
-  struct SwsContext *sws_ctx;
+  struct SwsContext *sws_context_;
 
-  YAML::Node codec_parameters;
+  YAML::Node codec_parameters_;
 
-  ImageDecoder id;
+  ImageDecoder image_decoder_;
 
-  std::queue<FrameStruct *> buffer;
-  std::queue<AVPacket *> pBuffer;
+  std::queue<FrameStruct *> buffer_fs_;
+  std::queue<AVPacket *> buffer_packet_;
 
-  std::string stream_id;
+  std::string stream_id_;
 
-  uint fps;
+  unsigned int fps_;
 
-  bool ready;
+  bool ready_;
 
-  void init(FrameStruct *fs);
+  void Init(FrameStruct *fs);
 
-  void encode();
+  void Encode();
 
-  void encodeA(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt);
+  void EncodeA(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt);
 
-  void prepareFrame();
+  void PrepareFrame();
 
-  std::vector<unsigned char> currentFrameBytes();
+  std::vector<unsigned char> CurrentFrameBytes();
 
 public:
-  LibAvEncoder(std::string codec_parameters_file, uint _fps);
+  LibAvEncoder(std::string codec_parameters_file, unsigned int fps);
 
-  LibAvEncoder(YAML::Node &_codec_parameters, uint _fps);
+  LibAvEncoder(YAML::Node &_codec_parameters, unsigned int fps);
 
   ~LibAvEncoder();
 
-  void addFrameStruct(FrameStruct *fs);
+  void AddFrameStruct(FrameStruct *fs);
 
-  void nextPacket();
+  void NextPacket();
 
-  bool hasNextPacket();
+  bool HasNextPacket();
 
-  FrameStruct *currentFrameEncoded();
+  FrameStruct *CurrentFrameEncoded();
 
-  FrameStruct *currentFrameOriginal();
+  FrameStruct *CurrentFrameOriginal();
 
-  CodecParamsStruct *getCodecParamsStruct();
+  CodecParamsStruct *GetCodecParamsStruct();
 
-  uint getFps();
+  unsigned int GetFps();
 
 };

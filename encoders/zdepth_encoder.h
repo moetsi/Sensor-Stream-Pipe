@@ -15,38 +15,38 @@
 
 class ZDepthEncoder: public IEncoder {
 private:
-  FrameStruct *frameOriginal;
-  FrameStruct *frameCompressed;
-  uint totalCurrentFrameCounter;
-  uint fps;
-  uint width, height;
-  zdepth::DepthCompressor compressor;
-  LibAvDecoder *fd;
-  ImageDecoder id;
-  struct SwsContext *sws_ctx;
-  std::vector<uint8_t> compressed;
-  CodecParamsStruct *paramsStruct;
+  FrameStruct *frame_original_;
+  FrameStruct *frame_compressed_;
+  unsigned int total_frame_counter_;
+  unsigned int fps_;
+  unsigned int width_, height_;
+  zdepth::DepthCompressor compressor_;
+  LibAvDecoder *libav_decoder_;
+  ImageDecoder image_decoder_;
+  struct SwsContext *sws_context_;
+  std::vector<uint8_t> compressed_buffer_;
+  CodecParamsStruct *codec_params_struct_;
 
-  std::string stream_id;
+  std::string stream_id_;
 
 public:
   ZDepthEncoder(int _fps);
 
   ~ZDepthEncoder();
 
-  void addFrameStruct(FrameStruct *fs);
+  void AddFrameStruct(FrameStruct *fs);
 
-  void nextPacket();
+  void NextPacket();
 
-  bool hasNextPacket();
+  bool HasNextPacket();
 
-  FrameStruct *currentFrameEncoded();
+  FrameStruct *CurrentFrameEncoded();
 
-  FrameStruct *currentFrameOriginal();
+  FrameStruct *CurrentFrameOriginal();
 
-  CodecParamsStruct *getCodecParamsStruct();
+  CodecParamsStruct *GetCodecParamsStruct();
 
-  uint getFps();
+  unsigned int GetFps();
 
 };
 

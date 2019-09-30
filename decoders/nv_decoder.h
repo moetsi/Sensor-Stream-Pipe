@@ -13,16 +13,16 @@
 
 class NvDecoder : public IDecoder {
 private:
-  NvPipe *decoder;
-  std::vector<uint8_t> decompressed;
-  uint width;
-  uint height;
-  NvPipe_Codec codec;
-  NvPipe_Format format;
+  NvPipe *decoder_;
+  std::vector<uint8_t> decompressed_buffer_;
+  unsigned int width_;
+  unsigned int height_;
+  NvPipe_Codec codec_;
+  NvPipe_Format format_;
 
 public:
   NvDecoder();
   ~NvDecoder();
-  void init(std::vector<unsigned char> parameter_data);
+  void Init(std::vector<unsigned char> parameter_data);
   cv::Mat Decode(FrameStruct *frame);
 };

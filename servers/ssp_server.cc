@@ -45,10 +45,10 @@ int main(int argc, char *argv[]) {
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
     YAML::Node general_parameters = codec_parameters["general"];
-    setupLogging(general_parameters);
+    SetupLogging(general_parameters);
 
     std::string host = codec_parameters["general"]["host"].as<std::string>();
-    uint port = codec_parameters["general"]["port"].as<uint>();
+    unsigned int port = codec_parameters["general"]["port"].as<unsigned int>();
 
     IReader *reader = nullptr;
 
@@ -64,15 +64,15 @@ int main(int argc, char *argv[]) {
               .as<std::string>();
       if (general_parameters["frame_source"]["parameters"]["streams"]
               .IsDefined()) {
-        std::vector<uint> streams =
+        std::vector<unsigned int> streams =
             general_parameters["frame_source"]["parameters"]["streams"]
-                .as<std::vector<uint>>();
+                .as<std::vector<unsigned int>>();
         reader = new VideoFileReader(path, streams);
       } else {
         reader = new VideoFileReader(path);
       }
     } else if (reader_type == "kinect") {
-      ExtendedAzureConfig c = buildKinectConfigFromYAML(
+      ExtendedAzureConfig c = BuildKinectConfigFromYAML(
           general_parameters["frame_source"]["parameters"]);
       reader = new KinectReader(0, c);
     } else {
@@ -82,22 +82,22 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    std::unordered_map<uint, IEncoder *> encoders;
+    std::unordered_map<unsigned int, IEncoder *> encoders;
 
-    std::vector<uint> types = reader->getType();
+    std::vector<unsigned int> types = reader->GetType();
 
-    for (uint type : types) {
+    for (unsigned int type : types) {
       YAML::Node v = codec_parameters["video_encoder"][type];
       std::string encoder_type = v["type"].as<std::string>();
       IEncoder *fe = nullptr;
       if (encoder_type == "libav")
-        fe = new LibAvEncoder(v, reader->getFps());
+        fe = new LibAvEncoder(v, reader->GetFps());
       else if (encoder_type == "nvenc")
-        fe = new NvEncoder(v, reader->getFps());
+        fe = new NvEncoder(v, reader->GetFps());
       else if (encoder_type == "zdepth")
-        fe = new ZDepthEncoder(reader->getFps());
+        fe = new ZDepthEncoder(reader->GetFps());
       else if (encoder_type == "null")
-        fe = new NullEncoder(reader->getFps());
+        fe = new NullEncoder(reader->GetFps());
       else {
         spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                       "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
       encoders[type] = fe;
     }
 
-    uint64_t last_time = currentTimeMs();
+    uint64_t last_time = CurrentTimeMs();
     uint64_t start_time = last_time;
     uint64_t start_frame_time = last_time;
     uint64_t sent_frames = 0;
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 
     socket.connect("tcp://" + host + ":" + std::to_string(port));
 
-    uint fps = reader->getFps();
+    unsigned int fps = reader->GetFps();
 
     while (1) {
 
@@ -126,10 +126,10 @@ int main(int argc, char *argv[]) {
       if (sleep_time > 1)
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 
-      start_frame_time = currentTimeMs();
+      start_frame_time = CurrentTimeMs();
 
       if (sent_frames == 0) {
-        last_time = currentTimeMs();
+        last_time = CurrentTimeMs();
         start_time = last_time;
       }
 
@@ -137,28 +137,28 @@ int main(int argc, char *argv[]) {
       std::vector<FrameStruct *> vO;
 
       while (v.empty()) {
-        std::vector<FrameStruct *> frameStruct = reader->currentFrame();
+        std::vector<FrameStruct *> frameStruct = reader->GetCurrentFrame();
         for (FrameStruct *frameStruct : frameStruct) {
 
-          IEncoder *frameEncoder = encoders[frameStruct->frameType];
+          IEncoder *frameEncoder = encoders[frameStruct->frame_type];
 
-          frameEncoder->addFrameStruct(frameStruct);
-          if (frameEncoder->hasNextPacket()) {
-            FrameStruct *f = frameEncoder->currentFrameEncoded();
+          frameEncoder->AddFrameStruct(frameStruct);
+          if (frameEncoder->HasNextPacket()) {
+            FrameStruct *f = frameEncoder->CurrentFrameEncoded();
             vO.push_back(f);
             v.push_back(*f);
-            frameEncoder->nextPacket();
+            frameEncoder->NextPacket();
           }
         }
-        if (reader->hasNextFrame())
-          reader->nextFrame();
+        if (reader->HasNextFrame())
+          reader->NextFrame();
         else {
-          reader->reset();
+          reader->Reset();
         }
       }
 
       if (!v.empty()) {
-        std::string message = cerealStructToString(v);
+        std::string message = CerealStructToString(v);
 
         zmq::message_t request(message.size());
         memcpy(request.data(), message.c_str(), message.size());
@@ -166,9 +166,9 @@ int main(int argc, char *argv[]) {
         sent_frames += 1;
         sent_mbytes += message.size() / 1000.0;
 
-        uint64_t diff_time = currentTimeMs() - last_time;
+        uint64_t diff_time = CurrentTimeMs() - last_time;
 
-        double diff_start_time = (currentTimeMs() - start_time);
+        double diff_start_time = (CurrentTimeMs() - start_time);
         int64_t avg_fps;
         if (diff_start_time == 0)
           avg_fps = -1;
@@ -178,17 +178,17 @@ int main(int argc, char *argv[]) {
           avg_fps = 1000 / avg_time_per_frame_sent_ms;
         }
 
-        last_time = currentTimeMs();
+        last_time = CurrentTimeMs();
         processing_time = last_time - start_frame_time;
 
         spdlog::debug(
             "Message sent, took {} ms; packet size {}; avg {} fps; {} "
             "Mbps; {} Mbps expected",
             diff_time, message.size(), avg_fps,
-            8 * (sent_mbytes / (currentTimeMs() - start_time)),
-            8 * (sent_mbytes * reader->getFps() / (sent_frames * 1000)));
+            8 * (sent_mbytes / (CurrentTimeMs() - start_time)),
+            8 * (sent_mbytes * reader->GetFps() / (sent_frames * 1000)));
 
-        for (uint i = 0; i < v.size(); i++) {
+        for (unsigned int i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
           if (f.camera_calibration_data.type == 0) {
             k4a_calibration_t *calibration = new k4a_calibration_t();
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
           }
 
           f.frame.clear();
-          spdlog::debug("\t{};{};{} sent", f.deviceId, f.sensorId, f.frameId);
+          spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id, f.frame_id);
           vO.at(i)->frame.clear();
           delete vO.at(i);
         }

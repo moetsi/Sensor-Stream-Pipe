@@ -23,13 +23,12 @@ extern "C" {
 class LibAvDecoder : public IDecoder {
 private:
 
-  AVCodec * pCodec;
-  AVCodecContext * pCodecContext;
-  AVCodecParameters * pCodecParameter;
+  AVCodec * codec_;
+  AVCodecContext * codec_context_;
 
 public:
   LibAvDecoder();
   ~LibAvDecoder();
-  void init(AVCodecParameters *pCodecParameter);
-  cv::Mat Decode(FrameStruct *data);
+  void Init(AVCodecParameters *codec_parameters);
+  cv::Mat Decode(FrameStruct *frame_struct);
 };

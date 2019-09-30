@@ -1,7 +1,7 @@
 #include "video_utils.h"
 #include "../decoders/zdepth_decoder.h"
 
-void avframeToMatYUV(const AVFrame *frame, cv::Mat &image) {
+void AVFrameToMatYUV(const AVFrame *frame, cv::Mat &image) {
   int width = frame->width;
   int height = frame->height;
 
@@ -19,7 +19,7 @@ void avframeToMatYUV(const AVFrame *frame, cv::Mat &image) {
   sws_freeContext(conversion);
 }
 
-void avframeToMatGray(const AVFrame *frame, cv::Mat &image) {
+void AVFrameToMatGray(const AVFrame *frame, cv::Mat &image) {
   int width = frame->width;
   int height = frame->height;
 
@@ -43,10 +43,10 @@ void avframeToMatGray(const AVFrame *frame, cv::Mat &image) {
     memset(frame->data[0], 0, frame->height * frame->width * 2);
 }
 
-void prepareDecodingStruct(
-        FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
-        std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
-        std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters) {
+void PrepareDecodingStruct(
+    FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
+    std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
+    std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters) {
   AVCodecParameters *pCodecParameter = f->codec_data.getParams();
   AVCodec *pCodec = avcodec_find_decoder(f->codec_data.getParams()->codec_id);
   AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
@@ -66,51 +66,52 @@ void prepareDecodingStruct(
     exit(1);
   }
 
-  pCodecs[f->streamId + std::to_string(f->sensorId)] = pCodec;
-  pCodecContexts[f->streamId + std::to_string(f->sensorId)] = pCodecContext;
-  pCodecParameters[f->streamId + std::to_string(f->sensorId)] = pCodecParameter;
+  pCodecs[f->stream_id + std::to_string(f->sensor_id)] = pCodec;
+  pCodecContexts[f->stream_id + std::to_string(f->sensor_id)] = pCodecContext;
+  pCodecParameters[f->stream_id + std::to_string(f->sensor_id)] =
+      pCodecParameter;
 }
 
 bool frameStructToMat(FrameStruct &f, cv::Mat &img,
                       std::unordered_map<std::string, IDecoder *> &decoders) {
-  std::string decoder_id = f.streamId + std::to_string(f.sensorId);
+  std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
   if (decoders.find(decoder_id) == decoders.end()) {
     CodecParamsStruct data = f.codec_data;
     if (data.type == 0) {
       LibAvDecoder *fd = new LibAvDecoder();
-      fd->init(data.getParams());
+      fd->Init(data.getParams());
       decoders[decoder_id] = fd;
     } else if (data.type == 1) {
       NvDecoder *fd = new NvDecoder();
-      fd->init(data.data);
+      fd->Init(data.data);
       decoders[decoder_id] = fd;
     } else if (data.type == 2) {
       ZDepthDecoder *fd = new ZDepthDecoder();
-      fd->init(data.data);
+      fd->Init(data.data);
       decoders[decoder_id] = fd;
     }
   }
 
   bool imgChanged = false;
 
-  if (f.frameDataType == 0) {
+  if (f.frame_data_type == 0) {
     img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
     imgChanged = true;
-  } else if (f.frameDataType == 2) {
+  } else if (f.frame_data_type == 2) {
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
     img = cv::Mat(rows, cols, CV_8UC4, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
     imgChanged = true;
-  } else if (f.frameDataType == 3) {
+  } else if (f.frame_data_type == 3) {
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
     img =
         cv::Mat(rows, cols, CV_16UC1, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
     imgChanged = true;
-  } else if (f.frameDataType == 1) {
+  } else if (f.frame_data_type == 1) {
 
     IDecoder *decoder;
 
@@ -118,11 +119,11 @@ bool frameStructToMat(FrameStruct &f, cv::Mat &img,
       CodecParamsStruct data = f.codec_data;
       if (data.type == 0) {
         LibAvDecoder *fd = new LibAvDecoder();
-        fd->init(data.getParams());
+        fd->Init(data.getParams());
         decoders[decoder_id] = fd;
       } else if (data.type == 1) {
         NvDecoder *fd = new NvDecoder();
-        fd->init(data.data);
+        fd->Init(data.data);
         decoders[decoder_id] = fd;
       }
     }

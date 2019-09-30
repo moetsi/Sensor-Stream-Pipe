@@ -5,13 +5,13 @@
 #include "similarity_measures.h"
 #include <opencv2/imgproc.hpp>
 
-double getMSE(const Mat &I1, const Mat &I2) {
+double GetMSE(const Mat &I1, const Mat &I2) {
   cv::Mat power;
   cv::pow(I1 - I2, 2, power);
   return cv::sum(cv::sum(power))[0];
 }
 
-double getPSNR(const Mat &I1, const Mat &I2, double max_value) {
+double GetPSNR(const Mat &I1, const Mat &I2, double max_value) {
   Mat s1;
   absdiff(I1, I2, s1);      // |I1 - I2|
   s1.convertTo(s1, CV_32F); // cannot make a square on 8 bits
@@ -30,7 +30,7 @@ double getPSNR(const Mat &I1, const Mat &I2, double max_value) {
   }
 }
 
-Scalar getMSSIM(const Mat &i1, const Mat &i2) {
+Scalar GetMSSIM(const Mat &i1, const Mat &i2) {
   const double C1 = 6.5025, C2 = 58.5225;
   /***************************** INITS **********************************/
   int d = CV_32F;

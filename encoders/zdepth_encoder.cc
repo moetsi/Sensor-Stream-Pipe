@@ -5,53 +5,53 @@
 #include "zdepth_encoder.h"
 
 ZDepthEncoder::ZDepthEncoder(int _fps) {
-  fps = _fps;
-  totalCurrentFrameCounter = 0;
-  frameCompressed = nullptr;
-  frameOriginal = nullptr;
-  paramsStruct = nullptr;
-  fd = nullptr;
-  sws_ctx = nullptr;
+  fps_ = _fps;
+  total_frame_counter_ = 0;
+  frame_compressed_ = nullptr;
+  frame_original_ = nullptr;
+  codec_params_struct_ = nullptr;
+  libav_decoder_ = nullptr;
+  sws_context_ = nullptr;
 
-  stream_id = randomString(16);
+  stream_id_ = RandomString(16);
 }
 
 ZDepthEncoder::~ZDepthEncoder() {
-  if (frameCompressed != nullptr)
-    delete frameCompressed;
-  if (frameOriginal != nullptr)
-    delete frameOriginal;
-  if (paramsStruct != nullptr)
-    delete paramsStruct;
-  if (fd != nullptr)
-    delete fd;
-  if (sws_ctx != nullptr)
-    sws_freeContext(sws_ctx);
+  if (frame_compressed_ != nullptr)
+    delete frame_compressed_;
+  if (frame_original_ != nullptr)
+    delete frame_original_;
+  if (codec_params_struct_ != nullptr)
+    delete codec_params_struct_;
+  if (libav_decoder_ != nullptr)
+    delete libav_decoder_;
+  if (sws_context_ != nullptr)
+    sws_freeContext(sws_context_);
 }
 
-void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
-  frameOriginal = fs;
+void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
+  frame_original_ = fs;
 
-  if (frameOriginal == nullptr) {
-    frameCompressed = nullptr;
+  if (frame_original_ == nullptr) {
+    frame_compressed_ = nullptr;
   } else {
 
-    if (frameCompressed == nullptr)
-      frameCompressed = new FrameStruct();
+    if (frame_compressed_ == nullptr)
+      frame_compressed_ = new FrameStruct();
 
-    frameCompressed->deviceId = fs->deviceId;
-    frameCompressed->frameDataType = 1;
-    frameCompressed->frameId = totalCurrentFrameCounter;
-    frameCompressed->frameType = fs->frameType;
-    frameCompressed->messageType = fs->messageType;
-    frameCompressed->sensorId = fs->sensorId;
-    frameCompressed->streamId = stream_id;
-    frameCompressed->sceneDesc = fs->sceneDesc;
-    frameCompressed->timestamps.clear();
-    frameCompressed->timestamps = std::vector<unsigned long>();
-    frameCompressed->timestamps.push_back(frameOriginal->timestamps.front());
-    frameCompressed->timestamps.push_back(currentTimeMs());
-    frameCompressed->camera_calibration_data = fs->camera_calibration_data;
+    frame_compressed_->device_id = fs->device_id;
+    frame_compressed_->frame_data_type = 1;
+    frame_compressed_->frame_id = total_frame_counter_;
+    frame_compressed_->frame_type = fs->frame_type;
+    frame_compressed_->message_type = fs->message_type;
+    frame_compressed_->sensor_id = fs->sensor_id;
+    frame_compressed_->stream_id = stream_id_;
+    frame_compressed_->scene_desc = fs->scene_desc;
+    frame_compressed_->timestamps.clear();
+    frame_compressed_->timestamps = std::vector<unsigned long>();
+    frame_compressed_->timestamps.push_back(frame_original_->timestamps.front());
+    frame_compressed_->timestamps.push_back(CurrentTimeMs());
+    frame_compressed_->camera_calibration_data = fs->camera_calibration_data;
 
     uint16_t *data = nullptr;
 
@@ -59,72 +59,72 @@ void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
     AVFrame *pFrame = nullptr;
     cv::Mat img;
 
-    if (fs->frameDataType == 0) {
+    if (fs->frame_data_type == 0) {
 
       pFrameO = av_frame_alloc();
       pFrame = av_frame_alloc();
 
-      id.imageBufferToAVFrame(fs, pFrameO);
+      image_decoder_.ImageBufferToAVFrame(fs, pFrameO);
 
-      width = pFrameO->width;
-      height = pFrameO->height;
+      width_ = pFrameO->width;
+      height_ = pFrameO->height;
 
       pFrame->format = AV_PIX_FMT_GBRP16LE;
 
-      pFrame->width = width;
-      pFrame->height = height;
+      pFrame->width = width_;
+      pFrame->height = height_;
       av_frame_get_buffer(pFrame, 0);
 
-      if (sws_ctx == nullptr)
-        sws_ctx = sws_getContext(width, height, (AVPixelFormat)pFrameO->format,
-                                 width, height, (AVPixelFormat)pFrame->format,
+      if (sws_context_ == nullptr)
+        sws_context_ = sws_getContext(width_, height_, (AVPixelFormat)pFrameO->format,
+                                 width_, height_, (AVPixelFormat)pFrame->format,
                                  SWS_BILINEAR, NULL, NULL, NULL);
 
-      sws_scale(sws_ctx, (const uint8_t *const *)pFrameO->data,
+      sws_scale(sws_context_, (const uint8_t *const *)pFrameO->data,
                 pFrameO->linesize, 0, pFrameO->height, pFrame->data,
                 pFrame->linesize);
 
       data = reinterpret_cast<uint16_t *>(&pFrame->data[0][0]);
 
-    } else if (fs->frameDataType == 1) {
+    } else if (fs->frame_data_type == 1) {
 
-      if (fd == nullptr) {
-        fd = new LibAvDecoder();
-        fd->init(fs->codec_data.getParams());
+      if (libav_decoder_ == nullptr) {
+        libav_decoder_ = new LibAvDecoder();
+        libav_decoder_->Init(fs->codec_data.getParams());
       }
 
-      img = fd->Decode(fs);
+      img = libav_decoder_->Decode(fs);
 
-      width = img.cols;
-      height = img.rows;
+      width_ = img.cols;
+      height_ = img.rows;
 
-      if (frameCompressed->frameType == 0) {
+      if (frame_compressed_->frame_type == 0) {
         cv::cvtColor(img, img, CV_BGR2BGRA);
       }
 
       data = reinterpret_cast<uint16_t *>(img.data);
 
-    } else if (fs->frameDataType == 2 || fs->frameDataType == 3) {
+    } else if (fs->frame_data_type == 2 || fs->frame_data_type == 3) {
       // fs->frame[8] ignores width and height set at [0] and [4] by
       // KinectReader
-      memcpy(&width, &fs->frame[0], sizeof(int));
-      memcpy(&height, &fs->frame[4], sizeof(int));
+      memcpy(&width_, &fs->frame[0], sizeof(int));
+      memcpy(&height_, &fs->frame[4], sizeof(int));
       data = reinterpret_cast<uint16_t *>(&fs->frame[8]);
     }
 
-    if (paramsStruct == nullptr)
-      getCodecParamsStruct();
+    if (codec_params_struct_ == nullptr)
+      GetCodecParamsStruct();
 
-    compressed.clear();
+    compressed_buffer_.clear();
     //TODO: send I Frame every X frames to allow decoder to catch up mid stream
-    compressor.Compress(width, height, data, compressed,
-                        totalCurrentFrameCounter == 0);
+    compressor_.Compress(width_, height_, data, compressed_buffer_,
+                        total_frame_counter_ == 0);
 
-    frameCompressed->codec_data = *paramsStruct;
-    frameCompressed->frame = std::vector<unsigned char>(
-        compressed.data(), compressed.data() + compressed.size());
-    frameCompressed->timestamps.push_back(currentTimeMs());
-    totalCurrentFrameCounter++;
+    frame_compressed_->codec_data = *codec_params_struct_;
+    frame_compressed_->frame = std::vector<unsigned char>(
+        compressed_buffer_.data(), compressed_buffer_.data() + compressed_buffer_.size());
+    frame_compressed_->timestamps.push_back(CurrentTimeMs());
+    total_frame_counter_++;
 
     if (pFrame != nullptr) {
       av_frame_free(&pFrame);
@@ -133,29 +133,29 @@ void ZDepthEncoder::addFrameStruct(FrameStruct *fs) {
   }
 }
 
-void ZDepthEncoder::nextPacket() {
-  if (frameOriginal != nullptr)
-    delete frameOriginal;
-  frameOriginal = nullptr;
-  frameCompressed = nullptr;
+void ZDepthEncoder::NextPacket() {
+  if (frame_original_ != nullptr)
+    delete frame_original_;
+  frame_original_ = nullptr;
+  frame_compressed_ = nullptr;
 }
 
-bool ZDepthEncoder::hasNextPacket() { return true; }
+bool ZDepthEncoder::HasNextPacket() { return true; }
 
-FrameStruct *ZDepthEncoder::currentFrameEncoded() { return frameCompressed; }
+FrameStruct *ZDepthEncoder::CurrentFrameEncoded() { return frame_compressed_; }
 
-FrameStruct *ZDepthEncoder::currentFrameOriginal() { return frameOriginal; }
+FrameStruct *ZDepthEncoder::CurrentFrameOriginal() { return frame_original_; }
 
-CodecParamsStruct *ZDepthEncoder::getCodecParamsStruct() {
-  if (paramsStruct == NULL) {
-    paramsStruct = new CodecParamsStruct();
-    paramsStruct->type = 2;
-    paramsStruct->data.resize(4 + 4);
+CodecParamsStruct *ZDepthEncoder::GetCodecParamsStruct() {
+  if (codec_params_struct_ == NULL) {
+    codec_params_struct_ = new CodecParamsStruct();
+    codec_params_struct_->type = 2;
+    codec_params_struct_->data.resize(4 + 4);
 
-    memcpy(&paramsStruct->data[0], &width, sizeof(int));
-    memcpy(&paramsStruct->data[4], &height, sizeof(int));
+    memcpy(&codec_params_struct_->data[0], &width_, sizeof(int));
+    memcpy(&codec_params_struct_->data[4], &height_, sizeof(int));
   }
-  return paramsStruct;
+  return codec_params_struct_;
 }
 
-uint ZDepthEncoder::getFps() { return fps; }
+unsigned int ZDepthEncoder::GetFps() { return fps_; }
