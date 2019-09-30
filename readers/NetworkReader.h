@@ -33,19 +33,12 @@ public:
 
   ~NetworkReader();
 
-  void reset();
-
-  void goToFrame(unsigned int frameId);
-
   bool hasNextFrame();
 
   void nextFrame();
-
-  std::vector<uint> getType();
 
   std::vector<FrameStruct> currentFrame();
 
   uint currentFrameId();
 
-  unsigned int getFps();
 };

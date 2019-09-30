@@ -35,6 +35,9 @@ extern "C" {
 
 int main(int argc, char *argv[]) {
 
+  spdlog::set_level(spdlog::level::debug);
+  av_log_set_level(AV_LOG_QUIET);
+
   srand(time(NULL) * getpid());
   // srand(getpid());
 
@@ -46,6 +49,7 @@ int main(int argc, char *argv[]) {
 
   uint frameType = 0;
 
+  uint64_t total_latency = 0;
   uint64_t original_size = 0;
   uint64_t compressed_size = 0;
 
@@ -69,6 +73,11 @@ int main(int argc, char *argv[]) {
 
   IReader *reader = nullptr;
   YAML::Node general_parameters = codec_parameters["general"];
+
+  bool show_graphical_output = true;
+  if (general_parameters["show_graphical_output"].IsDefined())
+    show_graphical_output =
+        general_parameters["show_graphical_output"].as<bool>();
 
   setupLogging(general_parameters);
 
@@ -151,6 +160,7 @@ int main(int argc, char *argv[]) {
 
           original_size += fo.frame.size();
           compressed_size += f.frame.size();
+          total_latency += f.timestamps.back() - f.timestamps.at(1);
           v.push_back(f);
           buffer.push(fo);
 
@@ -205,73 +215,77 @@ int main(int argc, char *argv[]) {
         mse_comp += getMSE(frameOriA, imgA);
       }
 
-      if (f.frameType == 0) {
+      if (show_graphical_output) {
+        if (f.frameType == 0) {
 
-        absdiff(frameOri, img, frameDiff);
+          absdiff(frameOri, img, frameDiff);
 
-      } else if (f.frameType == 1) {
+        } else if (f.frameType == 1) {
 
-        absdiff(frameOri, img, frameDiff);
+          absdiff(frameOri, img, frameDiff);
 
-        if (img.type() == CV_16U) {
-          // Compress images to show up on a 255 valued color map
-          img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+          if (img.type() == CV_16U) {
+            // Compress images to show up on a 255 valued color map
+            img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+          }
+
+          if (frameOri.type() == CV_16U) {
+            // Compress images to show up on a 255 valued color map
+            frameOri *=
+                (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+          }
+
+          img.convertTo(img, CV_8U);
+          frameOri.convertTo(frameOri, CV_8U);
+          cv::applyColorMap(img, img, cv::COLORMAP_JET);
+          cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
+        }
+        if (f.frameType == 2) {
+          absdiff(frameOri, img, frameDiff);
+
+          double max = 1024;
+          img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
+          img.convertTo(img, CV_8U);
+
+          frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
+          frameOri.convertTo(frameOri, CV_8U);
         }
 
-        if (frameOri.type() == CV_16U) {
-          // Compress images to show up on a 255 valued color map
-          frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+        if (frameDiff.channels() == 1) {
+          frameDiff.convertTo(frameDiff, CV_8UC1);
+          cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
         }
 
-        img.convertTo(img, CV_8U);
-        frameOri.convertTo(frameOri, CV_8U);
-        cv::applyColorMap(img, img, cv::COLORMAP_JET);
-        cv::applyColorMap(frameOri, frameOri, cv::COLORMAP_JET);
+        cv::namedWindow("Original");
+        cv::imshow("Original", frameOri);
+        cv::namedWindow("Encoded");
+        cv::imshow("Encoded", img);
+        cv::namedWindow("Diff");
+
+        cv::imshow("Diff", frameDiff);
+
+        cv::waitKey(1);
       }
-      if (f.frameType == 2) {
-        absdiff(frameOri, img, frameDiff);
-
-        double max = 1024;
-        img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
-        img.convertTo(img, CV_8U);
-
-        frameOri *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
-        frameOri.convertTo(frameOri, CV_8U);
-      }
-
-      if (frameDiff.channels() == 1) {
-        frameDiff.convertTo(frameDiff, CV_8UC1);
-        cv::applyColorMap(frameDiff, frameDiff, cv::COLORMAP_HOT);
-      }
-
-      cv::namedWindow("Original");
-      cv::imshow("Original", frameOri);
-      cv::namedWindow("Encoded");
-      cv::imshow("Encoded", img);
-      cv::namedWindow("Diff");
-
-      cv::imshow("Diff", frameDiff);
-
-      cv::waitKey(1);
       imgChanged = false;
       i++;
     }
   }
 
-  spdlog::critical("original_size: {} bytes", original_size);
-  spdlog::critical("compressed_size: {} bytes", compressed_size);
-  spdlog::critical("compression ratio: {}x",
+  spdlog::critical("[original_size];{};bytes", original_size);
+  spdlog::critical("[compressed_size];{};bytes", compressed_size);
+  spdlog::critical("[compression ratio];{};x",
                    original_size / (float)compressed_size);
 
+  spdlog::critical("[latency];{};ms", total_latency / (float)i);
+
   if (frameType == 0) {
-    spdlog::critical("Avg PSNR: {}", psnr / i);
+    spdlog::critical("[PSNR];{}", psnr / i);
     cv::Vec<double, 4> mssimV = (mssim / i);
-    spdlog::critical("Avg MSSIM: ({};{};{};{})", mssimV(0), mssimV(1),
-                     mssimV(2), mssimV(3));
+    spdlog::critical("[MSSIM];{};{};{};{}", mssimV(0), mssimV(1), mssimV(2),
+                     mssimV(3));
   } else {
-    spdlog::critical("Avg MSE per voxel: {}", mse / (i * img.cols * img.rows));
-    spdlog::critical("Avg MSE per voxel (4096 mm): {}",
-                     mse_comp / (i * img.cols * img.rows));
+    spdlog::critical("[MSE];{}", mse / (i * img.cols * img.rows));
+    spdlog::critical("[MSE_4096];{}", mse_comp / (i * img.cols * img.rows));
   }
 
   delete reader;
