@@ -126,13 +126,14 @@ KinectReader::KinectReader(uint8_t _device_index,
   k4a_buffer_result_t output_buffer_size = k4a_device_get_raw_calibration(
       device_, (uint8_t *)camera_calibration_struct_->data.data(),
       &buffer_size);
-  camera_calibration_struct_->data.resize(buffer_size + 1);
-  camera_calibration_struct_->data[buffer_size] = '\0';
 
+  camera_calibration_struct_->data.resize(buffer_size);
+  // camera_calibration_struct_->data.resize(buffer_size + 1);
+  // camera_calibration_struct_->data[buffer_size] = '\0';
   camera_calibration_struct_->extra_data.push_back(
       _device_config.device_config.depth_mode);
   camera_calibration_struct_->extra_data.push_back(
-      _device_config.device_config.color_format);
+      _device_config.device_config.color_resolution);
 
   timeout_ms_ = 1000 / camera_fps;
 
@@ -209,6 +210,7 @@ void KinectReader::NextFrame() {
             av_frame_free(&avframe);
           }
           s->camera_calibration_data = *camera_calibration_struct_;
+
           s->codec_data = *codec_params_structs_.at(0);
         } else {
           s->frame_data_type = 2;

@@ -25,7 +25,9 @@ extern "C" {
 #include "../decoders/idecoder.h"
 #include "../decoders/libav_decoder.h"
 #include "../decoders/nv_decoder.h"
+#include "../decoders/zdepth_decoder.h"
 #include "../structs/frame_struct.hpp"
+
 
 #define MAX_DEPTH_VALUE_16_BITS 65536
 #define MAX_DEPTH_VALUE_14_BITS 16384
@@ -45,6 +47,7 @@ void PrepareDecodingStruct(
 
 bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
                       std::unordered_map<std::string, IDecoder *> &decoders);
+
 
 template <typename T>
 void MinMaxFilter(cv::Mat &in_mat, cv::Mat &out_mat, double min, double max) {

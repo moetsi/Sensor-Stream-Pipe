@@ -4,10 +4,15 @@
 
 #pragma once
 
-#include "logger.h"
 #include <iostream>
 #include <k4a/k4a.h>
+#include <k4abt.hpp>
 #include <yaml-cpp/yaml.h>
+
+#include "../decoders/idecoder.h"
+#include "../decoders/libav_decoder.h"
+#include "../structs/frame_struct.hpp"
+#include "logger.h"
 
 struct ExtendedAzureConfig {
   k4a_device_configuration_t device_config;
@@ -18,3 +23,6 @@ struct ExtendedAzureConfig {
 };
 
 ExtendedAzureConfig BuildKinectConfigFromYAML(YAML::Node config);
+
+void FrameStructToK4A(std::vector<FrameStruct> &f, k4a::capture &sensor_capture,
+                      std::unordered_map<std::string, IDecoder *> &decoders);
