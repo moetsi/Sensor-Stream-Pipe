@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
         */
 
         cv::Mat img;
-        imgChanged = frameStructToMat(f, img, decoders);
+        imgChanged = FrameStructToMat(f, img, decoders);
 
         if (imgChanged && !img.empty()) {
 

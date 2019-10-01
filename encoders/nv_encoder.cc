@@ -162,7 +162,7 @@ void NvEncoder::AddFrameStruct(FrameStruct *fs) {
 
     if (compressed_size == 0) {
       spdlog::error("Could not encode frame on NVEncoder");
-      spdlog::error(NvPipe_GetError(NULL));
+      spdlog::error(NvPipe_GetError(encoder_));
       exit(1);
     }
 

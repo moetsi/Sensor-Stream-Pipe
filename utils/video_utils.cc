@@ -11,11 +11,11 @@ void AVFrameToMatYUV(const AVFrame *frame, cv::Mat &image) {
   conversion =
       sws_getContext(width, height, (AVPixelFormat)frame->format, width, height,
                      AV_PIX_FMT_BGR24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
-  int cvLinesizes[1];
-  cvLinesizes[0] = image.step1();
+  int cv_linesizes[1];
+  cv_linesizes[0] = image.step1();
 
   sws_scale(conversion, frame->data, frame->linesize, 0, height, &image.data,
-            cvLinesizes);
+            cv_linesizes);
   sws_freeContext(conversion);
 }
 
@@ -72,7 +72,7 @@ void PrepareDecodingStruct(
       pCodecParameter;
 }
 
-bool frameStructToMat(FrameStruct &f, cv::Mat &img,
+bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
                       std::unordered_map<std::string, IDecoder *> &decoders) {
   std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
@@ -93,24 +93,24 @@ bool frameStructToMat(FrameStruct &f, cv::Mat &img,
     }
   }
 
-  bool imgChanged = false;
+  bool img_changed = false;
 
   if (f.frame_data_type == 0) {
     img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
-    imgChanged = true;
+    img_changed = true;
   } else if (f.frame_data_type == 2) {
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
     img = cv::Mat(rows, cols, CV_8UC4, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
-    imgChanged = true;
+    img_changed = true;
   } else if (f.frame_data_type == 3) {
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
     img =
         cv::Mat(rows, cols, CV_16UC1, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
-    imgChanged = true;
+    img_changed = true;
   } else if (f.frame_data_type == 1) {
 
     IDecoder *decoder;
@@ -131,9 +131,9 @@ bool frameStructToMat(FrameStruct &f, cv::Mat &img,
     decoder = decoders[decoder_id];
 
     img = decoder->Decode(&f);
-    imgChanged = true;
+    img_changed = true;
 
     f.frame.clear();
   }
-  return imgChanged;
+  return img_changed;
 }

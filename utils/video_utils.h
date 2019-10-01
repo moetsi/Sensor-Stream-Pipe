@@ -43,7 +43,7 @@ void PrepareDecodingStruct(
     std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
     std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
 
-bool frameStructToMat(FrameStruct &f, cv::Mat &img,
+bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
                       std::unordered_map<std::string, IDecoder *> &decoders);
 
 template <typename T>

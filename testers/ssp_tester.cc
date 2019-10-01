@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
     for (FrameStruct f : v) {
       std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
       cv::Mat img;
-      bool img_changed = frameStructToMat(f, img, decoders);
+      bool img_changed = FrameStructToMat(f, img, decoders);
       if (!img.empty() && img_changed) {
 
         cols[decoder_id] = img.cols;
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
         cv::Mat frame_ori;
         cv::Mat frame_diff;
 
-        frameStructToMat(fo, frame_ori, decoders);
+        FrameStructToMat(fo, frame_ori, decoders);
         fo.frame.clear();
 
         frame_ori = frame_ori.clone();

@@ -25,7 +25,7 @@ endif ()
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(SOURCE_FILES readers/image_reader.cc structs/frame_struct.hpp utils/utils.cc readers/ireader.h)
 
-add_executable(ssp_client clients/ssp_client.cc readers/network_reader.cc utils/video_utils.cc decoders/libav_decoder.cc decoders/nv_decoder.cc utils/image_decoder.cc decoders/zdepth_decoder.cc ${SOURCE_FILES})
+add_executable(ssp_client clients/ssp_client_opencv.cc readers/network_reader.cc utils/video_utils.cc decoders/libav_decoder.cc decoders/nv_decoder.cc utils/image_decoder.cc decoders/zdepth_decoder.cc ${SOURCE_FILES})
 add_executable(ssp_server servers/ssp_server.cc readers/video_file_reader.cc readers/kinect_reader.cc encoders/libav_encoder.cc utils/video_utils.cc utils/image_decoder.cc utils/kinect_utils.cc utils/similarity_measures.cc encoders/zdepth_encoder.cc encoders/nv_encoder.cc encoders/null_encoder.cc decoders/libav_decoder.cc decoders/nv_decoder.cc decoders/zdepth_decoder.cc ${SOURCE_FILES} utils/logger.h)
 add_executable(ssp_tester testers/ssp_tester.cc utils/video_utils.cc decoders/libav_decoder.cc decoders/nv_decoder.cc readers/video_file_reader.cc readers/kinect_reader.cc encoders/libav_encoder.cc utils/video_utils.cc utils/image_decoder.cc encoders/zdepth_encoder.cc decoders/zdepth_decoder.cc utils/kinect_utils.cc utils/similarity_measures.cc encoders/nv_encoder.cc encoders/null_encoder.cc decoders/libav_decoder.cc decoders/nv_decoder.cc ${SOURCE_FILES})
 

@@ -302,14 +302,6 @@ std::vector<FrameStruct *> KinectReader::GetCurrentFrame() {
   return current_frame_;
 }
 
-FrameStruct *KinectReader::CurrentFrame(unsigned int type) {
-  for (FrameStruct *fs : current_frame_) {
-    if (fs->frame_type == type)
-      return fs;
-  }
-  return NULL;
-}
-
 unsigned int KinectReader::GetFps() {
   if (device_config_.camera_fps == K4A_FRAMES_PER_SECOND_5)
     return 5;

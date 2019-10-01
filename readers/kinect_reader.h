@@ -91,8 +91,6 @@ public:
 
   std::vector<FrameStruct *> GetCurrentFrame();
 
-  FrameStruct *CurrentFrame(unsigned int type);
-
   unsigned int GetCurrentFrameId();
 
   virtual void GoToFrame(unsigned int frame_id);

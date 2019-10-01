@@ -17,7 +17,7 @@ void NvDecoder::Init(std::vector<unsigned char> parameter_data) {
   ushort codec__ushort = parameter_data[9];
 
   if (format__ushort == 0) {
-    height_ = NVPIPE_RGBA32;
+    format_ = NVPIPE_RGBA32;
     decompressed_buffer_.resize(width_ * height_ * 4);
   } else if (format__ushort == 1) {
     format_ = NVPIPE_UINT4;
@@ -55,7 +55,7 @@ cv::Mat NvDecoder::Decode(FrameStruct *data) {
 
   if (decompressed_buffer_.size() == 0) {
     spdlog::error("Could not decode frame on NvDecoder");
-    spdlog::error(NvPipe_GetError(NULL));
+    spdlog::error(NvPipe_GetError(decoder_));
     exit(1);
   }
 
