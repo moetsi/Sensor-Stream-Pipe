@@ -22,16 +22,23 @@ extern "C" {
 
 #include "../decoders/idecoder.h"
 #include "../decoders/libav_decoder.h"
-#include "../decoders/nv_decoder.h"
+
 #include "../encoders/null_encoder.h"
-#include "../encoders/nv_encoder.h"
 #include "../encoders/zdepth_encoder.h"
-#include "../readers/kinect_reader.h"
 #include "../readers/video_file_reader.h"
-#include "../utils/kinect_utils.h"
 #include "../utils/similarity_measures.h"
 #include "../utils/utils.h"
 #include "../utils/video_utils.h"
+
+#ifdef SSP_WITH_NVPIPE_SUPPORT
+#include "../encoders/nv_encoder.h"
+#include "../decoders/nv_decoder.h"
+#endif
+
+#ifdef SSP_WITH_KINECT_SUPPORT
+#include "../readers/kinect_reader.h"
+#include "../utils/kinect_utils.h"
+#endif
 
 int main(int argc, char *argv[]) {
 
@@ -100,9 +107,15 @@ int main(int argc, char *argv[]) {
       reader = new VideoFileReader(path);
     }
   } else if (reader_type == "kinect") {
+#ifdef SSP_WITH_KINECT_SUPPORT
     ExtendedAzureConfig c = BuildKinectConfigFromYAML(
         general_parameters["frame_source"]["parameters"]);
     reader = new KinectReader(0, c);
+#else
+    spdlog::error("SSP compiled without \"kinect\" reader support. Set to "
+                  "SSP_WITH_KINECT_SUPPORT=ON when configuring with cmake");
+    exit(1);
+#endif
   } else {
     spdlog::error("Unknown reader type: \"{}\". Supported types are "
                   "\"frames\", \"video\" and \"kinect\"",
@@ -119,15 +132,21 @@ int main(int argc, char *argv[]) {
     YAML::Node v = codec_parameters["video_encoder"][type];
     std::string encoder_type = v["type"].as<std::string>();
     IEncoder *fe = nullptr;
-    if (encoder_type == "libav")
+    if (encoder_type == "libav") {
       fe = new LibAvEncoder(v, reader->GetFps());
-    else if (encoder_type == "nvenc")
+    } else if (encoder_type == "nvenc") {
+#ifdef SSP_WITH_NVPIPE_SUPPORT
       fe = new NvEncoder(v, reader->GetFps());
-    else if (encoder_type == "zdepth")
+#else
+      spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
+                    "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
+      exit(1);
+#endif
+    } else if (encoder_type == "zdepth") {
       fe = new ZDepthEncoder(reader->GetFps());
-    else if (encoder_type == "null")
+    } else if (encoder_type == "null") {
       fe = new NullEncoder(reader->GetFps());
-    else {
+    } else {
       spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                     "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
                     encoder_type);

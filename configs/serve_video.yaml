@@ -7,8 +7,8 @@ general:
   frame_source:
     type: "video"
     parameters:
-      path: "/home/amourao/output2_short.mkv"
-      streams: [0]
+      path: "/home/amourao/output.mkv"
+      streams: [1]
 video_encoder:
   0: #color
     type: "nvenc"

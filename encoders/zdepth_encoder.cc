@@ -90,7 +90,7 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
 
       if (libav_decoder_ == nullptr) {
         libav_decoder_ = new LibAvDecoder();
-        libav_decoder_->Init(fs->codec_data.getParams());
+        libav_decoder_->Init(getParams(*fs));
       }
 
       img = libav_decoder_->Decode(fs);

@@ -6,7 +6,6 @@
 
 #include <zmq.hpp>
 
-#include "../decoders/idecoder.h"
 #include "../structs/frame_struct.hpp"
 #include "ireader.h"
 

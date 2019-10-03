@@ -5,7 +5,6 @@
 #include <unistd.h>
 
 #include "../utils/logger.h"
-#include <k4a/k4a.h>
 
 #include <ctime>
 #include <iostream>
@@ -103,7 +102,7 @@ void NvEncoder::AddFrameStruct(FrameStruct *fs) {
 
       if (lib_av_decoder_ == nullptr) {
         lib_av_decoder_ = new LibAvDecoder();
-        lib_av_decoder_->Init(fs->codec_data.getParams());
+        lib_av_decoder_->Init(getParams(*fs));
       }
 
       img = lib_av_decoder_->Decode(fs);

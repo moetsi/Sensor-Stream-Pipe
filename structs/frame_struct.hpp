@@ -13,10 +13,6 @@
 #include <cereal/types/memory.hpp>
 #include <cereal/types/vector.hpp>
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-}
-
 #include "../utils/utils.h"
 
 struct CameraCalibrationStruct {
@@ -51,20 +47,6 @@ struct CodecParamsStruct {
   void SetData(std::vector<unsigned char> &d) { data = d; }
 
   void SetExtraData(std::vector<unsigned char> &ed) { extra_data = ed; }
-
-  AVCodecParameters *getParams() {
-    if (type != 0)
-      return NULL;
-    AVCodecParameters *results = avcodec_parameters_alloc();
-    results->extradata = NULL;
-    results->extradata_size = 0;
-    memcpy(results, &data[0], data.size());
-    results->extradata =
-        (uint8_t *)av_mallocz(extra_data.size() + AV_INPUT_BUFFER_PADDING_SIZE);
-    memcpy(results->extradata, &extra_data[0], extra_data.size());
-    results->extradata_size = extra_data.size();
-    return results;
-  }
 
   template <class Archive> void serialize(Archive &ar) {
     ar(type, data, extra_data);

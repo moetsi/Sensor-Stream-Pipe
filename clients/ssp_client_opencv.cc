@@ -7,7 +7,6 @@
 #include <thread>
 #include <unistd.h>
 
-#include <k4a/k4a.h>
 #include <opencv2/imgproc.hpp>
 #include <zmq.hpp>
 
@@ -34,7 +33,7 @@ int main(int argc, char *argv[]) {
   try {
 
     if (argc < 2) {
-      std::cerr << "Usage: ssp_client <port> (<log level>) (<log file>)"
+      std::cerr << "Usage: ssp_client_opencv <port> (<log level>) (<log file>)"
                 << std::endl;
       return 1;
     }
@@ -59,21 +58,6 @@ int main(int argc, char *argv[]) {
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
       for (FrameStruct f : f_list) {
         std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
-
-        // You can access Kinect camera parameters here
-        /*
-        if (f.camera_calibration_data.type == 0) {
-          k4a_calibration_t *calibration = new k4a_calibration_t();
-          k4a_calibration_get_from_raw(
-              reinterpret_cast<char *>(f.camera_calibration_data.data.data()),
-              f.camera_calibration_data.data.size(),
-              static_cast<const k4a_depth_mode_t>(
-                  f.camera_calibration_data.extra_data[0]),
-              static_cast<const k4a_color_resolution_t>(
-                  f.camera_calibration_data.extra_data[1]),
-              calibration);
-        }
-        */
 
         cv::Mat img;
         imgChanged = FrameStructToMat(f, img, decoders);

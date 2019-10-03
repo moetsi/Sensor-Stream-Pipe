@@ -5,7 +5,6 @@
 #include <unistd.h>
 
 #include "../utils/logger.h"
-#include <k4a/k4a.h>
 
 #include <ctime>
 #include <iostream>
@@ -18,10 +17,17 @@
 
 #include "../encoders/libav_encoder.h"
 #include "../encoders/null_encoder.h"
-#include "../encoders/nv_encoder.h"
 #include "../encoders/zdepth_encoder.h"
-#include "../readers/kinect_reader.h"
 #include "../readers/video_file_reader.h"
+
+#ifdef SSP_WITH_NVPIPE_SUPPORT
+#include "../encoders/nv_encoder.h"
+#endif
+
+#ifdef SSP_WITH_KINECT_SUPPORT
+#include "../readers/kinect_reader.h"
+#include "../utils/kinect_utils.h"
+#endif
 
 int main(int argc, char *argv[]) {
 
@@ -71,10 +77,17 @@ int main(int argc, char *argv[]) {
       } else {
         reader = new VideoFileReader(path);
       }
+
     } else if (reader_type == "kinect") {
+#ifdef SSP_WITH_KINECT_SUPPORT
       ExtendedAzureConfig c = BuildKinectConfigFromYAML(
           general_parameters["frame_source"]["parameters"]);
       reader = new KinectReader(0, c);
+#else
+      spdlog::error("SSP compiled without \"kinect\" reader support. Set to "
+                    "SSP_WITH_KINECT_SUPPORT=ON when configuring with cmake");
+      exit(1);
+#endif
     } else {
       spdlog::error("Unknown reader type: \"{}\". Supported types are "
                     "\"frames\", \"video\" and \"kinect\"",
@@ -92,9 +105,15 @@ int main(int argc, char *argv[]) {
       IEncoder *fe = nullptr;
       if (encoder_type == "libav")
         fe = new LibAvEncoder(v, reader->GetFps());
-      else if (encoder_type == "nvenc")
+      else if (encoder_type == "nvenc") {
+#ifdef SSP_WITH_NVPIPE_SUPPORT
         fe = new NvEncoder(v, reader->GetFps());
-      else if (encoder_type == "zdepth")
+#else
+        spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
+                      "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
+        exit(1);
+#endif
+      } else if (encoder_type == "zdepth")
         fe = new ZDepthEncoder(reader->GetFps());
       else if (encoder_type == "null")
         fe = new NullEncoder(reader->GetFps());
@@ -190,18 +209,6 @@ int main(int argc, char *argv[]) {
 
         for (unsigned int i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
-          if (f.camera_calibration_data.type == 0) {
-            k4a_calibration_t *calibration = new k4a_calibration_t();
-            k4a_calibration_get_from_raw(
-                    reinterpret_cast<char *>(f.camera_calibration_data.data.data()),
-                    f.camera_calibration_data.data.size(),
-                    static_cast<const k4a_depth_mode_t>(
-                            f.camera_calibration_data.extra_data[0]),
-                    static_cast<const k4a_color_resolution_t>(
-                            f.camera_calibration_data.extra_data[1]),
-                    calibration);
-          }
-
           f.frame.clear();
           spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id, f.frame_id);
           vO.at(i)->frame.clear();

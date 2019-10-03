@@ -47,8 +47,8 @@ void PrepareDecodingStruct(
     FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
     std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
     std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters) {
-  AVCodecParameters *pCodecParameter = f->codec_data.getParams();
-  AVCodec *pCodec = avcodec_find_decoder(f->codec_data.getParams()->codec_id);
+  AVCodecParameters *pCodecParameter = getParams(*f);
+  AVCodec *pCodec = avcodec_find_decoder(pCodecParameter->codec_id);
   AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
 
   if (!pCodecContext) {
@@ -80,12 +80,18 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
     CodecParamsStruct data = f.codec_data;
     if (data.type == 0) {
       LibAvDecoder *fd = new LibAvDecoder();
-      fd->Init(data.getParams());
+      fd->Init(getParams(f));
       decoders[decoder_id] = fd;
     } else if (data.type == 1) {
+#ifdef SSP_WITH_NVPIPE_SUPPORT
       NvDecoder *fd = new NvDecoder();
       fd->Init(data.data);
       decoders[decoder_id] = fd;
+#else
+      spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
+                    "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
+      exit(1);
+#endif
     } else if (data.type == 2) {
       ZDepthDecoder *fd = new ZDepthDecoder();
       fd->Init(data.data);
@@ -119,12 +125,14 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
       CodecParamsStruct data = f.codec_data;
       if (data.type == 0) {
         LibAvDecoder *fd = new LibAvDecoder();
-        fd->Init(data.getParams());
+        fd->Init(getParams(f));
         decoders[decoder_id] = fd;
+#ifdef SSP_WITH_NVPIPE_SUPPORT
       } else if (data.type == 1) {
         NvDecoder *fd = new NvDecoder();
         fd->Init(data.data);
         decoders[decoder_id] = fd;
+#endif
       }
     }
 
@@ -138,4 +146,18 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
   return img_changed;
 }
 
-
+AVCodecParameters *getParams(FrameStruct &frame_struct) {
+  if (frame_struct.codec_data.type != 0)
+    return NULL;
+  AVCodecParameters *results = avcodec_parameters_alloc();
+  results->extradata = NULL;
+  results->extradata_size = 0;
+  memcpy(results, &frame_struct.codec_data.data[0],
+         frame_struct.codec_data.data.size());
+  results->extradata = (uint8_t *)av_mallocz(
+      frame_struct.codec_data.extra_data.size() + AV_INPUT_BUFFER_PADDING_SIZE);
+  memcpy(results->extradata, &frame_struct.codec_data.extra_data[0],
+         frame_struct.codec_data.extra_data.size());
+  results->extradata_size = frame_struct.codec_data.extra_data.size();
+  return results;
+}
