@@ -44,6 +44,7 @@ VideoFileReader::~VideoFileReader() {
 }
 
 void VideoFileReader::Init(std::string &filename) {
+  camera_calibration_struct_ = nullptr;
   av_register_all();
   spdlog::info("VideoFileReader: initializing all the containers, codecs and "
                "protocols.");
@@ -75,6 +76,9 @@ void VideoFileReader::Init(std::string &filename) {
     exit(-1);
   }
 
+  camera_calibration_struct_ = new CameraCalibrationStruct();
+  camera_calibration_struct_->type = 0;
+  camera_calibration_struct_->extra_data.resize(2);
   // the component that knows how to enCOde and DECode the stream
   // it's the codec (audio or video)
   // http://ffmpeg.org/doxygen/trunk/structAVCodec.html
@@ -104,6 +108,16 @@ void VideoFileReader::Init(std::string &filename) {
     AVCodec *codec = avcodec_find_decoder(codec_parameter->codec_id);
     if (codec == NULL) {
       spdlog::warn("Non video stream detected ({}), skipping", i);
+      if (av_format_context_->streams[i]->codec->extradata_size) {
+        if (camera_calibration_struct_->type == -1) {
+          camera_calibration_struct_->type = 0;
+          camera_calibration_struct_->extra_data.resize(2);
+        }
+        camera_calibration_struct_->data = std::vector<unsigned char>(
+            av_format_context_->streams[i]->codec->extradata,
+            av_format_context_->streams[i]->codec->extradata +
+                av_format_context_->streams[i]->codec->extradata_size + 1);
+      }
     } else if (codec_parameter->codec_type == AVMEDIA_TYPE_VIDEO) {
       spdlog::warn("Video stream detected ({})", i);
       if (!video_stream_indexes_from_file_)
@@ -131,6 +145,24 @@ void VideoFileReader::Init(std::string &filename) {
         if (avcodec_open2(codec_context, codec, NULL) < 0) {
           spdlog::error("Failed to open codec through avcodec_open2.");
           exit(-1);
+        }
+
+        AVDictionary *metadata = av_format_context_->streams[i]->metadata;
+        AVDictionaryEntry *t = nullptr;
+        while ((t = av_dict_get(metadata, "", t, AV_DICT_IGNORE_SUFFIX))) {
+          std::string metadata_key = t->key;
+          std::string metadata_value = t->value;
+          if (camera_calibration_struct_->type == -1) {
+            camera_calibration_struct_->type = 0;
+            camera_calibration_struct_->extra_data.resize(2);
+          }
+          if (metadata_key == "K4A_COLOR_MODE") {
+            camera_calibration_struct_->extra_data[1] =
+                GetKinectColorResolution(metadata_value);
+          } else if (metadata_key == "K4A_DEPTH_MODE") {
+            camera_calibration_struct_->extra_data[0] =
+                GetKinectDepthMode(metadata_value);
+          }
         }
 
         av_codec_contexts_[i] = codec_context;
@@ -169,6 +201,7 @@ void VideoFileReader::Init(std::string &filename) {
   frame_struct_template_.frame_data_type = 1;
   frame_struct_template_.stream_id = RandomString(16);
   frame_struct_template_.device_id = 0;
+  frame_struct_template_.camera_calibration_data = *camera_calibration_struct_;
 
   libav_ready_ = true;
 }
@@ -245,7 +278,8 @@ bool VideoFileReader::HasNextFrame() {
 void VideoFileReader::GoToFrame(unsigned int frame_id) {
   current_frame_counter_ = frame_id;
   eof_reached_ = false;
-  int error = av_seek_frame(av_format_context_, -1, frame_id, AVSEEK_FLAG_FRAME);
+  int error =
+      av_seek_frame(av_format_context_, -1, frame_id, AVSEEK_FLAG_FRAME);
   if (error < 0) {
     spdlog::error("Error seeking to frame {}: {}", frame_id, av_err2str(error));
   }
@@ -272,8 +306,68 @@ std::vector<FrameStruct *> VideoFileReader::GetCurrentFrame() {
   return frame_structs_;
 }
 
+typedef enum {
+  VIDEO_READER_K4A_DEPTH_MODE_OFF =
+      0, /**< Depth sensor will be turned off with this setting. */
+  VIDEO_READER_K4A_DEPTH_MODE_NFOV_2X2BINNED, /**< Depth captured at 320x288.
+                                                 Passive IR is also captured at
+                                                 320x288. */
+  VIDEO_READER_K4A_DEPTH_MODE_NFOV_UNBINNED,  /**< Depth captured at 640x576.
+                                                 Passive IR is also captured at
+                                                 640x576. */
+  VIDEO_READER_K4A_DEPTH_MODE_WFOV_2X2BINNED, /**< Depth captured at 512x512.
+                                                 Passive IR is also captured at
+                                                 512x512. */
+  VIDEO_READER_K4A_DEPTH_MODE_WFOV_UNBINNED,  /**< Depth captured at 1024x1024.
+                                                 Passive IR is also captured at
+                                                 1024x1024. */
+  VIDEO_READER_K4A_DEPTH_MODE_PASSIVE_IR,     /**< Passive IR only, captured at
+                                                 1024x1024. */
+} video_reader_k4a_depth_mode_t;
+
+typedef enum {
+  VIDEO_READER_K4A_COLOR_RESOLUTION_OFF =
+      0, /**< Color camera will be turned off with this setting */
+  VIDEO_READER_K4A_COLOR_RESOLUTION_720P,  /**< 1280 * 720  16:9 */
+  VIDEO_READER_K4A_COLOR_RESOLUTION_1080P, /**< 1920 * 1080 16:9 */
+  VIDEO_READER_K4A_COLOR_RESOLUTION_1440P, /**< 2560 * 1440 16:9 */
+  VIDEO_READER_K4A_COLOR_RESOLUTION_1536P, /**< 2048 * 1536 4:3  */
+  VIDEO_READER_K4A_COLOR_RESOLUTION_2160P, /**< 3840 * 2160 16:9 */
+  VIDEO_READER_K4A_COLOR_RESOLUTION_3072P, /**< 4096 * 3072 4:3  */
+} video_reader_k4a_color_resolution_t;
+
 std::vector<unsigned int> VideoFileReader::GetType() {
   if (!libav_ready_)
     Init(this->filename_);
   return video_stream_indexes_;
+}
+ushort VideoFileReader::GetKinectColorResolution(std::string &metadata_value) {
+  std::string ending = metadata_value.substr(metadata_value.size() - 5, 5);
+  if (ending == "_720P")
+    return VIDEO_READER_K4A_COLOR_RESOLUTION_720P;
+  if (ending == "1080P")
+    return VIDEO_READER_K4A_COLOR_RESOLUTION_1080P;
+  if (ending == "1440P")
+    return VIDEO_READER_K4A_COLOR_RESOLUTION_1440P;
+  if (ending == "1536P")
+    return VIDEO_READER_K4A_COLOR_RESOLUTION_1536P;
+  if (ending == "2160P")
+    return VIDEO_READER_K4A_COLOR_RESOLUTION_2160P;
+  if (ending == "3072P")
+    return VIDEO_READER_K4A_COLOR_RESOLUTION_3072P;
+  return 0;
+}
+
+ushort VideoFileReader::GetKinectDepthMode(std::string &metadata_value) {
+  if (metadata_value == "NFOV_2X2BINNED")
+    return VIDEO_READER_K4A_DEPTH_MODE_NFOV_2X2BINNED;
+  if (metadata_value == "NFOV_UNBINNED")
+    return VIDEO_READER_K4A_DEPTH_MODE_NFOV_UNBINNED;
+  if (metadata_value == "WFOV_2X2BINNED")
+    return VIDEO_READER_K4A_DEPTH_MODE_WFOV_2X2BINNED;
+  if (metadata_value == "WFOV_UNBINNED")
+    return VIDEO_READER_K4A_DEPTH_MODE_WFOV_UNBINNED;
+  if (metadata_value == "PASSIVE_IR")
+    return VIDEO_READER_K4A_DEPTH_MODE_PASSIVE_IR;
+  return 0;
 }

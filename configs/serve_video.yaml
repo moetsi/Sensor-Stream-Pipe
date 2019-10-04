@@ -7,18 +7,17 @@ general:
   frame_source:
     type: "video"
     parameters:
-      path: "/home/amourao/output.mkv"
-      streams: [1]
+      path: "/home/amourao/dataset_kinect_testB.mkv"
 video_encoder:
   0: #color
-    type: "nvenc"
+    type: "null"
     codec_name: "NVPIPE_HEVC"
     input_format: "NVPIPE_RGBA32"
     bit_rate: 4000000
   1: #depth
-    type: "zdepth"
+    type: "null"
   2: #ir
-    type: "nvenc"
+    type: "null"
     codec_name: "NVPIPE_HEVC"
     input_format: "NVPIPE_UINT16"
     bit_rate: 40000000

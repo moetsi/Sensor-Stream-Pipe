@@ -38,6 +38,7 @@ private:
   int current_frame_counter_;
 
   AVFormatContext *av_format_context_;
+  CameraCalibrationStruct *camera_calibration_struct_;
 
   std::unordered_map<unsigned int, CodecParamsStruct> codec_params_structs_;
   std::unordered_map<unsigned int, AVCodecContext *> av_codec_contexts_;
@@ -49,6 +50,9 @@ private:
   bool eof_reached_;
 
   void Init(std::string &filename);
+
+  ushort GetKinectColorResolution(std::string &metadata_value);
+  ushort GetKinectDepthMode(std::string &metadata_value);
 
 public:
   VideoFileReader(std::string &filename);

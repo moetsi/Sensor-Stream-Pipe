@@ -291,6 +291,7 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
     }
 
     if (f.frame_type == 0) {
+      cv::cvtColor(img, img, cv::COLOR_BGR2BGRA);
       k4a::image color = k4a::image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                             img.cols, img.rows, 4 * img.cols);
       memcpy(color.get_buffer(), img.datastart, img.total() * img.elemSize());

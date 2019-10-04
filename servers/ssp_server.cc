@@ -84,8 +84,6 @@ int main(int argc, char *argv[]) {
           general_parameters["frame_source"]["parameters"]);
       reader = new KinectReader(0, c);
 #else
-      spdlog::error("SSP compiled without \"kinect\" reader support. Set to "
-                    "SSP_WITH_KINECT_SUPPORT=ON when configuring with cmake");
       exit(1);
 #endif
     } else {
