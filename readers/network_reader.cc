@@ -16,9 +16,10 @@ NetworkReader::NetworkReader(int port) {
 void NetworkReader::init() {
 
   context_ = new zmq::context_t(1);
-  socket_ = new zmq::socket_t(*context_, ZMQ_PULL);
+  socket_ = new zmq::socket_t(*context_, ZMQ_SUB);
+  socket_->connect("tcp://localhost:" + std::to_string(port_));
 
-  socket_->bind("tcp://*:" + std::to_string(port_));
+  socket_->setsockopt(ZMQ_SUBSCRIBE, "", 0);
 }
 
 NetworkReader::~NetworkReader() {
