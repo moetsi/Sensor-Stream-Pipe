@@ -23,69 +23,15 @@ extern "C" {
 
 #include "../readers/network_reader.h"
 #include "../utils/kinect_utils.h"
-#include "../utils/video_utils.h"
-
-struct depth_point_t {
-  int16_t xyz[3];
-};
 
 struct color_point_t {
   int16_t xyz[3];
   uint8_t rgb[3];
 };
 
-void tranformation_helpers_write_point_cloud(k4a_image_t point_cloud_image,
-                                             const char *file_name) {
-  std::vector<depth_point_t> points;
-
-  int width = k4a_image_get_width_pixels(point_cloud_image);
-  int height = k4a_image_get_height_pixels(point_cloud_image);
-
-  int16_t *point_cloud_image_data =
-      (int16_t *)(void *)k4a_image_get_buffer(point_cloud_image);
-
-  for (int i = 0; i < width * height; i++) {
-    depth_point_t point;
-    point.xyz[0] = point_cloud_image_data[3 * i + 0];
-    point.xyz[1] = point_cloud_image_data[3 * i + 1];
-    point.xyz[2] = point_cloud_image_data[3 * i + 2];
-    if (point.xyz[2] == 0) {
-      continue;
-    }
-
-    points.push_back(point);
-  }
-
-#define PLY_START_HEADER "ply"
-#define PLY_END_HEADER "end_header"
-#define PLY_ASCII "format ascii 1.0"
-#define PLY_ELEMENT_VERTEX "element vertex"
-
-  // save to the ply file
-  std::ofstream ofs(file_name); // text mode first
-  ofs << PLY_START_HEADER << std::endl;
-  ofs << PLY_ASCII << std::endl;
-  ofs << PLY_ELEMENT_VERTEX << " " << points.size() << std::endl;
-  ofs << "property float x" << std::endl;
-  ofs << "property float y" << std::endl;
-  ofs << "property float z" << std::endl;
-  ofs << PLY_END_HEADER << std::endl;
-  ofs.close();
-
-  std::stringstream ss;
-  for (size_t i = 0; i < points.size(); ++i) {
-    // image data is BGR
-    ss << (float)points[i].xyz[0] << " " << (float)points[i].xyz[1] << " "
-       << (float)points[i].xyz[2];
-    ss << std::endl;
-  }
-  std::ofstream ofs_text(file_name, std::ios::out | std::ios::app);
-  ofs_text.write(ss.str().c_str(), (std::streamsize)ss.str().length());
-}
-
-void tranformation_helpers_write_point_cloud(
-    const k4a_image_t point_cloud_image, const k4a_image_t color_image,
-    const char *file_name) {
+void TranformationHelpersWritePointCloud(const k4a_image_t point_cloud_image,
+                                         const k4a_image_t color_image,
+                                         const char *file_name) {
   std::vector<color_point_t> points;
 
   int width = k4a_image_get_width_pixels(point_cloud_image);
@@ -159,17 +105,25 @@ int main(int argc, char *argv[]) {
   try {
 
     if (argc < 2) {
-      std::cerr << "Usage: ssp_client <port> (<log level>) (<log file>)"
+      std::cerr << "Usage: ssp_client_pointcloud <port> (<dest_folder>) (<log "
+                   "level>) (<log file>)"
                 << std::endl;
       return 1;
     }
     std::string log_level = "debug";
     std::string log_file = "";
+    bool write_to_disk = false;
+    std::string write_pattern = "";
 
-    if (argc > 2)
-      log_level = argv[2];
+    if (argc > 2) {
+      write_to_disk = true;
+      write_pattern = argv[2];
+    }
+
     if (argc > 3)
-      log_file = argv[3];
+      log_level = argv[3];
+    if (argc > 4)
+      log_file = argv[4];
 
     int port = std::stoi(argv[1]);
     NetworkReader reader(port);
@@ -203,23 +157,33 @@ int main(int argc, char *argv[]) {
           std::cout << &f.camera_calibration_data.data[0] << std::endl;
           calibration_set = true;
         }
+        if (write_to_disk) {
+          if (f_list.size() == 3 && f.frame_type == 0) {
+            cv::Mat img;
+            bool imgChanged = FrameStructToMat(f, img, decoders);
 
-        if (f_list.size() == 3 && f.frame_type == 0) {
-          cv::Mat img;
-          bool imgChanged = FrameStructToMat(f, img, decoders);
-          std::string output =
-              "/home/amourao/kinect_testA_color_" + std::to_string(j) + ".png";
-          if (imgChanged) {
-            cv::imwrite(output, img);
+            std::string j_str = std::to_string(j);
+
+            std::string j_formatted =
+                std::string(6 - j_str.length(), '0') + j_str;
+            std::string output = write_pattern + j_formatted + ".color.png";
+            if (imgChanged) {
+              cv::imwrite(output, img);
+            }
           }
-        }
-        if (f_list.size() == 3 && f.frame_type == 1) {
-          cv::Mat img;
-          bool imgChanged = FrameStructToMat(f, img, decoders);
-          std::string output = "/home/amourao/kinect_testA_depth_" +
-                               std::to_string(j++) + ".png";
-          if (imgChanged) {
-            cv::imwrite(output, img);
+          if (f_list.size() == 3 && f.frame_type == 1) {
+            cv::Mat img;
+            bool imgChanged = FrameStructToMat(f, img, decoders);
+
+            std::string j_str = std::to_string(j++);
+
+            std::string j_formatted =
+                std::string(6 - j_str.length(), '0') + j_str;
+
+            std::string output = write_pattern + j_formatted + ".depth.png";
+            if (imgChanged) {
+              cv::imwrite(output, img);
+            }
           }
         }
       }
@@ -251,9 +215,12 @@ int main(int argc, char *argv[]) {
         transformation.depth_image_to_point_cloud(
             depth_image, K4A_CALIBRATION_TYPE_DEPTH, &point_cloud);
 
-        std::string output =
-            "/home/amourao/kinect_testA_" + std::to_string(i++) + ".ply";
-        tranformation_helpers_write_point_cloud(
+        std::string i_str = std::to_string(i++);
+
+        std::string i_formatted = std::string(6 - i_str.length(), '0') + i_str;
+
+        std::string output = write_pattern + i_formatted + ".pointcloud.ply";
+        TranformationHelpersWritePointCloud(
             point_cloud.handle(), transformed_color.handle(), output.c_str());
 
       } catch (std::exception &e) {

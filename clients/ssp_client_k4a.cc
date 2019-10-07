@@ -23,9 +23,8 @@ extern "C" {
 
 #include "../readers/network_reader.h"
 #include "../utils/kinect_utils.h"
-#include "../utils/video_utils.h"
 
-void print_body_information(k4abt_body_t body) {
+void PrintBodyInformation(k4abt_body_t body) {
   std::cout << "Body ID: " << body.id << std::endl;
   for (int i = 0; i < (int)K4ABT_JOINT_COUNT; i++) {
     k4a_float3_t position = body.skeleton.joints[i].position;
@@ -37,15 +36,9 @@ void print_body_information(k4abt_body_t body) {
   }
 }
 
-void print_body_index_map_middle_line(k4a::image body_index_map) {
+void PrintBodyIndexMapMiddleLine(k4a::image body_index_map) {
   uint8_t *body_index_map_buffer = body_index_map.get_buffer();
 
-  // Given body_index_map pixel type should be uint8, the stride_byte should be
-  // the same as width
-  // TODO: Since there is no API to query the byte-per-pixel information, we
-  // have to compare the width and stride to know the information. We should
-  // replace this assert with proper byte-per-pixel query once the API is
-  // provided by K4A SDK.
   assert(body_index_map.get_stride_bytes() ==
          body_index_map.get_width_pixels());
 
@@ -123,30 +116,28 @@ int main(int argc, char *argv[]) {
 
       if (!tracker.enqueue_capture(sensor_capture)) {
         // It should never hit timeout when K4A_WAIT_INFINITE is set.
-        std::cout << "Error! Add capture to tracker process queue timeout!"
-                  << std::endl;
-        break;
+        spdlog::error("Error adding capture to tracker process queue timeout!");
+        exit(1);
       }
 
       k4abt::frame body_frame = tracker.pop_result();
       if (body_frame != nullptr) {
         size_t num_bodies = body_frame.get_num_bodies();
-        std::cout << num_bodies << " bodies are detected!" << std::endl;
+        spdlog::info("{} bodies are detected!", num_bodies);
 
         for (size_t i = 0; i < num_bodies; i++) {
           k4abt_body_t body = body_frame.get_body(i);
-          print_body_information(body);
+          PrintBodyInformation(body);
         }
 
         k4a::image body_index_map = body_frame.get_body_index_map();
         if (body_index_map != nullptr) {
-          print_body_index_map_middle_line(body_index_map);
+          PrintBodyIndexMapMiddleLine(body_index_map);
         } else {
-          std::cout << "Error: Failed to generate bodyindex map!" << std::endl;
+          spdlog::error("Failed to generate bodyindex map!");
         }
       } else {
-        //  It should never hit timeout when K4A_WAIT_INFINITE is set.
-        std::cout << "Error! Pop body frame result time out!" << std::endl;
+        spdlog::error("Pop body frame result time out!!");
         break;
       }
     }

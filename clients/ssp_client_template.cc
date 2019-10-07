@@ -20,7 +20,6 @@ extern "C" {
 #include "../utils/logger.h"
 
 #include "../readers/network_reader.h"
-#include "../utils/video_utils.h"
 
 int main(int argc, char *argv[]) {
 
