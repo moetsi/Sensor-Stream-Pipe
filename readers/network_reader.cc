@@ -50,8 +50,8 @@ void NetworkReader::NextFrame() {
 
   last_time_ = CurrentTimeMs();
 
-  std::string result =
-      std::string(static_cast<char *>(request.data()), request.size());
+  std::string result = std::string(static_cast<char *>(request.data()) + 17,
+                                   request.size() - 17);
 
   std::vector<FrameStruct> f_list =
       ParseCerealStructFromString<std::vector<FrameStruct>>(result);
