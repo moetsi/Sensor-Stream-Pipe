@@ -38,15 +38,21 @@ int main(int argc, char *argv[]) {
     zmq::socket_t *in_socket = new zmq::socket_t(*context, ZMQ_PULL);
     in_socket->bind("tcp://*:" + std::to_string(port));
 
-    zmq::socket_t *outA_socket = new zmq::socket_t(*context, ZMQ_PUB);
-    outA_socket->bind("tcp://*:" + std::to_string(port + 1));
+    zmq::socket_t *out_socket = new zmq::socket_t(*context, ZMQ_PUB);
+    out_socket->bind("tcp://*:" + std::to_string(++port));
 
+    // Can I use ZeroMQ to interact with normal sockets and, for example, be
+    // able to ping www.google.com from a ZeroMQ socket?
+    //
+    // You can in version 4.x use the ZMQ_STREAM socket to speak raw TCP.
     zmq::message_t request;
 
     while (1) {
       in_socket->recv(&request);
-      spdlog::debug("Message received");
-      outA_socket->send(request);
+      std::string stream_id =
+          std::string(static_cast<char *>(request.data()), 16);
+      spdlog::debug("Message received {}", stream_id);
+      out_socket->send(request);
       spdlog::debug("Message sent");
     }
 

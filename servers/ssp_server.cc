@@ -175,7 +175,9 @@ int main(int argc, char *argv[]) {
       }
 
       if (!v.empty()) {
-        std::string message = CerealStructToString(v);
+        std::string short_message = CerealStructToString(v);
+
+        std::string message = v.front().stream_id + " " + short_message;
 
         zmq::message_t request(message.size());
         memcpy(request.data(), message.c_str(), message.size());
