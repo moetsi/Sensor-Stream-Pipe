@@ -61,6 +61,7 @@ if (SSP_WITH_KINECT_SUPPORT)
 endif ()
 
 
+add_executable(ssp_coordinator clients/ssp_coordinator.cpp utils/utils.cc)
 add_executable(ssp_broker clients/ssp_broker.cc)
 add_executable(ssp_processor_opencv processors/ssp_processor_opencv.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
 add_executable(ssp_processor_template processors/ssp_processor_template.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
@@ -74,6 +75,9 @@ set(KINECT_LIB_FILES k4a k4arecord depthengine)
 set(K4A_BODYTRACK_LIB_FILES k4abt)
 
 target_link_libraries(ssp_broker zmq)
+target_link_libraries(ssp_coordinator zmq)
+target_link_libraries(ssp_coordinator yaml-cpp)
+
 
 target_link_libraries(ssp_processor_opencv ${LIB_FILES})
 target_link_libraries(ssp_processor_opencv ${FFMPEG_LIBRARIES})
