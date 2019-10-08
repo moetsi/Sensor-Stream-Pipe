@@ -68,10 +68,7 @@ cd ~/libs/srcOriginal
 wget https://github.com/zeromq/cppzmq/archive/v4.3.0.tar.gz
 tar xf v4.3.0.tar.gz
 cd cppzmq-4.3.0
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
-make install
+cp *.hpp ~/libs/include
 ```
 
 ### yaml-cpp 0.6.0
