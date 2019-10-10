@@ -79,6 +79,9 @@ int main(int argc, char *argv[]) {
 
     reader.init();
 
+    zmq::socket_t out_socket = zmq::socket_t(*reader.GetContext(), ZMQ_STREAM);
+    out_socket.bind("tcp://*:" + std::to_string(10001));
+
     k4a::calibration sensor_calibration;
     bool calibration_set = false;
     k4abt::tracker tracker;
@@ -122,9 +125,16 @@ int main(int argc, char *argv[]) {
         }
 
         k4abt::frame body_frame = tracker.pop_result();
+
         if (body_frame != nullptr) {
           size_t num_bodies = body_frame.get_num_bodies();
           spdlog::info("{} bodies are detected!", num_bodies);
+
+          std::string message =
+              std::to_string(num_bodies) + "  bodies are detected!\n";
+          zmq::message_t request(message.size());
+          memcpy(request.data(), message.c_str(), message.size());
+          out_socket.send(request);
 
           for (size_t i = 0; i < num_bodies; i++) {
             k4abt_body_t body = body_frame.get_body(i);

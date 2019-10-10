@@ -41,7 +41,8 @@ void NetworkReader::NextFrame() {
 
   rec_frames_ += 1;
   uint64_t diff_time = CurrentTimeMs() - last_time_;
-  double diff_start_time = (CurrentTimeMs() - start_time_) / (double)rec_frames_;
+  double diff_start_time =
+      (CurrentTimeMs() - start_time_) / (double)rec_frames_;
   int64_t avg_fps;
   if (diff_start_time == 0)
     avg_fps = -1;
@@ -80,11 +81,14 @@ void NetworkReader::NextFrame() {
                        (CurrentTimeMs() - start_time_)),
                   (f.timestamps.back() - f.timestamps.at(1)));
   }
-
 }
 
 std::vector<FrameStruct> NetworkReader::GetCurrentFrame() {
   return current_frame_internal_;
 }
 
-unsigned int NetworkReader::GetCurrentFrameId() { return current_frame_counter_; }
+unsigned int NetworkReader::GetCurrentFrameId() {
+  return current_frame_counter_;
+}
+
+zmq::context_t *NetworkReader::GetContext() { return context_; }
