@@ -61,11 +61,11 @@ if (SSP_WITH_KINECT_SUPPORT)
 endif ()
 
 
-add_executable(ssp_coordinator clients/ssp_coordinator.cpp utils/utils.cc)
+add_executable(ssp_coordinator clients/ssp_coordinator.cc utils/utils.cc)
 add_executable(ssp_broker clients/ssp_broker.cc)
 add_executable(ssp_processor_opencv processors/ssp_processor_opencv.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
 add_executable(ssp_processor_template processors/ssp_processor_template.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
-add_executable(ssp_server servers/ssp_server.cc ${READER_SOURCE_FILES} ${DECODER_SOURCE_FILES} ${ENCODER_SOURCE_FILES} ${SOURCE_FILES})
+add_executable(ssp_server servers/ssp_server_main.cc servers/ssp_server.cc ${READER_SOURCE_FILES} ${DECODER_SOURCE_FILES} ${ENCODER_SOURCE_FILES} ${SOURCE_FILES})
 add_executable(ssp_tester testers/ssp_tester.cc utils/similarity_measures.cc ${READER_SOURCE_FILES} ${DECODER_SOURCE_FILES} ${ENCODER_SOURCE_FILES} ${SOURCE_FILES})
 
 set(LIB_FILES zmq zdepth zstd yaml-cpp swscale)
@@ -87,6 +87,7 @@ target_link_libraries(ssp_processor_template ${LIB_FILES})
 target_link_libraries(ssp_processor_template ${FFMPEG_LIBRARIES})
 target_link_libraries(ssp_processor_template ${OpenCV_LIBS})
 
+target_link_libraries(ssp_server pthread)
 target_link_libraries(ssp_server ${LIB_FILES})
 target_link_libraries(ssp_server ${FFMPEG_LIBRARIES})
 target_link_libraries(ssp_server ${OpenCV_LIBS})
