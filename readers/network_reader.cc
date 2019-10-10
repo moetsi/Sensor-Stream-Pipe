@@ -16,9 +16,10 @@ NetworkReader::NetworkReader(int port) {
 void NetworkReader::init() {
 
   context_ = new zmq::context_t(1);
-  socket_ = new zmq::socket_t(*context_, ZMQ_PULL);
+  socket_ = new zmq::socket_t(*context_, ZMQ_SUB);
+  socket_->connect("tcp://localhost:" + std::to_string(port_));
 
-  socket_->bind("tcp://*:" + std::to_string(port_));
+  socket_->setsockopt(ZMQ_SUBSCRIBE, "", 0);
 }
 
 NetworkReader::~NetworkReader() {
@@ -40,7 +41,8 @@ void NetworkReader::NextFrame() {
 
   rec_frames_ += 1;
   uint64_t diff_time = CurrentTimeMs() - last_time_;
-  double diff_start_time = (CurrentTimeMs() - start_time_) / (double)rec_frames_;
+  double diff_start_time =
+      (CurrentTimeMs() - start_time_) / (double)rec_frames_;
   int64_t avg_fps;
   if (diff_start_time == 0)
     avg_fps = -1;
@@ -49,8 +51,8 @@ void NetworkReader::NextFrame() {
 
   last_time_ = CurrentTimeMs();
 
-  std::string result =
-      std::string(static_cast<char *>(request.data()), request.size());
+  std::string result = std::string(static_cast<char *>(request.data()) + 17,
+                                   request.size() - 17);
 
   std::vector<FrameStruct> f_list =
       ParseCerealStructFromString<std::vector<FrameStruct>>(result);
@@ -79,11 +81,14 @@ void NetworkReader::NextFrame() {
                        (CurrentTimeMs() - start_time_)),
                   (f.timestamps.back() - f.timestamps.at(1)));
   }
-
 }
 
 std::vector<FrameStruct> NetworkReader::GetCurrentFrame() {
   return current_frame_internal_;
 }
 
-unsigned int NetworkReader::GetCurrentFrameId() { return current_frame_counter_; }
+unsigned int NetworkReader::GetCurrentFrameId() {
+  return current_frame_counter_;
+}
+
+zmq::context_t *NetworkReader::GetContext() { return context_; }

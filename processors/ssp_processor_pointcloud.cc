@@ -154,7 +154,6 @@ int main(int argc, char *argv[]) {
           sensor_calibration = k4a::calibration::get_from_raw(
               reinterpret_cast<char *>(&f.camera_calibration_data.data[0]),
               f.camera_calibration_data.data.size(), d, r);
-          std::cout << &f.camera_calibration_data.data[0] << std::endl;
           calibration_set = true;
         }
         if (write_to_disk) {
@@ -192,9 +191,9 @@ int main(int argc, char *argv[]) {
           k4a_transformation_create(&sensor_calibration);
       k4a::capture sensor_capture = k4a::capture::create();
 
-      FrameStructToK4A(f_list, sensor_capture, decoders);
-
       try {
+
+        FrameStructToK4A(f_list, sensor_capture, decoders);
 
         k4a::image depth_image = sensor_capture.get_depth_image();
         k4a::image color_image = sensor_capture.get_color_image();

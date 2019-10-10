@@ -4,11 +4,9 @@
 
 #include <chrono>
 #include <iostream>
-#include <thread>
 #include <unistd.h>
 
 #include <k4a/k4a.h>
-#include <opencv2/imgproc.hpp>
 #include <zmq.hpp>
 
 extern "C" {
@@ -81,6 +79,9 @@ int main(int argc, char *argv[]) {
 
     reader.init();
 
+    zmq::socket_t out_socket = zmq::socket_t(*reader.GetContext(), ZMQ_STREAM);
+    out_socket.bind("tcp://*:" + std::to_string(10001));
+
     k4a::calibration sensor_calibration;
     bool calibration_set = false;
     k4abt::tracker tracker;
@@ -112,33 +113,46 @@ int main(int argc, char *argv[]) {
       }
 
       k4a::capture sensor_capture = k4a::capture::create();
-      FrameStructToK4A(f_list, sensor_capture, decoders);
 
-      if (!tracker.enqueue_capture(sensor_capture)) {
-        // It should never hit timeout when K4A_WAIT_INFINITE is set.
-        spdlog::error("Error adding capture to tracker process queue timeout!");
-        exit(1);
-      }
+      try {
+        FrameStructToK4A(f_list, sensor_capture, decoders);
 
-      k4abt::frame body_frame = tracker.pop_result();
-      if (body_frame != nullptr) {
-        size_t num_bodies = body_frame.get_num_bodies();
-        spdlog::info("{} bodies are detected!", num_bodies);
-
-        for (size_t i = 0; i < num_bodies; i++) {
-          k4abt_body_t body = body_frame.get_body(i);
-          PrintBodyInformation(body);
+        if (!tracker.enqueue_capture(sensor_capture)) {
+          // It should never hit timeout when K4A_WAIT_INFINITE is set.
+          spdlog::error(
+              "Error adding capture to tracker process queue timeout!");
+          exit(1);
         }
 
-        k4a::image body_index_map = body_frame.get_body_index_map();
-        if (body_index_map != nullptr) {
-          PrintBodyIndexMapMiddleLine(body_index_map);
+        k4abt::frame body_frame = tracker.pop_result();
+
+        if (body_frame != nullptr) {
+          size_t num_bodies = body_frame.get_num_bodies();
+          spdlog::info("{} bodies are detected!", num_bodies);
+
+          std::string message =
+              std::to_string(num_bodies) + "  bodies are detected!\n";
+          zmq::message_t request(message.size());
+          memcpy(request.data(), message.c_str(), message.size());
+          out_socket.send(request);
+
+          for (size_t i = 0; i < num_bodies; i++) {
+            k4abt_body_t body = body_frame.get_body(i);
+            PrintBodyInformation(body);
+          }
+
+          k4a::image body_index_map = body_frame.get_body_index_map();
+          if (body_index_map != nullptr) {
+            PrintBodyIndexMapMiddleLine(body_index_map);
+          } else {
+            spdlog::error("Failed to generate bodyindex map!");
+          }
         } else {
-          spdlog::error("Failed to generate bodyindex map!");
+          spdlog::error("Pop body frame result time out!!");
+          break;
         }
-      } else {
-        spdlog::error("Pop body frame result time out!!");
-        break;
+      } catch (std::exception &e) {
+        spdlog::error(e.what());
       }
     }
 
