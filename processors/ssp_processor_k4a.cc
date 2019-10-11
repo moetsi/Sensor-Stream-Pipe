@@ -52,12 +52,41 @@ void PrintBodyIndexMapMiddleLine(k4a::image body_index_map) {
   std::cout << std::endl;
 }
 
+int processor_communicator(zmq::context_t &context) {
+  zmq::socket_t out_socket = zmq::socket_t(context, ZMQ_STREAM);
+  std::string id = out_socket.getsockopt<std::string>(ZMQ_ROUTING_ID);
+  out_socket.bind("tcp://*:" + std::to_string(10001));
+
+  int SIZE = 256;
+  zmq::message_t in_request(SIZE);
+
+  zmq::message_t idrequest;
+
+  int num_bodies = 0;
+  std::string message =
+      id + std::to_string(num_bodies) + "  bodies are detected!\n";
+
+  while (1) {
+    out_socket.recv(&idrequest);
+    while (!out_socket.recv(&in_request)) {
+    };
+    std::cout << in_request.str() << std::endl;
+    zmq::message_t request(message.size());
+    memcpy(request.data(), message.c_str(), message.size());
+    out_socket.send(idrequest, ZMQ_SNDMORE);
+    out_socket.send(request, ZMQ_SNDMORE);
+  }
+}
+
 int main(int argc, char *argv[]) {
 
   spdlog::set_level(spdlog::level::debug);
   av_log_set_level(AV_LOG_QUIET);
 
   srand(time(NULL) * getpid());
+
+  zmq::context_t context(1);
+  std::thread processor_thread(processor_communicator, std::ref(context));
 
   try {
 
@@ -78,9 +107,6 @@ int main(int argc, char *argv[]) {
     NetworkReader reader(port);
 
     reader.init();
-
-    zmq::socket_t out_socket = zmq::socket_t(*reader.GetContext(), ZMQ_STREAM);
-    out_socket.bind("tcp://*:" + std::to_string(10001));
 
     k4a::calibration sensor_calibration;
     bool calibration_set = false;
@@ -130,12 +156,6 @@ int main(int argc, char *argv[]) {
           size_t num_bodies = body_frame.get_num_bodies();
           spdlog::info("{} bodies are detected!", num_bodies);
 
-          std::string message =
-              std::to_string(num_bodies) + "  bodies are detected!\n";
-          zmq::message_t request(message.size());
-          memcpy(request.data(), message.c_str(), message.size());
-          out_socket.send(request);
-
           for (size_t i = 0; i < num_bodies; i++) {
             k4abt_body_t body = body_frame.get_body(i);
             PrintBodyInformation(body);
@@ -159,6 +179,6 @@ int main(int argc, char *argv[]) {
   } catch (std::exception &e) {
     spdlog::error(e.what());
   }
-
+  processor_thread.join();
   return 0;
 }
