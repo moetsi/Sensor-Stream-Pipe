@@ -1,17 +1,25 @@
 # Sensor Stream Pipe Instalation
 
-Sensor Stream Pipe depends on the following libraries:
+To get our Sensor Stream Pipe up and running, you will require the following:
 
-* [OpenCV](https://opencv.org/) 3.2.0 (tested on version available on Ubuntu 18.04 repo): Image processing;
-* [libav](https://github.com/libav/libav/) 3.4.6 (tested on version available on Ubuntu 18.04 repo): Encode, decode and process image frames;
-* [Zdepth](https://github.com/catid/Zdepth.git): compress depth data;
-* [Cereal](https://uscilab.github.io/cereal/) 1.2.2 (headers only): Data serialization for network transmission;
-* [spdlog](https://github.com/gabime/spdlog/) 1.4.1: logging library;
-* [yaml-cpp](https://github.com/jbeder/yaml-cpp/) 0.6.0: Reading server configuration file;
-* [ZeroMQ](http://zeromq.org/) and [cppzmq](https://github.com/zeromq/cppzmq/) (libzmq3 4.3.1, cppzmq 4.3.0):  Network and low-level I/O;
-* [NvPipe](https://github.com/NVIDIA/NvPipe/) (*optional*, but **recommended if you have an NVidia GPU** ): Encode and decode frames;
-* [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/) 1.2 (*optional*): Access Kinect DK data.
-* [Azure Kinect Body Tracking SDK](https://docs.microsoft.com/bs-cyrl-ba/azure/Kinect-dk/body-sdk-download/) 0.9.3 (*optional*): SSP Body Tracking client.
+The following steps were tested on Ubuntu 18.04. Installing on other recent Linux distributions should be pretty similar, but please check the installation instructions for OpenCV and Kinect DK on your respective platform first. 
+Installation instructions for Windows should be ready soon.
+If you encounter any problems or have any suggestions, please let us know by emailing contact@moetsi.com or post on our [forum](https://moetsi.com/pages/community).
+
+## Dependencies
+
+To get our Sensor Stream Pipe up and running, you will require the following:
+
+* [OpenCV](https://opencv.org/) 3.2.0 (tested on version available on Ubuntu 18.04 repo) is used for image processing.
+* [libav](https://github.com/libav/libav/) 3.4.6 (tested on version available on Ubuntu 18.04 repo) encodes, decodes and processes image frames.
+* [Cereal](https://uscilab.github.io/cereal/) 1.2.2 (headers only) serializes data for network transmission.
+* [ZeroMQ](http://zeromq.org/) and [cppzmq](https://github.com/zeromq/cppzmq/) (libzmq3 4.3.1, cppzmq 4.3.0) perform network and low-level I/O operations.
+* [spdlog](https://github.com/gabime/spdlog/) 1.4.1 Logging library.
+* [yaml-cpp](https://github.com/jbeder/yaml-cpp/) 0.6.0 reads server configuration files.
+* [Zdepth](https://github.com/catid/Zdepth.git): compresses depth data.
+* [NvPipe](https://github.com/NVIDIA/NvPipe/) (*optional*, but **recommended if you have an NVidia GPU** ) encodes and decodes frames. This is optional, but recommended for users with Nvidia GPUs.
+* [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/) 1.2 (*optional*) accesses Kinect DK data.
+* [Azure Kinect Body Tracking SDK](https://docs.microsoft.com/bs-cyrl-ba/azure/Kinect-dk/body-sdk-download/) 0.9.3 (*optional*) SSP Body Tracking client.
 
 ## Download and install repo libraries
 
@@ -163,14 +171,7 @@ sudo apt install libk4abt0.9-dev
 
 ### Building Sensor Stream Pipe
 
-1) Add header libraries to search path
-
-```
-export CPATH=~/libs/include:$CPATH
-export C_INCLUDE_PATH=~/libs/include:$C_INCLUDE_PATH
-```
-
-2) Download and build the project (server, clients and tester)
+Download and build the project (the ssp_server, ssp_client and ssp_tester):
 
 ```
 git clone git@github.com:moetsi/Sensor-Stream-Pipe.git
@@ -182,10 +183,10 @@ make
 ```
 
 
-You can turn off Kinect, Bodytrack and NVPipe support by adding the following to the ```cmake ..``` line respectively:
+You can turn on Kinect, Bodytrack and NVPipe support by adding the following to the ```cmake ..``` line respectively:
  
 ```
--DSSP_WITH_KINECT_SUPPORT=OFF 
--DSSP_WITH_K4A_BODYTRACK=OFF
--DSSP_WITH_NVPIPE_SUPPORT=OFF
+-DSSP_WITH_KINECT_SUPPORT=ON 
+-DSSP_WITH_K4A_BODYTRACK=ON
+-DSSP_WITH_NVPIPE_SUPPORT=ON
 ```
