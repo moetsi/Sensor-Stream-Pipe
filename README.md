@@ -61,7 +61,7 @@ The following steps were tested on Ubuntu 18.04. Installing on other recent Linu
 
 Installation instructions for Windows should be ready soon.
 
-If you encounter any problems or have any suggestions, please let us know by emailing [contact@moetsi.com](malito:contact@moetsi.com) or post on our [forum](https://moetsi.com/pages/community).
+If you encounter any problems or have any suggestions, please let us know by emailing [contact@moetsi.com](mailto:contact@moetsi.com) or post on our [forum](https://moetsi.com/pages/community).
 
 #### Dependencies
 
@@ -264,7 +264,7 @@ Our pipeline is just one of the first pieces of the puzzle. To develop a robust 
 
 ### How to Contribute
 
-We’re always excited to work with likeminded people, and invite you to experiment with our pipeline however you like! If you enjoy our work and think you can help take this project to the next level, feel free to drop us a message on [contact@moetsi.com](malito:contact@moetsi.com) to get involved.
+We’re always excited to work with likeminded people, and invite you to experiment with our pipeline however you like! If you enjoy our work and think you can help take this project to the next level, feel free to drop us a message on [contact@moetsi.com](mailto:contact@moetsi.com) to get involved.
 
 If you happen to discover any bugs in our code, we’d really appreciate knowing about them. Please just create an issue here on GitHub. 
 
@@ -284,7 +284,7 @@ Improve encoding performance on AMD/Intel graphic cards, by using the AMD Media 
 
 ## Moetsi’s Permissive License
 
-Moetsi’s Sensor Stream Pipe is licensed under the MIT license. That means that we don’t require attribution, but we’d really like to know what cool things you’re using our pipe for. Drop us a message on [contact@moetsi.com](malito:contact@moetsi.com) or post on our [forum](https://moetsi.com/pages/community) to tell us all about it!
+Moetsi’s Sensor Stream Pipe is licensed under the MIT license. That means that we don’t require attribution, but we’d really like to know what cool things you’re using our pipe for. Drop us a message on [contact@moetsi.com](mailto:contact@moetsi.com) or post on our [forum](https://moetsi.com/pages/community) to tell us all about it!
 
 ## Support Moetsi!
 
