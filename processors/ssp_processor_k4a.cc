@@ -75,6 +75,7 @@ int processor_communicator(zmq::context_t &context) {
     memcpy(request.data(), message.c_str(), message.size());
     out_socket.send(idrequest, ZMQ_SNDMORE);
     out_socket.send(request, ZMQ_SNDMORE);
+    std::cout << request.str() << std::endl;
   }
 }
 
