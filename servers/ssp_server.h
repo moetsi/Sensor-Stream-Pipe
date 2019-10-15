@@ -30,4 +30,6 @@ public:
   int Start(std::string &error);
 
   int Stop(std::string &error);
+
+  int HandleMessage(std::string &message);
 };

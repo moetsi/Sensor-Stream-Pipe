@@ -78,3 +78,10 @@ int SSPServer::Stop(std::string &error) {
   status_ = EXEC_STATUS_STOPPED;
   return 0;
 }
+
+int SSPServer::HandleMessage(std::string &message) {
+  return 0;
+}
+
+
+

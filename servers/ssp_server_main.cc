@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string>
 #include <thread>
+#include <time.h>
 
 #include <yaml-cpp/yaml.h>
 #include <zmq.hpp>
@@ -29,8 +30,14 @@
 #include "../utils/kinect_utils.h"
 #endif
 
-int send_frames(zmq::context_t &context, std::string &yaml_config) {
-  zmq::socket_t socket(context, ZMQ_PUSH);
+std::mutex mutex_;
+std::condition_variable cond_var_;
+zmq::context_t context_(1);
+bool ready = false;
+bool leave = false;
+
+int send_frames(std::string &yaml_config) {
+  zmq::socket_t socket(context_, ZMQ_PUSH);
 
   YAML::Node codec_parameters = YAML::LoadFile(yaml_config);
 
@@ -115,93 +122,101 @@ int send_frames(zmq::context_t &context, std::string &yaml_config) {
 
   double sent_mbytes = 0;
 
+  int linger = 0;
   socket.connect("tcp://" + host + ":" + std::to_string(port));
+  socket.setsockopt(ZMQ_LINGER, &linger, sizeof(linger));
 
   unsigned int fps = reader->GetFps();
 
-  while (1) {
+  while (!leave) {
 
-    uint64_t sleep_time = (1000 / fps) - processing_time;
+    while (ready && !leave) {
 
-    if (sleep_time > 1)
-      std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+      uint64_t sleep_time = (1000 / fps) - processing_time;
 
-    start_frame_time = CurrentTimeMs();
+      if (sleep_time > 1)
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 
-    if (sent_frames == 0) {
-      last_time = CurrentTimeMs();
-      start_time = last_time;
-    }
+      start_frame_time = CurrentTimeMs();
 
-    std::vector<FrameStruct> v;
-    std::vector<FrameStruct *> vO;
+      if (sent_frames == 0) {
+        last_time = CurrentTimeMs();
+        start_time = last_time;
+      }
 
-    while (v.empty()) {
-      std::vector<FrameStruct *> frameStruct = reader->GetCurrentFrame();
-      for (FrameStruct *frameStruct : frameStruct) {
+      std::vector<FrameStruct> v;
+      std::vector<FrameStruct *> vO;
 
-        IEncoder *frameEncoder = encoders[frameStruct->frame_type];
+      while (v.empty()) {
+        std::vector<FrameStruct *> frameStruct = reader->GetCurrentFrame();
+        for (FrameStruct *frameStruct : frameStruct) {
 
-        frameEncoder->AddFrameStruct(frameStruct);
-        if (frameEncoder->HasNextPacket()) {
-          FrameStruct *f = frameEncoder->CurrentFrameEncoded();
-          vO.push_back(f);
-          v.push_back(*f);
-          frameEncoder->NextPacket();
+          IEncoder *frameEncoder = encoders[frameStruct->frame_type];
+
+          frameEncoder->AddFrameStruct(frameStruct);
+          if (frameEncoder->HasNextPacket()) {
+            FrameStruct *f = frameEncoder->CurrentFrameEncoded();
+            vO.push_back(f);
+            v.push_back(*f);
+            frameEncoder->NextPacket();
+          }
+        }
+        if (reader->HasNextFrame())
+          reader->NextFrame();
+        else {
+          reader->Reset();
         }
       }
-      if (reader->HasNextFrame())
-        reader->NextFrame();
-      else {
-        reader->Reset();
-      }
-    }
 
-    if (!v.empty()) {
-      std::string short_message = CerealStructToString(v);
+      if (!v.empty()) {
+        std::string short_message = CerealStructToString(v);
 
-      std::string message = v.front().stream_id + " " + short_message;
+        std::string message = v.front().stream_id + " " + short_message;
 
-      zmq::message_t request(message.size());
-      memcpy(request.data(), message.c_str(), message.size());
-      socket.send(request);
-      sent_frames += 1;
-      sent_mbytes += message.size() / 1000.0;
+        zmq::message_t request(message.size());
+        memcpy(request.data(), message.c_str(), message.size());
+        socket.send(request);
+        sent_frames += 1;
+        sent_mbytes += message.size() / 1000.0;
 
-      uint64_t diff_time = CurrentTimeMs() - last_time;
+        uint64_t diff_time = CurrentTimeMs() - last_time;
 
-      double diff_start_time = (CurrentTimeMs() - start_time);
-      int64_t avg_fps;
-      if (diff_start_time == 0)
-        avg_fps = -1;
-      else {
-        double avg_time_per_frame_sent_ms =
-            diff_start_time / (double)sent_frames;
-        avg_fps = 1000 / avg_time_per_frame_sent_ms;
-      }
+        double diff_start_time = (CurrentTimeMs() - start_time);
+        int64_t avg_fps;
+        if (diff_start_time == 0)
+          avg_fps = -1;
+        else {
+          double avg_time_per_frame_sent_ms =
+              diff_start_time / (double)sent_frames;
+          avg_fps = 1000 / avg_time_per_frame_sent_ms;
+        }
 
-      last_time = CurrentTimeMs();
-      processing_time = last_time - start_frame_time;
+        last_time = CurrentTimeMs();
+        processing_time = last_time - start_frame_time;
 
-      spdlog::debug(
-          "Message sent, took {} ms; packet size {}; avg {} fps; {} "
-          "Mbps; {} Mbps expected",
-          diff_time, message.size(), avg_fps,
-          8 * (sent_mbytes / (CurrentTimeMs() - start_time)),
-          8 * (sent_mbytes * reader->GetFps() / (sent_frames * 1000)));
+        spdlog::debug(
+            "Message sent, took {} ms; packet size {}; avg {} fps; {} "
+            "Mbps; {} Mbps expected",
+            diff_time, message.size(), avg_fps,
+            8 * (sent_mbytes / (CurrentTimeMs() - start_time)),
+            8 * (sent_mbytes * reader->GetFps() / (sent_frames * 1000)));
 
-      for (unsigned int i = 0; i < v.size(); i++) {
-        FrameStruct f = v.at(i);
-        f.frame.clear();
-        spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id, f.frame_id);
-        vO.at(i)->frame.clear();
-        delete vO.at(i);
+        for (unsigned int i = 0; i < v.size(); i++) {
+          FrameStruct f = v.at(i);
+          f.frame.clear();
+          spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id,
+                        f.frame_id);
+          vO.at(i)->frame.clear();
+          delete vO.at(i);
+        }
       }
     }
   }
+  socket.close();
   delete reader;
   for (auto const &x : encoders)
     delete x.second;
+  return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -218,11 +233,32 @@ int main(int argc, char *argv[]) {
   }
 
   std::string yaml_config_file = argv[1];
-  zmq::context_t context(1);
-  std::thread sender(send_frames, std::ref(context),
-                     std::ref(yaml_config_file));
+
+  std::thread sender(send_frames, std::ref(yaml_config_file));
+
+  {
+    std::lock_guard<std::mutex> lk(mutex_);
+    ready = true;
+    std::cout << "started" << std::endl;
+  }
+  cond_var_.notify_one();
+
+  nanosleep((const struct timespec[]){{1, 0}}, NULL);
+
+  {
+    std::lock_guard<std::mutex> lk(mutex_);
+    ready = false;
+    std::cout << "stopped" << std::endl;
+  }
+  cond_var_.notify_one();
+
+  {
+    leave = true;
+    std::cout << "ending" << std::endl;
+  }
 
   sender.join();
+  context_.close();
 
   return 0;
 }

@@ -2,12 +2,12 @@
 general:
   host: "localhost"
   port: 9999
-  log_level: "info"
+  log_level: "debug"
   show_graphical_output: False
   frame_source:
     type: "video"
     parameters:
-      path: "/home/amourao/dataset_kinect_testB.mkv"
+      path: "/home/amourao/output2.mkv"
 video_encoder:
   0: #color
     type: "null"
