@@ -16,7 +16,9 @@ int SSPServer::ConnectBroker(const std::string &host, const int &port,
   return 0;
 }
 
-int SSPServer::ConnectCoordinator(std::string &error) {
+int SSPServer::ConnectCoordinator(const FrameSourceType &fst,
+                                  const std::string &metadata,
+                                  std::string &error) {
   // status = socket.sendConnectTo(broker.host, broker.port)
   return 0;
 }
@@ -79,9 +81,4 @@ int SSPServer::Stop(std::string &error) {
   return 0;
 }
 
-int SSPServer::HandleMessage(std::string &message) {
-  return 0;
-}
-
-
-
+int SSPServer::HandleMessage(std::string &message) { return 0; }

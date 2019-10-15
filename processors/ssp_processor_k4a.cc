@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
   srand(time(NULL) * getpid());
 
   zmq::context_t context(1);
-  std::thread processor_thread(processor_communicator, std::ref(context));
+  // std::thread processor_thread(processor_communicator, std::ref(context));
 
   try {
 

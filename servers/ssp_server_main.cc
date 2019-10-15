@@ -26,6 +26,7 @@
 #endif
 
 #ifdef SSP_WITH_KINECT_SUPPORT
+#include "../clients/ssp_coordinator_types.h"
 #include "../readers/kinect_reader.h"
 #include "../utils/kinect_utils.h"
 #endif
@@ -36,7 +37,7 @@ zmq::context_t context_(1);
 bool ready = false;
 bool leave = false;
 
-int send_frames(std::string &yaml_config) {
+int send_frames(std::string &yaml_config, std::string &broker_host) {
   zmq::socket_t socket(context_, ZMQ_PUSH);
 
   YAML::Node codec_parameters = YAML::LoadFile(yaml_config);
@@ -122,8 +123,9 @@ int send_frames(std::string &yaml_config) {
 
   double sent_mbytes = 0;
 
+  socket.connect("tcp://" + broker_host);
+
   int linger = 0;
-  socket.connect("tcp://" + host + ":" + std::to_string(port));
   socket.setsockopt(ZMQ_LINGER, &linger, sizeof(linger));
 
   unsigned int fps = reader->GetFps();
@@ -227,6 +229,9 @@ int main(int argc, char *argv[]) {
 
   av_log_set_level(AV_LOG_QUIET);
 
+  std::string host = "127.0.0.1";
+  int port = 9999;
+
   if (argc < 2) {
     std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
     return 1;
@@ -234,30 +239,62 @@ int main(int argc, char *argv[]) {
 
   std::string yaml_config_file = argv[1];
 
-  std::thread sender(send_frames, std::ref(yaml_config_file));
+  zmq::socket_t coor_socket(context_, ZMQ_REQ);
+  coor_socket.connect("tcp://" + host + ":" + std::to_string(port));
 
-  {
-    std::lock_guard<std::mutex> lk(mutex_);
-    ready = true;
-    std::cout << "started" << std::endl;
-  }
-  cond_var_.notify_one();
+  std::string connect_msg = "1 " + std::to_string(FRAME_SOURCE_ANY);
+  zmq::message_t conn_request(connect_msg.c_str(), connect_msg.size());
 
-  nanosleep((const struct timespec[]){{1, 0}}, NULL);
+  int SIZE = 256 * 256;
+  zmq::message_t in_request(SIZE);
 
-  {
-    std::lock_guard<std::mutex> lk(mutex_);
-    ready = false;
-    std::cout << "stopped" << std::endl;
-  }
-  cond_var_.notify_one();
+  int i = 0;
 
-  {
-    leave = true;
-    std::cout << "ending" << std::endl;
+  coor_socket.send(conn_request);
+  coor_socket.recv(&in_request);
+  coor_socket.send(conn_request);
+
+  std::string connect_msg_rsp((char *)in_request.data(), in_request.size());
+  std::string msg_type = connect_msg_rsp.substr(0, 1);
+  std::string broker_host =
+      connect_msg_rsp.substr(2, connect_msg_rsp.size() - 2);
+
+  std::thread sender(send_frames, std::ref(yaml_config_file),
+                     std::ref(broker_host));
+  while (!leave) {
+    coor_socket.recv(&in_request);
+    std::string msg_rsp((char *)in_request.data(), in_request.size());
+
+    coor_socket.send(conn_request);
+    {
+      std::lock_guard<std::mutex> lk(mutex_);
+      ready = true;
+      std::cout << "started" << std::endl;
+    }
+    cond_var_.notify_one();
+
+    coor_socket.recv(&in_request);
+    coor_socket.send(conn_request);
+    // nanosleep((const struct timespec[]){{1, 0}}, NULL);
+
+    {
+      std::lock_guard<std::mutex> lk(mutex_);
+      ready = false;
+      std::cout << "stopped" << std::endl;
+    }
+    cond_var_.notify_one();
+
+    coor_socket.recv(&in_request);
+    coor_socket.send(conn_request);
+
+    {
+      leave = true;
+      std::cout << "ending" << std::endl;
+    }
   }
 
   sender.join();
+  coor_socket.close();
   context_.close();
 
   return 0;

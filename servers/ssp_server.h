@@ -21,7 +21,8 @@ public:
   int ConnectBroker(const std::string &host, const int &port,
                     std::string &error);
 
-  int ConnectCoordinator(std::string &error);
+  int ConnectCoordinator(const FrameSourceType &type,
+                         const std::string &metadata, std::string &error);
 
   int GetBroker(BrokerInstance &connection, std::string &error);
 
