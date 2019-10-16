@@ -18,7 +18,7 @@ public:
   SSPServer();
   ~SSPServer();
 
-  int ConnectBroker(const std::string &host, const int &port,
+  int ConnectBroker(const std::string &host,
                     std::string &error);
 
   int ConnectCoordinator(const FrameSourceType &type,

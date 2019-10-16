@@ -8,11 +8,15 @@ SSPServer::SSPServer() {}
 
 SSPServer::~SSPServer() {}
 
-int SSPServer::ConnectBroker(const std::string &host, const int &port,
-                             std::string &error) {
-  // broker, coordinator = socket.sendConnectTo(host, port)
-  // broker_ = broker
-  // coordinator_ = coordinator
+int SSPServer::ConnectBroker(const std::string &host, std::string &error) {
+  if (broker_.status != EXEC_STATUS_UNINIT) {
+    error = "Broker already initialized";
+    return 1;
+  }
+
+  broker_.status = EXEC_STATUS_WAITING;
+  broker_.host = host;
+  broker_.id = "";
   return 0;
 }
 

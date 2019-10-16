@@ -29,6 +29,7 @@
 #include "../clients/ssp_coordinator_types.h"
 #include "../readers/kinect_reader.h"
 #include "../utils/kinect_utils.h"
+#include "ssp_server.h"
 #endif
 
 std::mutex mutex_;
@@ -236,60 +237,109 @@ int main(int argc, char *argv[]) {
     std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
     return 1;
   }
+  SSPServer ssp;
+  std::string error_msg;
+  int error;
+
+  int SIZE = 256 * 256;
+  zmq::message_t in_request(SIZE);
+  int i = 0;
 
   std::string yaml_config_file = argv[1];
 
   zmq::socket_t coor_socket(context_, ZMQ_REQ);
-  coor_socket.connect("tcp://" + host + ":" + std::to_string(port));
-
-  std::string connect_msg = "1 " + std::to_string(FRAME_SOURCE_ANY);
+  std::string connect_msg = "1 " + std::to_string(FRAME_SOURCE_CAMERA);
   zmq::message_t conn_request(connect_msg.c_str(), connect_msg.size());
 
-  int SIZE = 256 * 256;
-  zmq::message_t in_request(SIZE);
+  while (error) {
+    spdlog::info("Connecting to coordinator");
 
-  int i = 0;
+    coor_socket.connect("tcp://" + host + ":" + std::to_string(port));
+
+    coor_socket.send(conn_request);
+    spdlog::info("Waiting to coordinator");
+    coor_socket.recv(&in_request);
+    spdlog::info("Coordinator responded");
+
+    FrameSourceType type;
+    std::string metadata;
+
+    error = ssp.ConnectCoordinator(type, metadata, error_msg);
+
+    if (error != 0) {
+      spdlog::info("Error " + std::to_string(error) +
+                   " connecting to coordinator \"" + error_msg + "\"");
+    }
+  }
 
   coor_socket.send(conn_request);
-  coor_socket.recv(&in_request);
-  coor_socket.send(conn_request);
+  spdlog::info("Connected to coordinator");
 
   std::string connect_msg_rsp((char *)in_request.data(), in_request.size());
-  std::string msg_type = connect_msg_rsp.substr(0, 1);
+  char msg_type = connect_msg_rsp.substr(0, 1).c_str()[0];
   std::string broker_host =
       connect_msg_rsp.substr(2, connect_msg_rsp.size() - 2);
 
+  spdlog::info("Connecting to broker at \"" + broker_host + "\"");
   std::thread sender(send_frames, std::ref(yaml_config_file),
                      std::ref(broker_host));
+  error = ssp.ConnectBroker(broker_host, error_msg);
+
+  if (error != 0) {
+    spdlog::info("Error " + std::to_string(error) + " connecting to broker \"" +
+                 error_msg + "\"");
+  }
+
   while (!leave) {
+    spdlog::info("Waiting for request");
     coor_socket.recv(&in_request);
     std::string msg_rsp((char *)in_request.data(), in_request.size());
+    msg_type = msg_rsp.substr(0, 1).c_str()[0];
 
-    coor_socket.send(conn_request);
-    {
+    /*
+     * enum MsgType {
+  SSP_MESSAGE_CONNECT = 0,
+  SSP_MESSAGE_START,
+  SSP_MESSAGE_STOP,
+  SSP_MESSAGE_REG_FS,
+  SSP_MESSAGE_REG_P,
+  SSP_MESSAGE_REG_CON,
+  SSP_MESSAGE_QUE_FS,
+  SSP_MESSAGE_QUE_P,
+  SSP_MESSAGE_QUE_CON,
+  SSP_MESSAGE_CON_FS,
+  SSP_MESSAGE_CON_P,
+  SSP_MESSAGE_DATA,
+  SSP_MESSAGE_OK,
+  SSP_MESSAGE_ERROR
+      };
+     */
+    switch (msg_type) {
+    case SSP_MESSAGE_START: {
+      spdlog::info("SSP_MESSAGE_START request");
       std::lock_guard<std::mutex> lk(mutex_);
       ready = true;
-      std::cout << "started" << std::endl;
+      cond_var_.notify_one();
+      coor_socket.send(conn_request);
     }
-    cond_var_.notify_one();
-
-    coor_socket.recv(&in_request);
-    coor_socket.send(conn_request);
-    // nanosleep((const struct timespec[]){{1, 0}}, NULL);
-
-    {
+    case SSP_MESSAGE_STOP: {
+      spdlog::info("SSP_MESSAGE_STOP request");
       std::lock_guard<std::mutex> lk(mutex_);
       ready = false;
-      std::cout << "stopped" << std::endl;
+      cond_var_.notify_one();
+      coor_socket.send(conn_request);
     }
-    cond_var_.notify_one();
-
-    coor_socket.recv(&in_request);
-    coor_socket.send(conn_request);
-
-    {
-      leave = true;
-      std::cout << "ending" << std::endl;
+    case SSP_MESSAGE_EXIT: {
+      spdlog::info("SSP_MESSAGE_EXIT request");
+      leave = false;
+      cond_var_.notify_one();
+      coor_socket.send(conn_request);
+    }
+    default: {
+      spdlog::info("Invalid " + std::to_string(msg_type) + " request.");
+      coor_socket.send(conn_request);
+      break;
+    }
     }
   }
 

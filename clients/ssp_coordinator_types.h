@@ -34,7 +34,6 @@ struct ProcessorInstance {
   ExchangeDataType data_type;
   std::string metadata;
   std::string host;
-  std::string port;
   ExecStatus status = EXEC_STATUS_UNINIT;
 };
 
@@ -43,7 +42,6 @@ struct FrameServerInstance {
   FrameSourceType source_type;
   std::string metadata;
   std::string host;
-  std::string port;
   ExecStatus status = EXEC_STATUS_UNINIT;
 };
 
@@ -57,7 +55,6 @@ struct FrameServerProcessorConnection {
 struct BrokerInstance {
   std::string id;
   std::string host;
-  int port;
   ExecStatus status = EXEC_STATUS_UNINIT;
 };
 
@@ -65,6 +62,7 @@ enum MsgType {
   SSP_MESSAGE_CONNECT = 0,
   SSP_MESSAGE_START,
   SSP_MESSAGE_STOP,
+  SSP_MESSAGE_EXIT,
   SSP_MESSAGE_REG_FS,
   SSP_MESSAGE_REG_P,
   SSP_MESSAGE_REG_CON,
