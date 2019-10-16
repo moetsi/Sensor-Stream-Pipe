@@ -14,7 +14,7 @@ int SSPServer::ConnectBroker(const std::string &host, std::string &error) {
     return 1;
   }
 
-  broker_.status = EXEC_STATUS_WAITING;
+  broker_.status = EXEC_STATUS_RUNNING;
   broker_.host = host;
   broker_.id = "";
   return 0;
@@ -46,7 +46,7 @@ int SSPServer::GetCoordinator(BrokerInstance &connection, std::string &error) {
 }
 
 int SSPServer::Start(std::string &error) {
-  if (status_ == EXEC_STATUS_RUNNING) {
+  if (status_ == EXEC_STATUS_UNINIT) {
     error = "Server not initialized";
     return 1;
   }
@@ -66,7 +66,7 @@ int SSPServer::Start(std::string &error) {
 }
 
 int SSPServer::Stop(std::string &error) {
-  if (status_ == EXEC_STATUS_RUNNING) {
+  if (status_ == EXEC_STATUS_UNINIT) {
     error = "Server not initialized";
     return 1;
   }

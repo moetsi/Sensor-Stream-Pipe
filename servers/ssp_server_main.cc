@@ -248,7 +248,9 @@ int main(int argc, char *argv[]) {
   std::string yaml_config_file = argv[1];
 
   zmq::socket_t coor_socket(context_, ZMQ_REQ);
-  std::string connect_msg = "1 " + std::to_string(FRAME_SOURCE_CAMERA);
+  char code = char(SSP_MESSAGE_CONNECT);
+  std::string connect_msg = std::string(1, code);
+  connect_msg += " " + std::to_string(FRAME_SOURCE_CAMERA);
   zmq::message_t conn_request(connect_msg.c_str(), connect_msg.size());
 
   while (error) {
@@ -267,11 +269,11 @@ int main(int argc, char *argv[]) {
     error = ssp.ConnectCoordinator(type, metadata, error_msg);
 
     if (error != 0) {
-      spdlog::info("Error " + std::to_string(error) +
-                   " connecting to coordinator \"" + error_msg + "\"");
+      spdlog::error("Error " + std::to_string(error) +
+                    " connecting to coordinator \"" + error_msg + "\"");
     }
   }
-
+  conn_request = zmq::message_t(connect_msg.c_str(), connect_msg.size());
   coor_socket.send(conn_request);
   spdlog::info("Connected to coordinator");
 
@@ -286,8 +288,8 @@ int main(int argc, char *argv[]) {
   error = ssp.ConnectBroker(broker_host, error_msg);
 
   if (error != 0) {
-    spdlog::info("Error " + std::to_string(error) + " connecting to broker \"" +
-                 error_msg + "\"");
+    spdlog::error("Error " + std::to_string(error) +
+                  " connecting to broker \"" + error_msg + "\"");
   }
 
   while (!leave) {
@@ -316,24 +318,38 @@ int main(int argc, char *argv[]) {
      */
     switch (msg_type) {
     case SSP_MESSAGE_START: {
-      spdlog::info("SSP_MESSAGE_START request");
-      std::lock_guard<std::mutex> lk(mutex_);
-      ready = true;
-      cond_var_.notify_one();
+      error = ssp.Start(error_msg);
+      if (error != 0) {
+        spdlog::error("SSP_MESSAGE_START Error " + std::to_string(error) +
+                      "\": " + error_msg + "\"");
+      } else {
+        spdlog::info("SSP_MESSAGE_START request");
+        std::lock_guard<std::mutex> lk(mutex_);
+        ready = true;
+        cond_var_.notify_one();
+      }
       coor_socket.send(conn_request);
+      break;
     }
     case SSP_MESSAGE_STOP: {
-      spdlog::info("SSP_MESSAGE_STOP request");
-      std::lock_guard<std::mutex> lk(mutex_);
-      ready = false;
-      cond_var_.notify_one();
+      error = ssp.Stop(error_msg);
+      if (error != 0) {
+        spdlog::error("SSP_MESSAGE_STOP Error " + std::to_string(error) +
+                      "\": " + error_msg + "\"");
+      } else {
+        spdlog::info("SSP_MESSAGE_STOP request");
+        std::lock_guard<std::mutex> lk(mutex_);
+        ready = false;
+        cond_var_.notify_one();
+      }
       coor_socket.send(conn_request);
+      break;
     }
     case SSP_MESSAGE_EXIT: {
       spdlog::info("SSP_MESSAGE_EXIT request");
-      leave = false;
-      cond_var_.notify_one();
+      leave = true;
       coor_socket.send(conn_request);
+      break;
     }
     default: {
       spdlog::info("Invalid " + std::to_string(msg_type) + " request.");
