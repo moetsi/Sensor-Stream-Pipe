@@ -135,7 +135,7 @@ int SSPCoordinator::Connect(const std::string &id_fs,
   current_connections_id_mapping_[fspc_id] = connection.id;
   current_connections_[connection.id] = connection;
 
-  spdlog::info("Connection registered: " + fspc_id);
+  spdlog::info("Connection registered: " + fspc_id + " " + connection.id);
   return 0;
 }
 int SSPCoordinator::Disconnect(const std::string &id_out, std::string &error) {

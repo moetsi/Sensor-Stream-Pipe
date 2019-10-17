@@ -151,16 +151,16 @@ int main() {
         std::string host = sdata.at(0);
         std::string id = sdata.at(1);
         std::string fst_string = sdata.at(2);
+        std::string edt_string = sdata.at(3);
+        std::string metadata = sdata.at(4);
 
         std::string zmq_id = id_msg;
 
         FrameSourceType fst =
             static_cast<FrameSourceType>(fst_string.c_str()[0]);
 
-        std::string edt_string = sdata.at(3);
         ExchangeDataType edt =
             static_cast<ExchangeDataType>(edt_string.c_str()[0]);
-        std::string metadata = sdata.at(4);
 
         error = ssp_coordinator.RegisterProcessor(host, id, zmq_id, fst, edt,
                                                   metadata, error_msg);
@@ -229,7 +229,8 @@ int main() {
         zmq::message_t request = BuildMessage(connect_msg);
         coor_socket.send(request);
 
-        spdlog::info("SSP_MESSAGE_CONNECT SSP_CONNECTION_TYPE_PROCESSOR ok");
+        spdlog::info(
+            "Send SSP_MESSAGE_CONNECT to SSP_CONNECTION_TYPE_PROCESSOR ok");
         answer = BuildOKMessage();
       }
       coor_socket.send(id_request, ZMQ_SNDMORE);
@@ -251,23 +252,91 @@ int main() {
         spdlog::error("SSP_MESSAGE_START error " + std::to_string(error) +
                       "\": " + error_msg + "\"");
         answer = BuildErrorMessage(error, error_msg);
-      } else {
-        ProcessorInstance pi = connection.processor;
-        FrameServerInstance fsi = connection.frameserver;
-
-        std::string id_fsi_request = fsi.zmq_id;
-        zmq::message_t id_fsi_msg = BuildMessage(id_fsi_request);
-        coor_socket.send(id_fsi_msg, ZMQ_SNDMORE);
+        coor_socket.send(id_request, ZMQ_SNDMORE);
         coor_socket.send(emp_request, ZMQ_SNDMORE);
-
-        std::string connect_msg = std::string(1, char(SSP_MESSAGE_START));
-
-        zmq::message_t request = BuildMessage(connect_msg);
-        coor_socket.send(request);
-
-        spdlog::info("SSP_MESSAGE_START " + id_con + " ok");
-        answer = BuildOKMessage();
+        coor_socket.send(answer);
+        break;
       }
+
+      error = ssp_coordinator.Start(id_con, error_msg);
+      if (error != 0) {
+        spdlog::error("SSP_MESSAGE_START error " + std::to_string(error) +
+                      "\": " + error_msg + "\"");
+        answer = BuildErrorMessage(error, error_msg);
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+
+      ProcessorInstance pi = connection.processor;
+      FrameServerInstance fsi = connection.frameserver;
+
+      std::string id_fsi_request = fsi.zmq_id;
+      zmq::message_t id_fsi_msg = BuildMessage(id_fsi_request);
+      coor_socket.send(id_fsi_msg, ZMQ_SNDMORE);
+      coor_socket.send(emp_request, ZMQ_SNDMORE);
+
+      std::string connect_msg = std::string(1, char(SSP_MESSAGE_START));
+
+      zmq::message_t request = BuildMessage(connect_msg);
+      coor_socket.send(request);
+
+      spdlog::info("SSP_MESSAGE_START " + id_con + " ok");
+      answer = BuildOKMessage();
+
+      coor_socket.send(id_request, ZMQ_SNDMORE);
+      coor_socket.send(emp_request, ZMQ_SNDMORE);
+      coor_socket.send(answer);
+      break;
+    }
+    case SSP_MESSAGE_STOP: {
+      std::string data = msg_rsp.substr(1, msg_rsp.size() - 1);
+      std::string delimitor = " ";
+      std::vector<std::string> sdata = SplitString(data, delimitor);
+      std::string id_con = sdata.at(0);
+
+      FrameServerProcessorConnection connection;
+      error = ssp_coordinator.GetConnectionInfo(id_con, connection, error_msg);
+
+      zmq::message_t answer;
+      if (error != 0) {
+        spdlog::error("SSP_MESSAGE_STOP error " + std::to_string(error) +
+                      "\": " + error_msg + "\"");
+        answer = BuildErrorMessage(error, error_msg);
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+
+      error = ssp_coordinator.Stop(id_con, error_msg);
+      if (error != 0) {
+        spdlog::error("SSP_MESSAGE_STOP error " + std::to_string(error) +
+                      "\": " + error_msg + "\"");
+        answer = BuildErrorMessage(error, error_msg);
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+
+      ProcessorInstance pi = connection.processor;
+      FrameServerInstance fsi = connection.frameserver;
+
+      std::string id_fsi_request = fsi.zmq_id;
+      zmq::message_t id_fsi_msg = BuildMessage(id_fsi_request);
+      coor_socket.send(id_fsi_msg, ZMQ_SNDMORE);
+      coor_socket.send(emp_request, ZMQ_SNDMORE);
+
+      std::string connect_msg = std::string(1, char(SSP_MESSAGE_STOP));
+
+      zmq::message_t request = BuildMessage(connect_msg);
+      coor_socket.send(request);
+
+      spdlog::info("SSP_MESSAGE_STOP " + id_con + " ok");
+      answer = BuildOKMessage();
+
       coor_socket.send(id_request, ZMQ_SNDMORE);
       coor_socket.send(emp_request, ZMQ_SNDMORE);
       coor_socket.send(answer);

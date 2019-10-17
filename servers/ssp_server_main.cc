@@ -339,6 +339,8 @@ int main(int argc, char *argv[]) {
         ready = true;
         cond_var_.notify_one();
       }
+      dummy_request =
+          zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);
       coor_socket.send(dummy_request);
       break;
     }
@@ -351,6 +353,8 @@ int main(int argc, char *argv[]) {
         spdlog::info("SSP_MESSAGE_STOP request");
         ready = false;
       }
+      dummy_request =
+          zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);
       coor_socket.send(dummy_request);
       break;
     }
@@ -362,12 +366,15 @@ int main(int argc, char *argv[]) {
         ready = true;
         cond_var_.notify_one();
       }
-
+      dummy_request =
+          zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);
       coor_socket.send(dummy_request);
       break;
     }
     default: {
       spdlog::info("Invalid " + std::to_string(msg_type) + " request.");
+      dummy_request =
+          zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);
       coor_socket.send(dummy_request);
       break;
     }
