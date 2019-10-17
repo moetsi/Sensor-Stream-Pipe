@@ -325,13 +325,20 @@ int main() {
       FrameServerInstance fsi = connection.frameserver;
 
       std::string id_fsi_request = fsi.zmq_id;
+      std::string id_pi_request = pi.zmq_id;
       zmq::message_t id_fsi_msg = BuildMessage(id_fsi_request);
-      coor_socket.send(id_fsi_msg, ZMQ_SNDMORE);
-      coor_socket.send(emp_request, ZMQ_SNDMORE);
+      zmq::message_t id_pi_msg = BuildMessage(id_pi_request);
 
       std::string connect_msg = std::string(1, char(SSP_MESSAGE_STOP));
-
       zmq::message_t request = BuildMessage(connect_msg);
+
+      coor_socket.send(id_fsi_msg, ZMQ_SNDMORE);
+      coor_socket.send(emp_request, ZMQ_SNDMORE);
+      coor_socket.send(request);
+
+      request = BuildMessage(connect_msg);
+      coor_socket.send(id_pi_msg, ZMQ_SNDMORE);
+      coor_socket.send(emp_request, ZMQ_SNDMORE);
       coor_socket.send(request);
 
       spdlog::info("SSP_MESSAGE_STOP " + id_con + " ok");

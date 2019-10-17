@@ -92,3 +92,7 @@ unsigned int NetworkReader::GetCurrentFrameId() {
 }
 
 zmq::context_t *NetworkReader::GetContext() { return context_; }
+
+void NetworkReader::SetFilter(std::string filter) {
+  socket_->setsockopt(ZMQ_SUBSCRIBE, filter.c_str(), filter.size());
+}

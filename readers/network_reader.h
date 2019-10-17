@@ -25,10 +25,6 @@ private:
   int port_;
   zmq::context_t *context_;
 
-public:
-  zmq::context_t *getContext() const;
-  void setContext(zmq::context_t *context);
-
 private:
   zmq::socket_t *socket_;
 
@@ -47,4 +43,8 @@ public:
   unsigned int GetCurrentFrameId();
 
   zmq::context_t *GetContext();
+
+  void SetContext(zmq::context_t *context);
+
+  void SetFilter(std::string filter);
 };
