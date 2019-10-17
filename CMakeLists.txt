@@ -61,7 +61,7 @@ if (SSP_WITH_KINECT_SUPPORT)
 endif ()
 
 
-add_executable(ssp_coordinator clients/ssp_coordinator.cc utils/utils.cc)
+add_executable(ssp_coordinator clients/ssp_coordinator.cc utils/utils.cc clients/ssp_coordinator_main.cc)
 add_executable(ssp_broker clients/ssp_broker.cc)
 add_executable(ssp_processor_opencv processors/ssp_processor_opencv.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
 add_executable(ssp_processor_template processors/ssp_processor_template.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})

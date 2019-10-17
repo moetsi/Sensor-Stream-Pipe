@@ -32,8 +32,23 @@ void SetupLogging(YAML::Node &general_parameters) {
         "basic_logger", general_parameters["log_file"].as<std::string>()));
 }
 
-void SetupLogging(std::string &level, std::string &file) {
+void SetupLogging(const std::string &level, const std::string &file) {
   spdlog::set_level(spdlog::level::from_str(level));
   if (!file.empty())
     spdlog::set_default_logger(spdlog::basic_logger_mt("basic_logger", file));
+}
+
+std::vector<std::string> SplitString(const std::string& s, const std::string& delimiter) {
+  size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+  std::string token;
+  std::vector<std::string> res;
+
+  while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+    token = s.substr(pos_start, pos_end - pos_start);
+    pos_start = pos_end + delim_len;
+    res.push_back(token);
+  }
+
+  res.push_back(s.substr(pos_start));
+  return res;
 }

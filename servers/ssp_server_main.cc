@@ -133,6 +133,9 @@ int send_frames(std::string &yaml_config, std::string &broker_host) {
 
   while (!leave) {
 
+    std::unique_lock<std::mutex> lk(mutex_);
+    cond_var_.wait(lk, [] { return ready; });
+
     while (ready && !leave) {
 
       uint64_t sleep_time = (1000 / fps) - processing_time;
@@ -233,13 +236,15 @@ int main(int argc, char *argv[]) {
   std::string host = "127.0.0.1";
   int port = 9999;
 
+  std::string host_port = host + ":" + std::to_string(port);
+
   if (argc < 2) {
     std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
     return 1;
   }
   SSPServer ssp;
   std::string error_msg;
-  int error;
+  int error = 1;
 
   int SIZE = 256 * 256;
   zmq::message_t in_request(SIZE);
@@ -248,36 +253,42 @@ int main(int argc, char *argv[]) {
   std::string yaml_config_file = argv[1];
 
   zmq::socket_t coor_socket(context_, ZMQ_REQ);
-  char code = char(SSP_MESSAGE_CONNECT);
-  std::string connect_msg = std::string(1, code);
-  connect_msg += " " + std::to_string(FRAME_SOURCE_CAMERA);
+
+  std::string connect_msg =
+      std::string(1, char(SSP_MESSAGE_CONNECT)) +
+      std::string(1, char(SSP_CONNECTION_TYPE_FRAMESOURCE)) + host + ":" +
+      std::to_string(port) + " " + ssp.id + " " +
+      std::string(1, char(SSP_FRAME_SOURCE_CAMERA)) + " ";
   zmq::message_t conn_request(connect_msg.c_str(), connect_msg.size());
+  zmq::message_t dummy_request(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(),
+                               1);
 
-  while (error) {
-    spdlog::info("Connecting to coordinator");
+  spdlog::info("Connecting to coordinator at " + host_port);
 
-    coor_socket.connect("tcp://" + host + ":" + std::to_string(port));
+  coor_socket.connect("tcp://" + host_port);
 
-    coor_socket.send(conn_request);
-    spdlog::info("Waiting to coordinator");
-    coor_socket.recv(&in_request);
-    spdlog::info("Coordinator responded");
-
-    FrameSourceType type;
-    std::string metadata;
-
-    error = ssp.ConnectCoordinator(type, metadata, error_msg);
-
-    if (error != 0) {
-      spdlog::error("Error " + std::to_string(error) +
-                    " connecting to coordinator \"" + error_msg + "\"");
-    }
-  }
-  conn_request = zmq::message_t(connect_msg.c_str(), connect_msg.size());
   coor_socket.send(conn_request);
-  spdlog::info("Connected to coordinator");
+  spdlog::info("Waiting to coordinator");
+  coor_socket.recv(&in_request);
+  spdlog::info("Coordinator responded");
+  coor_socket.send(dummy_request);
+
+  FrameSourceType type;
+  std::string metadata;
+
+  error = ssp.ConnectCoordinator(type, metadata, error_msg);
+
+  if (error != 0) {
+    spdlog::error("Error " + std::to_string(error) +
+                  " connecting to coordinator \"" + error_msg + "\"");
+  }
+
+  spdlog::info("Connected to coordinator " + host_port);
 
   std::string connect_msg_rsp((char *)in_request.data(), in_request.size());
+
+  spdlog::info("Coordinator answer " + connect_msg_rsp);
+
   char msg_type = connect_msg_rsp.substr(0, 1).c_str()[0];
   std::string broker_host =
       connect_msg_rsp.substr(2, connect_msg_rsp.size() - 2);
@@ -328,7 +339,6 @@ int main(int argc, char *argv[]) {
         ready = true;
         cond_var_.notify_one();
       }
-      coor_socket.send(conn_request);
       break;
     }
     case SSP_MESSAGE_STOP: {
@@ -342,18 +352,15 @@ int main(int argc, char *argv[]) {
         ready = false;
         cond_var_.notify_one();
       }
-      coor_socket.send(conn_request);
       break;
     }
     case SSP_MESSAGE_EXIT: {
       spdlog::info("SSP_MESSAGE_EXIT request");
       leave = true;
-      coor_socket.send(conn_request);
       break;
     }
     default: {
       spdlog::info("Invalid " + std::to_string(msg_type) + " request.");
-      coor_socket.send(conn_request);
       break;
     }
     }

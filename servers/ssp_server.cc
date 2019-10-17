@@ -4,17 +4,17 @@
 
 #include "ssp_server.h"
 
-SSPServer::SSPServer() {}
+SSPServer::SSPServer() { id = RandomString(16); }
 
 SSPServer::~SSPServer() {}
 
 int SSPServer::ConnectBroker(const std::string &host, std::string &error) {
-  if (broker_.status != EXEC_STATUS_UNINIT) {
+  if (broker_.status != SSP_EXEC_STATUS_UNINIT) {
     error = "Broker already initialized";
     return 1;
   }
 
-  broker_.status = EXEC_STATUS_RUNNING;
+  broker_.status = SSP_EXEC_STATUS_RUNNING;
   broker_.host = host;
   broker_.id = "";
   return 0;
@@ -28,7 +28,7 @@ int SSPServer::ConnectCoordinator(const FrameSourceType &fst,
 }
 
 int SSPServer::GetBroker(BrokerInstance &connection, std::string &error) {
-  if (broker_.status == EXEC_STATUS_UNINIT) {
+  if (broker_.status == SSP_EXEC_STATUS_UNINIT) {
     error = "Broker not initialized";
     return 1;
   }
@@ -37,7 +37,7 @@ int SSPServer::GetBroker(BrokerInstance &connection, std::string &error) {
 }
 
 int SSPServer::GetCoordinator(BrokerInstance &connection, std::string &error) {
-  if (coordinator_.status == EXEC_STATUS_UNINIT) {
+  if (coordinator_.status == SSP_EXEC_STATUS_UNINIT) {
     error = "Cooordinator not initialized";
     return 1;
   }
@@ -46,42 +46,42 @@ int SSPServer::GetCoordinator(BrokerInstance &connection, std::string &error) {
 }
 
 int SSPServer::Start(std::string &error) {
-  if (status_ == EXEC_STATUS_UNINIT) {
+  if (status_ == SSP_EXEC_STATUS_UNINIT) {
     error = "Server not initialized";
     return 1;
   }
 
-  if (broker_.status != EXEC_STATUS_RUNNING) {
+  if (broker_.status != SSP_EXEC_STATUS_RUNNING) {
     error = "Broker not running";
     return 2;
   }
 
-  if (status_ == EXEC_STATUS_RUNNING) {
+  if (status_ == SSP_EXEC_STATUS_RUNNING) {
     error = "Server already running";
     return 2;
   }
 
-  status_ = EXEC_STATUS_RUNNING;
+  status_ = SSP_EXEC_STATUS_RUNNING;
   return 0;
 }
 
 int SSPServer::Stop(std::string &error) {
-  if (status_ == EXEC_STATUS_UNINIT) {
+  if (status_ == SSP_EXEC_STATUS_UNINIT) {
     error = "Server not initialized";
     return 1;
   }
 
-  if (broker_.status == EXEC_STATUS_UNINIT) {
+  if (broker_.status == SSP_EXEC_STATUS_UNINIT) {
     error = "Broker not initialized";
     return 1;
   }
 
-  if (status_ != EXEC_STATUS_RUNNING) {
+  if (status_ != SSP_EXEC_STATUS_RUNNING) {
     error = "Server not running";
     return 2;
   }
 
-  status_ = EXEC_STATUS_STOPPED;
+  status_ = SSP_EXEC_STATUS_STOPPED;
   return 0;
 }
 

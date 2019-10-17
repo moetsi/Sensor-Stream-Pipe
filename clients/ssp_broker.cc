@@ -45,6 +45,9 @@ int main(int argc, char *argv[]) {
     // able to ping www.google.com from a ZeroMQ socket?
     //
     // You can in version 4.x use the ZMQ_STREAM socket to speak raw TCP.
+
+    zmq::proxy(*in_socket, *out_socket, nullptr);
+    /*
     zmq::message_t request;
 
     while (1) {
@@ -55,7 +58,7 @@ int main(int argc, char *argv[]) {
       out_socket->send(request);
       spdlog::debug("Message sent");
     }
-
+    */
   } catch (std::exception &e) {
     spdlog::error(e.what());
   }

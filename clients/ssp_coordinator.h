@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../utils/utils.h"
+#include "../utils/logger.h"
 #include "ssp_coordinator_types.h"
 
 #pragma once
@@ -21,22 +23,25 @@ private:
   std::unordered_map<std::string, FrameServerProcessorConnection>
       current_connections_;
 
-  BrokerInstance broker_;
+
 
 public:
+  BrokerInstance broker_;
+
   SSPCoordinator();
 
   ~SSPCoordinator();
 
-  int RegisterFrameSource(const std::string &host, const int &port,
-                          const std::string &id, const FrameSourceType &type,
+  int RegisterFrameSource(const std::string &host, const std::string &id,
+                          const std::string &zmq_id,
+                          const FrameSourceType &type,
                           const std::string &metadata, std::string &error);
 
-  int RegisterBroker(const std::string &host, const int &port,
-                     const std::string &id, std::string &error);
+  int RegisterBroker(const std::string &host, const std::string &id,
+                     const std::string &zmq_id, std::string &error);
 
-  int RegisterProcessor(const std::string &host, const int &port,
-                        const std::string &id, const FrameSourceType &type,
+  int RegisterProcessor(const std::string &host, const std::string &id,
+                        const std::string &zmq_id, const FrameSourceType &type,
                         const ExchangeDataType &out_type,
                         const std::string &metadata, std::string &error);
 
@@ -45,9 +50,8 @@ public:
 
   int Disconnect(const std::string &id_out, std::string &error);
 
-  int GetBrokers(
-      std::vector<std::pair<std::string, std::pair<std::string, int>>> &results,
-      std::string &error);
+  int GetBrokers(std::vector<std::pair<std::string, std::string>> &results,
+                 std::string &error);
 
   int GetFrameSources(
       std::vector<std::pair<std::string, FrameSourceType>> &results,
@@ -59,11 +63,21 @@ public:
           &results,
       std::string &error);
 
+  int GetConnections(
+      std::vector<
+          std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>>>
+      &results,
+      std::string &error);
+
   int GetProcessorInfo(const std::string &id, ProcessorInstance &metadata,
                        std::string &error);
 
   int GetFrameServerInfo(const std::string &id, FrameServerInstance &metadata,
                          std::string &error);
+
+  int GetConnectionInfo(const std::string &id,
+                        FrameServerProcessorConnection &metadata,
+                        std::string &error);
 
   int SetMetadata(const std::string &id, const std::string &metadata,
                   std::string &error);

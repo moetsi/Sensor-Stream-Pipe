@@ -18,9 +18,13 @@ uint64_t CurrentTimeMs();
 
 std::string RandomString(size_t length);
 
+std::vector<std::string> SplitString(const std::string& s, const std::string& delimiter);
+
 void SetupLogging(YAML::Node &general_parameters);
 
 void SetupLogging(std::string &level, std::string &file);
+
+
 
 #undef av_err2str
 #define av_err2str(errnum)                                                     \

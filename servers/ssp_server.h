@@ -5,7 +5,7 @@
 #pragma once
 
 #include "../clients/ssp_coordinator_types.h"
-#include <string>
+#include "../utils/utils.h"
 
 class SSPServer {
 private:
@@ -15,6 +15,8 @@ private:
   ExecStatus status_;
 
 public:
+  std::string id;
+
   SSPServer();
   ~SSPServer();
 
