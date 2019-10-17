@@ -339,6 +339,7 @@ int main(int argc, char *argv[]) {
         ready = true;
         cond_var_.notify_one();
       }
+      coor_socket.send(dummy_request);
       break;
     }
     case SSP_MESSAGE_STOP: {
@@ -348,19 +349,26 @@ int main(int argc, char *argv[]) {
                       "\": " + error_msg + "\"");
       } else {
         spdlog::info("SSP_MESSAGE_STOP request");
-        std::lock_guard<std::mutex> lk(mutex_);
         ready = false;
-        cond_var_.notify_one();
       }
+      coor_socket.send(dummy_request);
       break;
     }
     case SSP_MESSAGE_EXIT: {
       spdlog::info("SSP_MESSAGE_EXIT request");
       leave = true;
+      if (ready == false) {
+        std::lock_guard<std::mutex> lk(mutex_);
+        ready = true;
+        cond_var_.notify_one();
+      }
+
+      coor_socket.send(dummy_request);
       break;
     }
     default: {
       spdlog::info("Invalid " + std::to_string(msg_type) + " request.");
+      coor_socket.send(dummy_request);
       break;
     }
     }
