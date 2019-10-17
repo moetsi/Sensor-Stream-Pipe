@@ -250,7 +250,27 @@ int main(int argc, char *argv[]) {
   zmq::message_t in_request(SIZE);
   int i = 0;
 
+  FrameSourceType fstype;
   std::string yaml_config_file = argv[1];
+  YAML::Node codec_parameters = YAML::LoadFile(yaml_config_file);
+  YAML::Node general_parameters = codec_parameters["general"];
+
+  //TODO: generalize this and check what happens for invalid arguments
+  std::string reader_type =
+      general_parameters["frame_source"]["type"].as<std::string>();
+  if (reader_type == "frames") {
+    fstype = SSP_FRAME_SOURCE_FRAMES;
+  } else if (reader_type == "video") {
+    fstype = SSP_FRAME_SOURCE_KINECT_DK;
+  } else if (reader_type == "kinect") {
+    fstype = SSP_FRAME_SOURCE_KINECT_DK;
+  } else {
+    spdlog::error("Unknown reader type: \"{}\". Supported types are "
+                  "\"frames\", \"video\" and \"kinect\"",
+                  reader_type);
+    exit(1);
+  }
+
 
   zmq::socket_t coor_socket(context_, ZMQ_REQ);
 
@@ -258,7 +278,7 @@ int main(int argc, char *argv[]) {
       std::string(1, char(SSP_MESSAGE_CONNECT)) +
       std::string(1, char(SSP_CONNECTION_TYPE_FRAMESOURCE)) + host + ":" +
       std::to_string(port) + " " + ssp.id + " " +
-      std::string(1, char(SSP_FRAME_SOURCE_CAMERA)) + " ";
+      std::string(1, char(fstype)) + " ";
   zmq::message_t conn_request(connect_msg.c_str(), connect_msg.size());
   zmq::message_t dummy_request(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(),
                                1);
@@ -308,25 +328,7 @@ int main(int argc, char *argv[]) {
     coor_socket.recv(&in_request);
     std::string msg_rsp((char *)in_request.data(), in_request.size());
     msg_type = msg_rsp.substr(0, 1).c_str()[0];
-
-    /*
-     * enum MsgType {
-  SSP_MESSAGE_CONNECT = 0,
-  SSP_MESSAGE_START,
-  SSP_MESSAGE_STOP,
-  SSP_MESSAGE_REG_FS,
-  SSP_MESSAGE_REG_P,
-  SSP_MESSAGE_REG_CON,
-  SSP_MESSAGE_QUE_FS,
-  SSP_MESSAGE_QUE_P,
-  SSP_MESSAGE_QUE_CON,
-  SSP_MESSAGE_CON_FS,
-  SSP_MESSAGE_CON_P,
-  SSP_MESSAGE_DATA,
-  SSP_MESSAGE_OK,
-  SSP_MESSAGE_ERROR
-      };
-     */
+    
     switch (msg_type) {
     case SSP_MESSAGE_START: {
       error = ssp.Start(error_msg);

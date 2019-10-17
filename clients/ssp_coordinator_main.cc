@@ -193,6 +193,8 @@ int main() {
       break;
     }
     case SSP_MESSAGE_REG_CON: {
+      // TODO: what should happen if mulitple frame sources connect to the same
+      // processor
       std::string data = msg_rsp.substr(1, msg_rsp.size() - 1);
       std::string delimitor = " ";
       std::vector<std::string> sdata = SplitString(data, delimitor);
@@ -332,12 +334,8 @@ int main() {
       std::string connect_msg = std::string(1, char(SSP_MESSAGE_STOP));
       zmq::message_t request = BuildMessage(connect_msg);
 
+      // TODO: what should happen to the processor on stop?
       coor_socket.send(id_fsi_msg, ZMQ_SNDMORE);
-      coor_socket.send(emp_request, ZMQ_SNDMORE);
-      coor_socket.send(request);
-
-      request = BuildMessage(connect_msg);
-      coor_socket.send(id_pi_msg, ZMQ_SNDMORE);
       coor_socket.send(emp_request, ZMQ_SNDMORE);
       coor_socket.send(request);
 
