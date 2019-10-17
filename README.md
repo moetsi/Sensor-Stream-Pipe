@@ -55,8 +55,6 @@ By taking data processing off device, you will be able to run far more powerful 
 
 ### Installation
 
-To get our Sensor Stream Pipe up and running, you will require the following:
-
 The following steps were tested on Ubuntu 18.04. Installing on other recent Linux distributions should be pretty similar, but please check the installation instructions for OpenCV and Kinect DK on your respective platform first. 
 
 Installation instructions for Windows should be ready soon.
