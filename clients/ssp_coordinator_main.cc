@@ -318,7 +318,7 @@ int main() {
 
         spdlog::info(
             "Send SSP_MESSAGE_CONNECT to SSP_CONNECTION_TYPE_PROCESSOR ok");
-        answer = BuildOKMessage();
+        answer = BuildOKMessage(connection.processor.host);
       }
       coor_socket.send(id_request, ZMQ_SNDMORE);
       coor_socket.send(emp_request, ZMQ_SNDMORE);
