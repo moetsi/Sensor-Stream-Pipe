@@ -21,8 +21,16 @@ extern "C" {
 
 #include "../utils/logger.h"
 
+#include "../clients/ssp_coordinator_types.h"
 #include "../readers/network_reader.h"
 #include "../utils/kinect_utils.h"
+
+std::mutex mutex_;
+std::condition_variable cond_var_;
+zmq::context_t context_(1);
+bool ready = false;
+bool leave = false;
+NetworkReader *reader;
 
 struct color_point_t {
   int16_t xyz[3];
@@ -95,40 +103,19 @@ void TranformationHelpersWritePointCloud(const k4a_image_t point_cloud_image,
   ofs_text.write(ss.str().c_str(), (std::streamsize)ss.str().length());
 }
 
-int main(int argc, char *argv[]) {
+int worker(bool write_to_disk, std::string &write_pattern) {
 
   spdlog::set_level(spdlog::level::debug);
   av_log_set_level(AV_LOG_QUIET);
 
   srand(time(NULL) * getpid());
 
+  zmq::context_t context(1);
+  // std::thread processor_thread(processor_communicator, std::ref(context));
+
   try {
 
-    if (argc < 2) {
-      std::cerr << "Usage: ssp_client_pointcloud <port> (<dest_folder>) (<log "
-                   "level>) (<log file>)"
-                << std::endl;
-      return 1;
-    }
-    std::string log_level = "debug";
-    std::string log_file = "";
-    bool write_to_disk = false;
-    std::string write_pattern = "";
-
-    if (argc > 2) {
-      write_to_disk = true;
-      write_pattern = argv[2];
-    }
-
-    if (argc > 3)
-      log_level = argv[3];
-    if (argc > 4)
-      log_file = argv[4];
-
-    int port = std::stoi(argv[1]);
-    NetworkReader reader(port);
-
-    reader.init();
+    reader->init();
 
     k4a::calibration sensor_calibration;
     bool calibration_set = false;
@@ -137,9 +124,9 @@ int main(int argc, char *argv[]) {
     std::unordered_map<std::string, IDecoder *> decoders;
 
     int i = 0, j = 0;
-    while (reader.HasNextFrame()) {
-      reader.NextFrame();
-      std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
+    while (reader->HasNextFrame()) {
+      reader->NextFrame();
+      std::vector<FrameStruct> f_list = reader->GetCurrentFrame();
       for (FrameStruct f : f_list) {
         std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
@@ -229,6 +216,150 @@ int main(int argc, char *argv[]) {
   } catch (std::exception &e) {
     spdlog::error(e.what());
   }
+
+  return 0;
+}
+
+int main(int argc, char *argv[]) {
+  spdlog::set_level(spdlog::level::debug);
+
+  srand(time(NULL) * getpid());
+
+  av_log_set_level(AV_LOG_QUIET);
+
+  if (argc < 2) {
+    std::cerr << "Usage: ssp_client_pointcloud <port> (<dest_folder>) (<log "
+                 "level>) (<log file>)"
+              << std::endl;
+    return 1;
+  }
+  std::string log_level = "debug";
+  std::string log_file = "";
+  bool write_to_disk = false;
+  std::string write_pattern = "";
+
+  if (argc > 2) {
+    write_to_disk = true;
+    write_pattern = argv[2];
+  }
+
+  if (argc > 3)
+    log_level = argv[3];
+  if (argc > 4)
+    log_file = argv[4];
+
+  int port = std::stoi(argv[1]);
+
+  reader = new NetworkReader(port);
+
+  std::string coor_host = "127.0.0.1";
+  int coor_port = 9999;
+
+  std::string coor_host_port = coor_host + ":" + std::to_string(coor_port);
+
+  std::string error_msg;
+  int error = 1;
+
+  int SIZE = 256 * 256;
+  zmq::message_t in_request(SIZE);
+  std::string processor_id = RandomString(16);
+
+  std::string yaml_config_file = argv[1];
+
+  zmq::socket_t coor_socket(context_, ZMQ_REQ);
+
+  std::string connect_msg =
+      std::string(1, char(SSP_MESSAGE_CONNECT)) +
+      std::string(1, char(SSP_CONNECTION_TYPE_PROCESSOR)) + coor_host + ":" +
+      std::to_string(coor_port) + " " + processor_id + " " +
+      std::string(1, char(SSP_FRAME_SOURCE_KINECT_DK)) + " " +
+      std::string(1, char(SSP_EXCHANGE_DATA_TYPE_VECTOR_POINTCLOUD)) + " ";
+  zmq::message_t conn_request(connect_msg.c_str(), connect_msg.size());
+  zmq::message_t dummy_request(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(),
+                               1);
+
+  spdlog::info("Connecting to coordinator at " + coor_host_port);
+
+  coor_socket.connect("tcp://" + coor_host_port);
+
+  coor_socket.send(conn_request);
+  spdlog::info("Waiting to coordinator");
+  coor_socket.recv(&in_request);
+  spdlog::info("Coordinator responded");
+  coor_socket.send(dummy_request);
+
+  FrameSourceType type;
+  std::string metadata;
+
+  spdlog::info("Connected to coordinator " + coor_host_port);
+
+  std::string connect_msg_rsp((char *)in_request.data(), in_request.size());
+
+  spdlog::info("Coordinator answer " + connect_msg_rsp);
+
+  std::thread worker_thread(worker, write_to_disk, std::ref(write_pattern));
+
+  while (!leave) {
+    spdlog::info("Waiting for request");
+    coor_socket.recv(&in_request);
+    std::string msg_rsp((char *)in_request.data(), in_request.size());
+    char msg_type = msg_rsp.substr(0, 1).c_str()[0];
+
+    /*
+     * enum MsgType {
+  SSP_MESSAGE_CONNECT = 0,
+  SSP_MESSAGE_START,
+  SSP_MESSAGE_STOP,
+  SSP_MESSAGE_REG_FS,
+  SSP_MESSAGE_REG_P,
+  SSP_MESSAGE_REG_CON,
+  SSP_MESSAGE_QUE_FS,
+  SSP_MESSAGE_QUE_P,
+  SSP_MESSAGE_QUE_CON,
+  SSP_MESSAGE_CON_FS,
+  SSP_MESSAGE_CON_P,
+  SSP_MESSAGE_DATA,
+  SSP_MESSAGE_OK,
+  SSP_MESSAGE_ERROR
+      };
+     */
+    switch (msg_type) {
+    case SSP_MESSAGE_CONNECT: {
+      char conn_type = msg_rsp.substr(1, 1).c_str()[0];
+      std::string data = msg_rsp.substr(2, msg_rsp.size() - 2);
+      std::string delimitor = " ";
+      std::vector<std::string> sdata = SplitString(data, delimitor);
+      std::string host = sdata.at(0);
+      std::string id = sdata.at(1);
+
+      reader->SetFilter(id);
+
+      dummy_request =
+          zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);
+      coor_socket.send(dummy_request);
+      break;
+    }
+    case SSP_MESSAGE_DISCONNECT: {
+      std::string dummy_filter = "STOP ";
+      reader->SetFilter(dummy_filter);
+
+      dummy_request =
+          zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);
+      coor_socket.send(dummy_request);
+      break;
+    }
+    default: {
+      spdlog::info("Invalid " + std::to_string(msg_type) + " request.");
+      dummy_request =
+          zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);
+      coor_socket.send(dummy_request);
+      break;
+    }
+    }
+  }
+
+  worker_thread.join();
+  context_.close();
 
   return 0;
 }

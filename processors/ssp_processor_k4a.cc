@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
       std::string(1, char(SSP_MESSAGE_CONNECT)) +
       std::string(1, char(SSP_CONNECTION_TYPE_PROCESSOR)) + host + ":" +
       std::to_string(port) + " " + processor_id + " " +
-      std::string(1, char(SSP_FRAME_SOURCE_CAMERA)) + " " +
+      std::string(1, char(SSP_FRAME_SOURCE_KINECT_DK)) + " " +
       std::string(1, char(SSP_EXCHANGE_DATA_TYPE_VECTOR_SKELETON)) + " ";
   zmq::message_t conn_request(connect_msg.c_str(), connect_msg.size());
   zmq::message_t dummy_request(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(),
