@@ -189,6 +189,24 @@ int SSPCoordinator::GetProcessors(
   return 0;
 }
 
+int SSPCoordinator::GetConnections(
+    std::vector<
+        std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>>>
+        &results,
+    std::string &error) {
+  for (auto &ps : current_connections_) {
+    std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>> pair;
+    pair.first = ps.first;
+    std::pair<FrameSourceType, ExchangeDataType> pair1;
+    pair1.first = ps.second.frameserver.source_type;
+    pair1.second = ps.second.processor.data_type;
+    pair.second = pair1;
+    results.push_back(pair);
+  }
+
+  return 0;
+}
+
 int SSPCoordinator::GetBrokers(
     std::vector<std::pair<std::string, std::string>> &results,
     std::string &error) {

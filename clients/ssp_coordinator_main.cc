@@ -192,6 +192,91 @@ int main() {
       }
       break;
     }
+    case SSP_MESSAGE_QUE: {
+      char conn_type = msg_rsp.substr(1, 1).c_str()[0];
+      switch (conn_type) {
+      case SSP_CONNECTION_TYPE_BROKER: {
+        spdlog::info("SSP_MESSAGE_QUE SSP_CONNECTION_TYPE_BROKER request");
+        std::vector<std::pair<std::string, std::string>> results;
+        error = ssp_coordinator.GetBrokers(results, error_msg);
+        std::string answer_text = "";
+        for (auto res : results) {
+          answer_text += res.first + "," + res.second + ";";
+        }
+        zmq::message_t answer = BuildOKMessage(answer_text);
+
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+      case SSP_CONNECTION_TYPE_FRAMESOURCE: {
+        spdlog::info("SSP_MESSAGE_QUE SSP_CONNECTION_TYPE_FRAMESOURCE request");
+        std::vector<std::pair<std::string, FrameSourceType>> results;
+        error = ssp_coordinator.GetFrameSources(results, error_msg);
+        std::string answer_text = "";
+        for (auto res : results) {
+          answer_text +=
+              res.first + "," + std::string(1, (char)res.second) + ";";
+        }
+        zmq::message_t answer = BuildOKMessage(answer_text);
+
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+      case SSP_CONNECTION_TYPE_PROCESSOR: {
+        spdlog::info("SSP_MESSAGE_QUE SSP_CONNECTION_TYPE_PROCESSOR request");
+        std::vector<std::pair<std::string,
+                              std::pair<FrameSourceType, ExchangeDataType>>>
+            results;
+        error = ssp_coordinator.GetProcessors(results, error_msg);
+        std::string answer_text = "";
+        for (auto res : results) {
+          answer_text += res.first + "," +
+                         std::string(1, (char)res.second.first) + "," +
+                         std::string(1, (char)res.second.second) + ";";
+        }
+        zmq::message_t answer = BuildOKMessage(answer_text);
+
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+      case SSP_CONNECTION_TYPE_CONNECTION: {
+        spdlog::info("SSP_MESSAGE_QUE SSP_CONNECTION_TYPE_CONNECTION request");
+        std::vector<std::pair<std::string,
+                              std::pair<FrameSourceType, ExchangeDataType>>>
+            results;
+        error = ssp_coordinator.GetConnections(results, error_msg);
+        std::string answer_text = "";
+        for (auto res : results) {
+          answer_text += res.first + "," +
+                         std::string(1, (char)res.second.first) + "," +
+                         std::string(1, (char)res.second.second) + ";";
+        }
+        zmq::message_t answer = BuildOKMessage(answer_text);
+
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+      default: {
+        spdlog::error("SSP_MESSAGE_CONNECT UNKNOWN SSP_CONNECTION_TYPE");
+        error = -1;
+        error_msg = "SSP_MESSAGE_CONNECT UNKNOWN SSP_CONNECTION_TYPE";
+        zmq::message_t answer = BuildErrorMessage(error, error_msg);
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+      }
+      break;
+    }
     case SSP_MESSAGE_REG_CON: {
       // TODO: what should happen if mulitple frame sources connect to the same
       // processor
