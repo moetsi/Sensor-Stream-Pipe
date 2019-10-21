@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
     }
     case SSP_MESSAGE_DISCONNECT: {
       std::string dummy_filter = "STOP ";
-      reader->SetFilter(dummy_filter);
+      reader->ResetFilter();
 
       dummy_request =
           zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);

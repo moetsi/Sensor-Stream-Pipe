@@ -3,7 +3,6 @@
 //
 
 #include "network_reader.h"
-#include "../utils/video_utils.h"
 
 NetworkReader::NetworkReader(int port) {
   last_time_ = CurrentTimeMs();
@@ -95,4 +94,8 @@ zmq::context_t *NetworkReader::GetContext() { return context_; }
 
 void NetworkReader::SetFilter(std::string filter) {
   socket_->setsockopt(ZMQ_SUBSCRIBE, filter.c_str(), filter.size());
+}
+
+void NetworkReader::ResetFilter() {
+  socket_->setsockopt(ZMQ_UNSUBSCRIBE, "", 0);
 }

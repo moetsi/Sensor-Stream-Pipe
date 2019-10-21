@@ -47,4 +47,6 @@ public:
   void SetContext(zmq::context_t *context);
 
   void SetFilter(std::string filter);
+
+  void ResetFilter();
 };
