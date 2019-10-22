@@ -332,3 +332,5 @@ std::vector<unsigned int> KinectReader::GetType() {
 
 void KinectReader::GoToFrame(unsigned int frame_id) {}
 unsigned int KinectReader::GetCurrentFrameId() { return frame_counter_.at(0); }
+
+void KinectReader::SetStreamId(const std::string &id) { stream_id_ = id; }

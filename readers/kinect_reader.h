@@ -73,8 +73,7 @@ private:
 
   FrameStruct frame_template_;
   std::vector<CodecParamsStruct *> codec_params_structs_;
-  CameraCalibrationStruct * camera_calibration_struct_;
-
+  CameraCalibrationStruct *camera_calibration_struct_;
 
   std::vector<FrameStruct *> current_frame_;
 
@@ -98,4 +97,5 @@ public:
   unsigned int GetFps();
 
   std::vector<unsigned int> GetType();
+  void SetStreamId(const std::string &id);
 };

@@ -18,7 +18,7 @@ void NetworkReader::init() {
   socket_ = new zmq::socket_t(*context_, ZMQ_SUB);
   socket_->connect("tcp://localhost:" + std::to_string(port_));
 
-  socket_->setsockopt(ZMQ_SUBSCRIBE, "", 0);
+  // socket_->setsockopt(ZMQ_SUBSCRIBE, "", 0);
 }
 
 NetworkReader::~NetworkReader() {
@@ -32,6 +32,9 @@ void NetworkReader::NextFrame() {
   zmq::message_t request;
 
   socket_->recv(&request);
+
+  // std::string meta = std::string(static_cast<char *>(request.data()), 16);
+  // std::cout << meta << std::endl;
 
   if (rec_frames_ == 0) {
     last_time_ = CurrentTimeMs();
@@ -92,10 +95,17 @@ unsigned int NetworkReader::GetCurrentFrameId() {
 
 zmq::context_t *NetworkReader::GetContext() { return context_; }
 
-void NetworkReader::SetFilter(std::string filter) {
+void NetworkReader::AddFilter(std::string filter) {
+  spdlog::debug("Subscribed " + filter);
+  subscriptions_.push_back(filter);
   socket_->setsockopt(ZMQ_SUBSCRIBE, filter.c_str(), filter.size());
 }
 
 void NetworkReader::ResetFilter() {
-  socket_->setsockopt(ZMQ_UNSUBSCRIBE, "", 0);
+  for (auto filter : subscriptions_) {
+    socket_->setsockopt(ZMQ_UNSUBSCRIBE, filter.c_str(), filter.size());
+    spdlog::debug("Unsubscribed " + filter);
+  }
+
+  subscriptions_.clear();
 }

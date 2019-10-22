@@ -14,8 +14,14 @@ private:
 
   ExecStatus status_;
 
+  std::string id_;
+
 public:
-  std::string id;
+  const std::string &GetId() const;
+  void SetId(const std::string &id);
+
+public:
+
 
   SSPServer();
   ~SSPServer();

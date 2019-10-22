@@ -38,7 +38,8 @@ zmq::context_t context_(1);
 bool ready = false;
 bool leave = false;
 
-int send_frames(std::string &yaml_config, std::string &broker_host) {
+int SendFrames(std::string &yaml_config, std::string &broker_host,
+               std::string &id) {
   zmq::socket_t socket(context_, ZMQ_PUSH);
 
   YAML::Node codec_parameters = YAML::LoadFile(yaml_config);
@@ -177,7 +178,7 @@ int send_frames(std::string &yaml_config, std::string &broker_host) {
       if (!v.empty()) {
         std::string short_message = CerealStructToString(v);
 
-        std::string message = v.front().stream_id + " " + short_message;
+        std::string message = id + " " + short_message;
 
         zmq::message_t request(message.size());
         memcpy(request.data(), message.c_str(), message.size());
@@ -277,7 +278,7 @@ int main(int argc, char *argv[]) {
   std::string connect_msg =
       std::string(1, char(SSP_MESSAGE_CONNECT)) +
       std::string(1, char(SSP_CONNECTION_TYPE_FRAMESOURCE)) + host + ":" +
-      std::to_string(port) + " " + ssp.id + " " +
+      std::to_string(port) + " " + ssp.GetId() + " " +
       std::string(1, char(fstype)) + " ";
   zmq::message_t conn_request(connect_msg.c_str(), connect_msg.size());
   zmq::message_t dummy_request(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(),
@@ -295,6 +296,8 @@ int main(int argc, char *argv[]) {
 
   FrameSourceType type;
   std::string metadata;
+
+  std::string id = ssp.GetId();
 
   error = ssp.ConnectCoordinator(type, metadata, error_msg);
 
@@ -314,8 +317,8 @@ int main(int argc, char *argv[]) {
       connect_msg_rsp.substr(2, connect_msg_rsp.size() - 2);
 
   spdlog::info("Connecting to broker at \"" + broker_host + "\"");
-  std::thread sender(send_frames, std::ref(yaml_config_file),
-                     std::ref(broker_host));
+  std::thread sender(SendFrames, std::ref(yaml_config_file),
+                     std::ref(broker_host), std::ref(id));
   error = ssp.ConnectBroker(broker_host, error_msg);
 
   if (error != 0) {

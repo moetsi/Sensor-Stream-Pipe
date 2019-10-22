@@ -49,6 +49,8 @@ private:
 
   bool eof_reached_;
 
+  std::string stream_id_;
+
   void Init(std::string &filename);
 
   ushort GetKinectColorResolution(std::string &metadata_value);
@@ -76,4 +78,6 @@ public:
   unsigned int GetCurrentFrameId();
 
   unsigned int GetFps();
+
+  void SetStreamId(const std::string &id);
 };

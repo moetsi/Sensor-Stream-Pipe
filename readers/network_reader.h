@@ -22,10 +22,10 @@ private:
   std::unordered_map<std::string, double> rec_mbytes_per_stream_;
   std::vector<FrameStruct> current_frame_internal_;
 
+  std::vector<std::string> subscriptions_;
+
   int port_;
   zmq::context_t *context_;
-
-private:
   zmq::socket_t *socket_;
 
 public:
@@ -44,9 +44,7 @@ public:
 
   zmq::context_t *GetContext();
 
-  void SetContext(zmq::context_t *context);
-
-  void SetFilter(std::string filter);
+  void AddFilter(std::string filter);
 
   void ResetFilter();
 };

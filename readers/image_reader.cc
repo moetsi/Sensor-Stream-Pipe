@@ -20,7 +20,8 @@ ImageReader::ImageReader(std::string filename) {
     std::stringstream ss(line);
     getline(ss, scene_desc_, ';');
 
-    std::string sensor_id_str, device_id_str, frame_count_str, fps_str, frame_type_str;
+    std::string sensor_id_str, device_id_str, frame_count_str, fps_str,
+        frame_type_str;
     getline(ss, device_id_str, ';');
     getline(ss, sensor_id_str, ';');
     getline(ss, frame_type_str, ';');
@@ -153,3 +154,5 @@ std::vector<unsigned int> ImageReader::GetType() {
   result.push_back(frame_type_);
   return result;
 }
+
+void ImageReader::SetStreamId(const std::string &id) { stream_id_ = id; }

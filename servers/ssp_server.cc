@@ -5,7 +5,7 @@
 #include "ssp_server.h"
 
 SSPServer::SSPServer() {
-  id = RandomString(16);
+  id_ = RandomString(16);
   status_ = SSP_EXEC_STATUS_WAITING;
 }
 
@@ -89,3 +89,5 @@ int SSPServer::Stop(std::string &error) {
 }
 
 int SSPServer::HandleMessage(std::string &message) { return 0; }
+const std::string &SSPServer::GetId() const { return id_; }
+void SSPServer::SetId(const std::string &id) { id_ = id; }

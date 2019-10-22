@@ -305,34 +305,16 @@ int main(int argc, char *argv[]) {
     std::string msg_rsp((char *)in_request.data(), in_request.size());
     char msg_type = msg_rsp.substr(0, 1).c_str()[0];
 
-    /*
-     * enum MsgType {
-  SSP_MESSAGE_CONNECT = 0,
-  SSP_MESSAGE_START,
-  SSP_MESSAGE_STOP,
-  SSP_MESSAGE_REG_FS,
-  SSP_MESSAGE_REG_P,
-  SSP_MESSAGE_REG_CON,
-  SSP_MESSAGE_QUE_FS,
-  SSP_MESSAGE_QUE_P,
-  SSP_MESSAGE_QUE_CON,
-  SSP_MESSAGE_CON_FS,
-  SSP_MESSAGE_CON_P,
-  SSP_MESSAGE_DATA,
-  SSP_MESSAGE_OK,
-  SSP_MESSAGE_ERROR
-      };
-     */
     switch (msg_type) {
     case SSP_MESSAGE_CONNECT: {
       char conn_type = msg_rsp.substr(1, 1).c_str()[0];
-      std::string data = msg_rsp.substr(2, msg_rsp.size() - 2);
+      std::string data = msg_rsp.substr(3, msg_rsp.size() - 3);
       std::string delimitor = " ";
       std::vector<std::string> sdata = SplitString(data, delimitor);
       std::string host = sdata.at(0);
       std::string id = sdata.at(1);
 
-      reader->SetFilter(id);
+      reader->AddFilter(id);
 
       dummy_request =
           zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);

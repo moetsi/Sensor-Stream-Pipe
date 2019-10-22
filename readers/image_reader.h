@@ -53,4 +53,6 @@ public:
   std::vector<unsigned int> GetType();
 
   unsigned int GetFps();
+
+  void SetStreamId(const std::string &id);
 };

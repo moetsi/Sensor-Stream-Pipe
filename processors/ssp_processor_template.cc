@@ -137,13 +137,13 @@ int main(int argc, char *argv[]) {
     switch (msg_type) {
     case SSP_MESSAGE_CONNECT: {
       char conn_type = msg_rsp.substr(1, 1).c_str()[0];
-      std::string data = msg_rsp.substr(2, msg_rsp.size() - 2);
+      std::string data = msg_rsp.substr(3, msg_rsp.size() - 3);
       std::string delimitor = " ";
       std::vector<std::string> sdata = SplitString(data, delimitor);
       std::string host = sdata.at(0);
       std::string id = sdata.at(1);
 
-      reader->SetFilter(id);
+      reader->AddFilter(id);
 
       dummy_request =
           zmq::message_t(std::string(1, char(SSP_MESSAGE_DUMMY)).c_str(), 1);
@@ -151,7 +151,6 @@ int main(int argc, char *argv[]) {
       break;
     }
     case SSP_MESSAGE_DISCONNECT: {
-      std::string dummy_filter = "STOP ";
       reader->ResetFilter();
 
       dummy_request =

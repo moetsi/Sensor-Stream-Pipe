@@ -26,4 +26,6 @@ public:
   virtual unsigned int GetCurrentFrameId() = 0;
 
   virtual unsigned int GetFps() = 0;
+
+  virtual void SetStreamId(const std::string &id) = 0;
 };

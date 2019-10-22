@@ -196,10 +196,12 @@ void VideoFileReader::Init(std::string &filename) {
     exit(-1);
   }
 
+  stream_id_ = RandomString(16);
+
   frame_struct_template_.message_type = 0;
 
   frame_struct_template_.frame_data_type = 1;
-  frame_struct_template_.stream_id = RandomString(16);
+  frame_struct_template_.stream_id = stream_id_;
   frame_struct_template_.device_id = 0;
   frame_struct_template_.camera_calibration_data = *camera_calibration_struct_;
 
@@ -304,6 +306,11 @@ unsigned int VideoFileReader::GetFps() {
 
 std::vector<FrameStruct *> VideoFileReader::GetCurrentFrame() {
   return frame_structs_;
+}
+
+void VideoFileReader::SetStreamId(const std::string &id) {
+  stream_id_ = id;
+  frame_struct_template_.stream_id = id;
 }
 
 typedef enum {

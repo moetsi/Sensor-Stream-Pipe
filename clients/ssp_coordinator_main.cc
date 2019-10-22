@@ -65,19 +65,6 @@ int main() {
     std::string msg_rsp((char *)in_request.data(), in_request.size());
     char msg_type = msg_rsp.substr(0, 1).c_str()[0];
 
-    /*
-     * enum MsgType {
-  SSP_MESSAGE_CONNECT = 0,
-  SSP_MESSAGE_START,
-  SSP_MESSAGE_STOP,
-  SSP_MESSAGE_EXIT,
-  SSP_MESSAGE_REG_CON,
-  SSP_MESSAGE_QUE,
-  SSP_MESSAGE_DATA,
-  SSP_MESSAGE_OK,
-  SSP_MESSAGE_ERROR
-      };
-     */
     switch (msg_type) {
     case SSP_MESSAGE_CONNECT: {
       char conn_type = msg_rsp.substr(1, 1).c_str()[0];
@@ -318,7 +305,8 @@ int main() {
 
         spdlog::info(
             "Send SSP_MESSAGE_CONNECT to SSP_CONNECTION_TYPE_PROCESSOR ok");
-        answer = BuildOKMessage(connection.processor.host);
+        answer =
+            BuildOKMessage(connection.processor.host + " " + connection.id);
       }
       coor_socket.send(id_request, ZMQ_SNDMORE);
       coor_socket.send(emp_request, ZMQ_SNDMORE);
@@ -421,6 +409,84 @@ int main() {
 
       // TODO: what should happen to the processor on stop?
       coor_socket.send(id_fsi_msg, ZMQ_SNDMORE);
+      coor_socket.send(emp_request, ZMQ_SNDMORE);
+      coor_socket.send(request);
+
+      spdlog::info("SSP_MESSAGE_STOP " + id_con + " ok");
+      answer = BuildOKMessage();
+
+      coor_socket.send(id_request, ZMQ_SNDMORE);
+      coor_socket.send(emp_request, ZMQ_SNDMORE);
+      coor_socket.send(answer);
+      break;
+    }
+    case SSP_MESSAGE_DISCONNECT: {
+      std::string data = msg_rsp.substr(1, msg_rsp.size() - 1);
+      std::string delimitor = " ";
+      std::vector<std::string> sdata = SplitString(data, delimitor);
+      std::string id_con = sdata.at(0);
+
+      FrameServerProcessorConnection connection;
+      error = ssp_coordinator.GetConnectionInfo(id_con, connection, error_msg);
+
+      zmq::message_t answer;
+      if (error != 0) {
+        spdlog::error("SSP_MESSAGE_DISCONNECT error " + std::to_string(error) +
+                      "\": " + error_msg + "\"");
+        answer = BuildErrorMessage(error, error_msg);
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+
+      ProcessorInstance pi = connection.processor;
+      FrameServerInstance fsi = connection.frameserver;
+
+      std::string id_fsi_request = fsi.zmq_id;
+      std::string id_pi_request = pi.zmq_id;
+      zmq::message_t request;
+
+      // TODO: decide if the frame source should stop if the processor
+      // disconnects
+
+      /*
+      error = ssp_coordinator.Stop(id_con, error_msg);
+      if (error != 0) {
+        spdlog::info("SSP_MESSAGE_DISCONNECT info " + std::to_string(error) +
+            "\": " + error_msg + "\"");
+        break;
+      }
+
+      zmq::message_t id_fsi_msg = BuildMessage(id_fsi_request);
+
+
+      std::string stop_msg = std::string(1, char(SSP_MESSAGE_STOP));
+      zmq::message_t request = BuildMessage(stop_msg);
+
+      coor_socket.send(id_fsi_msg, ZMQ_SNDMORE);
+      coor_socket.send(emp_request, ZMQ_SNDMORE);
+      coor_socket.send(request);
+       */
+
+      error = ssp_coordinator.Disconnect(id_con, error_msg);
+      if (error != 0) {
+        spdlog::error("SSP_MESSAGE_DISCONNECT error " + std::to_string(error) +
+                      "\": " + error_msg + "\"");
+        answer = BuildErrorMessage(error, error_msg);
+        coor_socket.send(id_request, ZMQ_SNDMORE);
+        coor_socket.send(emp_request, ZMQ_SNDMORE);
+        coor_socket.send(answer);
+        break;
+      }
+
+      std::string disc_msg = std::string(1, char(SSP_MESSAGE_DISCONNECT));
+
+      request = BuildMessage(disc_msg);
+
+      zmq::message_t id_pi_msg = BuildMessage(id_pi_request);
+
+      coor_socket.send(id_pi_msg, ZMQ_SNDMORE);
       coor_socket.send(emp_request, ZMQ_SNDMORE);
       coor_socket.send(request);
 
