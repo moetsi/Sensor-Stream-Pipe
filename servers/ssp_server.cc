@@ -4,7 +4,10 @@
 
 #include "ssp_server.h"
 
-SSPServer::SSPServer() { id = RandomString(16); }
+SSPServer::SSPServer() {
+  id = RandomString(16);
+  status_ = SSP_EXEC_STATUS_WAITING;
+}
 
 SSPServer::~SSPServer() {}
 
