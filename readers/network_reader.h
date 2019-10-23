@@ -24,12 +24,12 @@ private:
 
   std::vector<std::string> subscriptions_;
 
-  int port_;
+  std::string host_port_;
   zmq::context_t *context_;
   zmq::socket_t *socket_;
 
 public:
-  NetworkReader(int port);
+  NetworkReader(std::string host_port);
   void init();
 
   ~NetworkReader();
@@ -47,4 +47,5 @@ public:
   void AddFilter(std::string filter);
 
   void ResetFilter();
+
 };

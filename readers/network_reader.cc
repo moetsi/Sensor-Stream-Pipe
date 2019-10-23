@@ -4,19 +4,19 @@
 
 #include "network_reader.h"
 
-NetworkReader::NetworkReader(int port) {
+NetworkReader::NetworkReader(std::string host_port) {
   last_time_ = CurrentTimeMs();
   start_time_ = last_time_;
   rec_frames_ = 0;
   rec_mbytes_ = 0;
-  port_ = port;
+  host_port_ = host_port;
 }
 
 void NetworkReader::init() {
 
   context_ = new zmq::context_t(1);
   socket_ = new zmq::socket_t(*context_, ZMQ_SUB);
-  socket_->connect("tcp://localhost:" + std::to_string(port_));
+  socket_->connect("tcp://" + host_port_);
 
   // socket_->setsockopt(ZMQ_SUBSCRIBE, "", 0);
 }

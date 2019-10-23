@@ -59,6 +59,7 @@ struct BrokerInstance {
   std::string id;
   std::string zmq_id;
   std::string host;
+  std::string host_out;
   ExecStatus status = SSP_EXEC_STATUS_UNINIT;
 };
 

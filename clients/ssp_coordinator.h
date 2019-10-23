@@ -6,11 +6,13 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../utils/utils.h"
 #include "../utils/logger.h"
+#include "../utils/utils.h"
 #include "ssp_coordinator_types.h"
 
 #pragma once
+
+#define SSP_BROKER_START_PORT 10020
 
 class SSPCoordinator {
 private:
@@ -23,11 +25,12 @@ private:
   std::unordered_map<std::string, FrameServerProcessorConnection>
       current_connections_;
 
-
-
-public:
   BrokerInstance broker_;
 
+  int port_in_broker_ = SSP_BROKER_START_PORT;
+  int port_out_broker_ = SSP_BROKER_START_PORT+1;
+
+public:
   SSPCoordinator();
 
   ~SSPCoordinator();
@@ -38,7 +41,8 @@ public:
                           const std::string &metadata, std::string &error);
 
   int RegisterBroker(const std::string &host, const std::string &id,
-                     const std::string &zmq_id, std::string &error);
+                     const std::string &zmq_id, int &port_in, int &port_out,
+                     std::string &error);
 
   int RegisterProcessor(const std::string &host, const std::string &id,
                         const std::string &zmq_id, const FrameSourceType &type,
@@ -50,8 +54,12 @@ public:
 
   int Disconnect(const std::string &id_out, std::string &error);
 
+  int GetBroker(BrokerInstance &broker, std::string &error);
+
   int GetBrokers(std::vector<std::pair<std::string, std::string>> &results,
                  std::string &error);
+
+
 
   int GetFrameSources(
       std::vector<std::pair<std::string, FrameSourceType>> &results,
@@ -66,7 +74,7 @@ public:
   int GetConnections(
       std::vector<
           std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>>>
-      &results,
+          &results,
       std::string &error);
 
   int GetProcessorInfo(const std::string &id, ProcessorInstance &metadata,

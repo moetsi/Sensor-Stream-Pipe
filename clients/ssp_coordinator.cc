@@ -70,6 +70,8 @@ int SSPCoordinator::RegisterProcessor(
 int SSPCoordinator::RegisterBroker(const std::string &host,
                                    const std::string &id,
                                    const std::string &zmq_id,
+                                   int& port_in,
+                                   int& port_out,
                                    std::string &error) {
   if (frameserver_instances_.find(id) != frameserver_instances_.end() ||
       processor_instances_.find(id) != processor_instances_.end() ||
@@ -77,8 +79,16 @@ int SSPCoordinator::RegisterBroker(const std::string &host,
     error = "Id already exists: " + id;
     return 1;
   }
+
+  port_in = port_in_broker_;
+  port_out = port_out_broker_;
+
+  port_in_broker_ += 2;
+  port_out_broker_ += 2;
+
   BrokerInstance bi;
-  bi.host = host;
+  bi.host = host + ":" + std::to_string(port_in);
+  bi.host_out = host + ":" + std::to_string(port_out);
   bi.status = SSP_EXEC_STATUS_RUNNING;
   bi.id = id;
   bi.zmq_id = zmq_id;
@@ -204,6 +214,11 @@ int SSPCoordinator::GetConnections(
     results.push_back(pair);
   }
 
+  return 0;
+}
+
+int SSPCoordinator::GetBroker(BrokerInstance &broker, std::string &error){
+  broker = broker_;
   return 0;
 }
 

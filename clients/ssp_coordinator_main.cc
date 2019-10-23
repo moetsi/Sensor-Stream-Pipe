@@ -48,8 +48,8 @@ int main() {
 
   SSPCoordinator ssp_coordinator;
 
-  error =
-      ssp_coordinator.RegisterBroker("127.0.0.1:10000", "dummy", "", error_msg);
+  // error = ssp_coordinator.RegisterBroker("127.0.0.1:10000", "dummy", "",
+  // error_msg);
 
   bool leave = false;
 
@@ -71,13 +71,16 @@ int main() {
       switch (conn_type) {
       case SSP_CONNECTION_TYPE_BROKER: {
         spdlog::info("SSP_MESSAGE_CONNECT SSP_CONNECTION_TYPE_BROKER request");
-        std::string data = msg_rsp.substr(2, msg_rsp.size() - 2);
-        std::string delimitor = " ";
-        std::vector<std::string> sdata = SplitString(data, delimitor);
-        std::string host = sdata.at(0);
-        std::string id = sdata.at(1);
+        std::string identity = in_request.gets("Identity");
+        std::string host = in_request.gets("Peer-Address");
+
+        std::string id = msg_rsp.substr(3, msg_rsp.size() - 3);
         std::string zmq_id = id_msg;
-        error = ssp_coordinator.RegisterBroker(host, id, zmq_id, error_msg);
+
+        int port_in;
+        int port_out;
+        error = ssp_coordinator.RegisterBroker(host, id, zmq_id, port_in,
+                                               port_out, error_msg);
         zmq::message_t answer;
         if (error != 0) {
           spdlog::error(
@@ -86,7 +89,8 @@ int main() {
           answer = BuildErrorMessage(error, error_msg);
         } else {
           spdlog::info("SSP_MESSAGE_CONNECT SSP_CONNECTION_TYPE_BROKER ok");
-          answer = BuildOKMessage();
+          answer = BuildOKMessage(std::to_string(port_in) + " " +
+                                  std::to_string(port_out));
         }
         coor_socket.send(id_request, ZMQ_SNDMORE);
         coor_socket.send(emp_request, ZMQ_SNDMORE);
@@ -121,7 +125,8 @@ int main() {
         } else {
           spdlog::info(
               "SSP_MESSAGE_CONNECT SSP_CONNECTION_TYPE_FRAMESOURCE ok");
-          BrokerInstance b = ssp_coordinator.broker_;
+          BrokerInstance b;
+          ssp_coordinator.GetBroker(b, error_msg);
           answer = BuildOKMessage(b.host);
         }
         coor_socket.send(id_request, ZMQ_SNDMORE);
@@ -159,7 +164,9 @@ int main() {
           answer = BuildErrorMessage(error, error_msg);
         } else {
           spdlog::info("SSP_MESSAGE_CONNECT SSP_CONNECTION_TYPE_PROCESSOR ok");
-          answer = BuildOKMessage();
+          BrokerInstance b;
+          ssp_coordinator.GetBroker(b, error_msg);
+          answer = BuildOKMessage(b.host_out);
         }
         coor_socket.send(id_request, ZMQ_SNDMORE);
         coor_socket.send(emp_request, ZMQ_SNDMORE);

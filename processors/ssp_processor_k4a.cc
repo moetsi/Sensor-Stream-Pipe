@@ -183,27 +183,20 @@ int main(int argc, char *argv[]) {
   av_log_set_level(AV_LOG_QUIET);
 
   if (argc < 2) {
-    std::cerr << "Usage: ssp_processor_k4a <port> (<log level>) (<log file>)"
+    std::cerr << "Usage: ssp_processor_k4a <coor_host_port> (<log level>) "
+                 "(<log file>)"
               << std::endl;
     return 1;
   }
   std::string log_level = "debug";
   std::string log_file = "";
 
-  std::string host = "127.0.0.1";
-  int port = std::stoi(argv[1]);
+  std::string coor_host_port = argv[1];
 
   if (argc > 2)
     log_level = argv[2];
   if (argc > 3)
     log_file = argv[3];
-
-  reader = new NetworkReader(port);
-
-  std::string coor_host = "127.0.0.1";
-  int coor_port = 9999;
-
-  std::string coor_host_port = coor_host + ":" + std::to_string(coor_port);
 
   std::string error_msg;
   int error = 1;
@@ -218,8 +211,8 @@ int main(int argc, char *argv[]) {
 
   std::string connect_msg =
       std::string(1, char(SSP_MESSAGE_CONNECT)) +
-      std::string(1, char(SSP_CONNECTION_TYPE_PROCESSOR)) + host + ":" +
-      std::to_string(port) + " " + processor_id + " " +
+      std::string(1, char(SSP_CONNECTION_TYPE_PROCESSOR)) + coor_host_port +
+      " " + processor_id + " " +
       std::string(1, char(SSP_FRAME_SOURCE_KINECT_DK)) + " " +
       std::string(1, char(SSP_EXCHANGE_DATA_TYPE_VECTOR_SKELETON)) + " ";
   zmq::message_t conn_request(connect_msg.c_str(), connect_msg.size());
@@ -245,6 +238,11 @@ int main(int argc, char *argv[]) {
 
   spdlog::info("Coordinator answer " + connect_msg_rsp);
 
+  std::string broker_host_port =
+      connect_msg_rsp.substr(2, connect_msg_rsp.size() - 2);
+
+  reader = new NetworkReader(broker_host_port);
+
   std::thread worker_thread(worker);
   while (!leave) {
     spdlog::info("Waiting for request");
@@ -269,7 +267,6 @@ int main(int argc, char *argv[]) {
       break;
     }
     case SSP_MESSAGE_DISCONNECT: {
-      std::string dummy_filter = "STOP ";
       reader->ResetFilter();
 
       dummy_request =

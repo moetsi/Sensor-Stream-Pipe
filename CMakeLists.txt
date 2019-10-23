@@ -62,7 +62,7 @@ endif ()
 
 
 add_executable(ssp_coordinator clients/ssp_coordinator.cc utils/utils.cc clients/ssp_coordinator_main.cc)
-add_executable(ssp_broker clients/ssp_broker.cc)
+add_executable(ssp_broker clients/ssp_broker.cc utils/utils.cc)
 add_executable(ssp_processor_opencv processors/ssp_processor_opencv.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
 add_executable(ssp_processor_template processors/ssp_processor_template.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
 add_executable(ssp_server servers/ssp_server_main.cc servers/ssp_server.cc ${READER_SOURCE_FILES} ${DECODER_SOURCE_FILES} ${ENCODER_SOURCE_FILES} ${SOURCE_FILES})
@@ -74,9 +74,8 @@ set(NVPIPE_LIB_FILES NvPipe)
 set(KINECT_LIB_FILES k4a k4arecord depthengine)
 set(K4A_BODYTRACK_LIB_FILES k4abt)
 
-target_link_libraries(ssp_broker zmq)
-target_link_libraries(ssp_coordinator zmq)
-target_link_libraries(ssp_coordinator yaml-cpp)
+target_link_libraries(ssp_broker zmq pthread yaml-cpp)
+target_link_libraries(ssp_coordinator zmq yaml-cpp)
 
 
 target_link_libraries(ssp_processor_opencv ${LIB_FILES})
