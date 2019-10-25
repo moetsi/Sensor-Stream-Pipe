@@ -29,7 +29,7 @@ public:
   int ConnectBroker(const std::string &host,
                     std::string &error);
 
-  int ConnectCoordinator(const FrameSourceType &type,
+  int ConnectCoordinator(const ExchangeDataType &type,
                          const std::string &metadata, std::string &error);
 
   int GetBroker(BrokerInstance &connection, std::string &error);

@@ -89,19 +89,13 @@ std::vector<FrameStruct> NetworkReader::GetCurrentFrame() {
   return current_frame_internal_;
 }
 
-unsigned int NetworkReader::GetCurrentFrameId() {
-  return current_frame_counter_;
-}
-
-zmq::context_t *NetworkReader::GetContext() { return context_; }
-
 void NetworkReader::AddFilter(std::string filter) {
   spdlog::debug("Subscribed " + filter);
   subscriptions_.push_back(filter);
   socket_->setsockopt(ZMQ_SUBSCRIBE, filter.c_str(), filter.size());
 }
 
-void NetworkReader::ResetFilter() {
+void NetworkReader::ClearFilter() {
   for (auto filter : subscriptions_) {
     socket_->setsockopt(ZMQ_UNSUBSCRIBE, filter.c_str(), filter.size());
     spdlog::debug("Unsubscribed " + filter);

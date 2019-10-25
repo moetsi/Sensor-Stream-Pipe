@@ -37,7 +37,7 @@ public:
 
   int RegisterFrameSource(const std::string &host, const std::string &id,
                           const std::string &zmq_id,
-                          const FrameSourceType &type,
+                          const ExchangeDataType &type,
                           const std::string &metadata, std::string &error);
 
   int RegisterBroker(const std::string &host, const std::string &id,
@@ -45,7 +45,7 @@ public:
                      std::string &error);
 
   int RegisterProcessor(const std::string &host, const std::string &id,
-                        const std::string &zmq_id, const FrameSourceType &type,
+                        const std::string &zmq_id, const ExchangeDataType &type,
                         const ExchangeDataType &out_type,
                         const std::string &metadata, std::string &error);
 
@@ -62,18 +62,18 @@ public:
 
 
   int GetFrameSources(
-      std::vector<std::pair<std::string, FrameSourceType>> &results,
+      std::vector<std::pair<std::string, ExchangeDataType>> &results,
       std::string &error);
 
   int GetProcessors(
       std::vector<
-          std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>>>
+          std::pair<std::string, std::pair<ExchangeDataType, ExchangeDataType>>>
           &results,
       std::string &error);
 
   int GetConnections(
       std::vector<
-          std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>>>
+          std::pair<std::string, std::pair<ExchangeDataType, ExchangeDataType>>>
           &results,
       std::string &error);
 

@@ -11,7 +11,8 @@ enum ExchangeDataType {
   SSP_EXCHANGE_DATA_TYPE_VECTOR_CV_MAT,
   SSP_EXCHANGE_DATA_TYPE_VECTOR_POINTCLOUD,
   SSP_EXCHANGE_DATA_TYPE_K4A_CAPTURE,
-  SSP_EXCHANGE_DATA_TYPE_VECTOR_SKELETON
+  SSP_EXCHANGE_DATA_TYPE_VECTOR_SKELETON,
+  SSP_EXCHANGE_DATA_TYPE_CUSTOM
 };
 
 enum ConnectionType {
@@ -19,14 +20,6 @@ enum ConnectionType {
   SSP_CONNECTION_TYPE_FRAMESOURCE,
   SSP_CONNECTION_TYPE_PROCESSOR,
   SSP_CONNECTION_TYPE_CONNECTION,
-};
-
-enum FrameSourceType {
-  SSP_FRAME_SOURCE_ANY = 0,
-  SSP_FRAME_SOURCE_KINECT_DK,
-  SSP_FRAME_SOURCE_VIDEO,
-  SSP_FRAME_SOURCE_FRAMES,
-  SSP_FRAME_SOURCE_CAMERA
 };
 
 enum ExecStatus {
@@ -39,7 +32,7 @@ enum ExecStatus {
 struct ProcessorInstance {
   std::string id;
   std::string zmq_id;
-  FrameSourceType source_type;
+  ExchangeDataType source_type;
   ExchangeDataType data_type;
   std::string metadata;
   std::string host;
@@ -49,7 +42,7 @@ struct ProcessorInstance {
 struct FrameServerInstance {
   std::string id;
   std::string zmq_id;
-  FrameSourceType source_type;
+  ExchangeDataType source_type;
   std::string metadata;
   std::string host;
   ExecStatus status = SSP_EXEC_STATUS_UNINIT;

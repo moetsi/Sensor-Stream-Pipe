@@ -176,163 +176,114 @@ int main(int argc, char *argv[]) {
         general_parameters["frame_source"]["parameters"]);
     reader = new KinectReader(0, c);
 #else
-    spdlog::error("SSP compiled without \"kinect\" reader support. Set to "
+    spdlog::error("SSP compiled without \"kinect\" reader_ support. Set to "
                   "SSP_WITH_KINECT_SUPPORT=ON when configuring with cmake");
     exit(1);
 #endif
   } else {
-    spdlog::error("Unknown reader type: \"{}\". Supported types are "
+    spdlog::error("Unknown reader_ type: \"{}\". Supported types are "
                   "\"frames\", \"video\" and \"kinect\"",
                   reader_type);
     exit(1);
   }
 
-  // TODO: use smarter pointers
-  std::unordered_map<unsigned int, IEncoder *> encoders;
-
   std::vector<unsigned int> types = reader->GetType();
 
-  for (unsigned int type : types) {
-    YAML::Node v = codec_parameters["video_encoder"][type];
-    std::string encoder_type = v["type"].as<std::string>();
-    IEncoder *fe = nullptr;
-    if (encoder_type == "libav") {
-      fe = new LibAvEncoder(v, reader->GetFps());
-    } else if (encoder_type == "nvenc") {
-#ifdef SSP_WITH_NVPIPE_SUPPORT
-      fe = new NvEncoder(v, reader->GetFps());
-#else
-      spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
-                    "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
-      exit(1);
-#endif
-    } else if (encoder_type == "zdepth") {
-      fe = new ZDepthEncoder(reader->GetFps());
-    } else if (encoder_type == "null") {
-      fe = new NullEncoder(reader->GetFps());
-    } else {
-      spdlog::error("Unknown encoder type: \"{}\". Supported types are "
-                    "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
-                    encoder_type);
-      exit(1);
-    }
-    encoders[type] = fe;
-  }
-
-  std::queue<FrameStruct> buffer;
+  std::vector<FrameStruct *> frame_structs;
+  std::vector<FrameStruct> v;
 
   // This class only reads the file once
   // while ((currentTimeMs() - start_time) <= time_in_seconds * 1000) {
 
-  while (stop_after > 0) {
+  while (reader->HasNextFrame()) {
+    v.clear();
+    reader->NextFrame();
+    frame_structs = reader->GetCurrentFrame();
+    for (FrameStruct *frame_struct : frame_structs) {
+      FrameStruct f(*frame_struct);
+      v.push_back(f);
+      if (f.camera_calibration_data.type == 0 && calibration_set == false) {
 
-    std::vector<FrameStruct> v;
+        const k4a_depth_mode_t d = static_cast<const k4a_depth_mode_t>(
+            f.camera_calibration_data.extra_data[0]);
+        const k4a_color_resolution_t r =
+            static_cast<const k4a_color_resolution_t>(
+                f.camera_calibration_data.extra_data[1]);
+        sensor_calibration = k4a::calibration::get_from_raw(
+            reinterpret_cast<char *>(&f.camera_calibration_data.data[0]),
+            f.camera_calibration_data.data.size(), d, r);
+        calibration_set = true;
+      }
+      if (write_to_disk) {
+        if (frame_structs.size() == 3 && f.frame_type == 0) {
+          cv::Mat img;
+          bool imgChanged = FrameStructToMat(f, img, decoders);
 
-    // TODO: document what is happening with the Encoders and Queue
-    while (v.empty()) {
+          std::string j_str = std::to_string(j);
 
-      std::vector<FrameStruct *> frame_structs = reader->GetCurrentFrame();
-
-      for (FrameStruct *frame_struct : frame_structs) {
-        IEncoder *frameEncoder = encoders[frame_struct->frame_type];
-
-        frameEncoder->AddFrameStruct(frame_struct);
-        if (frameEncoder->HasNextPacket()) {
-
-          FrameStruct f = FrameStruct(*frameEncoder->CurrentFrameEncoded());
-          FrameStruct fo = FrameStruct(*frameEncoder->CurrentFrameOriginal());
-          v.push_back(f);
-          if (f.camera_calibration_data.type == 0 && calibration_set == false) {
-
-            const k4a_depth_mode_t d = static_cast<const k4a_depth_mode_t>(
-                f.camera_calibration_data.extra_data[0]);
-            const k4a_color_resolution_t r =
-                static_cast<const k4a_color_resolution_t>(
-                    f.camera_calibration_data.extra_data[1]);
-            sensor_calibration = k4a::calibration::get_from_raw(
-                reinterpret_cast<char *>(&f.camera_calibration_data.data[0]),
-                f.camera_calibration_data.data.size(), d, r);
-            calibration_set = true;
+          std::string j_formatted =
+              std::string(6 - j_str.length(), '0') + j_str;
+          std::string output = write_pattern + j_formatted + ".color.png";
+          if (imgChanged) {
+            cv::imwrite(output, img);
           }
-          if (write_to_disk) {
-            if (frame_structs.size() == 3 && f.frame_type == 0) {
-              cv::Mat img;
-              bool imgChanged = FrameStructToMat(f, img, decoders);
+        }
+        if (frame_structs.size() == 3 && f.frame_type == 1) {
+          cv::Mat img;
+          bool imgChanged = FrameStructToMat(f, img, decoders);
 
-              std::string j_str = std::to_string(j);
+          std::string j_str = std::to_string(j);
 
-              std::string j_formatted =
-                  std::string(6 - j_str.length(), '0') + j_str;
-              std::string output = write_pattern + j_formatted + ".color.png";
-              if (imgChanged) {
-                cv::imwrite(output, img);
-              }
-            }
-            if (frame_structs.size() == 3 && f.frame_type == 1) {
-              cv::Mat img;
-              bool imgChanged = FrameStructToMat(f, img, decoders);
+          std::string j_formatted =
+              std::string(6 - j_str.length(), '0') + j_str;
 
-              std::string j_str = std::to_string(j);
-
-              std::string j_formatted =
-                  std::string(6 - j_str.length(), '0') + j_str;
-
-              std::string output = write_pattern + j_formatted + ".depth.png";
-              if (imgChanged) {
-                cv::imwrite(output, img);
-              }
-            }
+          std::string output = write_pattern + j_formatted + ".depth.png";
+          if (imgChanged) {
+            cv::imwrite(output, img);
           }
-          frameEncoder->NextPacket();
         }
       }
-      if (v.size() == 3)
-        j++;
-      k4a::transformation transformation =
-          k4a_transformation_create(&sensor_calibration);
-      k4a::capture sensor_capture = k4a::capture::create();
-
-      try {
-
-        FrameStructToK4A(v, sensor_capture, decoders);
-
-        k4a::image depth_image = sensor_capture.get_depth_image();
-        k4a::image color_image = sensor_capture.get_color_image();
-
-        k4a::image point_cloud = k4a::image::create(
-            K4A_IMAGE_FORMAT_CUSTOM, depth_image.get_width_pixels(),
-            depth_image.get_height_pixels(),
-            depth_image.get_width_pixels() * 3 * (int)sizeof(uint16_t));
-
-        k4a::image transformed_color = k4a::image::create(
-            K4A_IMAGE_FORMAT_COLOR_BGRA32, depth_image.get_width_pixels(),
-            depth_image.get_height_pixels(),
-            depth_image.get_width_pixels() * 4 * (int)sizeof(uint8_t));
-
-        transformation.color_image_to_depth_camera(depth_image, color_image,
-                                                   &transformed_color);
-
-        transformation.depth_image_to_point_cloud(
-            depth_image, K4A_CALIBRATION_TYPE_DEPTH, &point_cloud);
-
-        std::string i_str = std::to_string(i++);
-
-        std::string i_formatted = std::string(6 - i_str.length(), '0') + i_str;
-
-        std::string output = write_pattern + i_formatted + ".pointcloud.ply";
-        TranformationHelpersWritePointCloud(
-            point_cloud.handle(), transformed_color.handle(), output.c_str());
-
-      } catch (std::exception &e) {
-        spdlog::error(e.what());
-      }
-
-      if (!reader->HasNextFrame()) {
-        stop_after--;
-        reader->Reset();
-      }
-      reader->NextFrame();
     }
+  }
+  if (frame_structs.size() == 3)
+    j++;
+  k4a::transformation transformation =
+      k4a_transformation_create(&sensor_calibration);
+  k4a::capture sensor_capture = k4a::capture::create();
+
+  try {
+
+    FrameStructToK4A(v, sensor_capture, decoders);
+
+    k4a::image depth_image = sensor_capture.get_depth_image();
+    k4a::image color_image = sensor_capture.get_color_image();
+
+    k4a::image point_cloud = k4a::image::create(
+        K4A_IMAGE_FORMAT_CUSTOM, depth_image.get_width_pixels(),
+        depth_image.get_height_pixels(),
+        depth_image.get_width_pixels() * 3 * (int)sizeof(uint16_t));
+
+    k4a::image transformed_color = k4a::image::create(
+        K4A_IMAGE_FORMAT_COLOR_BGRA32, depth_image.get_width_pixels(),
+        depth_image.get_height_pixels(),
+        depth_image.get_width_pixels() * 4 * (int)sizeof(uint8_t));
+
+    transformation.color_image_to_depth_camera(depth_image, color_image,
+                                               &transformed_color);
+
+    transformation.depth_image_to_point_cloud(
+        depth_image, K4A_CALIBRATION_TYPE_DEPTH, &point_cloud);
+
+    std::string i_str = std::to_string(i++);
+
+    std::string i_formatted = std::string(6 - i_str.length(), '0') + i_str;
+
+    std::string output = write_pattern + i_formatted + ".pointcloud.ply";
+    TranformationHelpersWritePointCloud(
+        point_cloud.handle(), transformed_color.handle(), output.c_str());
+
+  } catch (std::exception &e) {
+    spdlog::error(e.what());
   }
   return 0;
 }

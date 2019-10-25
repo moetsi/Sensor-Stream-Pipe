@@ -112,12 +112,12 @@ int main(int argc, char *argv[]) {
         general_parameters["frame_source"]["parameters"]);
     reader = new KinectReader(0, c);
 #else
-    spdlog::error("SSP compiled without \"kinect\" reader support. Set to "
+    spdlog::error("SSP compiled without \"kinect\" reader_ support. Set to "
                   "SSP_WITH_KINECT_SUPPORT=ON when configuring with cmake");
     exit(1);
 #endif
   } else {
-    spdlog::error("Unknown reader type: \"{}\". Supported types are "
+    spdlog::error("Unknown reader_ type: \"{}\". Supported types are "
                   "\"frames\", \"video\" and \"kinect\"",
                   reader_type);
     exit(1);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
       fe = new NvEncoder(v, reader->GetFps());
 #else
-      spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
+      spdlog::error("SSP compiled without \"nvenc\" reader_ support. Set to "
                     "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
       exit(1);
 #endif

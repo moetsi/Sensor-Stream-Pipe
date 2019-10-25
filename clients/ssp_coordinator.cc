@@ -10,7 +10,7 @@ SSPCoordinator::~SSPCoordinator() {}
 int SSPCoordinator::RegisterFrameSource(const std::string &host,
                                         const std::string &id,
                                         const std::string &zmq_id,
-                                        const FrameSourceType &type,
+                                        const ExchangeDataType &type,
                                         const std::string &metadata,
                                         std::string &error) {
   if (frameserver_instances_.find(id) != frameserver_instances_.end() ||
@@ -43,7 +43,7 @@ int SSPCoordinator::RegisterFrameSource(const std::string &host,
 
 int SSPCoordinator::RegisterProcessor(
     const std::string &host, const std::string &id, const std::string &zmq_id,
-    const FrameSourceType &type,
+    const ExchangeDataType &type,
                                       const ExchangeDataType &out_type,
                                       const std::string &metadata,
                                       std::string &error) {
@@ -128,8 +128,7 @@ int SSPCoordinator::Connect(const std::string &id_fs,
   ProcessorInstance pi = processor_instances_[id_proc];
   FrameServerInstance fsi = frameserver_instances_[id_fs];
 
-  if (pi.source_type != SSP_FRAME_SOURCE_ANY &&
-      pi.source_type != fsi.source_type) {
+  if (pi.source_type != fsi.source_type) {
     error = "Incompatible datatypes between processor and frame server; PI: " +
             std::to_string(pi.source_type) +
             " FSI: " + std::to_string(fsi.source_type);
@@ -167,11 +166,11 @@ int SSPCoordinator::Disconnect(const std::string &id_out, std::string &error) {
   return 0;
 }
 int SSPCoordinator::GetFrameSources(
-    std::vector<std::pair<std::string, FrameSourceType>> &results,
+    std::vector<std::pair<std::string, ExchangeDataType>> &results,
     std::string &error) {
 
   for (auto &fsi : frameserver_instances_) {
-    std::pair<std::string, FrameSourceType> pair;
+    std::pair<std::string, ExchangeDataType> pair;
     pair.first = fsi.first;
     pair.second = fsi.second.source_type;
     results.push_back(pair);
@@ -182,14 +181,14 @@ int SSPCoordinator::GetFrameSources(
 
 int SSPCoordinator::GetProcessors(
     std::vector<
-        std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>>>
+        std::pair<std::string, std::pair<ExchangeDataType, ExchangeDataType>>>
         &results,
     std::string &error) {
 
   for (auto &ps : processor_instances_) {
-    std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>> pair;
+    std::pair<std::string, std::pair<ExchangeDataType, ExchangeDataType>> pair;
     pair.first = ps.first;
-    std::pair<FrameSourceType, ExchangeDataType> pair1;
+    std::pair<ExchangeDataType, ExchangeDataType> pair1;
     pair1.first = ps.second.source_type;
     pair1.second = ps.second.data_type;
     pair.second = pair1;
@@ -201,13 +200,13 @@ int SSPCoordinator::GetProcessors(
 
 int SSPCoordinator::GetConnections(
     std::vector<
-        std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>>>
+        std::pair<std::string, std::pair<ExchangeDataType, ExchangeDataType>>>
         &results,
     std::string &error) {
   for (auto &ps : current_connections_) {
-    std::pair<std::string, std::pair<FrameSourceType, ExchangeDataType>> pair;
+    std::pair<std::string, std::pair<ExchangeDataType, ExchangeDataType>> pair;
     pair.first = ps.first;
-    std::pair<FrameSourceType, ExchangeDataType> pair1;
+    std::pair<ExchangeDataType, ExchangeDataType> pair1;
     pair1.first = ps.second.frameserver.source_type;
     pair1.second = ps.second.processor.data_type;
     pair.second = pair1;

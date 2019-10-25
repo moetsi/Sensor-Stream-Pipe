@@ -23,7 +23,7 @@ int SSPServer::ConnectBroker(const std::string &host, std::string &error) {
   return 0;
 }
 
-int SSPServer::ConnectCoordinator(const FrameSourceType &fst,
+int SSPServer::ConnectCoordinator(const ExchangeDataType &fst,
                                   const std::string &metadata,
                                   std::string &error) {
   // status = socket.sendConnectTo(broker.host, broker.port)

@@ -40,12 +40,8 @@ public:
 
   std::vector<FrameStruct> GetCurrentFrame();
 
-  unsigned int GetCurrentFrameId();
-
-  zmq::context_t *GetContext();
-
   void AddFilter(std::string filter);
 
-  void ResetFilter();
+  void ClearFilter();
 
 };

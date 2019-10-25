@@ -21,6 +21,8 @@
 #include "../encoders/zdepth_encoder.h"
 #include "../readers/video_file_reader.h"
 
+#include "ssp_server.h"
+
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../encoders/nv_encoder.h"
 #endif
@@ -29,7 +31,6 @@
 #include "../clients/ssp_coordinator_types.h"
 #include "../readers/kinect_reader.h"
 #include "../utils/kinect_utils.h"
-#include "ssp_server.h"
 #endif
 
 std::mutex mutex_;
@@ -77,10 +78,12 @@ int SendFrames(std::string &yaml_config, std::string &broker_host,
         general_parameters["frame_source"]["parameters"]);
     reader = new KinectReader(0, c);
 #else
+    spdlog::error("SSP compiled without \"kinect\" reader_ support. Set to "
+                  "SSP_WITH_KINECT_SUPPORT=ON when configuring with cmake");
     exit(1);
 #endif
   } else {
-    spdlog::error("Unknown reader type: \"{}\". Supported types are "
+    spdlog::error("Unknown reader_ type: \"{}\". Supported types are "
                   "\"frames\", \"video\" and \"kinect\"",
                   reader_type);
     exit(1);
@@ -100,7 +103,7 @@ int SendFrames(std::string &yaml_config, std::string &broker_host,
 #ifdef SSP_WITH_NVPIPE_SUPPORT
       fe = new NvEncoder(v, reader->GetFps());
 #else
-      spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
+      spdlog::error("SSP compiled without \"nvenc\" reader_ support. Set to "
                     "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
       exit(1);
 #endif
@@ -251,7 +254,7 @@ int main(int argc, char *argv[]) {
   zmq::message_t in_request(SIZE);
   int i = 0;
 
-  FrameSourceType fstype;
+  ExchangeDataType fstype = SSP_EXCHANGE_DATA_TYPE_VECTOR_FRAME_STRUCT;
   std::string yaml_config_file = argv[1];
   YAML::Node codec_parameters = YAML::LoadFile(yaml_config_file);
   YAML::Node general_parameters = codec_parameters["general"];
@@ -259,19 +262,6 @@ int main(int argc, char *argv[]) {
   //TODO: generalize this and check what happens for invalid arguments
   std::string reader_type =
       general_parameters["frame_source"]["type"].as<std::string>();
-  if (reader_type == "frames") {
-    fstype = SSP_FRAME_SOURCE_FRAMES;
-  } else if (reader_type == "video") {
-    fstype = SSP_FRAME_SOURCE_KINECT_DK;
-  } else if (reader_type == "kinect") {
-    fstype = SSP_FRAME_SOURCE_KINECT_DK;
-  } else {
-    spdlog::error("Unknown reader type: \"{}\". Supported types are "
-                  "\"frames\", \"video\" and \"kinect\"",
-                  reader_type);
-    exit(1);
-  }
-
 
   zmq::socket_t coor_socket(context_, ZMQ_REQ);
 
@@ -294,7 +284,7 @@ int main(int argc, char *argv[]) {
   spdlog::info("Coordinator responded");
   coor_socket.send(dummy_request);
 
-  FrameSourceType type;
+  ExchangeDataType type;
   std::string metadata;
 
   std::string id = ssp.GetId();

@@ -111,8 +111,8 @@ int main() {
 
         std::string zmq_id = id_msg;
 
-        FrameSourceType fst =
-            static_cast<FrameSourceType>(fst_string.c_str()[0]);
+        ExchangeDataType fst =
+            static_cast<ExchangeDataType>(fst_string.c_str()[0]);
 
         error = ssp_coordinator.RegisterFrameSource(host, id, zmq_id, fst,
                                                     metadata, error_msg);
@@ -148,8 +148,8 @@ int main() {
 
         std::string zmq_id = id_msg;
 
-        FrameSourceType fst =
-            static_cast<FrameSourceType>(fst_string.c_str()[0]);
+        ExchangeDataType fst =
+            static_cast<ExchangeDataType>(fst_string.c_str()[0]);
 
         ExchangeDataType edt =
             static_cast<ExchangeDataType>(edt_string.c_str()[0]);
@@ -206,7 +206,7 @@ int main() {
       }
       case SSP_CONNECTION_TYPE_FRAMESOURCE: {
         spdlog::info("SSP_MESSAGE_QUE SSP_CONNECTION_TYPE_FRAMESOURCE request");
-        std::vector<std::pair<std::string, FrameSourceType>> results;
+        std::vector<std::pair<std::string, ExchangeDataType>> results;
         error = ssp_coordinator.GetFrameSources(results, error_msg);
         std::string answer_text = "";
         for (auto res : results) {
@@ -223,7 +223,7 @@ int main() {
       case SSP_CONNECTION_TYPE_PROCESSOR: {
         spdlog::info("SSP_MESSAGE_QUE SSP_CONNECTION_TYPE_PROCESSOR request");
         std::vector<std::pair<std::string,
-                              std::pair<FrameSourceType, ExchangeDataType>>>
+                              std::pair<ExchangeDataType, ExchangeDataType>>>
             results;
         error = ssp_coordinator.GetProcessors(results, error_msg);
         std::string answer_text = "";
@@ -242,7 +242,7 @@ int main() {
       case SSP_CONNECTION_TYPE_CONNECTION: {
         spdlog::info("SSP_MESSAGE_QUE SSP_CONNECTION_TYPE_CONNECTION request");
         std::vector<std::pair<std::string,
-                              std::pair<FrameSourceType, ExchangeDataType>>>
+                              std::pair<ExchangeDataType, ExchangeDataType>>>
             results;
         error = ssp_coordinator.GetConnections(results, error_msg);
         std::string answer_text = "";
