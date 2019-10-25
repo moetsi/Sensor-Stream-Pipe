@@ -1,5 +1,3 @@
-
-
 #ifdef SSP_WITH_KINECT_SUPPORT
 #include "ssp_processor_pointcloud.h"
 #endif

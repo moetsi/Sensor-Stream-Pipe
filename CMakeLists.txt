@@ -29,17 +29,14 @@ option(SSP_WITH_K4A_BODYTRACK "This is settable from the command line" ON)
 option(SSP_WITH_NVPIPE_SUPPORT "This is settable from the command line" ON)
 
 if (SSP_WITH_NVPIPE_SUPPORT)
-    add_compile_definitions(SSP_WITH_NVPIPE_SUPPORT=1)
     add_definitions(-DSSP_WITH_NVPIPE_SUPPORT=1)
 endif ()
 
 if (SSP_WITH_KINECT_SUPPORT)
-    add_compile_definitions(SSP_WITH_NVPIPE_SUPPORT=1)
     add_definitions(-DSSP_WITH_KINECT_SUPPORT=1)
 endif ()
 
 if (SSP_WITH_K4A_BODYTRACK)
-    add_compile_definitions(SSP_WITH_NVPIPE_SUPPORT=1)
     add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
 endif ()
 

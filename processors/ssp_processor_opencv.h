@@ -18,13 +18,13 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include "../utils/logger.h"
-
 #include "../clients/ssp_coordinator_types.h"
 #include "../readers/network_reader.h"
 #include "../utils/video_utils.h"
 
 #include "issp_processor.h"
+
+#include "../utils/logger.h"
 
 class SSPProcOpenCV : public ISSPProcessor {
  private:
