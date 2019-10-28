@@ -9,6 +9,11 @@
 #include <k4a/k4a.h>
 #include <zmq.hpp>
 
+//#include <cereal/archives/json.hpp>
+#include <cereal/external/rapidjson/document.h>
+#include <cereal/external/rapidjson/stringbuffer.h>
+#include <cereal/external/rapidjson/writer.h>
+
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -71,12 +76,79 @@ public:
     std::cout << std::endl;
   }
 
-  static int Worker(std::shared_ptr<NetworkReader> reader) {
+  static std::string bodyFrameToJSON(k4abt::frame &body_frame) {
+
+    // 3. Stringify the DOM
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+
+    writer.StartObject();
+
+    writer.String("hello");
+    writer.String("hello");
+
+    if (body_frame != nullptr) {
+      size_t num_bodies = body_frame.get_num_bodies();
+      spdlog::info("{} bodies are detected!", num_bodies);
+
+      writer.String("bodies");
+      writer.StartArray();
+
+      for (size_t i = 0; i < num_bodies; i++) {
+        k4abt_body_t body = body_frame.get_body(i);
+
+        writer.StartObject();
+
+        writer.String("id");
+        writer.Int(body.id);
+
+        writer.String("joints");
+        writer.StartArray();
+
+        for (int j = 0; j < (int)K4ABT_JOINT_COUNT; j++) {
+
+          writer.String("confidence");
+          writer.Int(body.skeleton.joints[j].confidence_level);
+
+          writer.String("position");
+          writer.StartArray();
+          writer.Double(body.skeleton.joints[j].position.v[0]);
+          writer.Double(body.skeleton.joints[j].position.v[1]);
+          writer.Double(body.skeleton.joints[j].position.v[2]);
+          writer.EndArray();
+
+          writer.String("orientation");
+          writer.StartArray();
+          writer.Double(body.skeleton.joints[j].orientation.v[0]);
+          writer.Double(body.skeleton.joints[j].orientation.v[1]);
+          writer.Double(body.skeleton.joints[j].orientation.v[2]);
+          writer.Double(body.skeleton.joints[j].orientation.v[3]);
+          writer.EndArray();
+        }
+
+        writer.EndArray();
+        writer.EndObject();
+      }
+
+      writer.EndArray();
+
+
+    }
+    writer.EndObject();
+
+    return std::string(buffer.GetString(), buffer.GetSize());
+  }
+
+  static int Worker(std::shared_ptr<NetworkReader> reader, int port) {
 
     spdlog::set_level(spdlog::level::debug);
     av_log_set_level(AV_LOG_QUIET);
 
     srand(time(NULL) * getpid());
+
+    zmq::context_t context (1);
+    zmq::socket_t out_socket(context, ZMQ_PUB);
+    out_socket.bind("tcp://*:" + std::to_string(port));
 
     try {
       reader->init();
@@ -125,7 +197,15 @@ public:
 
           k4abt::frame body_frame = tracker.pop_result();
 
+          std::string s = bodyFrameToJSON(body_frame);
+          zmq::message_t msg(s.c_str(), s.size());
+
+          out_socket.send(msg);
+
+          /*
           if (body_frame != nullptr) {
+
+
             size_t num_bodies = body_frame.get_num_bodies();
             spdlog::info("{} bodies are detected!", num_bodies);
 
@@ -134,16 +214,21 @@ public:
               SSPProcK4A::PrintBodyInformation(body);
             }
 
+
+
             k4a::image body_index_map = body_frame.get_body_index_map();
             if (body_index_map != nullptr) {
               SSPProcK4A::PrintBodyIndexMapMiddleLine(body_index_map);
             } else {
               spdlog::error("Failed to generate bodyindex map!");
             }
+
           } else {
             spdlog::error("Pop body frame result time out!!");
             break;
           }
+           */
+
         } catch (std::exception &e) {
           spdlog::error(e.what());
         }

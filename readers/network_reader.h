@@ -25,8 +25,8 @@ private:
   std::vector<std::string> subscriptions_;
 
   std::string host_port_;
-  zmq::context_t *context_;
-  zmq::socket_t *socket_;
+  std::shared_ptr<zmq::context_t> context_;
+  std::shared_ptr<zmq::socket_t> socket_;
 
 public:
   NetworkReader(std::string host_port);
@@ -43,5 +43,7 @@ public:
   void AddFilter(std::string filter);
 
   void ClearFilter();
+
+  std::shared_ptr<zmq::context_t> GetContext();
 
 };

@@ -10,7 +10,7 @@ SSPProcK4A::SSPProcK4A(std::string host_port) {
 }
 
 void SSPProcK4A::Start() {
-  worker_thread_ = std::thread(SSPProcK4A::Worker, std::ref(reader_));
+  worker_thread_ = std::thread(SSPProcK4A::Worker, std::ref(reader_), 10030);
 }
 
 void SSPProcK4A::Stop() { worker_thread_.join(); }

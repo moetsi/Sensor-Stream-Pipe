@@ -14,8 +14,8 @@ NetworkReader::NetworkReader(std::string host_port) {
 
 void NetworkReader::init() {
 
-  context_ = new zmq::context_t(1);
-  socket_ = new zmq::socket_t(*context_, ZMQ_SUB);
+  context_ = std::make_shared<zmq::context_t>(1);
+  socket_ = std::make_shared<zmq::socket_t>(*context_, ZMQ_SUB);
   socket_->connect("tcp://" + host_port_);
 
   // socket_->setsockopt(ZMQ_SUBSCRIBE, "", 0);
@@ -23,7 +23,6 @@ void NetworkReader::init() {
 
 NetworkReader::~NetworkReader() {
   socket_->close();
-  delete socket_;
 }
 
 bool NetworkReader::HasNextFrame() { return true; }
@@ -102,4 +101,8 @@ void NetworkReader::ClearFilter() {
   }
 
   subscriptions_.clear();
+}
+
+std::shared_ptr<zmq::context_t> NetworkReader::GetContext() {
+  return context_;
 }
