@@ -12,11 +12,11 @@ void ZDepthDecoder::Init(std::vector<unsigned char> parameter_data) {
   memcpy(&height_, &parameter_data[4], sizeof(int));
 }
 
-cv::Mat ZDepthDecoder::Decode(FrameStruct *frame) {
+cv::Mat ZDepthDecoder::Decode(FrameStruct& frame) {
 
   //TODO: do not crash on failure, wait for I Frame if mid stream
   zdepth::DepthResult result =
-      decompressor_.Decompress(frame->frame, width_, height_, decompressed_buffer_);
+      decompressor_.Decompress(frame.frame, width_, height_, decompressed_buffer_);
   if (result != zdepth::DepthResult::Success) {
     // Handle input error
   }

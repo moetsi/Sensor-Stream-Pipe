@@ -7,7 +7,7 @@
 #include "iencoder.h"
 class NullEncoder : public IEncoder {
 private:
-  FrameStruct *frame;
+  std::shared_ptr<FrameStruct> frame;
   unsigned int fps;
 
 public:
@@ -15,17 +15,17 @@ public:
 
   ~NullEncoder();
 
-  void AddFrameStruct(FrameStruct *fs);
+  void AddFrameStruct(std::shared_ptr<FrameStruct> &fs);
 
   void NextPacket();
 
   bool HasNextPacket();
 
-  FrameStruct *CurrentFrameEncoded();
+  std::shared_ptr<FrameStruct> CurrentFrameEncoded();
 
-  FrameStruct *CurrentFrameOriginal();
+  std::shared_ptr<FrameStruct> CurrentFrameOriginal();
 
-  CodecParamsStruct *GetCodecParamsStruct();
+  std::shared_ptr<CodecParamsStruct> GetCodecParamsStruct();
 
   unsigned int GetFps();
 };

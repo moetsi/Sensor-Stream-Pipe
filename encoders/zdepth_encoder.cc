@@ -17,19 +17,13 @@ ZDepthEncoder::ZDepthEncoder(int _fps) {
 }
 
 ZDepthEncoder::~ZDepthEncoder() {
-  if (frame_compressed_ != nullptr)
-    delete frame_compressed_;
-  if (frame_original_ != nullptr)
-    delete frame_original_;
-  if (codec_params_struct_ != nullptr)
-    delete codec_params_struct_;
   if (libav_decoder_ != nullptr)
     delete libav_decoder_;
   if (sws_context_ != nullptr)
     sws_freeContext(sws_context_);
 }
 
-void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
+void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
   frame_original_ = fs;
 
   if (frame_original_ == nullptr) {
@@ -37,7 +31,7 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
   } else {
 
     if (frame_compressed_ == nullptr)
-      frame_compressed_ = new FrameStruct();
+      frame_compressed_ = std::make_shared<FrameStruct>();
 
     frame_compressed_->device_id = fs->device_id;
     frame_compressed_->frame_data_type = 1;
@@ -55,14 +49,16 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
 
     uint16_t *data = nullptr;
 
-    AVFrame *pFrameO = nullptr;
-    AVFrame *pFrame = nullptr;
     cv::Mat img;
 
     if (fs->frame_data_type == 0) {
 
-      pFrameO = av_frame_alloc();
-      pFrame = av_frame_alloc();
+      AVFrame *tmp = av_frame_alloc();
+      AVFrameSharedP pFrameO =
+          std::shared_ptr<AVFrame>(tmp, AVFrameSharedDeleter);
+      tmp = av_frame_alloc();
+      AVFrameSharedP pFrame =
+          std::shared_ptr<AVFrame>(tmp, AVFrameSharedDeleter);
 
       image_decoder_.ImageBufferToAVFrame(fs, pFrameO);
 
@@ -73,7 +69,7 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
 
       pFrame->width = width_;
       pFrame->height = height_;
-      av_frame_get_buffer(pFrame, 0);
+      av_frame_get_buffer(pFrame.get(), 0);
 
       if (sws_context_ == nullptr)
         sws_context_ = sws_getContext(width_, height_, (AVPixelFormat)pFrameO->format,
@@ -93,7 +89,8 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
         libav_decoder_->Init(getParams(*fs));
       }
 
-      img = libav_decoder_->Decode(fs);
+      FrameStruct fss = *fs;
+      img = libav_decoder_->Decode(fss);
 
       width_ = img.cols;
       height_ = img.rows;
@@ -126,29 +123,27 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
     frame_compressed_->timestamps.push_back(CurrentTimeMs());
     total_frame_counter_++;
 
-    if (pFrame != nullptr) {
-      av_frame_free(&pFrame);
-      av_frame_free(&pFrameO);
-    }
   }
 }
 
 void ZDepthEncoder::NextPacket() {
-  if (frame_original_ != nullptr)
-    delete frame_original_;
   frame_original_ = nullptr;
   frame_compressed_ = nullptr;
 }
 
 bool ZDepthEncoder::HasNextPacket() { return true; }
 
-FrameStruct *ZDepthEncoder::CurrentFrameEncoded() { return frame_compressed_; }
+std::shared_ptr<FrameStruct> ZDepthEncoder::CurrentFrameEncoded() {
+  return frame_compressed_;
+}
 
-FrameStruct *ZDepthEncoder::CurrentFrameOriginal() { return frame_original_; }
+std::shared_ptr<FrameStruct> ZDepthEncoder::CurrentFrameOriginal() {
+  return frame_original_;
+}
 
-CodecParamsStruct *ZDepthEncoder::GetCodecParamsStruct() {
+std::shared_ptr<CodecParamsStruct> ZDepthEncoder::GetCodecParamsStruct() {
   if (codec_params_struct_ == NULL) {
-    codec_params_struct_ = new CodecParamsStruct();
+    codec_params_struct_ = std::make_shared<CodecParamsStruct>();
     codec_params_struct_->type = 2;
     codec_params_struct_->data.resize(4 + 4);
 

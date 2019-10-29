@@ -118,7 +118,7 @@ KinectReader::KinectReader(uint8_t _device_index,
     exit(1);
   }
 
-  camera_calibration_struct_ = new CameraCalibrationStruct();
+  camera_calibration_struct_ = std::make_shared<CameraCalibrationStruct>();
 
   size_t buffer_size = 10000;
   camera_calibration_struct_->type = 0;
@@ -159,14 +159,6 @@ KinectReader::~KinectReader() {
   k4a_device_stop_cameras(device_);
 
   k4a_device_close(device_);
-
-  for (unsigned int i = 0; i < codec_params_structs_.size(); i++)
-    if (codec_params_structs_[i] != nullptr)
-      delete codec_params_structs_[i];
-
-  for (unsigned int i = 0; i < current_frame_.size(); i++)
-    if (codec_params_structs_[i] != nullptr)
-      delete current_frame_[i];
 }
 
 void KinectReader::NextFrame() {
@@ -188,7 +180,8 @@ void KinectReader::NextFrame() {
         device_config_.color_resolution != K4A_COLOR_RESOLUTION_OFF) {
       k4a_image_t color_image = k4a_capture_get_color_image(capture_);
       if (color_image && k4a_image_get_format(color_image) != 6) {
-        FrameStruct *s = new FrameStruct(frame_template_);
+        std::shared_ptr<FrameStruct> s =
+            std::make_shared<FrameStruct>(frame_template_);
         s->sensor_id = 0;
         s->frame_type = 0;
         s->frame_id = frame_counter_.at(0)++;
@@ -204,10 +197,12 @@ void KinectReader::NextFrame() {
           s->frame = std::vector<uchar>(buffer, buffer + size);
           if (codec_params_structs_.at(0) == nullptr) {
             ImageDecoder id;
-            AVFrame *avframe = av_frame_alloc();
+            AVFrame *avframe_tmp = av_frame_alloc();
+            AVFrameSharedP avframe =
+                std::shared_ptr<AVFrame>(avframe_tmp, AVFrameSharedDeleter);
             id.ImageBufferToAVFrame(s, avframe);
-            codec_params_structs_.at(0) = new CodecParamsStruct(s->codec_data);
-            av_frame_free(&avframe);
+            codec_params_structs_.at(0) =
+                std::make_shared<CodecParamsStruct>(s->codec_data);
           }
           s->camera_calibration_data = *camera_calibration_struct_;
 
@@ -235,7 +230,8 @@ void KinectReader::NextFrame() {
       k4a_image_t depth_image = k4a_capture_get_depth_image(capture_);
       if (depth_image && k4a_image_get_format(depth_image) != 6) {
 
-        FrameStruct *s = new FrameStruct(frame_template_);
+        std::shared_ptr<FrameStruct> s =
+            std::make_shared<FrameStruct>(frame_template_);
         s->sensor_id = 1;
         s->frame_type = 1;
         s->frame_data_type = 3;
@@ -266,7 +262,8 @@ void KinectReader::NextFrame() {
 
       k4a_image_t ir_image = k4a_capture_get_ir_image(capture_);
       if (ir_image && k4a_image_get_format(ir_image) != 6) {
-        FrameStruct *s = new FrameStruct(frame_template_);
+        std::shared_ptr<FrameStruct> s =
+            std::make_shared<FrameStruct>(frame_template_);
         s->sensor_id = 2;
         s->frame_type = 2;
         s->frame_id = frame_counter_.at(2)++;
@@ -300,7 +297,7 @@ bool KinectReader::HasNextFrame() { return true; }
 
 void KinectReader::Reset() {}
 
-std::vector<FrameStruct *> KinectReader::GetCurrentFrame() {
+std::vector<std::shared_ptr<FrameStruct>> KinectReader::GetCurrentFrame() {
   return current_frame_;
 }
 

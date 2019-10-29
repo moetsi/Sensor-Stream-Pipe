@@ -11,17 +11,17 @@ class IEncoder {
 public:
   virtual ~IEncoder() {}
 
-  virtual void AddFrameStruct(FrameStruct *frame_struct) = 0;
+  virtual void AddFrameStruct(std::shared_ptr<FrameStruct> &frame_struct) = 0;
 
   virtual void NextPacket() = 0;
 
   virtual bool HasNextPacket() = 0;
 
-  virtual FrameStruct *CurrentFrameEncoded() = 0;
+  virtual std::shared_ptr<FrameStruct> CurrentFrameEncoded() = 0;
 
-  virtual FrameStruct *CurrentFrameOriginal() = 0;
+  virtual std::shared_ptr<FrameStruct> CurrentFrameOriginal() = 0;
 
-  virtual CodecParamsStruct *GetCodecParamsStruct() = 0;
+  virtual std::shared_ptr<CodecParamsStruct> GetCodecParamsStruct() = 0;
 
   virtual unsigned int GetFps() = 0;
 };

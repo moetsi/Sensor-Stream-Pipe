@@ -151,17 +151,17 @@ int main(int argc, char *argv[]) {
       }
 
       std::vector<FrameStruct> v;
-      std::vector<FrameStruct *> vO;
+      std::vector<std::shared_ptr<FrameStruct>> vO;
 
       while (v.empty()) {
-        std::vector<FrameStruct *> frameStruct = reader->GetCurrentFrame();
-        for (FrameStruct *frameStruct : frameStruct) {
+        std::vector<std::shared_ptr<FrameStruct>> frameStruct = reader->GetCurrentFrame();
+        for (std::shared_ptr<FrameStruct> frameStruct : frameStruct) {
 
           IEncoder *frameEncoder = encoders[frameStruct->frame_type];
 
           frameEncoder->AddFrameStruct(frameStruct);
           if (frameEncoder->HasNextPacket()) {
-            FrameStruct *f = frameEncoder->CurrentFrameEncoded();
+            std::shared_ptr<FrameStruct> f = frameEncoder->CurrentFrameEncoded();
             vO.push_back(f);
             v.push_back(*f);
             frameEncoder->NextPacket();
@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
           f.frame.clear();
           spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id, f.frame_id);
           vO.at(i)->frame.clear();
-          delete vO.at(i);
+          vO.at(i) = nullptr;
         }
       }
     }

@@ -41,7 +41,7 @@ private:
   AVFrame *frame_av_;
   AVPacket *packet_av_;
 
-  CodecParamsStruct *codec_params_struct_;
+  std::shared_ptr<CodecParamsStruct> codec_params_struct_;
 
   struct SwsContext *sws_context_;
 
@@ -49,7 +49,7 @@ private:
 
   ImageDecoder image_decoder_;
 
-  std::queue<FrameStruct *> buffer_fs_;
+  std::queue<std::shared_ptr<FrameStruct>> buffer_fs_;
   std::queue<AVPacket *> buffer_packet_;
 
   std::string stream_id_;
@@ -58,7 +58,7 @@ private:
 
   bool ready_;
 
-  void Init(FrameStruct *fs);
+  void Init(std::shared_ptr<FrameStruct> &fs);
 
   void Encode();
 
@@ -75,17 +75,17 @@ public:
 
   ~LibAvEncoder();
 
-  void AddFrameStruct(FrameStruct *fs);
+  void AddFrameStruct(std::shared_ptr<FrameStruct> &fs);
 
   void NextPacket();
 
   bool HasNextPacket();
 
-  FrameStruct *CurrentFrameEncoded();
+  std::shared_ptr<FrameStruct> CurrentFrameEncoded();
 
-  FrameStruct *CurrentFrameOriginal();
+  std::shared_ptr<FrameStruct> CurrentFrameOriginal();
 
-  CodecParamsStruct *GetCodecParamsStruct();
+  std::shared_ptr<CodecParamsStruct> GetCodecParamsStruct();
 
   unsigned int GetFps();
 

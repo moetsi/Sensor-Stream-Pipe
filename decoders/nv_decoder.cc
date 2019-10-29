@@ -39,6 +39,7 @@ void NvDecoder::Init(std::vector<unsigned char> parameter_data) {
     codec_ = NVPIPE_HEVC;
   }
 
+
   decoder_ = NvPipe_CreateDecoder(format_, codec_, width_, height_);
 
   if (decoder_ == nullptr) {
@@ -48,9 +49,9 @@ void NvDecoder::Init(std::vector<unsigned char> parameter_data) {
   }
 }
 
-cv::Mat NvDecoder::Decode(FrameStruct *data) {
+cv::Mat NvDecoder::Decode(FrameStruct& data) {
   //TODO: do not crash on failure, wait for I Frame if mid stream
-  NvPipe_Decode(decoder_, data->frame.data(), data->frame.size(),
+  NvPipe_Decode(decoder_, data.frame.data(), data.frame.size(),
                 decompressed_buffer_.data(), width_, height_);
 
   if (decompressed_buffer_.size() == 0) {

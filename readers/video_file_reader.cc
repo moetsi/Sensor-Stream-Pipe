@@ -37,10 +37,6 @@ VideoFileReader::~VideoFileReader() {
 
   avformat_close_input(&av_format_context_);
 
-  for (auto fs : frame_structs_)
-    delete fs;
-  if (frame_struct_buffer_ != nullptr)
-    delete frame_struct_buffer_;
 }
 
 void VideoFileReader::Init(std::string &filename) {
@@ -76,7 +72,7 @@ void VideoFileReader::Init(std::string &filename) {
     exit(-1);
   }
 
-  camera_calibration_struct_ = new CameraCalibrationStruct();
+  camera_calibration_struct_ = std::make_shared<CameraCalibrationStruct>();
   camera_calibration_struct_->type = 0;
   camera_calibration_struct_->extra_data.resize(2);
   // the component that knows how to enCOde and DECode the stream
@@ -230,7 +226,10 @@ void VideoFileReader::NextFrame() {
               packet_->stream_index);
     if (it != video_stream_indexes_.end()) {
 
-      FrameStruct *frameStruct = new FrameStruct(frame_struct_template_);
+      FrameStruct *frame_struct_tmp = new FrameStruct(frame_struct_template_);
+      std::shared_ptr<FrameStruct> frameStruct =
+          std::shared_ptr<FrameStruct>(frame_struct_tmp);
+
       frameStruct->frame = std::vector<unsigned char>(
           &packet_->data[0], &packet_->data[0] + packet_->size);
       frameStruct->frame_id = current_frame_counter_;
@@ -256,11 +255,8 @@ void VideoFileReader::NextFrame() {
     av_packet_unref(packet_);
     if (error == AVERROR_EOF) {
       eof_reached_ = true;
-      for (auto fs : frame_structs_)
-        delete fs;
       frame_structs_.clear();
       if (frame_struct_buffer_ != nullptr) {
-        delete frame_struct_buffer_;
         frame_struct_buffer_ = nullptr;
       }
       error = 1;
@@ -302,7 +298,7 @@ unsigned int VideoFileReader::GetFps() {
   return fps_;
 }
 
-std::vector<FrameStruct *> VideoFileReader::GetCurrentFrame() {
+std::vector<std::shared_ptr<FrameStruct>> VideoFileReader::GetCurrentFrame() {
   return frame_structs_;
 }
 

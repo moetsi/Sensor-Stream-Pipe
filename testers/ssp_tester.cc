@@ -166,8 +166,9 @@ int main(int argc, char *argv[]) {
     // TODO: document what is happening with the Encoders and Queue
     while (v.empty()) {
 
-      std::vector<FrameStruct *> frame_structs = reader->GetCurrentFrame();
-      for (FrameStruct *frame_struct : frame_structs) {
+      std::vector<std::shared_ptr<FrameStruct>> frame_structs =
+          reader->GetCurrentFrame();
+      for (std::shared_ptr<FrameStruct> frame_struct : frame_structs) {
         IEncoder *frameEncoder = encoders[frame_struct->frame_type];
 
         frameEncoder->AddFrameStruct(frame_struct);

@@ -285,7 +285,7 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
 
       decoder = decoders[decoder_id];
 
-      img = decoder->Decode(&f);
+      img = decoder->Decode(f);
 
       f.frame.clear();
     }

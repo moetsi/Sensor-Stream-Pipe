@@ -23,10 +23,9 @@ extern "C" {
 #include <opencv2/highgui.hpp>
 
 #include "../decoders/idecoder.h"
-#include "../decoders/libav_decoder.h"
 #include "../decoders/zdepth_decoder.h"
 #include "../structs/frame_struct.hpp"
-
+#include "../utils/libav_types.h"
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../decoders/nv_decoder.h"
@@ -39,9 +38,9 @@ extern "C" {
 #define MAX_DEPTH_VALUE_11_BITS 2048
 #define MAX_DEPTH_VALUE_8_BITS 256
 
-void AVFrameToMatYUV(const AVFrame *frame, cv::Mat &image);
+void AVFrameToMatYUV(AVFrameSharedP &frame, cv::Mat &image);
 
-void AVFrameToMatGray(const AVFrame *frame, cv::Mat &image);
+void AVFrameToMatGray(AVFrameSharedP &frame, cv::Mat &image);
 
 void PrepareDecodingStruct(
     FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,

@@ -19,22 +19,22 @@
 class NvEncoder : public IEncoder {
 
 private:
-  NvPipe *encoder_;
+  NvPipeSafeP encoder_;
   std::vector<uint8_t> compressed_buffer_;
   unsigned int fps_;
   unsigned int total_frame_counter_;
   unsigned int width_, height_;
   uint64 bitrate_;
-  FrameStruct *frame_original_;
-  FrameStruct *frame_compressed_;
-  CodecParamsStruct *codec_params_struct_;
-  struct SwsContext *sws_context_;
+  std::shared_ptr<FrameStruct> frame_original_;
+  std::shared_ptr<FrameStruct> frame_compressed_;
+  std::shared_ptr<CodecParamsStruct> codec_params_struct_;
+  SwsContextSafeP sws_context_;
   NvPipe_Codec codec_;
   NvPipe_Compression compression_;
   NvPipe_Format format_;
   std::string stream_id_;
 
-  LibAvDecoder *lib_av_decoder_;
+  std::unique_ptr<LibAvDecoder> lib_av_decoder_;
 
   ImageDecoder image_decoder_;
 
@@ -45,17 +45,17 @@ public:
 
   ~NvEncoder();
 
-  void AddFrameStruct(FrameStruct *fs);
+  void AddFrameStruct(std::shared_ptr<FrameStruct> &fs);
 
   void NextPacket();
 
   bool HasNextPacket();
 
-  FrameStruct *CurrentFrameEncoded();
+  std::shared_ptr<FrameStruct> CurrentFrameEncoded();
 
-  FrameStruct *CurrentFrameOriginal();
+  std::shared_ptr<FrameStruct> CurrentFrameOriginal();
 
-  CodecParamsStruct *GetCodecParamsStruct();
+  std::shared_ptr<CodecParamsStruct> GetCodecParamsStruct();
 
   unsigned int GetFps();
 };

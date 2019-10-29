@@ -24,7 +24,7 @@ video_encoder:
     options:
       preset: "veryfast"
       crf: "23"
-  1: #depth
+  2: #depth
     type: "libav"
     codec_name: "libx265"
     pix_fmt: "gray12le"
@@ -32,5 +32,5 @@ video_encoder:
     options:
       preset: "veryfast"
       crf: "23"
-  2: #ir
+  1: #ir
     type: "zdepth"

@@ -17,11 +17,13 @@ extern "C" {
 };
 
 #include "../structs/frame_struct.hpp"
+#include "libav_types.h"
 #include "utils.h"
 
 class ImageDecoder {
 
 private:
+  // TODO: convert to new types
   AVFormatContext *av_format_context_;
   AVIOContext *avio_context_;
   AVCodecParameters *av_codec_parameters_;
@@ -38,7 +40,7 @@ private:
 
   void Init(std::vector<unsigned char> &buffer);
 
-  int DecodePacket(AVFrame *pFrame);
+  int DecodePacket(AVFrameSharedP pFrame);
   CodecParamsStruct *GetCodecParamsStruct();
 
 public:
@@ -46,5 +48,6 @@ public:
 
   ~ImageDecoder();
 
-  void ImageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame);
+  void ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
+                            AVFrameSharedP pFrame);
 };

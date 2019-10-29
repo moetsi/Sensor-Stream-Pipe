@@ -35,7 +35,7 @@ NvEncoder::NvEncoder(YAML::Node _codec_parameters, unsigned int _fps) {
 
 NvEncoder::~NvEncoder() {}
 
-void NvEncoder::AddFrameStruct(FrameStruct *fs) {
+void NvEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
 
   frame_original_ = fs;
 
@@ -44,7 +44,7 @@ void NvEncoder::AddFrameStruct(FrameStruct *fs) {
   } else {
 
     if (frame_compressed_ == nullptr)
-      frame_compressed_ = new FrameStruct();
+      frame_compressed_ = std::make_shared<FrameStruct>();
 
     frame_compressed_->device_id = fs->device_id;
     frame_compressed_->frame_data_type = 1;
@@ -61,16 +61,18 @@ void NvEncoder::AddFrameStruct(FrameStruct *fs) {
 
     char *data = nullptr;
 
-    AVFrame *frame_av_original = nullptr;
-    AVFrame *frame_av_encoded = nullptr;
+    AVFrameSharedP frame_av_original = nullptr;
+    AVFrameSharedP frame_av_encoded = nullptr;
     cv::Mat img;
 
     uint64_t compressed_size = 0;
 
     if (fs->frame_data_type == 0) {
 
-      frame_av_original = av_frame_alloc();
-      frame_av_encoded = av_frame_alloc();
+      frame_av_original =
+          std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
+      frame_av_encoded =
+          std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 
       image_decoder_.ImageBufferToAVFrame(fs, frame_av_original);
 
@@ -85,27 +87,30 @@ void NvEncoder::AddFrameStruct(FrameStruct *fs) {
 
       frame_av_encoded->width = width_;
       frame_av_encoded->height = height_;
-      av_frame_get_buffer(frame_av_encoded, 0);
+      av_frame_get_buffer(frame_av_encoded.get(), 0);
 
       if (sws_context_ == nullptr)
-        sws_context_ = sws_getContext(width_, height_, (AVPixelFormat)frame_av_original->format,
-                                 width_, height_, (AVPixelFormat)frame_av_encoded->format,
-                                 SWS_BILINEAR, NULL, NULL, NULL);
+        sws_context_ = std::unique_ptr<struct SwsContext, SwsContextDeleter>(
+            sws_getContext(width_, height_,
+                           (AVPixelFormat)frame_av_original->format, width_,
+                           height_, (AVPixelFormat)frame_av_encoded->format,
+                           SWS_BILINEAR, NULL, NULL, NULL));
 
-      sws_scale(sws_context_, (const uint8_t *const *)frame_av_original->data,
-                frame_av_original->linesize, 0, frame_av_original->height, frame_av_encoded->data,
-                frame_av_encoded->linesize);
+      sws_scale(sws_context_.get(),
+                (const uint8_t *const *)frame_av_original->data,
+                frame_av_original->linesize, 0, frame_av_original->height,
+                frame_av_encoded->data, frame_av_encoded->linesize);
 
       data = reinterpret_cast<char *>(&frame_av_encoded->data[0][0]);
 
     } else if (fs->frame_data_type == 1) {
 
       if (lib_av_decoder_ == nullptr) {
-        lib_av_decoder_ = new LibAvDecoder();
+        lib_av_decoder_ = std::make_unique<LibAvDecoder>();
         lib_av_decoder_->Init(getParams(*fs));
       }
 
-      img = lib_av_decoder_->Decode(fs);
+      img = lib_av_decoder_->Decode(*fs);
 
       width_ = img.cols;
       height_ = img.rows;
@@ -128,14 +133,15 @@ void NvEncoder::AddFrameStruct(FrameStruct *fs) {
       GetCodecParamsStruct();
 
       if (frame_compressed_->frame_type == 0) {
-        encoder_ = NvPipe_CreateEncoder(format_, codec_, compression_, bitrate_, fps_,
-                                       width_, height_);
+        encoder_ = std::unique_ptr<NvPipe, NVPipeDeleter>(NvPipe_CreateEncoder(
+            format_, codec_, compression_, bitrate_, fps_, width_, height_));
       } else {
         // For some reason, NVPipe rebuilds the enconder if the frame size
         // "changes". By using the expected width here, we avoid having the
         // program crash due an invalid free on the encoder
-        encoder_ = NvPipe_CreateEncoder(format_, codec_, compression_, bitrate_, fps_,
-                                       width_ * 2, height_);
+        encoder_ = std::unique_ptr<NvPipe, NVPipeDeleter>(
+            NvPipe_CreateEncoder(format_, codec_, compression_, bitrate_, fps_,
+                                 width_ * 2, height_));
       }
     }
 
@@ -156,12 +162,13 @@ void NvEncoder::AddFrameStruct(FrameStruct *fs) {
     }
 
     // TODO: send I Frame every X frames to allow decoder to catch up mid stream
-    compressed_size = NvPipe_Encode(encoder_, data, src_pitch, compressed_buffer_.data(),
-                                    compressed_buffer_.size(), width_, height_, false);
+    compressed_size = NvPipe_Encode(
+        encoder_.get(), data, src_pitch, compressed_buffer_.data(),
+        compressed_buffer_.size(), width_, height_, false);
 
     if (compressed_size == 0) {
       spdlog::error("Could not encode frame on NVEncoder");
-      spdlog::error(NvPipe_GetError(encoder_));
+      spdlog::error(NvPipe_GetError(encoder_.get()));
       exit(1);
     }
 
@@ -170,30 +177,27 @@ void NvEncoder::AddFrameStruct(FrameStruct *fs) {
         compressed_buffer_.data(), compressed_buffer_.data() + compressed_size);
     frame_compressed_->timestamps.push_back(CurrentTimeMs());
     total_frame_counter_++;
-
-    if (frame_av_encoded != nullptr) {
-      av_frame_free(&frame_av_encoded);
-      av_frame_free(&frame_av_original);
-    }
   }
 }
 
 void NvEncoder::NextPacket() {
-  if (frame_original_ != nullptr)
-    delete frame_original_;
   frame_original_ = nullptr;
   frame_compressed_ = nullptr;
 }
 
 bool NvEncoder::HasNextPacket() { return frame_compressed_ != nullptr; }
 
-FrameStruct *NvEncoder::CurrentFrameEncoded() { return frame_compressed_; }
+std::shared_ptr<FrameStruct> NvEncoder::CurrentFrameEncoded() {
+  return frame_compressed_;
+}
 
-FrameStruct *NvEncoder::CurrentFrameOriginal() { return frame_original_; }
+std::shared_ptr<FrameStruct> NvEncoder::CurrentFrameOriginal() {
+  return frame_original_;
+}
 
-CodecParamsStruct *NvEncoder::GetCodecParamsStruct() {
+std::shared_ptr<CodecParamsStruct> NvEncoder::GetCodecParamsStruct() {
   if (codec_params_struct_ == NULL) {
-    codec_params_struct_ = new CodecParamsStruct();
+    codec_params_struct_ = std::make_shared<CodecParamsStruct>();
     codec_params_struct_->type = 1;
     codec_params_struct_->data.resize(4 + 4 + 1 + 1);
 
@@ -256,7 +260,8 @@ void NvEncoder::BuildEncoder(YAML::Node _codec_parameters) {
     spdlog::warn("Missing key: \"compression\", Using default: NVPIPE_LOSSY");
     compression_ = NVPIPE_LOSSY;
   } else {
-    std::string compression_str = _codec_parameters["compression"].as<std::string>();
+    std::string compression_str =
+        _codec_parameters["compression"].as<std::string>();
     if (compression_str == "NVPIPE_LOSSY") {
       compression_ = NVPIPE_LOSSY;
     } else if (compression_str == "NVPIPE_LOSSLESS") {
@@ -276,7 +281,8 @@ void NvEncoder::BuildEncoder(YAML::Node _codec_parameters) {
                   "and NVPIPE_UINT32");
     throw "Invalid value for: \"input_format\"";
   } else {
-    std::string input_format_str = _codec_parameters["input_format"].as<std::string>();
+    std::string input_format_str =
+        _codec_parameters["input_format"].as<std::string>();
     if (input_format_str == "NVPIPE_RGBA32") {
       format_ = NVPIPE_RGBA32;
     } else if (input_format_str == "NVPIPE_UINT4") {

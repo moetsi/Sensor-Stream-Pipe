@@ -24,15 +24,15 @@ private:
   unsigned int frame_type_;
   std::string stream_id_;
 
-  CodecParamsStruct *codec_params_struct_;
+  std::shared_ptr<CodecParamsStruct> codec_params_struct_;
 
-  FrameStruct *current_frame_internal_;
+  std::shared_ptr<FrameStruct> current_frame_internal_;
 
   std::vector<std::string> frame_lines_;
 
   std::vector<unsigned char> ReadFile(std::string &filename);
 
-  FrameStruct *CreateFrameStruct(unsigned int frame_id);
+  std::shared_ptr<FrameStruct> CreateFrameStruct(unsigned int frame_id);
 
 public:
   ImageReader(std::string filename);
@@ -46,7 +46,7 @@ public:
 
   void NextFrame();
 
-  std::vector<FrameStruct *> GetCurrentFrame();
+  std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
 
   unsigned int GetCurrentFrameId();
 

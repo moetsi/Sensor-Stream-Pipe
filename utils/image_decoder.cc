@@ -4,7 +4,7 @@
 
 #include "image_decoder.h"
 
-int ImageDecoder::DecodePacket(AVFrame *pFrame) {
+int ImageDecoder::DecodePacket(AVFrameSharedP pFrame) {
   // Supply raw packet data as input to a decoder
   // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga58bc4bf1e0ac59e27362597e467efff3
   int response = avcodec_send_packet(av_codec_context_, packet_);
@@ -18,7 +18,7 @@ int ImageDecoder::DecodePacket(AVFrame *pFrame) {
   while (response >= 0) {
     // Return decoded output data (into a frame) from a decoder
     // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga11e6542c4e66d3028668788a1a74217c
-    response = avcodec_receive_frame(av_codec_context_, pFrame);
+    response = avcodec_receive_frame(av_codec_context_, pFrame.get());
     if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
       break;
     } else if (response < 0) {
@@ -160,7 +160,8 @@ CodecParamsStruct *ImageDecoder::GetCodecParamsStruct() {
 }
 
 // http://guru-coder.blogspot.com/2014/01/in-memory-jpeg-decode-using-ffmpeg.html
-void ImageDecoder::ImageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame) {
+void ImageDecoder::ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
+                                        AVFrameSharedP pFrame) {
 
   std::vector<unsigned char> buffer = fs->frame;
 
