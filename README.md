@@ -286,7 +286,7 @@ Moetsi’s Sensor Stream Pipe is licensed under the MIT license. That means that
 
 ## Support Moetsi!
 
-Our Sensor Stream Pipe is always going to be free, but it has taken a lot of blood, sweat and tears to get to this point. If you love what we’ve made, please consider supporting the project on our Patreon or on [Salt (Bountysource)](https://salt.bountysource.com/).
+Our Sensor Stream Pipe is always going to be free, but it has taken a lot of blood, sweat and tears to get to this point. If you love what we’ve made, please consider reaching out to olenka@moetsi.com.
 
 
 ## Authors
