@@ -3,7 +3,6 @@
 //
 
 #include "libav_encoder.h"
-#include "../utils/logger.h"
 
 LibAvEncoder::LibAvEncoder(std::string codec_parameters_file, unsigned int _fps) {
   codec_parameters_ = YAML::LoadFile(codec_parameters_file);
@@ -127,10 +126,11 @@ void LibAvEncoder::PrepareFrame() {
       memset(&frame_av_->data[2][0], 128, frame_av_->height * frame_av_->width / 4);
     }
 
-  } else if (f->frame_data_type == 0) {
+  } else if (f->frame_data_type == 0 || f->frame_data_type == 1) {
 
     AVFrame *frame_av_O_tmp = av_frame_alloc();
-    AVFrameSharedP frame_av_O = std::shared_ptr<AVFrame>(frame_av_O_tmp);
+    AVFrameSharedP frame_av_O =
+        std::shared_ptr<AVFrame>(frame_av_O_tmp, AVFrameSharedDeleter);
 
     std::vector<unsigned char> frameData = f->frame;
 
@@ -194,7 +194,7 @@ void LibAvEncoder::PrepareFrame() {
                 frame_av_->linesize);
     }
 
-    av_frame_free(&frame_av_O_tmp);
+    // av_frame_free(&frame_av_O_tmp);
   }
 
 }
@@ -217,13 +217,13 @@ void LibAvEncoder::EncodeA(AVCodecContext *enc_ctx, AVFrame *frame,
     exit(1);
   }
 
-  AVPacket *new_packet = new AVPacket(*packet_av_);
+  AVPacket *new_packet = new AVPacket(*pkt);
   buffer_packet_.push(new_packet);
   buffer_packet_.back()->data = reinterpret_cast<uint8_t *>(
-      new uint64_t[(packet_av_->size + FF_INPUT_BUFFER_PADDING_SIZE) /
+      new uint64_t[(pkt->size + FF_INPUT_BUFFER_PADDING_SIZE) /
                        sizeof(uint64_t) +
                    1]);
-  memcpy(buffer_packet_.back()->data, packet_av_->data, packet_av_->size);
+  memcpy(buffer_packet_.back()->data, pkt->data, pkt->size);
 }
 
 void LibAvEncoder::Encode() {
@@ -412,7 +412,6 @@ void LibAvEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
     ready_ = true;
     Init(fs);
   }
-  std::cout << fs->frame.size() << std::endl;
   fs->timestamps.push_back(CurrentTimeMs());
   buffer_fs_.push(fs);
   Encode();

@@ -29,6 +29,8 @@ extern "C" {
 #include "../utils/video_utils.h"
 
 #include "iencoder.h"
+#include "../decoders/libav_decoder.h"
+#include "../utils/logger.h"
 
 class LibAvEncoder : public IEncoder {
 private:
@@ -48,6 +50,7 @@ private:
   YAML::Node codec_parameters_;
 
   ImageDecoder image_decoder_;
+  std::unique_ptr <LibAvDecoder> lib_av_decoder_;
 
   std::queue<std::shared_ptr<FrameStruct>> buffer_fs_;
   std::queue<AVPacket *> buffer_packet_;
