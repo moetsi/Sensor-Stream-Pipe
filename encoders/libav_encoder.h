@@ -36,24 +36,22 @@ class LibAvEncoder : public IEncoder {
 private:
   unsigned int total_frame_counter_;
 
-  AVCodecParameters *av_codec_parameters_;
-  AVCodecContext *av_codec_context_;
-  AVCodec *av_codec_;
+  AVCodecParametersSafeP av_codec_parameters_;
+  AVCodecContextSafeP av_codec_context_;
+  AVCodecSafeP av_codec_;
 
-  AVFrame *frame_av_;
-  AVPacket *packet_av_;
+  AVFrameSharedP frame_av_;
 
   std::shared_ptr<CodecParamsStruct> codec_params_struct_;
 
-  struct SwsContext *sws_context_;
+  SwsContextSafeP sws_context_;
 
   YAML::Node codec_parameters_;
 
   ImageDecoder image_decoder_;
-  std::unique_ptr <LibAvDecoder> lib_av_decoder_;
 
   std::queue<std::shared_ptr<FrameStruct>> buffer_fs_;
-  std::queue<AVPacket *> buffer_packet_;
+  std::queue<AVPacketSharedP> buffer_packet_;
 
   std::string stream_id_;
 
@@ -65,7 +63,7 @@ private:
 
   void Encode();
 
-  void EncodeA(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt);
+  void EncodeA();
 
   void PrepareFrame();
 

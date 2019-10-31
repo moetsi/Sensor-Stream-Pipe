@@ -34,35 +34,21 @@ std::vector<unsigned char> LibAvEncoder::CurrentFrameBytes() {
 }
 
 LibAvEncoder::~LibAvEncoder() {
-  av_packet_free(&packet_av_);
-  av_frame_free(&frame_av_);
-  avcodec_free_context(&av_codec_context_);
-  avcodec_parameters_free(&av_codec_parameters_);
-  sws_freeContext(sws_context_);
+  frame_av_.reset();
 
-  while (!buffer_fs_.empty()) {
-    buffer_fs_.pop();
-  }
+  av_codec_context_.reset();
+  av_codec_parameters_.reset();
+  sws_context_.reset();
+  av_codec_.reset();
 
-  while (!buffer_packet_.empty()) {
-    AVPacket *q_element = buffer_packet_.front();
-    av_packet_free(&q_element);
-    buffer_fs_.pop();
-  }
 }
 
 void LibAvEncoder::NextPacket() {
   if (!buffer_fs_.empty()) {
-    std::shared_ptr<FrameStruct> f = buffer_fs_.front();
     buffer_fs_.pop();
-    f->frame.clear();
-    f = nullptr;
   }
   if (!buffer_packet_.empty()) {
-    AVPacket *p = buffer_packet_.front();
     buffer_packet_.pop();
-    delete[] p->data;
-    delete p;
   }
 }
 
@@ -72,7 +58,7 @@ void LibAvEncoder::PrepareFrame() {
     uint8_t *in_data[1] = {&f->frame[8]};
     int in_linesize[1] = {4 * frame_av_->width};
 
-    sws_scale(sws_context_, (const uint8_t *const *)in_data, in_linesize, 0,
+    sws_scale(sws_context_.get(), (const uint8_t *const *)in_data, in_linesize, 0,
               frame_av_->height, frame_av_->data, frame_av_->linesize);
 
   } else if (f->frame_data_type == 3) {
@@ -128,16 +114,15 @@ void LibAvEncoder::PrepareFrame() {
 
   } else if (f->frame_data_type == 0 || f->frame_data_type == 1) {
 
-    AVFrame *frame_av_O_tmp = av_frame_alloc();
     AVFrameSharedP frame_av_O =
-        std::shared_ptr<AVFrame>(frame_av_O_tmp, AVFrameSharedDeleter);
+        std::shared_ptr<AVFrame>( av_frame_alloc(), AVFrameSharedDeleter);
 
     std::vector<unsigned char> frameData = f->frame;
 
     image_decoder_.ImageBufferToAVFrame(f, frame_av_O);
 
     if (frame_av_O->format == frame_av_->format) {
-      av_frame_copy(frame_av_, frame_av_O_tmp);
+      av_frame_copy(frame_av_.get(), frame_av_O.get());
 
     } else if (frame_av_O->format == AV_PIX_FMT_GRAY16BE &&
                frame_av_->format ==
@@ -164,7 +149,7 @@ void LibAvEncoder::PrepareFrame() {
                 frame_av_->format == AV_PIX_FMT_YUV422P ||
                 frame_av_->format == AV_PIX_FMT_YUV444P)) { // PNG GRAY16 TO YUV
       // TODO: remove redundant call
-      sws_scale(sws_context_, (const uint8_t *const *)frame_av_O->data,
+      sws_scale(sws_context_.get(), (const uint8_t *const *)frame_av_O->data,
                 frame_av_O->linesize, 0, frame_av_O->height, frame_av_->data,
                 frame_av_->linesize);
 
@@ -189,7 +174,7 @@ void LibAvEncoder::PrepareFrame() {
       }*/
     } else {
       // YUV to YUV
-      sws_scale(sws_context_, (const uint8_t *const *)frame_av_O->data,
+      sws_scale(sws_context_.get(), (const uint8_t *const *)frame_av_O->data,
                 frame_av_O->linesize, 0, frame_av_O->height, frame_av_->data,
                 frame_av_->linesize);
     }
@@ -199,17 +184,16 @@ void LibAvEncoder::PrepareFrame() {
 
 }
 
-void LibAvEncoder::EncodeA(AVCodecContext *enc_ctx, AVFrame *frame,
-                           AVPacket *pkt) {
+void LibAvEncoder::EncodeA() {
   int ret;
   /* send the frame to the encoder */
-  ret = avcodec_send_frame(enc_ctx, frame);
+  ret = avcodec_send_frame(av_codec_context_.get(), frame_av_.get());
   if (ret < 0) {
     spdlog::error("Error sending a frame for encoding.");
     exit(1);
   }
-
-  ret = avcodec_receive_packet(enc_ctx, pkt);
+  AVPacketSharedP packet_av = std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketSharedDeleter);
+  ret = avcodec_receive_packet(av_codec_context_.get(), packet_av.get());
   if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
     return;
   else if (ret < 0) {
@@ -217,13 +201,7 @@ void LibAvEncoder::EncodeA(AVCodecContext *enc_ctx, AVFrame *frame,
     exit(1);
   }
 
-  AVPacket *new_packet = new AVPacket(*pkt);
-  buffer_packet_.push(new_packet);
-  buffer_packet_.back()->data = reinterpret_cast<uint8_t *>(
-      new uint64_t[(pkt->size + FF_INPUT_BUFFER_PADDING_SIZE) /
-                       sizeof(uint64_t) +
-                   1]);
-  memcpy(buffer_packet_.back()->data, pkt->data, pkt->size);
+  buffer_packet_.push(packet_av);
 }
 
 void LibAvEncoder::Encode() {
@@ -232,7 +210,7 @@ void LibAvEncoder::Encode() {
 
   frame_av_->pts = total_frame_counter_++;
 
-  EncodeA(av_codec_context_, frame_av_, packet_av_);
+  EncodeA();
 
   buffer_fs_.front()->timestamps.push_back(CurrentTimeMs());
 }
@@ -242,18 +220,16 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
 
   spdlog::info("Codec information:\n {}", codec_parameters_);
 
-  av_codec_ = avcodec_find_encoder_by_name(
-      codec_parameters_["codec_name"].as<std::string>().c_str());
-  av_codec_context_ = avcodec_alloc_context3(av_codec_);
-  packet_av_ = av_packet_alloc();
-  av_codec_parameters_ = avcodec_parameters_alloc();
+  av_codec_ = std::unique_ptr<AVCodec, AVCodecDeleter>(avcodec_find_encoder_by_name(
+      codec_parameters_["codec_name"].as<std::string>().c_str()));
+  av_codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(avcodec_alloc_context3(av_codec_.get()));
+  av_codec_parameters_ = std::unique_ptr<AVCodecParameters, AVCodecParametersDeleter>(avcodec_parameters_alloc());
 
   int width = 0, height = 0, pxl_format = 0;
 
   if (fs->frame_data_type == 0 || fs->frame_data_type == 1) {
-    AVFrame *frame_av_O_tmp = av_frame_alloc();
     AVFrameSharedP frame_av_O =
-        std::shared_ptr<AVFrame>(frame_av_O_tmp, AVFrameSharedDeleter);
+        std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 
     image_decoder_.ImageBufferToAVFrame(fs, frame_av_O);
 
@@ -337,13 +313,13 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
   av_codec_parameters_->color_space = av_codec_context_->colorspace;
   av_codec_parameters_->sample_rate = av_codec_context_->sample_rate;
 
-  ret = avcodec_open2(av_codec_context_, av_codec_, NULL);
+  ret = avcodec_open2(av_codec_context_.get(), av_codec_.get(), NULL);
   if (ret < 0) {
     spdlog::error("Could not open codec: {}", av_err2str(ret));
     exit(1);
   }
 
-  frame_av_ = av_frame_alloc();
+  frame_av_ = std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
   if (!frame_av_) {
     spdlog::error("Could not allocate video frame.");
     exit(1);
@@ -356,15 +332,15 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
   frame_av_->pts = 0;
   frame_av_->pkt_dts = 0;
 
-  ret = av_frame_get_buffer(frame_av_, 30);
+  ret = av_frame_get_buffer(frame_av_.get(), 30);
   if (ret < 0) {
     spdlog::error("Could not allocate the video frame data.");
     exit(1);
   }
 
-  sws_context_ = sws_getContext(
+  sws_context_ = std::unique_ptr<struct SwsContext, SwsContextDeleter>(sws_getContext(
       width, height, (AVPixelFormat)pxl_format, frame_av_->width, frame_av_->height,
-      (AVPixelFormat)frame_av_->format, SWS_BILINEAR, NULL, NULL, NULL);
+      (AVPixelFormat)frame_av_->format, SWS_BILINEAR, NULL, NULL, NULL));
 }
 
 std::shared_ptr<CodecParamsStruct> LibAvEncoder::GetCodecParamsStruct() {
@@ -378,7 +354,7 @@ std::shared_ptr<CodecParamsStruct> LibAvEncoder::GetCodecParamsStruct() {
     std::vector<unsigned char> data_buffer(data_size);
     std::vector<unsigned char> extra_data_buffer(extra_data_size);
 
-    memcpy(&data_buffer[0], av_codec_parameters_, data_size);
+    memcpy(&data_buffer[0], av_codec_parameters_.get(), data_size);
     memcpy(&extra_data_buffer[0], extra_data_pointer, extra_data_size);
     codec_params_struct_ =
         std::make_shared<CodecParamsStruct>(0, data_buffer, extra_data_buffer);

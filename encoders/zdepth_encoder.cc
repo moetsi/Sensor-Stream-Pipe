@@ -17,10 +17,7 @@ ZDepthEncoder::ZDepthEncoder(int _fps) {
 }
 
 ZDepthEncoder::~ZDepthEncoder() {
-  if (libav_decoder_ != nullptr)
-    delete libav_decoder_;
-  if (sws_context_ != nullptr)
-    sws_freeContext(sws_context_);
+
 }
 
 void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
@@ -73,11 +70,11 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
       av_frame_get_buffer(pFrame.get(), 0);
 
       if (sws_context_ == nullptr)
-        sws_context_ = sws_getContext(width_, height_, (AVPixelFormat)pFrameO->format,
+        sws_context_ = std::unique_ptr<SwsContext, SwsContextDeleter>(sws_getContext(width_, height_, (AVPixelFormat)pFrameO->format,
                                  width_, height_, (AVPixelFormat)pFrame->format,
-                                 SWS_BILINEAR, NULL, NULL, NULL);
+                                 SWS_BILINEAR, NULL, NULL, NULL));
 
-      sws_scale(sws_context_, (const uint8_t *const *)pFrameO->data,
+      sws_scale(sws_context_.get(), (const uint8_t *const *)pFrameO->data,
                 pFrameO->linesize, 0, pFrameO->height, pFrame->data,
                 pFrame->linesize);
 
@@ -86,7 +83,7 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
     } else if (fs->frame_data_type == 1) {
 
       if (libav_decoder_ == nullptr) {
-        libav_decoder_ = new LibAvDecoder();
+        libav_decoder_ = std::make_unique<LibAvDecoder>();
         libav_decoder_->Init(getParams(*fs));
       }
 

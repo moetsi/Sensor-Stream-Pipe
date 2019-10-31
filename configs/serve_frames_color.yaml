@@ -5,15 +5,15 @@ general:
   frame_source:
     type: "frames"
     parameters:
-      path: "/home/amourao/code/2019-05_moetsi/davp-data-scripts/stairs-seq-01-frames-color.txt"
+      path: "/home/amourao/code/2019-05_moetsi/davp-data-scripts/apt0-frames-color.txt"
 video_encoder:
   0: #color
     type: "nvenc"
     codec_name: "NVPIPE_HEVC"
     input_format: "NVPIPE_RGBA32"
-    bit_rate: 15000000
+    bit_rate: 2000000
   1: #depth
-    type: "libav"
+    type: "zdepth"
     codec_name: "libx265"
     pix_fmt: "gray12le"
     bit_rate: 8000000

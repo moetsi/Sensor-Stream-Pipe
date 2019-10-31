@@ -25,4 +25,4 @@ struct ExtendedAzureConfig {
 ExtendedAzureConfig BuildKinectConfigFromYAML(YAML::Node config);
 
 void FrameStructToK4A(std::vector<FrameStruct> &f, k4a::capture &sensor_capture,
-                      std::unordered_map<std::string, IDecoder *> &decoders);
+                      std::unordered_map<std::string, std::shared_ptr<IDecoder >> &decoders);

@@ -22,6 +22,7 @@ extern "C" {
 
 #include "../readers/network_reader.h"
 #include "../utils/video_utils.h"
+#include "../utils/image_converter.h"
 
 int main(int argc, char *argv[]) {
 
@@ -50,7 +51,7 @@ int main(int argc, char *argv[]) {
 
     reader.init();
 
-    std::unordered_map<std::string, IDecoder *> decoders;
+    std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
     bool imgChanged = false;
     while (reader.HasNextFrame()) {

@@ -26,6 +26,7 @@ extern "C" {
 #include "../encoders/null_encoder.h"
 #include "../encoders/zdepth_encoder.h"
 #include "../readers/video_file_reader.h"
+#include "../utils/image_converter.h"
 #include "../utils/similarity_measures.h"
 #include "../utils/utils.h"
 #include "../utils/video_utils.h"
@@ -48,7 +49,7 @@ int main(int argc, char *argv[]) {
   srand(time(NULL) * getpid());
   // srand(getpid());
 
-  std::unordered_map<std::string, IDecoder *> decoders;
+  std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
   std::unordered_map<std::string, int64_t> total_latencies;
   std::unordered_map<std::string, int64_t> original_sizes;
@@ -78,7 +79,6 @@ int main(int argc, char *argv[]) {
 
   YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
-  IReader *reader = nullptr;
   YAML::Node general_parameters = codec_parameters["general"];
 
   bool show_graphical_output = true;
@@ -88,12 +88,14 @@ int main(int argc, char *argv[]) {
 
   SetupLogging(general_parameters);
 
+  std::unique_ptr<IReader> reader;
+
   std::string reader_type =
       general_parameters["frame_source"]["type"].as<std::string>();
   if (reader_type == "frames") {
-    reader =
-        new ImageReader(general_parameters["frame_source"]["parameters"]["path"]
-                            .as<std::string>());
+    reader = std::make_unique<ImageReader>(
+        general_parameters["frame_source"]["parameters"]["path"]
+            .as<std::string>());
   } else if (reader_type == "video") {
     std::string path = general_parameters["frame_source"]["parameters"]["path"]
                            .as<std::string>();
@@ -102,18 +104,17 @@ int main(int argc, char *argv[]) {
       std::vector<unsigned int> streams =
           general_parameters["frame_source"]["parameters"]["streams"]
               .as<std::vector<unsigned int>>();
-      reader = new VideoFileReader(path, streams);
+      reader = std::make_unique<VideoFileReader>(path, streams);
     } else {
-      reader = new VideoFileReader(path);
+      reader = std::make_unique<VideoFileReader>(path);
     }
+
   } else if (reader_type == "kinect") {
 #ifdef SSP_WITH_KINECT_SUPPORT
     ExtendedAzureConfig c = BuildKinectConfigFromYAML(
         general_parameters["frame_source"]["parameters"]);
-    reader = new KinectReader(0, c);
+    reader = std::make_unique<KinectReader>(0, c);
 #else
-    spdlog::error("SSP compiled without \"kinect\" reader support. Set to "
-                  "SSP_WITH_KINECT_SUPPORT=ON when configuring with cmake");
     exit(1);
 #endif
   } else {
@@ -123,30 +124,29 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  // TODO: use smarter pointers
-  std::unordered_map<unsigned int, IEncoder *> encoders;
+  std::unordered_map<unsigned int, std::shared_ptr<IEncoder>> encoders;
 
   std::vector<unsigned int> types = reader->GetType();
 
   for (unsigned int type : types) {
     YAML::Node v = codec_parameters["video_encoder"][type];
     std::string encoder_type = v["type"].as<std::string>();
-    IEncoder *fe = nullptr;
-    if (encoder_type == "libav") {
-      fe = new LibAvEncoder(v, reader->GetFps());
-    } else if (encoder_type == "nvenc") {
+    std::shared_ptr<IEncoder> fe = nullptr;
+    if (encoder_type == "libav")
+      fe = std::make_shared<LibAvEncoder>(v, reader->GetFps());
+    else if (encoder_type == "nvenc") {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
-      fe = new NvEncoder(v, reader->GetFps());
+      fe = std::make_shared<NvEncoder>(v, reader->GetFps());
 #else
       spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
                     "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
       exit(1);
 #endif
-    } else if (encoder_type == "zdepth") {
-      fe = new ZDepthEncoder(reader->GetFps());
-    } else if (encoder_type == "null") {
-      fe = new NullEncoder(reader->GetFps());
-    } else {
+    } else if (encoder_type == "zdepth")
+      fe = std::make_shared<ZDepthEncoder>(reader->GetFps());
+    else if (encoder_type == "null")
+      fe = std::make_shared<NullEncoder>(reader->GetFps());
+    else {
       spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                     "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
                     encoder_type);
@@ -169,7 +169,8 @@ int main(int argc, char *argv[]) {
       std::vector<std::shared_ptr<FrameStruct>> frame_structs =
           reader->GetCurrentFrame();
       for (std::shared_ptr<FrameStruct> frame_struct : frame_structs) {
-        IEncoder *frameEncoder = encoders[frame_struct->frame_type];
+        std::shared_ptr<IEncoder> frameEncoder =
+            encoders[frame_struct->frame_type];
 
         frameEncoder->AddFrameStruct(frame_struct);
         if (frameEncoder->HasNextPacket()) {
@@ -357,12 +358,6 @@ int main(int argc, char *argv[]) {
               (counts[decoder_id] * cols[decoder_id] * rows[decoder_id]));
     }
   }
-  delete reader;
-  for (auto const &x : encoders)
-    delete x.second;
-
-  for (auto const &x : decoders)
-    delete x.second;
 
   return 0;
 }

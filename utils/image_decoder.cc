@@ -7,7 +7,7 @@
 int ImageDecoder::DecodePacket(AVFrameSharedP pFrame) {
   // Supply raw packet data as input to a decoder
   // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga58bc4bf1e0ac59e27362597e467efff3
-  int response = avcodec_send_packet(av_codec_context_, packet_);
+  int response = avcodec_send_packet(av_codec_context_.get(), packet_.get());
 
   if (response < 0) {
     spdlog::error("Error while sending a packet to the decoder: {}",
@@ -18,7 +18,7 @@ int ImageDecoder::DecodePacket(AVFrameSharedP pFrame) {
   while (response >= 0) {
     // Return decoded output data (into a frame) from a decoder
     // https://ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga11e6542c4e66d3028668788a1a74217c
-    response = avcodec_receive_frame(av_codec_context_, pFrame.get());
+    response = avcodec_receive_frame(av_codec_context_.get(), pFrame.get());
     if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
       break;
     } else if (response < 0) {
@@ -55,7 +55,6 @@ ImageDecoder::ImageDecoder() {
   codec_params_struct_ = NULL;
   av_format_context_ = NULL;
   avio_context_ = NULL;
-  avio_ctx_buffer_ = NULL;
   av_register_all();
 }
 
@@ -69,30 +68,28 @@ void ImageDecoder::Init(std::vector<unsigned char> &buffer) {
 
   int ret = 0;
 
-  if (!(av_format_context_ = avformat_alloc_context())) {
-    ret = AVERROR(ENOMEM);
-  }
+  AVFormatContext* av_format_context_tmp = avformat_alloc_context();
 
   avio_ctx_buffer_ = (unsigned char *)av_malloc(avio_ctx_buffer_size_);
-  if (!avio_ctx_buffer_) {
-    ret = AVERROR(ENOMEM);
-    exit(1);
-  }
-  avio_context_ = avio_alloc_context(avio_ctx_buffer_, avio_ctx_buffer_size_, 0,
-                                     &bd, &read_packet, NULL, NULL);
+
+
+  avio_context_ = std::unique_ptr<AVIOContext, AVIOContextDeleter>(avio_alloc_context(avio_ctx_buffer_, avio_ctx_buffer_size_, 0,
+                                     &bd, &read_packet, NULL, NULL));
   if (!avio_context_) {
     ret = AVERROR(ENOMEM);
     exit(1);
   }
-  av_format_context_->pb = avio_context_;
+  av_format_context_tmp->pb = avio_context_.get();
 
-  ret = avformat_open_input(&av_format_context_, NULL, NULL, NULL);
+  ret = avformat_open_input(&av_format_context_tmp, NULL, NULL, NULL);
   if (ret < 0) {
     spdlog::error("Could not open input.");
     exit(1);
   }
 
-  ret = avformat_find_stream_info(av_format_context_, NULL);
+  av_format_context_ = std::unique_ptr<AVFormatContext,AVFormatContextDeleter>(av_format_context_tmp);
+
+  ret = avformat_find_stream_info(av_format_context_.get(), NULL);
   if (ret < 0) {
     spdlog::error("Could not find stream information.");
     exit(1);
@@ -100,37 +97,38 @@ void ImageDecoder::Init(std::vector<unsigned char> &buffer) {
 
   // av_dump_format(pFormatContext, 0, "nofile", 0);
 
-  av_codec_parameters_ = NULL;
+  AVCodecParameters* av_codec_parameters_tmp = NULL;
+  av_codec_parameters_ = nullptr;
 
   // loop though all the streams and print its main information
   for (unsigned int i = 0; i < av_format_context_->nb_streams; i++) {
-    av_codec_parameters_ = av_format_context_->streams[i]->codecpar;
-    codec_ = avcodec_find_decoder(av_codec_parameters_->codec_id);
-
-    if (codec_ != NULL &&
-        av_codec_parameters_->codec_type == AVMEDIA_TYPE_VIDEO) {
+    av_codec_parameters_tmp = av_format_context_->streams[i]->codecpar;
+    if (avcodec_find_decoder(av_codec_parameters_tmp->codec_id) != NULL &&
+        av_codec_parameters_tmp->codec_type == AVMEDIA_TYPE_VIDEO) {
+      av_codec_parameters_ = std::unique_ptr<AVCodecParameters, AVCodecParametersNullDeleter>(av_codec_parameters_tmp);
+      codec_ = std::unique_ptr<AVCodec, AVCodecDeleter>(avcodec_find_decoder(av_codec_parameters_->codec_id));
       break;
     }
   }
 
-  av_codec_context_ = avcodec_alloc_context3(codec_);
+  av_codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(avcodec_alloc_context3(codec_.get()));
   if (!av_codec_context_) {
     spdlog::error("Failed to allocated memory for AVCodecContext.");
     exit(-1);
   }
 
-  if (avcodec_parameters_to_context(av_codec_context_, av_codec_parameters_) <
+  if (avcodec_parameters_to_context(av_codec_context_.get(), av_codec_parameters_.get()) <
       0) {
     spdlog::error("Failed to copy codec params to codec context.");
     exit(-1);
   }
 
-  if (avcodec_open2(av_codec_context_, codec_, NULL) < 0) {
+  if (avcodec_open2(av_codec_context_.get(), codec_.get(), NULL) < 0) {
     spdlog::error("Failed to open codec through avcodec_open2.");
     exit(-1);
   }
 
-  packet_ = av_packet_alloc();
+  packet_ = std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketSharedDeleter);
   if (!packet_) {
     spdlog::error("Failed to allocated memory for AVPacket.");
     exit(-1);
@@ -139,25 +137,6 @@ void ImageDecoder::Init(std::vector<unsigned char> &buffer) {
   libav_ready_ = true;
 }
 
-CodecParamsStruct *ImageDecoder::GetCodecParamsStruct() {
-
-  if (codec_params_struct_ == NULL) {
-
-    void *extra_data_pointer = av_codec_parameters_->extradata;
-    size_t extra_data_size = av_codec_parameters_->extradata_size;
-    size_t data_size = sizeof(*av_codec_parameters_);
-
-    std::vector<unsigned char> data_buffer(data_size);
-    std::vector<unsigned char> extra_data_buffer(extra_data_size);
-
-    memcpy(&data_buffer[0], av_codec_parameters_, data_size);
-    memcpy(&extra_data_buffer[0], extra_data_pointer, extra_data_size);
-    codec_params_struct_ =
-        new CodecParamsStruct(0, data_buffer, extra_data_buffer);
-  }
-
-  return codec_params_struct_;
-}
 
 // http://guru-coder.blogspot.com/2014/01/in-memory-jpeg-decode-using-ffmpeg.html
 void ImageDecoder::ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
@@ -168,16 +147,26 @@ void ImageDecoder::ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
   // TODO: do not create a decoder for each single frame
   Init(buffer);
 
-  fs->codec_data = *GetCodecParamsStruct();
+  if (codec_params_struct_ == NULL) {
 
-  av_read_frame(av_format_context_, packet_);
+    void *extra_data_pointer = av_codec_parameters_->extradata;
+    size_t extra_data_size = av_codec_parameters_->extradata_size;
+    size_t data_size = sizeof(*av_codec_parameters_);
+
+    std::vector<unsigned char> data_buffer(data_size);
+    std::vector<unsigned char> extra_data_buffer(extra_data_size);
+
+    memcpy(&data_buffer[0], av_codec_parameters_.get(), data_size);
+    memcpy(&extra_data_buffer[0], extra_data_pointer, extra_data_size);
+    codec_params_struct_ =
+        std::make_unique<CodecParamsStruct>(0, data_buffer, extra_data_buffer);
+  }
+
+  fs->codec_data = *codec_params_struct_;
+
+  av_read_frame(av_format_context_.get(), packet_.get());
   DecodePacket(pFrame);
 
-  av_packet_free(&packet_);
-  avcodec_free_context(&av_codec_context_);
-  // avformat_free_context(pFormatContext);
-
-  avformat_close_input(&av_format_context_);
   if (avio_context_) {
     av_freep(&avio_context_->buffer);
     av_freep(&avio_context_);

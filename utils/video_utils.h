@@ -42,14 +42,6 @@ void AVFrameToMatYUV(AVFrameSharedP &frame, cv::Mat &image);
 
 void AVFrameToMatGray(AVFrameSharedP &frame, cv::Mat &image);
 
-void PrepareDecodingStruct(
-    FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
-    std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
-    std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters);
-
-bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
-                      std::unordered_map<std::string, IDecoder *> &decoders);
-
 AVCodecParameters *getParams(FrameStruct& frame_struct);
 
 template <typename T>

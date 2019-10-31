@@ -8,7 +8,10 @@
 #pragma once
 
 struct NVPipeDeleter {
-  void operator()(NvPipe *ptr) const { NvPipe_Destroy(ptr); }
+  void operator()(NvPipe *ptr) const {
+    if (ptr)
+      NvPipe_Destroy(ptr);
+  }
 };
 
 typedef std::unique_ptr<NvPipe, NVPipeDeleter> NvPipeSafeP;

@@ -226,26 +226,25 @@ void VideoFileReader::NextFrame() {
               packet_->stream_index);
     if (it != video_stream_indexes_.end()) {
 
-      FrameStruct *frame_struct_tmp = new FrameStruct(frame_struct_template_);
-      std::shared_ptr<FrameStruct> frameStruct =
-          std::shared_ptr<FrameStruct>(frame_struct_tmp);
+      std::shared_ptr<FrameStruct> frame_struct =
+          std::make_shared<FrameStruct>(frame_struct_template_);
 
-      frameStruct->frame = std::vector<unsigned char>(
+      frame_struct->frame = std::vector<unsigned char>(
           &packet_->data[0], &packet_->data[0] + packet_->size);
-      frameStruct->frame_id = current_frame_counter_;
-      frameStruct->sensor_id = packet_->stream_index;
-      frameStruct->frame_type = packet_->stream_index;
-      frameStruct->timestamps.push_back(packet_->pts);
-      frameStruct->timestamps.push_back(CurrentTimeMs());
-      frameStruct->codec_data = codec_params_structs_[packet_->stream_index];
+      frame_struct->frame_id = current_frame_counter_;
+      frame_struct->sensor_id = packet_->stream_index;
+      frame_struct->frame_type = packet_->stream_index;
+      frame_struct->timestamps.push_back(packet_->pts);
+      frame_struct->timestamps.push_back(CurrentTimeMs());
+      frame_struct->codec_data = codec_params_structs_[packet_->stream_index];
 
       if (frame_structs_.empty() ||
           (std::abs((long)(packet_->pts -
                            (long)frame_structs_.front()->timestamps.front())) <
            10000)) {
-        frame_structs_.push_back(frameStruct);
+        frame_structs_.push_back(frame_struct);
       } else if (frame_struct_buffer_ == nullptr) {
-        frame_struct_buffer_ = frameStruct;
+        frame_struct_buffer_ = frame_struct;
         current_frame_counter_ += 1;
         frame_struct_buffer_->frame_id = current_frame_counter_;
         av_packet_unref(packet_);

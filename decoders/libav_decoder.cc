@@ -11,7 +11,8 @@ LibAvDecoder::~LibAvDecoder() {}
 void LibAvDecoder::Init(AVCodecParameters *codec_parameters) {
   av_register_all();
 
-  codec_ = std::unique_ptr<AVCodec>(avcodec_find_decoder(codec_parameters->codec_id));
+  codec_ = std::unique_ptr<AVCodec, AVCodecDeleter>(
+      avcodec_find_decoder(codec_parameters->codec_id));
   codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(avcodec_alloc_context3(codec_.get()));
   if (!codec_context_) {
     spdlog::error("Failed to allocated memory for AVCodecContext.");
@@ -30,7 +31,7 @@ void LibAvDecoder::Init(AVCodecParameters *codec_parameters) {
 }
 
 cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
-  AVPacket* packet_av = av_packet_alloc();
+  AVPacketSharedP packet_av = std::shared_ptr<AVPacket>(av_packet_alloc());
   AVFrameSharedP frame_av =
       std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 
@@ -38,7 +39,7 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
   packet_av->size = frame_struct.frame.size();
 
   cv::Mat img;
-  int response = avcodec_send_packet(codec_context_.get(), packet_av);
+  int response = avcodec_send_packet(codec_context_.get(), packet_av.get());
   if (response >= 0) {
     // Return decoded output data (into a frame) from a decoder
     response = avcodec_receive_frame(codec_context_.get(), frame_av.get());
@@ -58,7 +59,5 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
       }
     }
   }
-
-  av_packet_free(&packet_av);
   return img;
 }

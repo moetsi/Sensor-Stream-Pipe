@@ -216,32 +216,33 @@ ExtendedAzureConfig BuildKinectConfigFromYAML(YAML::Node config) {
 
 void FrameStructToK4A(std::vector<FrameStruct> &fs,
                       k4a::capture &sensor_capture,
-                      std::unordered_map<std::string, IDecoder *> &decoders) {
+                      std::unordered_map<std::string, std::shared_ptr<IDecoder>> &decoders) {
   for (auto &f : fs) {
     std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
     if (decoders.find(decoder_id) == decoders.end()) {
       CodecParamsStruct data = f.codec_data;
       if (data.type == 0) {
-        LibAvDecoder *fd = new LibAvDecoder();
+        std::shared_ptr<LibAvDecoder> fd = std::make_shared<LibAvDecoder>();
         fd->Init(getParams(f));
         decoders[decoder_id] = fd;
       } else if (data.type == 1) {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
-        NvDecoder *fd = new NvDecoder();
+        std::shared_ptr<NvDecoder> fd = std::make_shared<NvDecoder>();
         fd->Init(data.data);
         decoders[decoder_id] = fd;
 #else
         spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
-                      "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
-        exit(1);
+                    "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
+      exit(1);
 #endif
       } else if (data.type == 2) {
-        ZDepthDecoder *fd = new ZDepthDecoder();
+        std::shared_ptr<ZDepthDecoder> fd = std::make_shared<ZDepthDecoder>();
         fd->Init(data.data);
         decoders[decoder_id] = fd;
       }
     }
+
 
     cv::Mat img;
 
@@ -261,25 +262,30 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
                     cv::Mat::AUTO_STEP);
     } else if (f.frame_data_type == 1) {
 
-      IDecoder *decoder;
+      std::shared_ptr<IDecoder> decoder;
+
+      std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
       if (decoders.find(decoder_id) == decoders.end()) {
         CodecParamsStruct data = f.codec_data;
         if (data.type == 0) {
-          LibAvDecoder *fd = new LibAvDecoder();
+          std::shared_ptr<LibAvDecoder> fd = std::make_shared<LibAvDecoder>();
           fd->Init(getParams(f));
           decoders[decoder_id] = fd;
         } else if (data.type == 1) {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
-          NvDecoder *fd = new NvDecoder();
+          std::shared_ptr<NvDecoder> fd = std::make_shared<NvDecoder>();
           fd->Init(data.data);
           decoders[decoder_id] = fd;
 #else
-          spdlog::error(
-              "SSP compiled without \"nvenc\" reader support. Set to "
-              "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
-          exit(1);
+          spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
+                    "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
+      exit(1);
 #endif
+        } else if (data.type == 2) {
+          std::shared_ptr<ZDepthDecoder> fd = std::make_shared<ZDepthDecoder>();
+          fd->Init(data.data);
+          decoders[decoder_id] = fd;
         }
       }
 

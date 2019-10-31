@@ -25,7 +25,7 @@ extern "C" {
 class LibAvDecoder : public IDecoder {
 private:
 
-  std::unique_ptr<AVCodec> codec_;
+  AVCodecSafeP codec_;
   AVCodecContextSafeP codec_context_;
 
 public:
