@@ -33,4 +33,5 @@ public:
   ~LibAvDecoder();
   void Init(AVCodecParameters *codec_parameters);
   cv::Mat Decode(FrameStruct& frame_struct);
+  AVFrameSharedP DecodeFrame(FrameStruct &frame_struct);
 };

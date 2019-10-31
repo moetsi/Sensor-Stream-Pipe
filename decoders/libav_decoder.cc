@@ -61,3 +61,22 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
   }
   return img;
 }
+
+AVFrameSharedP LibAvDecoder::DecodeFrame(FrameStruct &frame_struct) {
+  AVPacketSharedP packet_av = std::shared_ptr<AVPacket>(av_packet_alloc());
+  AVFrameSharedP frame_av =
+      std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
+
+  packet_av->data = frame_struct.frame.data();
+  packet_av->size = frame_struct.frame.size();
+
+  cv::Mat img;
+  int response = avcodec_send_packet(codec_context_.get(), packet_av.get());
+  if (response >= 0) {
+    // Return decoded output data (into a frame) from a decoder
+    response = avcodec_receive_frame(codec_context_.get(), frame_av.get());
+    if (response >= 0) {
+    }
+  }
+  return frame_av;
+}

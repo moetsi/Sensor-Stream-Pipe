@@ -50,6 +50,8 @@ private:
 
   ImageDecoder image_decoder_;
 
+  std::unique_ptr<LibAvDecoder> lib_av_decoder_;
+
   std::queue<std::shared_ptr<FrameStruct>> buffer_fs_;
   std::queue<AVPacketSharedP> buffer_packet_;
 

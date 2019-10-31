@@ -88,7 +88,7 @@ std::shared_ptr<FrameStruct> ImageReader::CreateFrameStruct(unsigned int frame_i
                  read_frame_id, frame_counter_);
 
   std::vector<unsigned char> file_data = ReadFile(frame_path);
-  std::shared_ptr<FrameStruct> frame = std::make_shared<FrameStruct>();
+  std::shared_ptr<FrameStruct> frame = std::shared_ptr<FrameStruct>(new FrameStruct());
 
   frame->message_type = 0;
 
@@ -109,7 +109,7 @@ std::shared_ptr<FrameStruct> ImageReader::CreateFrameStruct(unsigned int frame_i
     ImageDecoder image_decoder;
     AVFrameSharedP frame_av = std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
     image_decoder.ImageBufferToAVFrame(frame, frame_av);
-    codec_params_struct_ = std::make_shared<CodecParamsStruct>(frame->codec_data);
+    codec_params_struct_ = std::shared_ptr<CodecParamsStruct>(new CodecParamsStruct(frame->codec_data));
   }
   frame->codec_data = *codec_params_struct_;
 

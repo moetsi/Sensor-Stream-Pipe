@@ -4,7 +4,8 @@
 
 #include "libav_encoder.h"
 
-LibAvEncoder::LibAvEncoder(std::string codec_parameters_file, unsigned int _fps) {
+LibAvEncoder::LibAvEncoder(std::string codec_parameters_file,
+                           unsigned int _fps) {
   codec_parameters_ = YAML::LoadFile(codec_parameters_file);
   fps_ = _fps;
   av_register_all();
@@ -29,8 +30,9 @@ LibAvEncoder::LibAvEncoder(YAML::Node &_codec_parameters, unsigned int _fps) {
 }
 
 std::vector<unsigned char> LibAvEncoder::CurrentFrameBytes() {
-  return std::vector<unsigned char>(
-      buffer_packet_.front()->data, buffer_packet_.front()->data + buffer_packet_.front()->size);
+  return std::vector<unsigned char>(buffer_packet_.front()->data,
+                                    buffer_packet_.front()->data +
+                                        buffer_packet_.front()->size);
 }
 
 LibAvEncoder::~LibAvEncoder() {
@@ -40,7 +42,6 @@ LibAvEncoder::~LibAvEncoder() {
   av_codec_parameters_.reset();
   sws_context_.reset();
   av_codec_.reset();
-
 }
 
 void LibAvEncoder::NextPacket() {
@@ -58,14 +59,15 @@ void LibAvEncoder::PrepareFrame() {
     uint8_t *in_data[1] = {&f->frame[8]};
     int in_linesize[1] = {4 * frame_av_->width};
 
-    sws_scale(sws_context_.get(), (const uint8_t *const *)in_data, in_linesize, 0,
-              frame_av_->height, frame_av_->data, frame_av_->linesize);
+    sws_scale(sws_context_.get(), (const uint8_t *const *)in_data, in_linesize,
+              0, frame_av_->height, frame_av_->data, frame_av_->linesize);
 
   } else if (f->frame_data_type == 3) {
     if (frame_av_->format == AV_PIX_FMT_GRAY12LE) {
       int i = 0;
       uint8_t *data = &f->frame[8];
-      // memcpy(frame_av_->data[0], data, frame_av_->height * frame_av_->width * 2);
+      // memcpy(frame_av_->data[0], data, frame_av_->height * frame_av_->width *
+      // 2);
 
       for (int y = 0; y < frame_av_->height; y++) {
         for (int x = 0; x < frame_av_->width; x++) {
@@ -104,22 +106,33 @@ void LibAvEncoder::PrepareFrame() {
           ushort value = upper << 8 | lower;
 
           frame_av_->data[0][i++] =
-              std::min((unsigned int)(value * coeff), (unsigned int)MAX_DEPTH_VALUE_8_BITS - 1);
+              std::min((unsigned int)(value * coeff),
+                       (unsigned int)MAX_DEPTH_VALUE_8_BITS - 1);
         }
       }
 
-      memset(&frame_av_->data[1][0], 128, frame_av_->height * frame_av_->width / 4);
-      memset(&frame_av_->data[2][0], 128, frame_av_->height * frame_av_->width / 4);
+      memset(&frame_av_->data[1][0], 128,
+             frame_av_->height * frame_av_->width / 4);
+      memset(&frame_av_->data[2][0], 128,
+             frame_av_->height * frame_av_->width / 4);
     }
 
   } else if (f->frame_data_type == 0 || f->frame_data_type == 1) {
 
     AVFrameSharedP frame_av_O =
-        std::shared_ptr<AVFrame>( av_frame_alloc(), AVFrameSharedDeleter);
+        std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 
     std::vector<unsigned char> frameData = f->frame;
 
-    image_decoder_.ImageBufferToAVFrame(f, frame_av_O);
+    if (f->frame_data_type == 0) {
+      image_decoder_.ImageBufferToAVFrame(f, frame_av_O);
+    } else {
+      if (lib_av_decoder_ == nullptr) {
+        lib_av_decoder_ = std::unique_ptr<LibAvDecoder>(new LibAvDecoder());
+        lib_av_decoder_->Init(getParams(*f));
+      }
+      frame_av_O = lib_av_decoder_->DecodeFrame(*f);
+    }
 
     if (frame_av_O->format == frame_av_->format) {
       av_frame_copy(frame_av_.get(), frame_av_O.get());
@@ -130,8 +143,10 @@ void LibAvEncoder::PrepareFrame() {
       int i = 0;
       for (int y = 0; y < frame_av_O->height; y++) {
         for (int x = 0; x < frame_av_O->width; x++) {
-          ushort lower = frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2];
-          ushort upper = frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2 + 1];
+          ushort lower =
+              frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2];
+          ushort upper =
+              frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2 + 1];
           ushort value = lower << 8 | upper;
 
           // TODO: check what is happening!
@@ -157,11 +172,14 @@ void LibAvEncoder::PrepareFrame() {
       float coeff = (float)MAX_DEPTH_VALUE_8_BITS / MAX_DEPTH_VALUE_12_BITS;
       for (int y = 0; y < frame_av_O->height; y++) {
         for (int x = 0; x < frame_av_O->width; x++) {
-          unsigned int lower = frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2];
-          unsigned int upper = frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2 + 1];
+          unsigned int lower =
+              frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2];
+          unsigned int upper =
+              frame_av_O->data[0][y * frame_av_O->linesize[0] + x * 2 + 1];
           ushort value = lower << 8 | upper;
 
-          frame_av_->data[0][i++] = std::min((ushort)(value * coeff), (ushort)255);
+          frame_av_->data[0][i++] =
+              std::min((ushort)(value * coeff), (ushort)255);
         }
       }
 
@@ -181,7 +199,6 @@ void LibAvEncoder::PrepareFrame() {
 
     // av_frame_free(&frame_av_O_tmp);
   }
-
 }
 
 void LibAvEncoder::EncodeA() {
@@ -192,7 +209,8 @@ void LibAvEncoder::EncodeA() {
     spdlog::error("Error sending a frame for encoding.");
     exit(1);
   }
-  AVPacketSharedP packet_av = std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketSharedDeleter);
+  AVPacketSharedP packet_av =
+      std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketSharedDeleter);
   ret = avcodec_receive_packet(av_codec_context_.get(), packet_av.get());
   if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
     return;
@@ -220,14 +238,18 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
 
   spdlog::info("Codec information:\n {}", codec_parameters_);
 
-  av_codec_ = std::unique_ptr<AVCodec, AVCodecDeleter>(avcodec_find_encoder_by_name(
-      codec_parameters_["codec_name"].as<std::string>().c_str()));
-  av_codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(avcodec_alloc_context3(av_codec_.get()));
-  av_codec_parameters_ = std::unique_ptr<AVCodecParameters, AVCodecParametersDeleter>(avcodec_parameters_alloc());
+  av_codec_ =
+      std::unique_ptr<AVCodec, AVCodecDeleter>(avcodec_find_encoder_by_name(
+          codec_parameters_["codec_name"].as<std::string>().c_str()));
+  av_codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(
+      avcodec_alloc_context3(av_codec_.get()));
+  av_codec_parameters_ =
+      std::unique_ptr<AVCodecParameters, AVCodecParametersDeleter>(
+          avcodec_parameters_alloc());
 
   int width = 0, height = 0, pxl_format = 0;
 
-  if (fs->frame_data_type == 0 || fs->frame_data_type == 1) {
+  if (fs->frame_data_type == 0) {
     AVFrameSharedP frame_av_O =
         std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 
@@ -236,6 +258,23 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
     width = frame_av_O->width;
     height = frame_av_O->height;
     pxl_format = frame_av_O->format;
+  } else if (fs->frame_data_type == 1) {
+
+    if (lib_av_decoder_ == nullptr) {
+      lib_av_decoder_ = std::unique_ptr<LibAvDecoder>(new LibAvDecoder());
+      lib_av_decoder_->Init(getParams(*fs));
+    }
+
+    cv::Mat img = lib_av_decoder_->Decode(*fs);
+
+    width = img.cols;
+    height = img.rows;
+
+    if (img.channels() == 1) {
+      pxl_format = AV_PIX_FMT_GRAY16BE;
+    } else {
+      pxl_format = AV_PIX_FMT_BGRA;
+    }
   } else if (fs->frame_data_type == 2) {
     memcpy(&width, &fs->frame[0], sizeof(int));
     memcpy(&height, &fs->frame[4], sizeof(int));
@@ -272,13 +311,13 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
   av_codec_context_->bit_rate = codec_parameters_["bit_rate"].as<int>(); // 1
 
   // fmpeg -h encoder=hevc
-  // libx264:                 yuv420p yuvj420p yuv422p yuvj422p yuv444p yuvj444p
-  // nv12 nv16 nv21 libx264rgb:              bgr0 bgr24 rgb24 libx265: yuv420p
-  // yuv422p yuv444p gbrp yuv420p10le yuv422p10le yuv444p10le gbrp10le
-  // yuv420p12le yuv422p12le yuv444p12le gbrp12le gray gray10le gray12le
-  // hevc_nvenc (gpu x265):   yuv420p nv12 p010le yuv444p yuv444p16le bgr0 rgb0
-  // cuda nv12 p010le nvenc_h264 (gpu x264):   yuv420p nv12 p010le yuv444p
-  // yuv444p16le bgr0 rgb0 cuda
+  // libx264:                 yuv420p yuvj420p yuv422p yuvj422p yuv444p
+  // yuvj444p nv12 nv16 nv21 libx264rgb:              bgr0 bgr24 rgb24
+  // libx265: yuv420p yuv422p yuv444p gbrp yuv420p10le yuv422p10le yuv444p10le
+  // gbrp10le yuv420p12le yuv422p12le yuv444p12le gbrp12le gray gray10le
+  // gray12le hevc_nvenc (gpu x265):   yuv420p nv12 p010le yuv444p yuv444p16le
+  // bgr0 rgb0 cuda nv12 p010le nvenc_h264 (gpu x264):   yuv420p nv12 p010le
+  // yuv444p yuv444p16le bgr0 rgb0 cuda
 
   av_codec_context_->pix_fmt =
       av_get_pix_fmt(codec_parameters_["pix_fmt"].as<std::string>().c_str());
@@ -294,8 +333,7 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
 
   av_opt_set(av_codec_context_->priv_data, "tune", "delay", 0);
   av_opt_set(av_codec_context_->priv_data, "tune", "zerolatency", 1);
-  av_opt_set(av_codec_context_->priv_data, "rcParams", "zeroReorderDelay",
-             1);
+  av_opt_set(av_codec_context_->priv_data, "rcParams", "zeroReorderDelay", 1);
 
   av_codec_parameters_->codec_type = AVMEDIA_TYPE_VIDEO;
 
@@ -338,9 +376,10 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
     exit(1);
   }
 
-  sws_context_ = std::unique_ptr<struct SwsContext, SwsContextDeleter>(sws_getContext(
-      width, height, (AVPixelFormat)pxl_format, frame_av_->width, frame_av_->height,
-      (AVPixelFormat)frame_av_->format, SWS_BILINEAR, NULL, NULL, NULL));
+  sws_context_ = std::unique_ptr<struct SwsContext, SwsContextDeleter>(
+      sws_getContext(width, height, (AVPixelFormat)pxl_format, frame_av_->width,
+                     frame_av_->height, (AVPixelFormat)frame_av_->format,
+                     SWS_BILINEAR, NULL, NULL, NULL));
 }
 
 std::shared_ptr<CodecParamsStruct> LibAvEncoder::GetCodecParamsStruct() {
@@ -356,8 +395,8 @@ std::shared_ptr<CodecParamsStruct> LibAvEncoder::GetCodecParamsStruct() {
 
     memcpy(&data_buffer[0], av_codec_parameters_.get(), data_size);
     memcpy(&extra_data_buffer[0], extra_data_pointer, extra_data_size);
-    codec_params_struct_ =
-        std::make_shared<CodecParamsStruct>(0, data_buffer, extra_data_buffer);
+    codec_params_struct_ = std::shared_ptr<CodecParamsStruct>(
+        new CodecParamsStruct(0, data_buffer, extra_data_buffer));
   }
 
   return codec_params_struct_;
@@ -365,7 +404,7 @@ std::shared_ptr<CodecParamsStruct> LibAvEncoder::GetCodecParamsStruct() {
 
 std::shared_ptr<FrameStruct> LibAvEncoder::CurrentFrameEncoded() {
   std::shared_ptr<FrameStruct> f =
-      std::make_shared<FrameStruct>(*buffer_fs_.front());
+      std::shared_ptr<FrameStruct>(new FrameStruct(*buffer_fs_.front()));
 
   f->message_type = 0;
   f->frame_data_type = 1;

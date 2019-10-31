@@ -44,7 +44,7 @@ void NvEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
   } else {
 
     if (frame_compressed_ == nullptr)
-      frame_compressed_ = std::make_shared<FrameStruct>();
+      frame_compressed_ = std::shared_ptr<FrameStruct>(new FrameStruct());
 
     frame_compressed_->device_id = fs->device_id;
     frame_compressed_->frame_data_type = 1;
@@ -106,7 +106,7 @@ void NvEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
     } else if (fs->frame_data_type == 1) {
 
       if (lib_av_decoder_ == nullptr) {
-        lib_av_decoder_ = std::make_unique<LibAvDecoder>();
+        lib_av_decoder_ = std::unique_ptr<LibAvDecoder>(new LibAvDecoder());
         lib_av_decoder_->Init(getParams(*fs));
       }
 
@@ -197,7 +197,8 @@ std::shared_ptr<FrameStruct> NvEncoder::CurrentFrameOriginal() {
 
 std::shared_ptr<CodecParamsStruct> NvEncoder::GetCodecParamsStruct() {
   if (codec_params_struct_ == NULL) {
-    codec_params_struct_ = std::make_shared<CodecParamsStruct>();
+    codec_params_struct_ =
+        std::shared_ptr<CodecParamsStruct>(new CodecParamsStruct());
     codec_params_struct_->type = 1;
     codec_params_struct_->data.resize(4 + 4 + 1 + 1);
 

@@ -29,12 +29,12 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
     if (decoders.find(decoder_id) == decoders.end()) {
       CodecParamsStruct data = f.codec_data;
       if (data.type == 0) {
-        std::shared_ptr<LibAvDecoder> fd = std::make_shared<LibAvDecoder>();
+        std::shared_ptr<LibAvDecoder> fd = std::shared_ptr<LibAvDecoder>(new LibAvDecoder());
         fd->Init(getParams(f));
         decoders[decoder_id] = fd;
       } else if (data.type == 1) {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
-        std::shared_ptr<NvDecoder> fd = std::make_shared<NvDecoder>();
+        std::shared_ptr<NvDecoder> fd = std::shared_ptr<NvDecoder>(new NvDecoder());
         fd->Init(data.data);
         decoders[decoder_id] = fd;
 #else
@@ -43,7 +43,7 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
         exit(1);
 #endif
       } else if (data.type == 2) {
-        std::shared_ptr<ZDepthDecoder> fd = std::make_shared<ZDepthDecoder>();
+        std::shared_ptr<ZDepthDecoder> fd = std::shared_ptr<ZDepthDecoder>(new ZDepthDecoder());
         fd->Init(data.data);
         decoders[decoder_id] = fd;
       }

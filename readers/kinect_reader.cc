@@ -118,7 +118,8 @@ KinectReader::KinectReader(uint8_t _device_index,
     exit(1);
   }
 
-  camera_calibration_struct_ = std::make_shared<CameraCalibrationStruct>();
+  camera_calibration_struct_ =
+      std::shared_ptr<CameraCalibrationStruct>(new CameraCalibrationStruct());
 
   size_t buffer_size = 10000;
   camera_calibration_struct_->type = 0;
@@ -181,7 +182,7 @@ void KinectReader::NextFrame() {
       k4a_image_t color_image = k4a_capture_get_color_image(capture_);
       if (color_image && k4a_image_get_format(color_image) != 6) {
         std::shared_ptr<FrameStruct> s =
-            std::make_shared<FrameStruct>(frame_template_);
+            std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
         s->sensor_id = 0;
         s->frame_type = 0;
         s->frame_id = frame_counter_.at(0)++;
@@ -201,8 +202,8 @@ void KinectReader::NextFrame() {
             AVFrameSharedP avframe =
                 std::shared_ptr<AVFrame>(avframe_tmp, AVFrameSharedDeleter);
             id.ImageBufferToAVFrame(s, avframe);
-            codec_params_structs_.at(0) =
-                std::make_shared<CodecParamsStruct>(s->codec_data);
+            codec_params_structs_.at(0) = std::shared_ptr<CodecParamsStruct>(
+                new CodecParamsStruct(s->codec_data));
           }
           s->camera_calibration_data = *camera_calibration_struct_;
 
@@ -231,7 +232,7 @@ void KinectReader::NextFrame() {
       if (depth_image && k4a_image_get_format(depth_image) != 6) {
 
         std::shared_ptr<FrameStruct> s =
-            std::make_shared<FrameStruct>(frame_template_);
+            std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
         s->sensor_id = 1;
         s->frame_type = 1;
         s->frame_data_type = 3;
@@ -263,7 +264,7 @@ void KinectReader::NextFrame() {
       k4a_image_t ir_image = k4a_capture_get_ir_image(capture_);
       if (ir_image && k4a_image_get_format(ir_image) != 6) {
         std::shared_ptr<FrameStruct> s =
-            std::make_shared<FrameStruct>(frame_template_);
+            std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
         s->sensor_id = 2;
         s->frame_type = 2;
         s->frame_id = frame_counter_.at(2)++;

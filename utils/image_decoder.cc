@@ -66,6 +66,8 @@ void ImageDecoder::Init(std::vector<unsigned char> &buffer) {
   bd.ptr = (uint8_t *)&buffer[0];
   bd.size = buffer.size();
 
+  std::cout << buffer.size() << std::endl;
+
   int ret = 0;
 
   AVFormatContext* av_format_context_tmp = avformat_alloc_context();
@@ -159,7 +161,7 @@ void ImageDecoder::ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
     memcpy(&data_buffer[0], av_codec_parameters_.get(), data_size);
     memcpy(&extra_data_buffer[0], extra_data_pointer, extra_data_size);
     codec_params_struct_ =
-        std::make_unique<CodecParamsStruct>(0, data_buffer, extra_data_buffer);
+        std::unique_ptr<CodecParamsStruct>(new CodecParamsStruct(0, data_buffer, extra_data_buffer));
   }
 
   fs->codec_data = *codec_params_struct_;

@@ -72,7 +72,7 @@ void VideoFileReader::Init(std::string &filename) {
     exit(-1);
   }
 
-  camera_calibration_struct_ = std::make_shared<CameraCalibrationStruct>();
+  camera_calibration_struct_ = std::shared_ptr<CameraCalibrationStruct>(new CameraCalibrationStruct());
   camera_calibration_struct_->type = 0;
   camera_calibration_struct_->extra_data.resize(2);
   // the component that knows how to enCOde and DECode the stream
@@ -227,7 +227,7 @@ void VideoFileReader::NextFrame() {
     if (it != video_stream_indexes_.end()) {
 
       std::shared_ptr<FrameStruct> frame_struct =
-          std::make_shared<FrameStruct>(frame_struct_template_);
+          std::shared_ptr<FrameStruct>(new FrameStruct(frame_struct_template_));
 
       frame_struct->frame = std::vector<unsigned char>(
           &packet_->data[0], &packet_->data[0] + packet_->size);

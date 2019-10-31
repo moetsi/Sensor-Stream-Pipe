@@ -61,9 +61,9 @@ int main(int argc, char *argv[]) {
     std::string reader_type =
         general_parameters["frame_source"]["type"].as<std::string>();
     if (reader_type == "frames") {
-      reader = std::make_unique<ImageReader>(
+      reader = std::unique_ptr<ImageReader>(new ImageReader(
           general_parameters["frame_source"]["parameters"]["path"]
-              .as<std::string>());
+              .as<std::string>()));
     } else if (reader_type == "video") {
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
@@ -73,16 +73,17 @@ int main(int argc, char *argv[]) {
         std::vector<unsigned int> streams =
             general_parameters["frame_source"]["parameters"]["streams"]
                 .as<std::vector<unsigned int>>();
-        reader = std::make_unique<VideoFileReader>(path, streams);
+        reader = std::unique_ptr<VideoFileReader>(
+            new VideoFileReader(path, streams));
       } else {
-        reader = std::make_unique<VideoFileReader>(path);
+        reader = std::unique_ptr<VideoFileReader>(new VideoFileReader(path));
       }
 
     } else if (reader_type == "kinect") {
 #ifdef SSP_WITH_KINECT_SUPPORT
       ExtendedAzureConfig c = BuildKinectConfigFromYAML(
           general_parameters["frame_source"]["parameters"]);
-      reader = std::make_unique<KinectReader>(0, c);
+      reader = std::unique_ptr<KinectReader>(new KinectReader(0, c));
 #else
       exit(1);
 #endif
@@ -102,19 +103,21 @@ int main(int argc, char *argv[]) {
       std::string encoder_type = v["type"].as<std::string>();
       std::shared_ptr<IEncoder> fe = nullptr;
       if (encoder_type == "libav")
-        fe = std::make_shared<LibAvEncoder>(v, reader->GetFps());
+        fe = std::shared_ptr<LibAvEncoder>(
+            new LibAvEncoder(v, reader->GetFps()));
       else if (encoder_type == "nvenc") {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
-        fe = std::make_shared<NvEncoder>(v, reader->GetFps());
+        fe = std::shared_ptr<NvEncoder>(new NvEncoder(v, reader->GetFps()));
 #else
         spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
                       "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
         exit(1);
 #endif
       } else if (encoder_type == "zdepth")
-        fe = std::make_shared<ZDepthEncoder>(reader->GetFps());
+        fe =
+            std::shared_ptr<ZDepthEncoder>(new ZDepthEncoder(reader->GetFps()));
       else if (encoder_type == "null")
-        fe = std::make_shared<NullEncoder>(reader->GetFps());
+        fe = std::shared_ptr<NullEncoder>(new NullEncoder(reader->GetFps()));
       else {
         spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                       "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
