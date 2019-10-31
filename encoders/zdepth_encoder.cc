@@ -51,14 +51,15 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
 
     cv::Mat img;
 
+    AVFrameSharedP pFrameO = nullptr;
+    AVFrameSharedP pFrame = nullptr;
+
     if (fs->frame_data_type == 0) {
 
       AVFrame *tmp = av_frame_alloc();
-      AVFrameSharedP pFrameO =
-          std::shared_ptr<AVFrame>(tmp, AVFrameSharedDeleter);
+      pFrameO = std::shared_ptr<AVFrame>(tmp, AVFrameSharedDeleter);
       tmp = av_frame_alloc();
-      AVFrameSharedP pFrame =
-          std::shared_ptr<AVFrame>(tmp, AVFrameSharedDeleter);
+      pFrame = std::shared_ptr<AVFrame>(tmp, AVFrameSharedDeleter);
 
       image_decoder_.ImageBufferToAVFrame(fs, pFrameO);
 

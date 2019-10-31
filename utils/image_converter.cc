@@ -33,10 +33,7 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
 
   bool img_changed = false;
 
-  if (f.frame_data_type == 0) {
-    img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
-    img_changed = true;
-  } else if (f.frame_data_type == 2) {
+  if (f.frame_data_type == 2) {
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
@@ -49,7 +46,7 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
     img =
         cv::Mat(rows, cols, CV_16UC1, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
     img_changed = true;
-  } else if (f.frame_data_type == 1) {
+  } else if (f.frame_data_type == 0 || f.frame_data_type == 1) {
 
     IDecoder *decoder;
 
@@ -72,8 +69,6 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
 
     img = decoder->Decode(f);
     img_changed = true;
-
-    f.frame.clear();
   }
   return img_changed;
 }

@@ -7,6 +7,7 @@
 #include <thread>
 #include <unistd.h>
 
+#include <opencv2/imgproc.hpp>
 #include <zmq.hpp>
 
 extern "C" {
@@ -20,6 +21,7 @@ extern "C" {
 #include "../utils/logger.h"
 
 #include "../readers/network_reader.h"
+#include "../utils/video_utils.h"
 
 int main(int argc, char *argv[]) {
 
@@ -31,9 +33,8 @@ int main(int argc, char *argv[]) {
   try {
 
     if (argc < 2) {
-      std::cerr
-          << "Usage: ssp_client_template <port> (<log level>) (<log file>)"
-          << std::endl;
+      std::cerr << "Usage: ssp_client_opencv <port> (<log level>) (<log file>)"
+                << std::endl;
       return 1;
     }
     std::string log_level = "debug";
@@ -49,9 +50,18 @@ int main(int argc, char *argv[]) {
 
     reader.init();
 
+    std::unordered_map<std::string, IDecoder *> decoders;
+
+    bool imgChanged = false;
     while (reader.HasNextFrame()) {
       reader.NextFrame();
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
+      for (FrameStruct f : f_list) {
+        std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
+
+        cv::Mat img;
+        imgChanged = FrameStructToMat(f, img, decoders);
+      }
     }
 
   } catch (std::exception &e) {
