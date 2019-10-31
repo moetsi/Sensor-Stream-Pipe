@@ -264,17 +264,12 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
       lib_av_decoder_ = std::unique_ptr<LibAvDecoder>(new LibAvDecoder());
       lib_av_decoder_->Init(getParams(*fs));
     }
+    AVFrameSharedP frame_av_O = lib_av_decoder_->DecodeFrame(*fs);
 
-    cv::Mat img = lib_av_decoder_->Decode(*fs);
+    width = frame_av_O->width;
+    height = frame_av_O->height;
 
-    width = img.cols;
-    height = img.rows;
-
-    if (img.channels() == 1) {
-      pxl_format = AV_PIX_FMT_GRAY16BE;
-    } else {
-      pxl_format = AV_PIX_FMT_BGRA;
-    }
+    pxl_format = frame_av_O->format;
   } else if (fs->frame_data_type == 2) {
     memcpy(&width, &fs->frame[0], sizeof(int));
     memcpy(&height, &fs->frame[4], sizeof(int));
