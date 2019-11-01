@@ -38,6 +38,7 @@ extern "C" {
 
 #ifdef SSP_WITH_KINECT_SUPPORT
 #include "../readers/kinect_reader.h"
+#include "../readers/multi_image_reader.h"
 #include "../utils/kinect_utils.h"
 #endif
 
@@ -93,9 +94,14 @@ int main(int argc, char *argv[]) {
   std::string reader_type =
       general_parameters["frame_source"]["type"].as<std::string>();
   if (reader_type == "frames") {
-    reader = std::unique_ptr<ImageReader>(
-        new ImageReader(general_parameters["frame_source"]["parameters"]["path"]
-                            .as<std::string>()));
+    if (general_parameters["frame_source"]["parameters"]["path"].IsSequence())
+      reader = std::unique_ptr<MultiImageReader>(new MultiImageReader(
+          general_parameters["frame_source"]["parameters"]["path"]
+              .as<std::vector<std::string>>()));
+    else
+      reader = std::unique_ptr<ImageReader>(new ImageReader(
+          general_parameters["frame_source"]["parameters"]["path"]
+              .as<std::string>()));
   } else if (reader_type == "video") {
     std::string path = general_parameters["frame_source"]["parameters"]["path"]
                            .as<std::string>();
@@ -226,15 +232,14 @@ int main(int argc, char *argv[]) {
         rows[decoder_id] = img.rows;
 
         FrameStruct fo = buffer.front();
-        buffer.pop();
+
         cv::Mat frame_ori;
         cv::Mat frame_diff;
 
         FrameStructToMat(fo, frame_ori, decoders);
-        fo.frame.clear();
-
-        frame_ori = frame_ori.clone();
         img = img.clone();
+
+        buffer.pop();
 
         if (frame_ori.channels() == 4)
           cv::cvtColor(frame_ori, frame_ori, COLOR_BGRA2BGR);

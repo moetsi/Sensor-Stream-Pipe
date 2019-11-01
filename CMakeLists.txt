@@ -42,7 +42,7 @@ if (SSP_WITH_K4A_BODYTRACK)
 endif ()
 
 
-set(SOURCE_FILES readers/image_reader.cc structs/frame_struct.hpp utils/utils.cc utils/video_utils.cc utils/image_decoder.cc utils/image_converter.cc)
+set(SOURCE_FILES readers/image_reader.cc readers/multi_image_reader.cc structs/frame_struct.hpp utils/utils.cc utils/video_utils.cc utils/image_decoder.cc utils/image_converter.cc)
 set(DECODER_SOURCE_FILES decoders/libav_decoder.cc decoders/zdepth_decoder.cc)
 set(ENCODER_SOURCE_FILES encoders/zdepth_encoder.cc encoders/null_encoder.cc encoders/libav_encoder.cc)
 set(READER_SOURCE_FILES readers/video_file_reader.cc readers/image_reader.cc)

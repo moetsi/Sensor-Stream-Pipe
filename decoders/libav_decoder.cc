@@ -31,7 +31,8 @@ void LibAvDecoder::Init(AVCodecParameters *codec_parameters) {
 }
 
 cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
-  AVPacketSharedP packet_av = std::shared_ptr<AVPacket>(av_packet_alloc());
+  AVPacketSharedP packet_av =
+      std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketSharedDeleter);
   AVFrameSharedP frame_av =
       std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 
@@ -59,6 +60,7 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
       }
     }
   }
+
   return img;
 }
 

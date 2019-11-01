@@ -38,6 +38,8 @@ NvEncoder::~NvEncoder() {}
 void NvEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
 
   frame_original_ = fs;
+  std::cout << (uint)fs->frame.at(0) << " " << (uint)fs->frame.at(100) << " "
+            << (uint)fs->frame.at(150) << std::endl;
 
   if (frame_original_ == nullptr) {
     frame_compressed_ = nullptr;
@@ -192,6 +194,9 @@ std::shared_ptr<FrameStruct> NvEncoder::CurrentFrameEncoded() {
 }
 
 std::shared_ptr<FrameStruct> NvEncoder::CurrentFrameOriginal() {
+  std::cout << "b: " << (uint)frame_original_->frame.at(0) << " "
+            << (uint)frame_original_->frame.at(100) << " "
+            << (uint)frame_original_->frame.at(150) << std::endl;
   return frame_original_;
 }
 

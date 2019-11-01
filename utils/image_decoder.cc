@@ -66,8 +66,6 @@ void ImageDecoder::Init(std::vector<unsigned char> &buffer) {
   bd.ptr = (uint8_t *)&buffer[0];
   bd.size = buffer.size();
 
-  std::cout << buffer.size() << std::endl;
-
   int ret = 0;
 
   AVFormatContext* av_format_context_tmp = avformat_alloc_context();

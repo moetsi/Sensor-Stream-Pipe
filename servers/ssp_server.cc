@@ -26,6 +26,7 @@
 
 #ifdef SSP_WITH_KINECT_SUPPORT
 #include "../readers/kinect_reader.h"
+#include "../readers/multi_image_reader.h"
 #include "../utils/kinect_utils.h"
 #endif
 
@@ -61,9 +62,15 @@ int main(int argc, char *argv[]) {
     std::string reader_type =
         general_parameters["frame_source"]["type"].as<std::string>();
     if (reader_type == "frames") {
-      reader = std::unique_ptr<ImageReader>(new ImageReader(
-          general_parameters["frame_source"]["parameters"]["path"]
-              .as<std::string>()));
+      if (general_parameters["frame_source"]["parameters"]["path"].IsSequence())
+        reader = std::unique_ptr<MultiImageReader>(new MultiImageReader(
+            general_parameters["frame_source"]["parameters"]["path"]
+                .as<std::vector<std::string>>()));
+      else
+        reader = std::unique_ptr<ImageReader>(new ImageReader(
+            general_parameters["frame_source"]["parameters"]["path"]
+                .as<std::string>()));
+
     } else if (reader_type == "video") {
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
@@ -157,14 +164,17 @@ int main(int argc, char *argv[]) {
       std::vector<std::shared_ptr<FrameStruct>> vO;
 
       while (v.empty()) {
-        std::vector<std::shared_ptr<FrameStruct>> frameStruct = reader->GetCurrentFrame();
+        std::vector<std::shared_ptr<FrameStruct>> frameStruct =
+            reader->GetCurrentFrame();
         for (std::shared_ptr<FrameStruct> frameStruct : frameStruct) {
 
-          std::shared_ptr<IEncoder> frameEncoder = encoders[frameStruct->frame_type];
+          std::shared_ptr<IEncoder> frameEncoder =
+              encoders[frameStruct->frame_type];
 
           frameEncoder->AddFrameStruct(frameStruct);
           if (frameEncoder->HasNextPacket()) {
-            std::shared_ptr<FrameStruct> f = frameEncoder->CurrentFrameEncoded();
+            std::shared_ptr<FrameStruct> f =
+                frameEncoder->CurrentFrameEncoded();
             vO.push_back(f);
             v.push_back(*f);
             frameEncoder->NextPacket();
@@ -211,7 +221,8 @@ int main(int argc, char *argv[]) {
         for (unsigned int i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
           f.frame.clear();
-          spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id, f.frame_id);
+          spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id,
+                        f.frame_id);
           vO.at(i)->frame.clear();
           vO.at(i) = nullptr;
         }

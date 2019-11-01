@@ -17,6 +17,10 @@ void AVFrameToMatYUV(AVFrameSharedP& frame, cv::Mat &image) {
   sws_scale(conversion, frame->data, frame->linesize, 0, height, &image.data,
             cv_linesizes);
   sws_freeContext(conversion);
+
+  if (frame->format == 2) {
+    memset(frame->data[0], 0, frame->width * frame->height * 3);
+  }
 }
 
 void AVFrameToMatGray(AVFrameSharedP& frame, cv::Mat &image) {
@@ -41,35 +45,6 @@ void AVFrameToMatGray(AVFrameSharedP& frame, cv::Mat &image) {
   }
   if (frame->format == AV_PIX_FMT_GRAY16BE)
     memset(frame->data[0], 0, frame->height * frame->width * 2);
-}
-
-void PrepareDecodingStruct(
-    FrameStruct *f, std::unordered_map<std::string, AVCodec *> &pCodecs,
-    std::unordered_map<std::string, AVCodecContext *> &pCodecContexts,
-    std::unordered_map<std::string, AVCodecParameters *> &pCodecParameters) {
-  AVCodecParameters *pCodecParameter = getParams(*f);
-  AVCodec *pCodec = avcodec_find_decoder(pCodecParameter->codec_id);
-  AVCodecContext *pCodecContext = avcodec_alloc_context3(pCodec);
-
-  if (!pCodecContext) {
-    spdlog::error("Failed to allocated memory for AVCodecContext.");
-    exit(1);
-  }
-
-  if (avcodec_parameters_to_context(pCodecContext, pCodecParameter) < 0) {
-    spdlog::error("Failed to copy codec params to codec context.");
-    exit(1);
-  }
-
-  if (avcodec_open2(pCodecContext, pCodec, NULL) < 0) {
-    spdlog::error("Failed to open codec through avcodec_open2.");
-    exit(1);
-  }
-
-  pCodecs[f->stream_id + std::to_string(f->sensor_id)] = pCodec;
-  pCodecContexts[f->stream_id + std::to_string(f->sensor_id)] = pCodecContext;
-  pCodecParameters[f->stream_id + std::to_string(f->sensor_id)] =
-      pCodecParameter;
 }
 
 AVCodecParameters *getParams(FrameStruct &frame_struct) {
