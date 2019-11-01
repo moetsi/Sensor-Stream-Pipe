@@ -18,6 +18,7 @@ void AVFrameToMatYUV(AVFrameSharedP& frame, cv::Mat &image) {
             cv_linesizes);
   sws_freeContext(conversion);
 
+  // PNG decoding requires clearing frame
   if (frame->format == 2) {
     memset(frame->data[0], 0, frame->width * frame->height * 3);
   }
@@ -43,6 +44,7 @@ void AVFrameToMatGray(AVFrameSharedP& frame, cv::Mat &image) {
       }
     }
   }
+  // PNG decoding requires clearing frame
   if (frame->format == AV_PIX_FMT_GRAY16BE)
     memset(frame->data[0], 0, frame->height * frame->width * 2);
 }

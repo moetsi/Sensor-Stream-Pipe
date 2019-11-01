@@ -142,6 +142,8 @@ int main(int argc, char *argv[]) {
 
     double sent_mbytes = 0;
 
+    double sent_latency = 0;
+
     socket.connect("tcp://" + host + ":" + std::to_string(port));
 
     unsigned int fps = reader->GetFps();
@@ -211,10 +213,13 @@ int main(int argc, char *argv[]) {
         last_time = CurrentTimeMs();
         processing_time = last_time - start_frame_time;
 
+        sent_latency += diff_time;
+
         spdlog::debug(
-            "Message sent, took {} ms; packet size {}; avg {} fps; {} "
+            "Message sent, took {} ms (avg. {}); packet size {}; avg {} fps; "
+            "{} "
             "Mbps; {} Mbps expected",
-            diff_time, message.size(), avg_fps,
+            diff_time, sent_latency / sent_frames, message.size(), avg_fps,
             8 * (sent_mbytes / (CurrentTimeMs() - start_time)),
             8 * (sent_mbytes * reader->GetFps() / (sent_frames * 1000)));
 
