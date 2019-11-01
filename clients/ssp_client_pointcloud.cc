@@ -22,6 +22,7 @@ extern "C" {
 #include "../utils/logger.h"
 
 #include "../readers/network_reader.h"
+#include "../utils/image_converter.h"
 #include "../utils/kinect_utils.h"
 
 struct color_point_t {
@@ -134,7 +135,7 @@ int main(int argc, char *argv[]) {
     bool calibration_set = false;
     k4abt::tracker tracker;
 
-    std::unordered_map<std::string, IDecoder *> decoders;
+    std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
     int i = 0, j = 0;
     while (reader.HasNextFrame()) {
@@ -154,7 +155,7 @@ int main(int argc, char *argv[]) {
           sensor_calibration = k4a::calibration::get_from_raw(
               reinterpret_cast<char *>(&f.camera_calibration_data.data[0]),
               f.camera_calibration_data.data.size(), d, r);
-          std::cout << &f.camera_calibration_data.data[0] << std::endl;
+          // std::cout << &f.camera_calibration_data.data[0] << std::endl;
           calibration_set = true;
         }
         if (write_to_disk) {

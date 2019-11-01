@@ -26,6 +26,7 @@
 
 #ifdef SSP_WITH_KINECT_SUPPORT
 #include "../readers/kinect_reader.h"
+#include "../readers/multi_image_reader.h"
 #include "../utils/kinect_utils.h"
 #endif
 
@@ -56,14 +57,20 @@ int main(int argc, char *argv[]) {
     std::string host = codec_parameters["general"]["host"].as<std::string>();
     unsigned int port = codec_parameters["general"]["port"].as<unsigned int>();
 
-    IReader *reader = nullptr;
+    std::unique_ptr<IReader> reader = nullptr;
 
     std::string reader_type =
         general_parameters["frame_source"]["type"].as<std::string>();
     if (reader_type == "frames") {
-      reader = new ImageReader(
-          general_parameters["frame_source"]["parameters"]["path"]
-              .as<std::string>());
+      if (general_parameters["frame_source"]["parameters"]["path"].IsSequence())
+        reader = std::unique_ptr<MultiImageReader>(new MultiImageReader(
+            general_parameters["frame_source"]["parameters"]["path"]
+                .as<std::vector<std::string>>()));
+      else
+        reader = std::unique_ptr<ImageReader>(new ImageReader(
+            general_parameters["frame_source"]["parameters"]["path"]
+                .as<std::string>()));
+
     } else if (reader_type == "video") {
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
@@ -73,16 +80,17 @@ int main(int argc, char *argv[]) {
         std::vector<unsigned int> streams =
             general_parameters["frame_source"]["parameters"]["streams"]
                 .as<std::vector<unsigned int>>();
-        reader = new VideoFileReader(path, streams);
+        reader = std::unique_ptr<VideoFileReader>(
+            new VideoFileReader(path, streams));
       } else {
-        reader = new VideoFileReader(path);
+        reader = std::unique_ptr<VideoFileReader>(new VideoFileReader(path));
       }
 
     } else if (reader_type == "kinect") {
 #ifdef SSP_WITH_KINECT_SUPPORT
       ExtendedAzureConfig c = BuildKinectConfigFromYAML(
           general_parameters["frame_source"]["parameters"]);
-      reader = new KinectReader(0, c);
+      reader = std::unique_ptr<KinectReader>(new KinectReader(0, c));
 #else
       exit(1);
 #endif
@@ -93,28 +101,30 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    std::unordered_map<unsigned int, IEncoder *> encoders;
+    std::unordered_map<unsigned int, std::shared_ptr<IEncoder>> encoders;
 
     std::vector<unsigned int> types = reader->GetType();
 
     for (unsigned int type : types) {
       YAML::Node v = codec_parameters["video_encoder"][type];
       std::string encoder_type = v["type"].as<std::string>();
-      IEncoder *fe = nullptr;
+      std::shared_ptr<IEncoder> fe = nullptr;
       if (encoder_type == "libav")
-        fe = new LibAvEncoder(v, reader->GetFps());
+        fe = std::shared_ptr<LibAvEncoder>(
+            new LibAvEncoder(v, reader->GetFps()));
       else if (encoder_type == "nvenc") {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
-        fe = new NvEncoder(v, reader->GetFps());
+        fe = std::shared_ptr<NvEncoder>(new NvEncoder(v, reader->GetFps()));
 #else
         spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
                       "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
         exit(1);
 #endif
       } else if (encoder_type == "zdepth")
-        fe = new ZDepthEncoder(reader->GetFps());
+        fe =
+            std::shared_ptr<ZDepthEncoder>(new ZDepthEncoder(reader->GetFps()));
       else if (encoder_type == "null")
-        fe = new NullEncoder(reader->GetFps());
+        fe = std::shared_ptr<NullEncoder>(new NullEncoder(reader->GetFps()));
       else {
         spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                       "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
@@ -131,6 +141,8 @@ int main(int argc, char *argv[]) {
     uint64_t processing_time = 0;
 
     double sent_mbytes = 0;
+
+    double sent_latency = 0;
 
     socket.connect("tcp://" + host + ":" + std::to_string(port));
 
@@ -151,17 +163,20 @@ int main(int argc, char *argv[]) {
       }
 
       std::vector<FrameStruct> v;
-      std::vector<FrameStruct *> vO;
+      std::vector<std::shared_ptr<FrameStruct>> vO;
 
       while (v.empty()) {
-        std::vector<FrameStruct *> frameStruct = reader->GetCurrentFrame();
-        for (FrameStruct *frameStruct : frameStruct) {
+        std::vector<std::shared_ptr<FrameStruct>> frameStruct =
+            reader->GetCurrentFrame();
+        for (std::shared_ptr<FrameStruct> frameStruct : frameStruct) {
 
-          IEncoder *frameEncoder = encoders[frameStruct->frame_type];
+          std::shared_ptr<IEncoder> frameEncoder =
+              encoders[frameStruct->frame_type];
 
           frameEncoder->AddFrameStruct(frameStruct);
           if (frameEncoder->HasNextPacket()) {
-            FrameStruct *f = frameEncoder->CurrentFrameEncoded();
+            std::shared_ptr<FrameStruct> f =
+                frameEncoder->CurrentFrameEncoded();
             vO.push_back(f);
             v.push_back(*f);
             frameEncoder->NextPacket();
@@ -198,25 +213,26 @@ int main(int argc, char *argv[]) {
         last_time = CurrentTimeMs();
         processing_time = last_time - start_frame_time;
 
+        sent_latency += diff_time;
+
         spdlog::debug(
-            "Message sent, took {} ms; packet size {}; avg {} fps; {} "
+            "Message sent, took {} ms (avg. {}); packet size {}; avg {} fps; "
+            "{} "
             "Mbps; {} Mbps expected",
-            diff_time, message.size(), avg_fps,
+            diff_time, sent_latency / sent_frames, message.size(), avg_fps,
             8 * (sent_mbytes / (CurrentTimeMs() - start_time)),
             8 * (sent_mbytes * reader->GetFps() / (sent_frames * 1000)));
 
         for (unsigned int i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
           f.frame.clear();
-          spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id, f.frame_id);
+          spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id,
+                        f.frame_id);
           vO.at(i)->frame.clear();
-          delete vO.at(i);
+          vO.at(i) = nullptr;
         }
       }
     }
-    delete reader;
-    for (auto const &x : encoders)
-      delete x.second;
   } catch (YAML::Exception &e) {
     spdlog::error("Error on the YAML configuration file");
     spdlog::error(e.what());

@@ -55,8 +55,6 @@ ImageReader::ImageReader(std::string filename) {
 }
 
 ImageReader::~ImageReader() {
-  if (codec_params_struct_ != nullptr)
-    delete codec_params_struct_;
 }
 
 std::vector<unsigned char> ImageReader::ReadFile(std::string &filename) {
@@ -72,7 +70,7 @@ std::vector<unsigned char> ImageReader::ReadFile(std::string &filename) {
   return file_data;
 }
 
-FrameStruct *ImageReader::CreateFrameStruct(unsigned int frame_id) {
+std::shared_ptr<FrameStruct> ImageReader::CreateFrameStruct(unsigned int frame_id) {
   // 0;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg;/home/amourao/data/bundle_fusion/apt0/frame-000000.color.jpg
 
   std::string line = frame_lines_[frame_id];
@@ -90,7 +88,7 @@ FrameStruct *ImageReader::CreateFrameStruct(unsigned int frame_id) {
                  read_frame_id, frame_counter_);
 
   std::vector<unsigned char> file_data = ReadFile(frame_path);
-  FrameStruct *frame = new FrameStruct();
+  std::shared_ptr<FrameStruct> frame = std::shared_ptr<FrameStruct>(new FrameStruct());
 
   frame->message_type = 0;
 
@@ -109,10 +107,9 @@ FrameStruct *ImageReader::CreateFrameStruct(unsigned int frame_id) {
 
   if (codec_params_struct_ == nullptr) {
     ImageDecoder image_decoder;
-    AVFrame *frame_av = av_frame_alloc();
+    AVFrameSharedP frame_av = std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
     image_decoder.ImageBufferToAVFrame(frame, frame_av);
-    codec_params_struct_ = new CodecParamsStruct(frame->codec_data);
-    av_frame_free(&frame_av);
+    codec_params_struct_ = std::shared_ptr<CodecParamsStruct>(new CodecParamsStruct(frame->codec_data));
   }
   frame->codec_data = *codec_params_struct_;
 
@@ -121,8 +118,8 @@ FrameStruct *ImageReader::CreateFrameStruct(unsigned int frame_id) {
 
 unsigned int ImageReader::GetCurrentFrameId() { return frame_counter_; }
 
-std::vector<FrameStruct *> ImageReader::GetCurrentFrame() {
-  std::vector<FrameStruct *> v;
+std::vector<std::shared_ptr<FrameStruct>> ImageReader::GetCurrentFrame() {
+  std::vector<std::shared_ptr<FrameStruct>> v;
   v.push_back(current_frame_internal_);
   return v;
 }

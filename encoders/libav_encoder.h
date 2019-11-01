@@ -29,28 +29,31 @@ extern "C" {
 #include "../utils/video_utils.h"
 
 #include "iencoder.h"
+#include "../decoders/libav_decoder.h"
+#include "../utils/logger.h"
 
 class LibAvEncoder : public IEncoder {
 private:
   unsigned int total_frame_counter_;
 
-  AVCodecParameters *av_codec_parameters_;
-  AVCodecContext *av_codec_context_;
-  AVCodec *av_codec_;
+  AVCodecParametersSafeP av_codec_parameters_;
+  AVCodecContextSafeP av_codec_context_;
+  AVCodecSafeP av_codec_;
 
-  AVFrame *frame_av_;
-  AVPacket *packet_av_;
+  AVFrameSharedP frame_av_;
 
-  CodecParamsStruct *codec_params_struct_;
+  std::shared_ptr<CodecParamsStruct> codec_params_struct_;
 
-  struct SwsContext *sws_context_;
+  SwsContextSafeP sws_context_;
 
   YAML::Node codec_parameters_;
 
   ImageDecoder image_decoder_;
 
-  std::queue<FrameStruct *> buffer_fs_;
-  std::queue<AVPacket *> buffer_packet_;
+  std::unique_ptr<LibAvDecoder> lib_av_decoder_;
+
+  std::queue<std::shared_ptr<FrameStruct>> buffer_fs_;
+  std::queue<AVPacketSharedP> buffer_packet_;
 
   std::string stream_id_;
 
@@ -58,11 +61,11 @@ private:
 
   bool ready_;
 
-  void Init(FrameStruct *fs);
+  void Init(std::shared_ptr<FrameStruct> &fs);
 
   void Encode();
 
-  void EncodeA(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt);
+  void EncodeA();
 
   void PrepareFrame();
 
@@ -75,17 +78,17 @@ public:
 
   ~LibAvEncoder();
 
-  void AddFrameStruct(FrameStruct *fs);
+  void AddFrameStruct(std::shared_ptr<FrameStruct> &fs);
 
   void NextPacket();
 
   bool HasNextPacket();
 
-  FrameStruct *CurrentFrameEncoded();
+  std::shared_ptr<FrameStruct> CurrentFrameEncoded();
 
-  FrameStruct *CurrentFrameOriginal();
+  std::shared_ptr<FrameStruct> CurrentFrameOriginal();
 
-  CodecParamsStruct *GetCodecParamsStruct();
+  std::shared_ptr<CodecParamsStruct> GetCodecParamsStruct();
 
   unsigned int GetFps();
 

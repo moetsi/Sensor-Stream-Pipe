@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
     bool calibration_set = false;
     k4abt::tracker tracker;
 
-    std::unordered_map<std::string, IDecoder *> decoders;
+    std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
     while (reader.HasNextFrame()) {
       reader.NextFrame();

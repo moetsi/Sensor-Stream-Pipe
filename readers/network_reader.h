@@ -23,8 +23,8 @@ private:
   std::vector<FrameStruct> current_frame_internal_;
 
   int port_;
-  zmq::context_t *context_;
-  zmq::socket_t *socket_;
+  std::unique_ptr<zmq::context_t> context_;
+  std::unique_ptr<zmq::socket_t> socket_;
 
 public:
   NetworkReader(int port);

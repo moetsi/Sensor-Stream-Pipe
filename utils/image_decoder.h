@@ -17,34 +17,37 @@ extern "C" {
 };
 
 #include "../structs/frame_struct.hpp"
+#include "libav_types.h"
 #include "utils.h"
 
 class ImageDecoder {
 
 private:
-  AVFormatContext *av_format_context_;
-  AVIOContext *avio_context_;
-  AVCodecParameters *av_codec_parameters_;
-  AVCodecContext *av_codec_context_;
-  AVCodec *codec_;
-  AVPacket *packet_;
 
-  CodecParamsStruct *codec_params_struct_;
+  AVFormatContextSafeP av_format_context_;
+  AVIOContextSafeP avio_context_;
+  AVCodecParametersSafePNullDelete av_codec_parameters_;
+  AVCodecContextSafeP av_codec_context_;
+  AVCodecSafeP codec_;
+  AVPacketSharedP packet_;
 
-  uint8_t *avio_ctx_buffer_;
+  std::shared_ptr<CodecParamsStruct> codec_params_struct_;
+
+  unsigned char * avio_ctx_buffer_;
   size_t avio_ctx_buffer_size_ = 4096;
 
   bool libav_ready_;
 
   void Init(std::vector<unsigned char> &buffer);
 
-  int DecodePacket(AVFrame *pFrame);
-  CodecParamsStruct *GetCodecParamsStruct();
+  int DecodePacket(AVFrameSharedP pFrame);
+
 
 public:
   ImageDecoder();
 
   ~ImageDecoder();
 
-  void ImageBufferToAVFrame(FrameStruct *fs, AVFrame *pFrame);
+  void ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
+                            AVFrameSharedP pFrame);
 };

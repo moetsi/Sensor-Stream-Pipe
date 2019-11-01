@@ -17,19 +17,10 @@ ZDepthEncoder::ZDepthEncoder(int _fps) {
 }
 
 ZDepthEncoder::~ZDepthEncoder() {
-  if (frame_compressed_ != nullptr)
-    delete frame_compressed_;
-  if (frame_original_ != nullptr)
-    delete frame_original_;
-  if (codec_params_struct_ != nullptr)
-    delete codec_params_struct_;
-  if (libav_decoder_ != nullptr)
-    delete libav_decoder_;
-  if (sws_context_ != nullptr)
-    sws_freeContext(sws_context_);
+
 }
 
-void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
+void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
   frame_original_ = fs;
 
   if (frame_original_ == nullptr) {
@@ -37,7 +28,7 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
   } else {
 
     if (frame_compressed_ == nullptr)
-      frame_compressed_ = new FrameStruct();
+      frame_compressed_ = std::shared_ptr<FrameStruct>(new FrameStruct());
 
     frame_compressed_->device_id = fs->device_id;
     frame_compressed_->frame_data_type = 1;
@@ -55,14 +46,17 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
 
     uint16_t *data = nullptr;
 
-    AVFrame *pFrameO = nullptr;
-    AVFrame *pFrame = nullptr;
     cv::Mat img;
+
+    AVFrameSharedP pFrameO = nullptr;
+    AVFrameSharedP pFrame = nullptr;
 
     if (fs->frame_data_type == 0) {
 
-      pFrameO = av_frame_alloc();
-      pFrame = av_frame_alloc();
+      AVFrame *tmp = av_frame_alloc();
+      pFrameO = std::shared_ptr<AVFrame>(tmp, AVFrameSharedDeleter);
+      tmp = av_frame_alloc();
+      pFrame = std::shared_ptr<AVFrame>(tmp, AVFrameSharedDeleter);
 
       image_decoder_.ImageBufferToAVFrame(fs, pFrameO);
 
@@ -73,14 +67,14 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
 
       pFrame->width = width_;
       pFrame->height = height_;
-      av_frame_get_buffer(pFrame, 0);
+      av_frame_get_buffer(pFrame.get(), 0);
 
       if (sws_context_ == nullptr)
-        sws_context_ = sws_getContext(width_, height_, (AVPixelFormat)pFrameO->format,
+        sws_context_ = std::unique_ptr<SwsContext, SwsContextDeleter>(sws_getContext(width_, height_, (AVPixelFormat)pFrameO->format,
                                  width_, height_, (AVPixelFormat)pFrame->format,
-                                 SWS_BILINEAR, NULL, NULL, NULL);
+                                 SWS_BILINEAR, NULL, NULL, NULL));
 
-      sws_scale(sws_context_, (const uint8_t *const *)pFrameO->data,
+      sws_scale(sws_context_.get(), (const uint8_t *const *)pFrameO->data,
                 pFrameO->linesize, 0, pFrameO->height, pFrame->data,
                 pFrame->linesize);
 
@@ -89,11 +83,12 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
     } else if (fs->frame_data_type == 1) {
 
       if (libav_decoder_ == nullptr) {
-        libav_decoder_ = new LibAvDecoder();
+        libav_decoder_ = std::unique_ptr<LibAvDecoder>(new LibAvDecoder());
         libav_decoder_->Init(getParams(*fs));
       }
 
-      img = libav_decoder_->Decode(fs);
+      FrameStruct fss = *fs;
+      img = libav_decoder_->Decode(fss);
 
       width_ = img.cols;
       height_ = img.rows;
@@ -126,29 +121,27 @@ void ZDepthEncoder::AddFrameStruct(FrameStruct *fs) {
     frame_compressed_->timestamps.push_back(CurrentTimeMs());
     total_frame_counter_++;
 
-    if (pFrame != nullptr) {
-      av_frame_free(&pFrame);
-      av_frame_free(&pFrameO);
-    }
   }
 }
 
 void ZDepthEncoder::NextPacket() {
-  if (frame_original_ != nullptr)
-    delete frame_original_;
   frame_original_ = nullptr;
   frame_compressed_ = nullptr;
 }
 
 bool ZDepthEncoder::HasNextPacket() { return true; }
 
-FrameStruct *ZDepthEncoder::CurrentFrameEncoded() { return frame_compressed_; }
+std::shared_ptr<FrameStruct> ZDepthEncoder::CurrentFrameEncoded() {
+  return frame_compressed_;
+}
 
-FrameStruct *ZDepthEncoder::CurrentFrameOriginal() { return frame_original_; }
+std::shared_ptr<FrameStruct> ZDepthEncoder::CurrentFrameOriginal() {
+  return frame_original_;
+}
 
-CodecParamsStruct *ZDepthEncoder::GetCodecParamsStruct() {
+std::shared_ptr<CodecParamsStruct> ZDepthEncoder::GetCodecParamsStruct() {
   if (codec_params_struct_ == NULL) {
-    codec_params_struct_ = new CodecParamsStruct();
+    codec_params_struct_ = std::shared_ptr<CodecParamsStruct>(new CodecParamsStruct());
     codec_params_struct_->type = 2;
     codec_params_struct_->data.resize(4 + 4);
 

@@ -12,31 +12,20 @@
 
 #include "../structs/frame_struct.hpp"
 #include "../utils/image_decoder.h"
+#include "image_reader.h"
 #include "ireader.h"
 
-class ImageReader : public IReader {
+class MultiImageReader: public IReader {
 private:
   unsigned int frame_counter_;
-  unsigned int fps_;
-  std::string scene_desc_;
-  unsigned int sensor_id_;
-  unsigned int device_id_;
-  unsigned int frame_type_;
-  std::string stream_id_;
 
-  std::shared_ptr<CodecParamsStruct> codec_params_struct_;
+  std::vector<std::shared_ptr<IReader>> readers_;
+  std::vector<std::shared_ptr<FrameStruct>> current_frame_internal_;
 
-  std::shared_ptr<FrameStruct> current_frame_internal_;
-
-  std::vector<std::string> frame_lines_;
-
-  std::vector<unsigned char> ReadFile(std::string &filename);
-
-  std::shared_ptr<FrameStruct> CreateFrameStruct(unsigned int frame_id);
 
 public:
-  ImageReader(std::string filename);
-  ~ImageReader();
+  MultiImageReader(std::vector<std::string> filename);
+  ~MultiImageReader();
 
   void Reset();
 

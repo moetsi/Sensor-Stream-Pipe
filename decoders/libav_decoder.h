@@ -18,17 +18,20 @@ extern "C" {
 #include <opencv2/imgproc.hpp>
 
 #include "../utils/video_utils.h"
+#include "../utils/libav_types.h"
+
 #include "idecoder.h"
 
 class LibAvDecoder : public IDecoder {
 private:
 
-  AVCodec * codec_;
-  AVCodecContext * codec_context_;
+  AVCodecSafeP codec_;
+  AVCodecContextSafeP codec_context_;
 
 public:
   LibAvDecoder();
   ~LibAvDecoder();
   void Init(AVCodecParameters *codec_parameters);
-  cv::Mat Decode(FrameStruct *frame_struct);
+  cv::Mat Decode(FrameStruct& frame_struct);
+  AVFrameSharedP DecodeFrame(FrameStruct &frame_struct);
 };

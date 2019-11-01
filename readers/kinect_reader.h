@@ -72,11 +72,11 @@ private:
   int32_t timeout_ms_;
 
   FrameStruct frame_template_;
-  std::vector<CodecParamsStruct *> codec_params_structs_;
-  CameraCalibrationStruct * camera_calibration_struct_;
+  std::vector<std::shared_ptr<CodecParamsStruct>> codec_params_structs_;
+  std::shared_ptr<CameraCalibrationStruct> camera_calibration_struct_;
 
 
-  std::vector<FrameStruct *> current_frame_;
+  std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
 public:
   KinectReader(uint8_t device_index, ExtendedAzureConfig device_config);
@@ -89,7 +89,7 @@ public:
 
   void NextFrame();
 
-  std::vector<FrameStruct *> GetCurrentFrame();
+  std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
 
   unsigned int GetCurrentFrameId();
 

@@ -2,7 +2,7 @@
 general:
   host: "localhost"
   port: 9999
-  log_level: "info"
+  log_level: "debug"
   show_graphical_output: False
   frame_source:
     type: "video"
@@ -10,14 +10,17 @@ general:
       path: "/home/amourao/dataset_kinect_testB.mkv"
 video_encoder:
   0: #color
-    type: "null"
-    codec_name: "NVPIPE_HEVC"
-    input_format: "NVPIPE_RGBA32"
-    bit_rate: 4000000
+    type: "libav"
+    codec_name: "libx265"
+    pix_fmt: "yuv420p"
+    bit_rate: 8000000
+    options:
+      preset: "veryfast"
+      crf: "23"
   1: #depth
-    type: "null"
+    type: "zdepth"
   2: #ir
-    type: "null"
+    type: "nvenc"
     codec_name: "NVPIPE_HEVC"
     input_format: "NVPIPE_UINT16"
     bit_rate: 40000000

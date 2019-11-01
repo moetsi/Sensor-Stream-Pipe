@@ -11,7 +11,7 @@ class IReader {
 public:
   virtual ~IReader() {}
 
-  virtual std::vector<FrameStruct *> GetCurrentFrame() = 0;
+  virtual std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame() = 0;
 
   virtual std::vector<unsigned int> GetType() = 0;
 

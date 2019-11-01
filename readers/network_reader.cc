@@ -15,15 +15,14 @@ NetworkReader::NetworkReader(int port) {
 
 void NetworkReader::init() {
 
-  context_ = new zmq::context_t(1);
-  socket_ = new zmq::socket_t(*context_, ZMQ_PULL);
+  context_ = std::unique_ptr<zmq::context_t>(new zmq::context_t(1));
+  socket_ = std::unique_ptr<zmq::socket_t>(new zmq::socket_t(*context_, ZMQ_PULL));
 
   socket_->bind("tcp://*:" + std::to_string(port_));
 }
 
 NetworkReader::~NetworkReader() {
   socket_->close();
-  delete socket_;
 }
 
 bool NetworkReader::HasNextFrame() { return true; }

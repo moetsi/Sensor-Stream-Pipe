@@ -26,3 +26,4 @@ void SetupLogging(std::string &level, std::string &file);
 #define av_err2str(errnum)                                                     \
   av_make_error_string((char *)__builtin_alloca(AV_ERROR_MAX_STRING_SIZE),     \
                        AV_ERROR_MAX_STRING_SIZE, errnum)
+

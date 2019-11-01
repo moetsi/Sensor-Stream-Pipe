@@ -31,14 +31,14 @@ private:
 
   std::vector<unsigned int> video_stream_indexes_;
   bool video_stream_indexes_from_file_;
-  std::vector<FrameStruct *> frame_structs_;
-  FrameStruct *frame_struct_buffer_;
+  std::vector<std::shared_ptr<FrameStruct>> frame_structs_;
+  std::shared_ptr<FrameStruct> frame_struct_buffer_;
   FrameStruct frame_struct_template_;
 
   int current_frame_counter_;
 
   AVFormatContext *av_format_context_;
-  CameraCalibrationStruct *camera_calibration_struct_;
+  std::shared_ptr<CameraCalibrationStruct> camera_calibration_struct_;
 
   std::unordered_map<unsigned int, CodecParamsStruct> codec_params_structs_;
   std::unordered_map<unsigned int, AVCodecContext *> av_codec_contexts_;
@@ -71,7 +71,7 @@ public:
 
   std::vector<unsigned int> GetType();
 
-  std::vector<FrameStruct *> GetCurrentFrame();
+  std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
 
   unsigned int GetCurrentFrameId();
 
