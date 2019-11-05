@@ -286,10 +286,11 @@ Moetsi’s Sensor Stream Pipe is licensed under the MIT license. That means that
 
 ## Support Moetsi!
 
-Our Sensor Stream Pipe is always going to be free, but it has taken a lot of blood, sweat and tears to get to this point. If you love what we’ve made, please consider reaching out to olenka@moetsi.com.
+Our Sensor Stream Pipe is always going to be free, but it has taken a lot of blood, sweat and tears to get to this point. If you love what we’ve made, please consider reaching out to [contact@moetsi.com](mailto:contact@moetsi.com).
 
 
 ## Authors
 
 * **André Mourão** - [amourao](https://github.com/amourao)
 * **Adam Polak** - [adammpolak](https://github.com/adammpolak)
+* **Olenka Polak** - [olenkapolak](https://github.com/olenkapolak)
