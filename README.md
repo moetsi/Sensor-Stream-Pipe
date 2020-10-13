@@ -1,8 +1,10 @@
 # Sensor Stream Pipe
 
-Moetsi's Sensor Stream Pipe (SSP) is an open-source C++ streaming pipeline that makes it easier to process both color and depth data.
+Moetsi's Sensor Stream Pipe (SSP) is the first open-source C++ modular kit-of-parts that compresses, streams, and processes sensor data (RGB-D).
 It does this by efficiently compressing raw data streams, allowing developers to send multiple video types over the network in real time. 
 Frame data can be sent in its raw form (JPG/PNG frames), or compressed using a myriad of codecs, leveraged on FFmpeg/LibAV and NV Codec to considerably reduce bandwidth strain.
+
+SSP is designed to help overcome the limitations of on-device sensor data processing. 
 
 In its current incarnation, Moetsi’s pipe supports the [Azure Kinect DK](https://azure.microsoft.com/en-us/services/kinect-dk/) RGB-D camera and existing datasets (e.g. [BundleFusion](https://graphics.stanford.edu/projects/bundlefusion/), [MS RGB-D 7 scenes](https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/) and [VSFS](http://graphics.stanford.edu/projects/vsfs/)), but we’re planning to support other cameras and devices (e.g. Kinect v2 and Structure Core) in the near future. 
 At the same time, we’ve made the Moetsi SSP totally open source so that you can build out support for any devices that you want to too!
@@ -28,7 +30,7 @@ It's a work in progress after all!
 That said, we welcome both feedback and pull requests.
    
 We would also love to hear more about how you plan to use the Moetsi Sensor Stream Pipe! 
-So if you have any problems, questions, feature requests, or ideas for improvement, please feel free to reach out at [contact@moetsi.com](mailto:contact@moetsi.com) or post on our [forum](https://moetsi.com/pages/community)
+So if you have any problems, questions, feature requests, or ideas for improvement, please feel free to reach out at [olenka@moetsi.com](mailto:olenka@moetsi.com) or post on our [forum](https://moetsi.com/pages/community)
    
 The better we understand how you’re using the Moetsi SSP, the better we can plan future developments!
 
@@ -262,7 +264,7 @@ Our pipeline is just one of the first pieces of the puzzle. To develop a robust 
 
 ### How to Contribute
 
-We’re always excited to work with likeminded people, and invite you to experiment with our pipeline however you like! If you enjoy our work and think you can help take this project to the next level, feel free to drop us a message on [contact@moetsi.com](mailto:contact@moetsi.com) to get involved.
+We’re always excited to work with like-minded people, and invite you to experiment with our pipeline however you like! If you enjoy our work and think you can help take this project to the next level, feel free to drop us a message on [olenka@moetsi.com](mailto:olenka@moetsi.com) to get involved.
 
 If you happen to discover any bugs in our code, we’d really appreciate knowing about them. Please just create an issue here on GitHub. 
 
@@ -282,15 +284,15 @@ Improve encoding performance on AMD/Intel graphic cards, by using the AMD Media 
 
 ## Moetsi’s Permissive License
 
-Moetsi’s Sensor Stream Pipe is licensed under the MIT license. That means that we don’t require attribution, but we’d really like to know what cool things you’re using our pipe for. Drop us a message on [contact@moetsi.com](mailto:contact@moetsi.com) or post on our [forum](https://moetsi.com/pages/community) to tell us all about it!
+Moetsi’s Sensor Stream Pipe is licensed under the MIT license. That means that we don’t require attribution, but we’d really like to know what cool things you’re using our pipe for. Drop us a message on [olenka@moetsi.com](mailto:olenka@moetsi.com) or post on our [forum](https://moetsi.com/pages/community) to tell us all about it!
 
 ## Support Moetsi!
 
-Our Sensor Stream Pipe is always going to be free, but it has taken a lot of blood, sweat and tears to get to this point. If you love what we’ve made, please consider reaching out to [contact@moetsi.com](mailto:contact@moetsi.com).
+Our Sensor Stream Pipe is always going to be free, but it has taken a lot of blood, sweat and tears to get to this point. If you love what we’ve made, please consider reaching out to [olenka@moetsi.com](mailto:olenka@moetsi.com).
 
 
 ## Authors
 
 * **André Mourão** - [amourao](https://github.com/amourao)
-* **Adam Polak** - [adammpolak](https://github.com/adammpolak)
 * **Olenka Polak** - [olenkapolak](https://github.com/olenkapolak)
+* **Adam Polak** - [adammpolak](https://github.com/adammpolak)
