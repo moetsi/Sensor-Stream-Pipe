@@ -1,6 +1,6 @@
 # Sensor Stream Pipe
 
-Moetsi's Sensor Stream Pipe (SSP) is an open-source C++ API that makes it easier to process both color and depth data by simplifying and expediting remote rendering. 
+Moetsi's Sensor Stream Pipe (SSP) is an open-source C++ streaming pipeline that makes it easier to process both color and depth data.
 It does this by efficiently compressing raw data streams, allowing developers to send multiple video types over the network in real time. 
 Frame data can be sent in its raw form (JPG/PNG frames), or compressed using a myriad of codecs, leveraged on FFmpeg/LibAV and NV Codec to considerably reduce bandwidth strain.
 
