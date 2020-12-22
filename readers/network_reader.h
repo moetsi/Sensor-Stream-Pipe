@@ -9,6 +9,8 @@
 #include "../structs/frame_struct.hpp"
 #include "ireader.h"
 
+#define POLL_TIMEOUT_MS 500
+
 class NetworkReader {
 
 private:
@@ -25,6 +27,8 @@ private:
   int port_;
   std::unique_ptr<zmq::context_t> context_;
   std::unique_ptr<zmq::socket_t> socket_;
+
+  zmq::poller_t<> poller_;
 
 public:
   NetworkReader(int port);
