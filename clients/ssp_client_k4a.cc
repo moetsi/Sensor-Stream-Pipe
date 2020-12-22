@@ -5,7 +5,12 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif 
 
 #include <k4a/k4a.h>
 #include <opencv2/imgproc.hpp>

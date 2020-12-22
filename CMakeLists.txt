@@ -4,7 +4,9 @@ project(davp-baseline)
 include_directories("$ENV{HOME}/libs/include")
 link_directories("$ENV{HOME}/libs/lib")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+if(CMAKE_COMPILER_IS_GNUCXX)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+endif(CMAKE_COMPILER_IS_GNUCXX)
 set(CMAKE_CXX_STANDARD 11)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules" "$ENV{HOME}/libs/lib")

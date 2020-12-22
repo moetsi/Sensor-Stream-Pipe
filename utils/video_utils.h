@@ -9,7 +9,12 @@
 #include <stdlib.h>
 #include <string>
 #include <thread>
+
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif 
 
 extern "C" {
 #include <libavcodec/avcodec.h>
