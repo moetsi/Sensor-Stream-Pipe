@@ -5,7 +5,12 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#ifdef _WIN32
+#include <io.h>
+#define ushort u_short
+#else
 #include <unistd.h>
+#endif 
 
 extern "C" {
 #include <libavcodec/avcodec.h>
