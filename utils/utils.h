@@ -23,7 +23,14 @@ void SetupLogging(YAML::Node &general_parameters);
 void SetupLogging(std::string &level, std::string &file);
 
 #undef av_err2str
+
+#ifdef _WIN32
+#define av_err2str(errnum)                                                     \
+  av_make_error_string((char *)_malloca(AV_ERROR_MAX_STRING_SIZE),             \
+                       AV_ERROR_MAX_STRING_SIZE, errnum)
+#else
 #define av_err2str(errnum)                                                     \
   av_make_error_string((char *)__builtin_alloca(AV_ERROR_MAX_STRING_SIZE),     \
                        AV_ERROR_MAX_STRING_SIZE, errnum)
+#endif
 
