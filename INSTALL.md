@@ -1,12 +1,19 @@
 # Sensor Stream Pipe Instalation
 
+
+[Linux instructions](#linux)
+[Windows instructions](#windows)
+
+
+## Linux
+
 To get our Sensor Stream Pipe up and running, you will require the following:
 
 The following steps were tested on Ubuntu 18.04. Installing on other recent Linux distributions should be pretty similar, but please check the installation instructions for OpenCV and Kinect DK on your respective platform first. 
 Installation instructions for Windows should be ready soon.
 If you encounter any problems or have any suggestions, please let us know by emailing contact@moetsi.com or post on our [forum](https://moetsi.com/pages/community).
 
-## Dependencies
+### Dependencies
 
 To get our Sensor Stream Pipe up and running, you will require the following:
 
@@ -21,20 +28,20 @@ To get our Sensor Stream Pipe up and running, you will require the following:
 * [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/) 1.2 (*optional*) accesses Kinect DK data.
 * [Azure Kinect Body Tracking SDK](https://docs.microsoft.com/bs-cyrl-ba/azure/Kinect-dk/body-sdk-download/) 0.9.3 (*optional*) SSP Body Tracking client.
 
-## Download and install repo libraries
+### Download and install repo libraries
 
-### OpenCV 3.2.0
+#### OpenCV 3.2.0
 
 ```
 sudo apt install libopencv-dev libopencv-core-dev uuid-dev
 ```
-### Libav 3.4.6
+#### Libav 3.4.6
 
 ```
 sudo apt install libavformat-dev libavutil-dev libavcodec-dev libavfilter-dev
 ```
 
-## Download and extract "out-of-repo" libraries
+### Download and extract "out-of-repo" libraries
 
 
 First, create a folder where local libs are to be installed:
@@ -44,7 +51,7 @@ mkdir ~/libs
 mkdir ~/libs/srcOriginal
 ```
 
-### Cereal 1.2.2
+#### Cereal 1.2.2
 
 ```
 cd ~/libs/srcOriginal
@@ -53,10 +60,10 @@ tar xf v1.2.2
 cp -r cereal-1.2.2/include ~/libs
 ```
 
-### ZeroMQ
+#### ZeroMQ
 
 
-#### libzmq3 4.3.1
+##### libzmq3 4.3.1
 
 ```
 cd ~/libs/srcOriginal
@@ -69,7 +76,7 @@ cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install -j4
 ```
 
-#### cppzmq 4.3.0
+##### cppzmq 4.3.0
 
 ```
 cd ~/libs/srcOriginal
@@ -79,7 +86,7 @@ cd cppzmq-4.3.0
 cp *.hpp ~/libs/include
 ```
 
-### yaml-cpp 0.6.0
+#### yaml-cpp 0.6.0
 
 ```
 cd ~/libs/srcOriginal
@@ -92,7 +99,7 @@ cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install
 ```
 
-### Zdepth
+#### Zdepth
 
 ```
 cd ~/libs/srcOriginal
@@ -106,7 +113,7 @@ cp libzdepth.a ~/libs/lib/
 cp zstd/libzstd.a ~/libs/lib/
 ```
 
-### spdlog
+#### spdlog
 
 ```
 cd ~/libs/srcOriginal
@@ -118,7 +125,7 @@ make -j
 make install
 ```
 
-#### NVPipe (optional, recommended for users with Nvidia GPU)
+##### NVPipe (optional, recommended for users with Nvidia GPU)
 
 ```
 cd ~/libs/srcOriginal
@@ -130,7 +137,7 @@ make
 make install
 ```
 
-#### Azure Kinect SDK 1.2 (optional)
+##### Azure Kinect SDK 1.2 (optional)
 
 *Note: to avoid getting a password prompt, run any command as sudo before starting this section of the tutorial*
 
@@ -159,7 +166,7 @@ You can create it by running the following command:
 sudo ln -s /usr/lib/x86_64-linux-gnu/libdepthengine.so.2.0 /usr/lib/x86_64-linux-gnu/libdepthengine.so
 ```
 
-#### Azure Kinect Body Tracking SDK (optional)
+##### Azure Kinect Body Tracking SDK (optional)
 
 Check instructions above to add the Linux Software Repository for Microsoft Products and then do:
 
@@ -169,7 +176,7 @@ sudo apt install libk4abt0.9-dev
 ```
 
 
-### Building Sensor Stream Pipe
+#### Building Sensor Stream Pipe
 
 Download and build the project (the ssp_server, ssp_client and ssp_tester):
 
@@ -190,3 +197,79 @@ You can turn on Kinect, Bodytrack and NVPipe support by adding the following to 
 -DSSP_WITH_K4A_BODYTRACK=ON
 -DSSP_WITH_NVPIPE_SUPPORT=ON
 ```
+
+
+## Windows
+
+
+Windows installation process was performed using [vcpkg](https://docs.microsoft.com/en-us/cpp/build/vcpkg?view=msvc-160) to install most dependencies.
+Tested on Windows 10 Build 19041, Visual Studio 2019 Community Edition (VS).
+
+This process may also work for Linux, but this was not tested.
+
+### Install vcpkg
+
+Follow vcpkg installation instructions available [here](https://docs.microsoft.com/en-us/cpp/build/install-vcpkg?view=msvc-160&tabs=windows)
+
+### Install dependencies available on vcpkg
+
+Install dependencies using vcpkg.
+
+```
+vcpkg install azure-kinect-sensor-sdk:x64-windows cereal:x64-windows cppzmq:x64-windows ffmpeg:x64-windows opencv3:x64-windows spdlog:x64-windows yaml-cpp:x64-windows zeromq:x64-windows
+```
+
+### Build and install remaining dependecies 
+
+Prepare a directory to place the remaining dependecies lib and include files (refered henceforth as `$LIBS`).
+This directory should have a `lib` and `include` subfolders with the corresponding `.lib` and headers respectively.
+
+#### Zdepth
+
+Clone Zdepth repo
+
+```
+git clone https://github.com/catid/Zdepth.git
+```
+
+Open CMakeLists file in VS and build accorcing to your desired profile (x86 or x64; Debug or Release).
+
+If you did not specify an install dir during the CMake configuration, copy the `Zdepth\include` and output lib folders (e.g. `ZDepth\out\*`) to `$LIBS`.
+
+#### Azure Kinect Body Tracking SDK (optional)
+
+Install Azure Body Tracker SDK from the instructions available [here](https://www.microsoft.com/en-us/download/details.aspx?id=100942).
+
+Copy the SDK include and lib files from the SDK install list to `$LIBS`, or add the SDK path to SSP CMakeLists (see below)
+
+#### Building Sensor Stream Pipe
+
+Clone the SSP repo
+
+
+```
+git clone git@github.com:moetsi/Sensor-Stream-Pipe.git
+```
+
+Due to the diferences in the build process, the Windows CMake file is named CMakeListsWindows.txt at the root of the SSP repo.
+
+Thus, you shoud delete CMakeLists.txt and rename CMakeListsWindows.txt to CMakeLists.txt.
+
+Open CMakeLists.txt in VS.
+
+Replace/Add the include ("C://Users//Andre//source//repos//vcpkg//installed//x64-windows//include") and link paths ("C://Users//Andre//source//repos//vcpkg//installed//x64-windows//lib") at the top of the file with your `$LIBS` paths
+
+```
+include_directories("C://Users//Andre//source//repos//vcpkg//installed//x64-windows//include")
+link_directories("C://Users//Andre//source//repos//vcpkg//installed//x64-windows//lib")
+```
+
+You can also add your `vcpkg//installed//` dir to the include and link paths.
+
+After replacing the paths, set the desired compile options (SSP_WITH_KINECT_SUPPORT, SSP_WITH_K4A_BODYTRACK, ...), regenerate CMakeCache and build the project.
+
+#### Linking errors?
+
+
+if you have linking errors (missing .lib files), try replacing the short lib name with the full lib path in CMake: 
+"libzmq" -> "C:/Users/Andre/source/repos/vcpkg/installed/x64-windows/lib/libzmq.lib"
