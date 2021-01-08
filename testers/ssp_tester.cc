@@ -5,7 +5,12 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#ifdef _WIN32
+#include <io.h>
+#define ushort u_short
+#else
 #include <unistd.h>
+#endif 
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -26,6 +31,7 @@ extern "C" {
 #include "../encoders/null_encoder.h"
 #include "../encoders/zdepth_encoder.h"
 #include "../readers/video_file_reader.h"
+#include "../readers/multi_image_reader.h"
 #include "../utils/image_converter.h"
 #include "../utils/similarity_measures.h"
 #include "../utils/utils.h"
@@ -38,9 +44,10 @@ extern "C" {
 
 #ifdef SSP_WITH_KINECT_SUPPORT
 #include "../readers/kinect_reader.h"
-#include "../readers/multi_image_reader.h"
 #include "../utils/kinect_utils.h"
 #endif
+
+
 
 int main(int argc, char *argv[]) {
 

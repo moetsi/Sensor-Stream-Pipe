@@ -2,7 +2,12 @@
 // Created by amourao on 26-06-2019.
 //
 
+#ifdef _WIN32
+#include <io.h>
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "../utils/logger.h"
 
@@ -19,6 +24,7 @@
 #include "../encoders/null_encoder.h"
 #include "../encoders/zdepth_encoder.h"
 #include "../readers/video_file_reader.h"
+#include "../readers/multi_image_reader.h"
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../encoders/nv_encoder.h"
@@ -26,7 +32,6 @@
 
 #ifdef SSP_WITH_KINECT_SUPPORT
 #include "../readers/kinect_reader.h"
-#include "../readers/multi_image_reader.h"
 #include "../utils/kinect_utils.h"
 #endif
 

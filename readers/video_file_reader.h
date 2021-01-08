@@ -8,6 +8,11 @@
 #include <iostream>
 #include <vector>
 
+#ifdef _WIN32
+#include <windows.h>
+#define ushort u_short
+#endif
+
 #include "../utils/logger.h"
 
 extern "C" {

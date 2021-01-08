@@ -57,9 +57,9 @@ By taking data processing off device, you will be able to run far more powerful 
 
 ### Installation
 
-The following steps were tested on Ubuntu 18.04. Installing on other recent Linux distributions should be pretty similar, but please check the installation instructions for OpenCV and Kinect DK on your respective platform first. 
+SSP installation was tested on Ubuntu 18.04. Installing on other recent Linux distributions should be pretty similar, but please check the installation instructions for OpenCV and Kinect DK on your respective platform first. 
 
-Installation instructions for Windows should be ready soon.
+Installation instructions for Windows 10 are available on the [ INSTALL ](https://github.com/moetsi/Sensor-Stream-Pipe/blob/master/INSTALL.md) file.
 
 If you encounter any problems or have any suggestions, please let us know by emailing [contact@moetsi.com](mailto:contact@moetsi.com) or post on our [forum](https://moetsi.com/pages/community).
 
