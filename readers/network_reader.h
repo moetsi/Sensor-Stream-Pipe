@@ -28,7 +28,9 @@ private:
   std::unique_ptr<zmq::context_t> context_;
   std::unique_ptr<zmq::socket_t> socket_;
 
+#ifdef SSP_WITH_ZMQ_POLLING
   zmq::poller_t<> poller_;
+#endif
 
 public:
   NetworkReader(int port);
