@@ -236,7 +236,7 @@ void LibAvEncoder::Encode() {
 void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
   int ret;
 
-  spdlog::info("Codec information:\n {}", codec_parameters_);
+  //spdlog::info("Codec information:\n {}", codec_parameters_);
 
   av_codec_ =
       std::unique_ptr<AVCodec, AVCodecDeleter>(avcodec_find_encoder_by_name(

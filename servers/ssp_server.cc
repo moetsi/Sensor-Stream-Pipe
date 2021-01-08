@@ -24,6 +24,7 @@
 #include "../encoders/null_encoder.h"
 #include "../encoders/zdepth_encoder.h"
 #include "../readers/video_file_reader.h"
+#include "../readers/multi_image_reader.h"
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../encoders/nv_encoder.h"
@@ -31,7 +32,6 @@
 
 #ifdef SSP_WITH_KINECT_SUPPORT
 #include "../readers/kinect_reader.h"
-#include "../readers/multi_image_reader.h"
 #include "../utils/kinect_utils.h"
 #endif
 

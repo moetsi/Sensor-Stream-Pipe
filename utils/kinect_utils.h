@@ -5,8 +5,12 @@
 #pragma once
 
 #include <iostream>
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
+
+#if (SSP_WITH_K4A_BODYTRACK)
 #include <k4abt.hpp>
+#endif
+
 #include <yaml-cpp/yaml.h>
 
 #include "../decoders/idecoder.h"
