@@ -41,6 +41,8 @@ set(EXECUTABLE_OUTPUT_PATH bin)
 option(SSP_WITH_KINECT_SUPPORT "This is settable from the command line" ON)
 option(SSP_WITH_K4A_BODYTRACK "This is settable from the command line" ON)
 option(SSP_WITH_NVPIPE_SUPPORT "This is settable from the command line" OFF)
+option(SSP_WITH_ZMQ_POLLING "This is settable from the command line" OFF)
+
 
 if (SSP_WITH_NVPIPE_SUPPORT)
     add_definitions(-DSSP_WITH_NVPIPE_SUPPORT=1)
@@ -52,6 +54,10 @@ endif ()
 
 if (SSP_WITH_K4A_BODYTRACK)
     add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
+endif ()
+
+if (SSP_WITH_ZMQ_POLLING)
+    add_definitions(-DSSP_WITH_ZMQ_POLLING=1)
 endif ()
 
 

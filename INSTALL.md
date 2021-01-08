@@ -63,6 +63,10 @@ cp -r cereal-1.2.2/include ~/libs
 
 #### ZeroMQ
 
+If you want to take advantage of ZMQ pulling support to check for new frames, compile ZMQ and CPPZMQ with the [draft API suppport](https://github.com/zeromq/cppzmq/issues/175).
+Also, you must set SSP_WITH_ZMQ_POLLING at SSP build time.
+Discussion available [here](https://github.com/moetsi/Sensor-Stream-Pipe/pull/7)
+
 
 ##### libzmq3 4.3.1
 

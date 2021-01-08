@@ -30,6 +30,8 @@ set(EXECUTABLE_OUTPUT_PATH bin)
 option(SSP_WITH_KINECT_SUPPORT "This is settable from the command line" ON)
 option(SSP_WITH_K4A_BODYTRACK "This is settable from the command line" ON)
 option(SSP_WITH_NVPIPE_SUPPORT "This is settable from the command line" ON)
+option(SSP_WITH_ZMQ_POLLING "This is settable from the command line" OFF)
+
 
 if (SSP_WITH_NVPIPE_SUPPORT)
     add_definitions(-DSSP_WITH_NVPIPE_SUPPORT=1)
@@ -43,6 +45,9 @@ if (SSP_WITH_K4A_BODYTRACK)
     add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
 endif ()
 
+if (SSP_WITH_ZMQ_POLLING)
+    add_definitions(-DSSP_WITH_ZMQ_POLLING=1)
+endif ()
 
 set(SOURCE_FILES readers/image_reader.cc readers/multi_image_reader.cc structs/frame_struct.hpp utils/utils.cc utils/video_utils.cc utils/image_decoder.cc utils/image_converter.cc)
 set(DECODER_SOURCE_FILES decoders/libav_decoder.cc decoders/zdepth_decoder.cc)
