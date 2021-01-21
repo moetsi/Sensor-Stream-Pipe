@@ -59,7 +59,7 @@ By taking data processing off device, you will be able to run far more powerful 
 
 SSP installation was tested on Ubuntu 18.04. Installing on other recent Linux distributions should be pretty similar, but please check the installation instructions for OpenCV and Kinect DK on your respective platform first. 
 
-Installation instructions for Windows 10 are available on the [ INSTALL ](https://github.com/moetsi/Sensor-Stream-Pipe/blob/master/INSTALL.md) file.
+Installation instructions for Ubuntu 18.04 and Windows 10 are available on the [ INSTALL ](https://github.com/moetsi/Sensor-Stream-Pipe/blob/master/INSTALL.md) file.
 
 If you encounter any problems or have any suggestions, please let us know by emailing [contact@moetsi.com](mailto:contact@moetsi.com) or post on our [forum](https://moetsi.com/pages/community).
 
@@ -75,8 +75,8 @@ To get our Sensor Stream Pipe up and running, you will require the following:
 * [yaml-cpp](https://github.com/jbeder/yaml-cpp/) 0.6.0 reads server configuration files.
 * [Zdepth](https://github.com/catid/Zdepth.git): compresses depth data.
 * [NvPipe](https://github.com/NVIDIA/NvPipe/) (*optional*, but **recommended if you have an NVidia GPU** ) encodes and decodes frames. This is optional, but recommended for users with Nvidia GPUs.
-* [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/) 1.2 (*optional*) accesses Kinect DK data.
-* [Azure Kinect Body Tracking SDK](https://docs.microsoft.com/bs-cyrl-ba/azure/Kinect-dk/body-sdk-download/) 0.9.3 (*optional*) SSP Body Tracking client.
+* [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/) 1.3/4 (*optional*) accesses Kinect DK data.
+* [Azure Kinect Body Tracking SDK](https://docs.microsoft.com/bs-cyrl-ba/azure/Kinect-dk/body-sdk-download/) 1.0 (*optional*) SSP Body Tracking client.
 
 For more detailed instructions, check the [ INSTALL ](https://github.com/moetsi/Sensor-Stream-Pipe/blob/master/INSTALL.md) file.
 
