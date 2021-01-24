@@ -26,8 +26,8 @@ To get our Sensor Stream Pipe up and running, you will require the following:
 * [yaml-cpp](https://github.com/jbeder/yaml-cpp/) 0.6.0 reads server configuration files.
 * [Zdepth](https://github.com/catid/Zdepth.git): compresses depth data.
 * [NvPipe](https://github.com/NVIDIA/NvPipe/) (*optional*, but **recommended if you have an NVidia GPU** ) encodes and decodes frames. This is optional, but recommended for users with Nvidia GPUs.
-* [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/) 1.2 (*optional*) accesses Kinect DK data.
-* [Azure Kinect Body Tracking SDK](https://docs.microsoft.com/bs-cyrl-ba/azure/Kinect-dk/body-sdk-download/) 0.9.3 (*optional*) SSP Body Tracking client.
+* [Azure Kinect SDK](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/) 1.3 (to support the Azure Kinect Body Tracking SDK), 1.4 otherwise (*optional*) accesses Kinect DK data.
+* [Azure Kinect Body Tracking SDK](https://docs.microsoft.com/bs-cyrl-ba/azure/Kinect-dk/body-sdk-download/) 1.0 (*optional*) SSP Body Tracking client.
 
 ### Download and install repo libraries
 
@@ -142,7 +142,7 @@ make
 make install
 ```
 
-##### Azure Kinect SDK 1.2 (optional)
+##### Azure Kinect SDK 1.3/4 (optional)
 
 *Note: to avoid getting a password prompt, run any command as sudo before starting this section of the tutorial*
 
@@ -153,9 +153,9 @@ sudo apt-add-repository https://packages.microsoft.com/ubuntu/18.04/prod
 sudo apt-get update
 ```
 
-2) Install Azure Kinect SDK 1.2
+2) Install Azure Kinect SDK 1.3 (change 1.3 to 1.4 if you do not need body tracking)
 ```
-sudo apt install libk4a1.2 libk4a1.2-dev k4a-tools
+sudo apt install libk4a1.3 libk4a1.3-dev
 ```
 
 3) To be able to use the Kinect as non-root, please run the following:
@@ -164,12 +164,27 @@ wget https://raw.githubusercontent.com/microsoft/Azure-Kinect-Sensor-SDK/develop
 sudo cp 99-k4a.rules /etc/udev/rules.d/
 ```
 
-4) In the current package, the link to the canonical version of the depth lib is missing.
+4 a) If using 1.4, in the current package, the link to the canonical version of the depth lib is missing.
 You can create it by running the following command:
 
 ```
-sudo ln -s /usr/lib/x86_64-linux-gnu/libdepthengine.so.2.0 /usr/lib/x86_64-linux-gnu/libdepthengine.so
+sudo ln -s /usr/lib/x86_64-linux-gnu/libk4a1.4/libdepthengine.so.2.0 /usr/lib/x86_64-linux-gnu/libdepthengine.so
 ```
+
+4 a) If using 1.3, the depth engine is missing from the package.
+Microsoft is aware of the problem, but it only corrected it in 1.4.
+
+https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/docs/depthengine.md
+
+You can get the libdepthengine.so.2.0 file from the package at https://packages.microsoft.com/ubuntu/18.04/prod/pool/main/libk/libk4a1.4/libk4a1.4_1.4.1_amd64.deb. 
+Open with Archive Manager (or equivalent), the file is in (data/./usr/lib/x86_64-linux-gnu/libk4a1.4/), and extract it to `~/libs/lib`.
+You can then perform an equivalent command as above.
+
+```
+cd ~/libs/lib
+ln -s libdepthengine.so.2.0 libdepthengine.so
+```
+
 
 ##### Azure Kinect Body Tracking SDK (optional)
 
@@ -177,7 +192,7 @@ Check instructions above to add the Linux Software Repository for Microsoft Prod
 
 
 ```
-sudo apt install libk4abt0.9-dev
+sudo apt install libk4abt1.0-dev
 ```
 
 
