@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 #endif
       } else if (encoder_type == "zdepth")
         fe =
-            std::shared_ptr<ZDepthEncoder>(new ZDepthEncoder(reader->GetFps()));
+            std::shared_ptr<ZDepthEncoder>(new ZDepthEncoder(v, reader->GetFps()));
       else if (encoder_type == "null")
         fe = std::shared_ptr<NullEncoder>(new NullEncoder(reader->GetFps()));
       else {

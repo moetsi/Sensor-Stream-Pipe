@@ -18,6 +18,7 @@ private:
   std::shared_ptr<FrameStruct> frame_original_;
   std::shared_ptr<FrameStruct> frame_compressed_;
   unsigned int total_frame_counter_;
+  unsigned int send_I_frame_interval_;
   unsigned int fps_;
   unsigned int width_, height_;
   zdepth::DepthCompressor compressor_;
@@ -30,7 +31,7 @@ private:
   std::string stream_id_;
 
 public:
-  ZDepthEncoder(int _fps);
+  ZDepthEncoder(YAML::Node& _codec_parameters, int _fps);
 
   ~ZDepthEncoder();
 

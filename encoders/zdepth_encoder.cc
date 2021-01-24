@@ -4,7 +4,7 @@
 
 #include "zdepth_encoder.h"
 
-ZDepthEncoder::ZDepthEncoder(int _fps) {
+ZDepthEncoder::ZDepthEncoder(YAML::Node& _codec_parameters, int _fps) {
   fps_ = _fps;
   total_frame_counter_ = 0;
   frame_compressed_ = nullptr;
@@ -12,6 +12,13 @@ ZDepthEncoder::ZDepthEncoder(int _fps) {
   codec_params_struct_ = nullptr;
   libav_decoder_ = nullptr;
   sws_context_ = nullptr;
+
+  if (!_codec_parameters["send_I_frame_interval"].IsDefined()) {
+      send_I_frame_interval_ = std::numeric_limits<unsigned int>::max();
+      spdlog::warn("Missing key: \"send_I_frame_interval\", Using default: {}", send_I_frame_interval_);
+  } else {
+      send_I_frame_interval_ = _codec_parameters["send_I_frame_interval"].as<unsigned int>();
+  }
 
   stream_id_ = RandomString(16);
 }
@@ -113,7 +120,7 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
     compressed_buffer_.clear();
     //TODO: send I Frame every X frames to allow decoder to catch up mid stream
     compressor_.Compress(width_, height_, data, compressed_buffer_,
-                        total_frame_counter_ == 0);
+                        (total_frame_counter_ % send_I_frame_interval_) == 0 || total_frame_counter_ == 0);
 
     frame_compressed_->codec_data = *codec_params_struct_;
     frame_compressed_->frame = std::vector<unsigned char>(
