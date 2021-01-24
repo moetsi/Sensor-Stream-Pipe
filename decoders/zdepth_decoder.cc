@@ -14,7 +14,6 @@ void ZDepthDecoder::Init(std::vector<unsigned char> parameter_data) {
 
 cv::Mat ZDepthDecoder::Decode(FrameStruct& frame) {
 
-  //TODO: do not crash on failure, wait for I Frame if mid stream
   zdepth::DepthResult result =
       decompressor_.Decompress(frame.frame, width_, height_, decompressed_buffer_);
   if (result != zdepth::DepthResult::Success) {

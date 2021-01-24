@@ -23,6 +23,7 @@ video_encoder:
     bit_rate: 2000000
   1: #depth
     type: "zdepth"
+    send_I_frame_interval: 30
   2: #ir
     type: "nvenc"
     codec_name: "NVPIPE_HEVC"

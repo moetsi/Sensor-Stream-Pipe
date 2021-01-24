@@ -18,10 +18,5 @@ video_encoder:
       crf: "23"
   1: #depth
     type: "zdepth"
-    codec_name: "libx265"
-    pix_fmt: "gray12le"
-    bit_rate: 8000000
-    options:
-      preset: "veryfast"
-      crf: "21"
+    send_I_frame_interval: 30
     
