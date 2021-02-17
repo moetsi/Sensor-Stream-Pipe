@@ -63,10 +63,6 @@ cp -r cereal-1.2.2/include ~/libs
 
 #### ZeroMQ
 
-If you want to take advantage of ZMQ pulling support to check for new frames, compile ZMQ and CPPZMQ with the [draft API suppport](https://github.com/zeromq/cppzmq/issues/175).
-Also, you must set SSP_WITH_ZMQ_POLLING at SSP build time.
-Discussion available [here](https://github.com/moetsi/Sensor-Stream-Pipe/pull/7)
-
 
 ##### libzmq3 4.3.1
 
@@ -80,6 +76,17 @@ cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=~/libs
 make install -j4
 ```
+
+If you want to take advantage of ZMQ pulling support to check for new frames, compile ZMQ and CPPZMQ with the [draft API suppport](https://github.com/zeromq/cppzmq/issues/175).
+Replace the cmake line with:
+
+```
+cmake .. -DENABLE_DRAFTS=ON -DCMAKE_INSTALL_PREFIX=~/libs
+```
+
+Also, you must set SSP_WITH_ZMQ_POLLING at SSP build time.
+
+
 
 ##### cppzmq 4.3.0
 
