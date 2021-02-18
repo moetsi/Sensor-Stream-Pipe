@@ -43,27 +43,40 @@ int main(int argc, char *argv[]) {
 
   try {
     av_log_set_level(AV_LOG_QUIET);
-
+    
+    //Check to ensure parameter file was provided as argument
     if (argc < 2) {
       std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
       return 1;
     }
 
+    //It is possible to share context among multiple sockets if using multiple sockets
+    //Currently we are only using a single socket
+    //Here we instantiate a socket that will always send frames
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_PUSH);
 
+    //Pull in the path provided as an argument and save as a string
     std::string codec_parameters_file = std::string(argv[1]);
 
+    //Save the config file as a YAML node
+    // (so we can reference different parameters as different types)
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
+    //Grab the "general" section of the config files and save as its own node
     YAML::Node general_parameters = codec_parameters["general"];
     SetupLogging(general_parameters);
 
+    //Save the host and port from the "general" YAML node
+    //This will be used when creating the socket connection
     std::string host = codec_parameters["general"]["host"].as<std::string>();
     unsigned int port = codec_parameters["general"]["port"].as<unsigned int>();
 
+    //We create a pointer to a IReader interface that is currently null
+    //It will get updated below based on the config file
     std::unique_ptr<IReader> reader = nullptr;
 
+    //Here we read the reader_type from the "general" YAML node
     std::string reader_type =
         general_parameters["frame_source"]["type"].as<std::string>();
     if (reader_type == "frames") {

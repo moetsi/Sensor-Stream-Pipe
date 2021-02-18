@@ -32,5 +32,8 @@
 *.app
 bin/
 
+# VS Code
+./vscode
+
 cmake-*/
 .idea/

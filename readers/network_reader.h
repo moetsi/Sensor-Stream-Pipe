@@ -38,6 +38,8 @@ public:
 
   ~NetworkReader();
 
+  //This is a blocking method
+  //Will wait until next frame
   bool HasNextFrame();
 
   void NextFrame();

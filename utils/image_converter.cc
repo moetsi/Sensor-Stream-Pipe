@@ -24,6 +24,7 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
     img_changed = true;
   } else if (f.frame_data_type == 0 || f.frame_data_type == 1) {
 
+    //this is used to link the decoder with the current stream session
     std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
     if (decoders.find(decoder_id) == decoders.end()) {
@@ -51,6 +52,7 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
 
     std::shared_ptr<IDecoder> decoder = decoders[decoder_id];
 
+    //This is where the decoding occurs
     img = decoder->Decode(f);
     img_changed = true;
   }

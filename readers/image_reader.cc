@@ -5,6 +5,7 @@
 #include "image_reader.h"
 
 ImageReader::ImageReader(std::string filename) {
+  // Might be missing frame type
   // bundle_fusion_apt0;0;0;30
 
   // std::string sceneDesc;
