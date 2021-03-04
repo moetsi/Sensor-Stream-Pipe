@@ -5,8 +5,8 @@ general:
   frame_source:
     type: "frames"
     parameters:
-      path: "/home/amourao/code/2019-05_moetsi/davp-data-scripts/apt0-frames-depth.txt"
-      path1: "/home/amourao/code/2019-05_moetsi/davp-data-scripts/stairs-seq-01-frames-depth.txt"
+      path: "../examples/stairs-seq-01-frames-color.txt"
+      path1: "../examples/stairs-seq-01-frames-depth.txt"
 video_encoder:
   0: #color
     type: "libav"
