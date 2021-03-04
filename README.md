@@ -1,4 +1,5 @@
 # [CHECKOUT OUR GITBOOK FOR FULL DOCUMENTATION](https://moetsi.gitbook.io/sensor-stream-pipe/)
+![image](https://user-images.githubusercontent.com/12940507/109909944-06152900-7c75-11eb-91c6-fd52b347617b.png)
 
 # What is Sensor Stream Pipe?
 
