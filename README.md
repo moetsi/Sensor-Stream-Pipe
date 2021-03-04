@@ -1,4 +1,4 @@
-# [CHECKOUT OUR GITBOOK FOR FULL DOCUMENTATION](https://moetsi.gitbook.io/sensor-stream-pipe/)
+# [Checkout the Sensor Stream Pipe gitbook for full documentation](https://moetsi.gitbook.io/sensor-stream-pipe/)
 ![image](https://user-images.githubusercontent.com/12940507/109909944-06152900-7c75-11eb-91c6-fd52b347617b.png)
 
 # What is Sensor Stream Pipe?
@@ -17,7 +17,7 @@ Currently, Moetsi’s Sensor Stream Pipe supports:
 
 We’re planning to support other cameras and devices \(e.g. Kinect v2 and Structure Core\) in the near future. At the same time, we’ve made the Moetsi SSP totally open source so that anyone can build out support for any device.
 
-[CHECKOUT FULL DOCUMENTATION AT OUR GITBOOK](https://moetsi.gitbook.io/sensor-stream-pipe/)
+[Checkout the Sensor Stream Pipe gitbook for full documentation](https://moetsi.gitbook.io/sensor-stream-pipe/)
 
 **Features include:**
 
@@ -40,7 +40,7 @@ If you want to synthesize RGB-D+ data from multiple feeds in real-time, you will
 
 ## Component parts
 
-[CHECKOUT FULL DOCUMENTATION AT OUR GITBOOK](https://moetsi.gitbook.io/sensor-stream-pipe/)
+[Checkout the Sensor Stream Pipe gitbook for full documentation](https://moetsi.gitbook.io/sensor-stream-pipe/)
 
 ### [Sensor Stream Server](https://moetsi.gitbook.io/sensor-stream-pipe/components-overview/sensor-stream-server)
 
