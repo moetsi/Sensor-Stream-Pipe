@@ -1,3 +1,5 @@
+# [CHECKOUT OUR GITBOOK FOR FULL DOCUMENTATION](https://moetsi.gitbook.io/sensor-stream-pipe/)
+
 # What is Sensor Stream Pipe?
 
 Moetsi's Sensor Stream Pipe \(SSP\) is the first open-source C++ modular kit-of-parts that compresses, streams, and processes sensor data \(RGB-D\). It does this by efficiently compressing raw data streams, allowing developers to send multiple video types over the network in real time. Frame data can be sent in its raw form \(JPG/PNG frames\), or compressed using a myriad of codecs, leveraged on FFmpeg/LibAV and NV Codec to considerably reduce bandwidth strain.
@@ -13,6 +15,8 @@ Currently, Moetsi’s Sensor Stream Pipe supports:
 * seminal computer vision/spatial computing datasets \(e.g. [BundleFusion](https://graphics.stanford.edu/projects/bundlefusion/), [MS RGB-D 7 scenes](https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/) and [VSFS](http://graphics.stanford.edu/projects/vsfs/)\)
 
 We’re planning to support other cameras and devices \(e.g. Kinect v2 and Structure Core\) in the near future. At the same time, we’ve made the Moetsi SSP totally open source so that anyone can build out support for any device.
+
+[CHECKOUT FULL DOCUMENTATION AT OUR GITBOOK](https://moetsi.gitbook.io/sensor-stream-pipe/)
 
 **Features include:**
 
@@ -34,6 +38,8 @@ You can use Sensor Stream Server to send compressed sensor data to reduce bandwi
 If you want to synthesize RGB-D+ data from multiple feeds in real-time, you will probably need something like Sensor Stream Pipe.
 
 ## Component parts
+
+[CHECKOUT FULL DOCUMENTATION AT OUR GITBOOK](https://moetsi.gitbook.io/sensor-stream-pipe/)
 
 ### [Sensor Stream Server](https://moetsi.gitbook.io/sensor-stream-pipe/components-overview/sensor-stream-server)
 
