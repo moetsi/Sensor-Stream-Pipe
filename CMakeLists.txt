@@ -8,8 +8,8 @@ include(FetchContent)
 
 FetchContent_Declare(
   ssp_dep
-  URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103081921_1.0-297-f6b2350-dirty_ssp_macdep.tar.gz
-  URL_HASH MD5=4c0f5fd7e975f0d1e1f110c87389673d
+  URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103092244__ssp_macdep.tar.gz
+  URL_HASH MD5=1d825d80ab285a2fe9a1c7f2b2abaf2e
 )
 
 FetchContent_GetProperties(ssp_dep)
@@ -19,15 +19,14 @@ if (NOT ssp_dep_POPULATED)
 endif()
 
 if (ssp_dep_POPULATED)
-  set(cereal_DIR ${ssp_dep_SOURCE_DIR}/cereal/share/cmake/cereal)
-  set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV)
-  set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog)
-  set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp)
-  set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/lib/cmake/ZeroMQ)
-  set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq)
-  set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg)
-  
-  include_directories(${ssp_dep_SOURCE_DIR}/zdepth/include)
+  set(cereal_DIR ${ssp_dep_SOURCE_DIR}/cereal/share/cmake/cereal CACHE PATH "cereal installation path")
+  set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV CACHE PATH "OpenCV installation path")
+  set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog CACHE PATH "spdlog installation path")
+  set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
+  set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/lib/cmake/ZeroMQ CACHE PATH "ZeroMQ installation path")
+  set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
+  set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
+  set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -40,9 +39,7 @@ find_package(spdlog REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(ZeroMQ REQUIRED)
 find_package(cppzmq REQUIRED)
-
-# TODO: create a working FindZdepth.cmake
-#find_package(zdepth REQUIRED)
+find_package(zdepth REQUIRED)
 
 # TODO: modify FindFFmpeg to add this automatically
 include_directories(${FFMPEG_INCLUDE_DIRS})
@@ -120,10 +117,6 @@ add_library(ssp SHARED ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE
     ${FFMPEG_LIBRARIES}
     
-    # TODO: create a working FindZdepth.cmake
-    ${ssp_dep_SOURCE_DIR}/zdepth/lib/libzdepth.a
-    ${ssp_dep_SOURCE_DIR}/zdepth/lib/libzstd.a
-
     # TODO: move this FindFFmpeg.cmake
     -liconv -lm -lbz2 -lz "-framework AudioToolbox"
     -pthread
@@ -141,6 +134,7 @@ target_link_libraries(ssp PUBLIC
     libzmq-static
     cppzmq-static
     ${YAML_CPP_LIBRARIES}
+    zdepth::zdepth
 )
    
 if (SSP_WITH_NVPIPE_SUPPORT)
