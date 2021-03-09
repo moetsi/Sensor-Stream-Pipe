@@ -1,45 +1,59 @@
-cmake_minimum_required(VERSION 3.10.2)
-project(davp-baseline)
+cmake_minimum_required(VERSION 3.11)
+project(ssp)
 
-include_directories("$ENV{HOME}/libs/include")
-link_directories("$ENV{HOME}/libs/lib")
-
-if(CMAKE_COMPILER_IS_GNUCXX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-endif(CMAKE_COMPILER_IS_GNUCXX)
 set(CMAKE_CXX_STANDARD 11)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules" "$ENV{HOME}/libs/lib")
-list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/libs/lib")
+# Download dependencies
+include(FetchContent)
+
+FetchContent_Declare(
+  ssp_dep
+  URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103081921_1.0-297-f6b2350-dirty_ssp_macdep.tar.gz
+  URL_HASH MD5=4c0f5fd7e975f0d1e1f110c87389673d
+)
+
+FetchContent_GetProperties(ssp_dep)
+if (NOT ssp_dep_POPULATED)
+  message(STATUS "Populating SSP dependencies")
+  FetchContent_Populate(ssp_dep)
+endif()
+
+if (ssp_dep_POPULATED)
+  set(cereal_DIR ${ssp_dep_SOURCE_DIR}/cereal/share/cmake/cereal)
+  set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV)
+  set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog)
+  set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp)
+  set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/lib/cmake/ZeroMQ)
+  set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq)
+  set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg)
+  
+  include_directories(${ssp_dep_SOURCE_DIR}/zdepth/include)
+endif()
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(Threads REQUIRED)
-find_package(OpenCV REQUIRED)
-find_package(FFmpeg REQUIRED)
+find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
+find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
+find_package(cereal REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(yaml-cpp REQUIRED)
+find_package(ZeroMQ REQUIRED)
+find_package(cppzmq REQUIRED)
 
-if (FFMPEG_FOUND)
-    #  FFMPEG_INCLUDE_DIRS  - Include directory necessary for using the required components headers.
-    #  FFMPEG_LIBRARIES     - Link these to use the required ffmpeg components.
-    #  FFMPEG_DEFINITIONS   - Compiler switches required for using the required ffmpeg components.
-    message("FFMPEG_INCLUDE_DIRS = ${FFMPEG_INCLUDE_DIRS} ")
-    message("FFMPEG_LIBRARIES = ${FFMPEG_LIBRARIES} ")
-    message("FFMPEG_DEFINITIONS = ${FFMPEG_DEFINITIONS} ")
-endif ()
+# TODO: create a working FindZdepth.cmake
+#find_package(zdepth REQUIRED)
+
+# TODO: modify FindFFmpeg to add this automatically
+include_directories(${FFMPEG_INCLUDE_DIRS})
 
 set(EXECUTABLE_OUTPUT_PATH bin)
+set(LIBRARY_OUTPUT_PATH lib)
 
-option(SSP_WITH_KINECT_SUPPORT "This is settable from the command line" ON)
-option(SSP_WITH_K4A_BODYTRACK "This is settable from the command line" ON)
-option(SSP_WITH_NVPIPE_SUPPORT "This is settable from the command line" ON)
-option(SSP_WITH_ZMQ_POLLING "This is settable from the command line" OFF)
-
-
-if (SSP_WITH_NVPIPE_SUPPORT)
-    add_definitions(-DSSP_WITH_NVPIPE_SUPPORT=1)
-endif ()
-
-if (SSP_WITH_KINECT_SUPPORT)
-    add_definitions(-DSSP_WITH_KINECT_SUPPORT=1)
-endif ()
+option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" OFF)
+option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" OFF)
+option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
+option(SSP_WITH_ZMQ_POLLING "Compile with ZeroMQ polling" OFF)
 
 if (SSP_WITH_K4A_BODYTRACK)
     add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
@@ -49,80 +63,114 @@ if (SSP_WITH_ZMQ_POLLING)
     add_definitions(-DSSP_WITH_ZMQ_POLLING=1)
 endif ()
 
-set(SOURCE_FILES readers/image_reader.cc readers/multi_image_reader.cc structs/frame_struct.hpp utils/utils.cc utils/video_utils.cc utils/image_decoder.cc utils/image_converter.cc)
-set(DECODER_SOURCE_FILES decoders/libav_decoder.cc decoders/zdepth_decoder.cc)
-set(ENCODER_SOURCE_FILES encoders/zdepth_encoder.cc encoders/null_encoder.cc encoders/libav_encoder.cc)
-set(READER_SOURCE_FILES readers/video_file_reader.cc readers/image_reader.cc)
+#########################
+### Build the library
+#########################
 
-set(KINECT_READER_SOURCE_FILES readers/kinect_reader.cc utils/kinect_utils.cc)
-set(NVPIPE_ENCODER_SOURCE_FILES encoders/nv_encoder.cc)
-set(NVPIPE_DECODER_SOURCE_FILES decoders/nv_decoder.cc)
+set(SOURCE_FILES
+    readers/image_reader.cc
+    readers/image_reader.h
+    readers/multi_image_reader.cc
+    readers/multi_image_reader.h
+    structs/frame_struct.hpp
+    utils/image_converter.cc
+    utils/image_converter.h
+    utils/image_decoder.cc
+    utils/image_decoder.h
+    utils/libav_types.h
+    utils/logger.h
+    utils/similarity_measures.cc
+    utils/similarity_measures.h
+    utils/utils.cc
+    utils/utils.h
+    utils/video_utils.cc
+    utils/video_utils.h
+
+    decoders/libav_decoder.cc
+    decoders/libav_decoder.h
+    decoders/zdepth_decoder.cc
+    decoders/zdepth_decoder.h
+
+    encoders/zdepth_encoder.cc
+    encoders/zdepth_encoder.h
+    encoders/null_encoder.cc
+    encoders/null_encoder.h
+    encoders/libav_encoder.cc
+    encoders/libav_encoder.h
+
+    readers/video_file_reader.cc
+    readers/video_file_reader.h
+    readers/image_reader.cc
+    readers/image_reader.h
+    readers/network_reader.cc
+    readers/network_reader.h
+)
 
 if (SSP_WITH_NVPIPE_SUPPORT)
-    set(DECODER_SOURCE_FILES ${DECODER_SOURCE_FILES} ${NVPIPE_DECODER_SOURCE_FILES})
-    set(ENCODER_SOURCE_FILES ${ENCODER_SOURCE_FILES} ${NVPIPE_ENCODER_SOURCE_FILES})
+    add_definitions(-DSSP_WITH_NVPIPE_SUPPORT=1)
+    list(APPEND SOURCE_FILES encoders/nv_encoder.cc decoders/nv_decoder.cc)
 endif ()
 
 if (SSP_WITH_KINECT_SUPPORT)
-    set(READER_SOURCE_FILES ${READER_SOURCE_FILES} readers/kinect_reader.cc utils/kinect_utils.cc)
-    set(CLIENT_EXTRA_SOURCE_FILES ${CLIENT_EXTRA_SOURCE_FILES} utils/kinect_utils.cc)
+    add_definitions(-DSSP_WITH_KINECT_SUPPORT=1)
+    list(APPEND SOURCE_FILES readers/kinect_reader.cc utils/kinect_utils.cc)
 endif ()
 
-add_executable(ssp_client_opencv clients/ssp_client_opencv.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
-add_executable(ssp_client_template clients/ssp_client_template.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
-add_executable(ssp_server servers/ssp_server.cc ${READER_SOURCE_FILES} ${DECODER_SOURCE_FILES} ${ENCODER_SOURCE_FILES} ${SOURCE_FILES})
-add_executable(ssp_tester testers/ssp_tester.cc utils/similarity_measures.cc ${READER_SOURCE_FILES} ${DECODER_SOURCE_FILES} ${ENCODER_SOURCE_FILES} ${SOURCE_FILES})
+add_library(ssp SHARED ${SOURCE_FILES})
+target_link_libraries(ssp PRIVATE
+    ${FFMPEG_LIBRARIES}
+    
+    # TODO: create a working FindZdepth.cmake
+    ${ssp_dep_SOURCE_DIR}/zdepth/lib/libzdepth.a
+    ${ssp_dep_SOURCE_DIR}/zdepth/lib/libzstd.a
 
-set(LIB_FILES zmq zdepth zstd yaml-cpp swscale)
+    # TODO: move this FindFFmpeg.cmake
+    -liconv -lm -lbz2 -lz "-framework AudioToolbox"
+    -pthread
+    "-framework VideoToolbox"
+    "-framework CoreFoundation"
+    "-framework CoreMedia"
+    "-framework CoreVideo"
+    "-framework CoreServices"
+)
 
-set(NVPIPE_LIB_FILES NvPipe)
-set(KINECT_LIB_FILES k4a k4arecord depthengine)
-set(K4A_BODYTRACK_LIB_FILES k4abt)
-
-target_link_libraries(ssp_client_opencv ${LIB_FILES})
-target_link_libraries(ssp_client_opencv ${FFMPEG_LIBRARIES})
-target_link_libraries(ssp_client_opencv ${OpenCV_LIBS})
-
-target_link_libraries(ssp_client_template ${LIB_FILES})
-target_link_libraries(ssp_client_template ${FFMPEG_LIBRARIES})
-target_link_libraries(ssp_client_template ${OpenCV_LIBS})
-
-target_link_libraries(ssp_server ${LIB_FILES})
-target_link_libraries(ssp_server ${FFMPEG_LIBRARIES})
-target_link_libraries(ssp_server ${OpenCV_LIBS})
-
-target_link_libraries(ssp_tester ${LIB_FILES})
-target_link_libraries(ssp_tester ${FFMPEG_LIBRARIES})
-target_link_libraries(ssp_tester ${OpenCV_LIBS})
-
+target_link_libraries(ssp PUBLIC
+    cereal
+    ${OpenCV_LIBS}
+    spdlog::spdlog
+    libzmq-static
+    cppzmq-static
+    ${YAML_CPP_LIBRARIES}
+)
+   
 if (SSP_WITH_NVPIPE_SUPPORT)
-    target_link_libraries(ssp_client_opencv ${NVPIPE_LIB_FILES})
-    target_link_libraries(ssp_client_template ${NVPIPE_LIB_FILES})
-    target_link_libraries(ssp_server ${NVPIPE_LIB_FILES})
-    target_link_libraries(ssp_tester ${NVPIPE_LIB_FILES})
+    target_link_libraries(ssp PUBLIC NvPipe)
 endif ()
 
 if (SSP_WITH_KINECT_SUPPORT)
-    target_link_libraries(ssp_server ${KINECT_LIB_FILES})
-    target_link_libraries(ssp_tester ${KINECT_LIB_FILES})
+    target_link_libraries(ssp PUBLIC k4a k4arecord depthengine)
 endif ()
+
+#############################
+### Build the applications
+#############################
+
+add_executable(ssp_client_opencv clients/ssp_client_opencv.cc)
+target_link_libraries(ssp_client_opencv ssp)
+
+add_executable(ssp_client_template clients/ssp_client_template.cc)
+target_link_libraries(ssp_client_template ssp)
+
+add_executable(ssp_server servers/ssp_server.cc)
+target_link_libraries(ssp_server ssp)
+
+add_executable(ssp_tester testers/ssp_tester.cc)
+target_link_libraries(ssp_tester ssp)
 
 if (SSP_WITH_K4A_BODYTRACK)
-    add_executable(ssp_client_k4a clients/ssp_client_k4a.cc utils/kinect_utils.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
-    add_executable(ssp_client_pointcloud clients/ssp_client_pointcloud.cc utils/kinect_utils.cc readers/network_reader.cc ${DECODER_SOURCE_FILES} ${SOURCE_FILES} ${CLIENT_SOURCE_FILES})
-    if (SSP_WITH_NVPIPE_SUPPORT)
-        target_link_libraries(ssp_client_k4a ${NVPIPE_LIB_FILES})
-        target_link_libraries(ssp_client_pointcloud ${NVPIPE_LIB_FILES})
-    endif ()
-    target_link_libraries(ssp_client_k4a ${LIB_FILES})
-    target_link_libraries(ssp_client_k4a ${FFMPEG_LIBRARIES})
-    target_link_libraries(ssp_client_k4a ${OpenCV_LIBS})
-    target_link_libraries(ssp_client_k4a ${KINECT_LIB_FILES})
-    target_link_libraries(ssp_client_k4a ${K4A_BODYTRACK_LIB_FILES})
+    add_executable(ssp_client_k4a clients/ssp_client_k4a.cc)
+    target_link_libraries(ssp_client_k4a ssp k4abt)
 
-    target_link_libraries(ssp_client_pointcloud ${LIB_FILES})
-    target_link_libraries(ssp_client_pointcloud ${FFMPEG_LIBRARIES})
-    target_link_libraries(ssp_client_pointcloud ${OpenCV_LIBS})
-    target_link_libraries(ssp_client_pointcloud ${KINECT_LIB_FILES})
-    target_link_libraries(ssp_client_pointcloud ${K4A_BODYTRACK_LIB_FILES})
+    add_executable(ssp_client_pointcloud clients/ssp_client_pointcloud.cc)
+    target_link_libraries(ssp_client_pointcloud ssp k4abt)
 endif ()
