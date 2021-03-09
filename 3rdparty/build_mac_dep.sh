@@ -116,8 +116,13 @@ function build_spdlog {
 # https://github.com/catid/Zdepth
 function build_zdepth {
     echo "Building zdepth"
-    git clone --depth 1 https://github.com/catid/Zdepth.git
+    git clone https://github.com/catid/Zdepth.git
     pushd Zdepth
+    git checkout b54b1c6ebd17
+
+    # Patch cmake install
+    patch -p1 < $SOURCE_DIR/zdepth.patch
+
     mkdir build && cd build
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
