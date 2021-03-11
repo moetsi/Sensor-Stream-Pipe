@@ -118,10 +118,8 @@ function build_zdepth {
     echo "Building zdepth"
     git clone https://github.com/catid/Zdepth.git
     pushd Zdepth
-    git checkout b54b1c6ebd17
-
-    # Patch cmake install
-    patch -p1 < $SOURCE_DIR/zdepth.patch
+    # Commit including our cmake patch
+    git checkout 9b333d9aec520
 
     mkdir build && cd build
     cmake \
@@ -193,10 +191,6 @@ function build_cppzmq {
     popd
 }
 
-# Where we install all our dependencies
-export LOCAL_DIR=$HOME/local.ssp
-mkdir -p ${LOCAL_DIR}
-
 export SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd | sed -e 's,^/c/,c:/,')"
 
 echo "Cleaning tmp directory"
@@ -207,6 +201,10 @@ if [ $? -ne 0 ]; then
 fi
 mkdir tmp
 pushd tmp
+
+# Where we install all our dependencies
+export LOCAL_DIR=`pwd`/local.ssp
+mkdir -p ${LOCAL_DIR}
 
 export MACOSX_DEPLOYMENT_TARGET="10.11"
 
