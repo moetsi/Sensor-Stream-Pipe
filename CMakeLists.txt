@@ -6,11 +6,19 @@ set(CMAKE_CXX_STANDARD 11)
 # Download dependencies
 include(FetchContent)
 
-FetchContent_Declare(
-  ssp_dep
-  URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103092244__ssp_macdep.tar.gz
-  URL_HASH MD5=1d825d80ab285a2fe9a1c7f2b2abaf2e
-)
+if (APPLE)
+  FetchContent_Declare(
+    ssp_dep
+    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103092244__ssp_macdep.tar.gz
+    URL_HASH MD5=1d825d80ab285a2fe9a1c7f2b2abaf2e
+  )
+elseif (WIN32)
+  FetchContent_Declare(
+    ssp_dep
+    URL file://c:/Users/david/src/Sensor-Stream-Pipe/3rdparty/202103121929__ssp_macdep.tar.gz
+    URL_HASH MD5=34d922b7c2af6da987ec2b275aaafb30
+  )
+endif()
 
 FetchContent_GetProperties(ssp_dep)
 if (NOT ssp_dep_POPULATED)
@@ -19,17 +27,27 @@ if (NOT ssp_dep_POPULATED)
 endif()
 
 if (ssp_dep_POPULATED)
+  message(STATUS "Using SSP dependencies")
   set(cereal_DIR ${ssp_dep_SOURCE_DIR}/cereal/share/cmake/cereal CACHE PATH "cereal installation path")
-  set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV CACHE PATH "OpenCV installation path")
+  if (WIN32)
+    set(OpenCV_STATIC ON)
+    set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv CACHE PATH "OpenCV installation path")
+    set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/CMake CACHE PATH "ZeroMQ installation path")
+  else()
+    set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV CACHE PATH "OpenCV installation path")
+    set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/lib/cmake/ZeroMQ CACHE PATH "ZeroMQ installation path")
+  endif()
   set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog CACHE PATH "spdlog installation path")
   set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
-  set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/lib/cmake/ZeroMQ CACHE PATH "ZeroMQ installation path")
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Parallel build with VisualStudio
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 
 find_package(Threads REQUIRED)
 find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
@@ -113,10 +131,13 @@ if (SSP_WITH_KINECT_SUPPORT)
     list(APPEND SOURCE_FILES readers/kinect_reader.cc utils/kinect_utils.cc)
 endif ()
 
-add_library(ssp SHARED ${SOURCE_FILES})
+add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE
     ${FFMPEG_LIBRARIES}
-    
+    )
+
+if (APPLE)
+target_link_libraries(ssp PRIVATE
     # TODO: move this FindFFmpeg.cmake
     -liconv -lm -lbz2 -lz "-framework AudioToolbox"
     -pthread
@@ -125,7 +146,8 @@ target_link_libraries(ssp PRIVATE
     "-framework CoreMedia"
     "-framework CoreVideo"
     "-framework CoreServices"
-)
+    )
+endif()
 
 target_link_libraries(ssp PUBLIC
     cereal

@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
   spdlog::set_level(spdlog::level::debug);
 
-  srand(time(NULL) * getpid());
+  srand(time(NULL));
 
   try {
     av_log_set_level(AV_LOG_QUIET);

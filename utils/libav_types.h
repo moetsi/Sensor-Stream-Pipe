@@ -73,9 +73,9 @@ struct AVIOContextDeleter {
   }
 };
 
-auto AVFrameSharedDeleter = [](AVFrame *ptr) { av_frame_free(&ptr); };
+static auto AVFrameSharedDeleter = [](AVFrame *ptr) { av_frame_free(&ptr); };
 
-auto AVPacketSharedDeleter = [](AVPacket *ptr) { av_packet_free(&ptr); };
+static auto AVPacketSharedDeleter = [](AVPacket *ptr) { av_packet_free(&ptr); };
 
 typedef std::unique_ptr<AVFrame, AVFrameDeleter> AVFrameSafeP;
 typedef std::shared_ptr<AVFrame> AVFrameSharedP;

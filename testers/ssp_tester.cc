@@ -53,8 +53,7 @@ int main(int argc, char *argv[]) {
   spdlog::set_level(spdlog::level::debug);
   av_log_set_level(AV_LOG_QUIET);
 
-  srand(time(NULL) * getpid());
-  // srand(getpid());
+  srand(time(NULL));
 
   std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 

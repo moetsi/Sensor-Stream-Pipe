@@ -7,23 +7,44 @@
 # - CMake
 #
 
-function install_nasm {
-    echo "Install nasm"
+function install_yasm {
+    echo "Install yasm"
     curl -L -O \
-      https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/macosx/nasm-2.15.05-macosx.zip
-    unzip nasm-2.15.05-macosx.zip
-    export PATH=`pwd`/nasm-2.15.05:$PATH
-    nasm --version
+      http://www.tortall.net/projects/yasm/releases/yasm-1.3.0-win64.exe
+
+    mkdir bin
+    mv yasm-1.3.0-win64.exe bin/yasm.exe
+    export PATH=`pwd`/bin:$PATH
+    yasm --version
 }
 
-# Disable securetransport to be compatible with Apple AppStore
 function build_ffmpeg {
     echo "Building ffmpeg"
+
+    export FFMPEG_NAME=ffmpeg-n4.3.2-160-gfbb9368226-win64-lgpl-shared-4.3
+    curl -L -O \
+      https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-03-12-12-32/${FFMPEG_NAME}.zip
+    unzip -d ${LOCAL_DIR} ${FFMPEG_NAME}.zip
+
+    mv ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
+    return
+
     git clone --depth 1 --branch release/4.3 \
          https://git.ffmpeg.org/ffmpeg.git ffmpeg
     pushd ffmpeg
+
     ./configure --prefix=${LOCAL_DIR}/ffmpeg \
-        --disable-securetransport
+         --target-os=win64 --arch=x86_64 --toolchain=msvc \
+         --disable-gpl \
+         --enable-runtime-cpudetect \
+         --enable-yasm \
+         --enable-asm \
+         --enable-w32threads \
+         --disable-programs \
+         --disable-ffserver \
+         --disable-ffmpeg \
+         --disable-ffplay \
+         --disable-ffprobe
     make -j12
     make install
     popd
@@ -41,6 +62,7 @@ function build_opencv {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_WITH_STATIC_CRT=OFF \
         -DBUILD_opencv_apps:BOOL=OFF \
         -DBUILD_opencv_calib3d:BOOL=OFF \
         -DBUILD_opencv_core:BOOL=ON \
@@ -215,8 +237,8 @@ mkdir -p ${LOCAL_DIR}
 
 [ ${BUILD_DEBUG} ] && echo "Build Release+Debug version" || echo "Build only Release version"
 
-#install_nasm
-#build_ffmpeg
+#install_yasm
+build_ffmpeg
 build_opencv
 build_cereal
 build_spdlog
@@ -224,8 +246,6 @@ build_zdepth
 build_yaml_cpp
 build_libzmq
 build_cppzmq
-
-exit
 
 version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
 prefix=`date +%Y%m%d%H%M`
