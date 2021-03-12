@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.11...3.19)
 project(ssp)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -65,14 +65,50 @@ include_directories(${FFMPEG_INCLUDE_DIRS})
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBRARY_OUTPUT_PATH lib)
 
-option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" OFF)
-option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" OFF)
-option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
+if (WIN32)
+    option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" ON)
+    option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" ON)
+    option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" ON)
+else()
+    option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" OFF)
+    option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" OFF)
+    option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
+endif()
 option(SSP_WITH_ZMQ_POLLING "Compile with ZeroMQ polling" OFF)
 
+if (SSP_WITH_NVPIPE_SUPPORT)
+    find_package(NvPipe)
+
+    # If not found disable NvPipe support
+    if (NvPipe_FOUND)
+        add_definitions(-DSSP_WITH_NVPIPE_SUPPORT=1)
+    else()
+        set(SSP_WITH_NVPIPE_SUPPORT OFF)
+        message(STATUS "Setting SSP_WITH_NVPIPE_SUPPORT to OFF")
+    endif()
+endif()
+
+if (SSP_WITH_KINECT_SUPPORT)
+    find_package(k4a)
+
+    if (k4a_FOUND)
+        add_definitions(-DSSP_WITH_KINECT_SUPPORT=1)
+    else()
+        set(SSP_WITH_KINECT_SUPPORT OFF)
+        message(STATUS "Setting SSP_WITH_KINECT_SUPPORT to OFF")
+    endif()
+endif()
+
 if (SSP_WITH_K4A_BODYTRACK)
-    add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
-endif ()
+    find_package(k4abt)
+
+    if (k4abt_FOUND)
+        add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
+    else()
+        set(SSP_WITH_K4A_BODYTRACK OFF)
+        message(STATUS "Setting SSP_WITH_K4A_BODYTRACK to OFF")
+    endif()
+endif()
 
 if (SSP_WITH_ZMQ_POLLING)
     add_definitions(-DSSP_WITH_ZMQ_POLLING=1)
@@ -122,19 +158,15 @@ set(SOURCE_FILES
 )
 
 if (SSP_WITH_NVPIPE_SUPPORT)
-    add_definitions(-DSSP_WITH_NVPIPE_SUPPORT=1)
     list(APPEND SOURCE_FILES encoders/nv_encoder.cc decoders/nv_decoder.cc)
 endif ()
 
 if (SSP_WITH_KINECT_SUPPORT)
-    add_definitions(-DSSP_WITH_KINECT_SUPPORT=1)
     list(APPEND SOURCE_FILES readers/kinect_reader.cc utils/kinect_utils.cc)
 endif ()
 
 add_library(ssp STATIC ${SOURCE_FILES})
-target_link_libraries(ssp PRIVATE
-    ${FFMPEG_LIBRARIES}
-    )
+target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
 
 if (APPLE)
 target_link_libraries(ssp PRIVATE
@@ -158,9 +190,9 @@ target_link_libraries(ssp PUBLIC
     ${YAML_CPP_LIBRARIES}
     zdepth::zdepth
 )
-   
+
 if (SSP_WITH_NVPIPE_SUPPORT)
-    target_link_libraries(ssp PUBLIC NvPipe)
+    target_link_libraries(ssp PUBLIC NvPipe::NvPipe)
 endif ()
 
 if (SSP_WITH_KINECT_SUPPORT)
