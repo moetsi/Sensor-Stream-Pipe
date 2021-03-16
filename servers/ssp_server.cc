@@ -5,8 +5,10 @@
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
+#define SSP_EXPORT __declspec(dllexport)
 #else
 #include <unistd.h>
+#define SSP_EXPORT
 #endif
 
 #include "../utils/logger.h"
@@ -35,24 +37,15 @@
 #include "../utils/kinect_utils.h"
 #endif
 
-int main(int argc, char *argv[]) {
-
-  spdlog::set_level(spdlog::level::debug);
-
-  srand(time(NULL));
+extern "C" SSP_EXPORT int ssp_server(char* filename)
+{
+  av_log_set_level(AV_LOG_QUIET);
 
   try {
-    av_log_set_level(AV_LOG_QUIET);
-
-    if (argc < 2) {
-      std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
-      return 1;
-    }
-
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_PUSH);
 
-    std::string codec_parameters_file = std::string(argv[1]);
+    std::string codec_parameters_file = std::string(filename);
 
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
@@ -97,13 +90,13 @@ int main(int argc, char *argv[]) {
           general_parameters["frame_source"]["parameters"]);
       reader = std::unique_ptr<KinectReader>(new KinectReader(0, c));
 #else
-      exit(1);
+      return 1;
 #endif
     } else {
       spdlog::error("Unknown reader type: \"{}\". Supported types are "
                     "\"frames\", \"video\" and \"kinect\"",
                     reader_type);
-      exit(1);
+      return 1;
     }
 
     std::unordered_map<unsigned int, std::shared_ptr<IEncoder>> encoders;
@@ -123,7 +116,7 @@ int main(int argc, char *argv[]) {
 #else
         spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
                       "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
-        exit(1);
+        return 1;
 #endif
       } else if (encoder_type == "zdepth")
         fe =
@@ -134,7 +127,7 @@ int main(int argc, char *argv[]) {
         spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                       "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
                       encoder_type);
-        exit(1);
+        return 1;
       }
       encoders[type] = fe;
     }
@@ -248,3 +241,19 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
+#ifndef SSP_PLUGIN
+int main(int argc, char *argv[]) {
+
+  spdlog::set_level(spdlog::level::debug);
+
+  srand(time(NULL));
+
+  if (argc < 2) {
+    std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
+    return 1;
+  }
+    
+  return ssp_server(argv[1]);
+}
+#endif

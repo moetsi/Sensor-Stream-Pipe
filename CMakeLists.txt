@@ -199,6 +199,10 @@ target_link_libraries(ssp_client_template ssp)
 add_executable(ssp_server servers/ssp_server.cc)
 target_link_libraries(ssp_server ssp)
 
+add_library(ssp_plugin MODULE servers/ssp_server.cc)
+target_compile_definitions(ssp_plugin PRIVATE SSP_PLUGIN)
+target_link_libraries(ssp_plugin ssp)
+
 add_executable(ssp_tester testers/ssp_tester.cc)
 target_link_libraries(ssp_tester ssp)
 
