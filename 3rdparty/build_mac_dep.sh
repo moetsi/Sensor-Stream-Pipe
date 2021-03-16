@@ -23,10 +23,47 @@ function build_ffmpeg {
          https://git.ffmpeg.org/ffmpeg.git ffmpeg
     pushd ffmpeg
     ./configure --prefix=${LOCAL_DIR}/ffmpeg \
+        --disable-gpl \
+        --enable-asm \
+        --disable-static \
+        --enable-shared \
+        --enable-rpath \
+        --disable-programs \
+        --disable-ffmpeg \
+        --disable-ffplay \
+        --disable-ffprobe \
         --disable-securetransport
     make -j12
     make install
     popd
+}
+
+# Inspired from http://clarkkromenaker.com/post/library-dynamic-loading-mac/
+function fix_ffmpeg {
+    libs=( libavcodec.58.dylib \
+           libavdevice.58.dylib \
+           libavfilter.7.dylib \
+           libavformat.58.dylib \
+           libavutil.56.dylib \
+           libswresample.3.dylib \
+           libswscale.5.dylib \
+           )
+
+    for lib in ${libs[@]}; do
+        echo "===== Processing $lib"
+        # Change lib ID
+        install_name_tool -id @rpath/$lib ${LOCAL_DIR}/ffmpeg/lib/$lib
+
+        # List local dependencies
+        local_libs=`otool -L ${LOCAL_DIR}/ffmpeg/lib/$lib | fgrep ${LOCAL_DIR} | grep -v '\:' | awk '{print $1}' `
+
+        # Update ffmpeg dependencies
+        for l in $local_libs; do
+            filename=`basename "$l"`
+            echo "    $l $filename"
+            install_name_tool -change $l @rpath/$filename ${LOCAL_DIR}/ffmpeg/lib/$lib
+        done
+    done
 }
 
 # Build minimal OpenCV : core imgproc
@@ -210,6 +247,7 @@ export MACOSX_DEPLOYMENT_TARGET="10.11"
 
 install_nasm
 build_ffmpeg
+fix_ffmpeg
 build_opencv
 build_cereal
 build_spdlog

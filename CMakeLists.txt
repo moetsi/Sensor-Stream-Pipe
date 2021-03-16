@@ -9,8 +9,8 @@ include(FetchContent)
 if (APPLE)
   FetchContent_Declare(
     ssp_dep
-    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103092244__ssp_macdep.tar.gz
-    URL_HASH MD5=1d825d80ab285a2fe9a1c7f2b2abaf2e
+    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103161130__ssp_macdep.tar.gz
+    URL_HASH MD5=8cdef0d14b1ef3be77f2a023fd399ee0
   )
 elseif (WIN32)
   FetchContent_Declare(
@@ -167,19 +167,6 @@ endif ()
 
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
-
-if (APPLE)
-target_link_libraries(ssp PRIVATE
-    # TODO: move this FindFFmpeg.cmake
-    -liconv -lm -lbz2 -lz "-framework AudioToolbox"
-    -pthread
-    "-framework VideoToolbox"
-    "-framework CoreFoundation"
-    "-framework CoreMedia"
-    "-framework CoreVideo"
-    "-framework CoreServices"
-    )
-endif()
 
 target_link_libraries(ssp PUBLIC
     cereal
