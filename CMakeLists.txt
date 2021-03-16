@@ -199,7 +199,11 @@ target_link_libraries(ssp_client_template ssp)
 add_executable(ssp_server servers/ssp_server.cc)
 target_link_libraries(ssp_server ssp)
 
-add_library(ssp_plugin MODULE servers/ssp_server.cc)
+add_library(ssp_plugin MODULE
+    servers/ssp_server.cc
+    clients/ssp_client_opencv.cc
+    clients/ssp_client_template.cc
+)
 target_compile_definitions(ssp_plugin PRIVATE SSP_PLUGIN)
 target_link_libraries(ssp_plugin ssp)
 

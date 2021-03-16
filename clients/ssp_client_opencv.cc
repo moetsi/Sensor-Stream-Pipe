@@ -8,8 +8,10 @@
 
 #ifdef _WIN32
 #include <io.h>
+#define SSP_EXPORT __declspec(dllexport)
 #else
 #include <unistd.h>
+#define SSP_EXPORT
 #endif 
 
 #include <opencv2/imgproc.hpp>
@@ -29,29 +31,11 @@ extern "C" {
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
 
-int main(int argc, char *argv[]) {
-
-  spdlog::set_level(spdlog::level::debug);
+extern "C" SSP_EXPORT int ssp_client_opencv(int port)
+{
   av_log_set_level(AV_LOG_QUIET);
 
-  srand(time(NULL));
-
   try {
-
-    if (argc < 2) {
-      std::cerr << "Usage: ssp_client_opencv <port> (<log level>) (<log file>)"
-                << std::endl;
-      return 1;
-    }
-    std::string log_level = "debug";
-    std::string log_file = "";
-
-    if (argc > 2)
-      log_level = argv[2];
-    if (argc > 3)
-      log_file = argv[3];
-
-    int port = std::stoi(argv[1]);
     NetworkReader reader(port);
 
     reader.init();
@@ -100,3 +84,30 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
+#ifndef SSP_PLUGIN
+int main(int argc, char *argv[]) {
+
+  spdlog::set_level(spdlog::level::debug);
+
+  srand(time(NULL));
+    
+  if (argc < 2) {
+    std::cerr << "Usage: ssp_client_opencv <port> (<log level>) (<log file>)"
+              << std::endl;
+    return 1;
+  }
+  std::string log_level = "debug";
+  std::string log_file = "";
+
+  if (argc > 2)
+    log_level = argv[2];
+  if (argc > 3)
+    log_file = argv[3];
+
+  int port = std::stoi(argv[1]);
+    
+  return ssp_client_opencv(port);
+}
+#endif
+
