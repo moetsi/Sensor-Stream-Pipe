@@ -3,6 +3,16 @@ project(ssp)
 
 set(CMAKE_CXX_STANDARD 11)
 
+# Set default build type to Release if none is defined
+set(default_build_type "Release")
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
+  set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
 # Download dependencies
 include(FetchContent)
 
@@ -190,6 +200,14 @@ endif ()
 ### Build the applications
 #############################
 
+add_library(ssp_plugin MODULE
+    servers/ssp_server.cc
+    clients/ssp_client_opencv.cc
+    clients/ssp_client_template.cc
+)
+target_compile_definitions(ssp_plugin PRIVATE SSP_PLUGIN)
+target_link_libraries(ssp_plugin ssp)
+
 add_executable(ssp_client_opencv clients/ssp_client_opencv.cc)
 target_link_libraries(ssp_client_opencv ssp)
 
@@ -198,14 +216,6 @@ target_link_libraries(ssp_client_template ssp)
 
 add_executable(ssp_server servers/ssp_server.cc)
 target_link_libraries(ssp_server ssp)
-
-add_library(ssp_plugin MODULE
-    servers/ssp_server.cc
-    clients/ssp_client_opencv.cc
-    clients/ssp_client_template.cc
-)
-target_compile_definitions(ssp_plugin PRIVATE SSP_PLUGIN)
-target_link_libraries(ssp_plugin ssp)
 
 add_executable(ssp_tester testers/ssp_tester.cc)
 target_link_libraries(ssp_tester ssp)
@@ -216,4 +226,7 @@ if (SSP_WITH_K4A_BODYTRACK)
 
     add_executable(ssp_client_pointcloud clients/ssp_client_pointcloud.cc)
     target_link_libraries(ssp_client_pointcloud ssp k4abt)
+    
+    target_sources(ssp_plugin PRIVATE clients/ssp_client_k4a.cc clients/ssp_client_pointcloud.cc)
+    target_link_libraries(ssp_plugin ssp k4abt)
 endif ()
