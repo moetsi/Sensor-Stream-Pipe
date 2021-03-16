@@ -25,8 +25,8 @@ if (APPLE)
 elseif (WIN32)
   FetchContent_Declare(
     ssp_dep
-    URL file://c:/Users/david/src/Sensor-Stream-Pipe/3rdparty/202103121929__ssp_macdep.tar.gz
-    URL_HASH MD5=34d922b7c2af6da987ec2b275aaafb30
+    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103161828__ssp_windep.tar.gz
+    URL_HASH MD5=b8bbae0698a4a782ceef5ed6697c456f
   )
 endif()
 

@@ -249,7 +249,7 @@ build_cppzmq
 
 version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
 prefix=`date +%Y%m%d%H%M`
-filename=${prefix}_${version}_ssp_macdep
+filename=${prefix}_${version}_ssp_windep
 
 echo "Packing ${LOCAL_DIR} to ${filename}.tar"
 tar -C ${LOCAL_DIR} -cf ${filename}.tar \
