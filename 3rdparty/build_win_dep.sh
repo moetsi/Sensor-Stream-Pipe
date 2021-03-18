@@ -218,6 +218,29 @@ function build_cppzmq {
     popd
 }
 
+# https://github.com/microsoft/Azure-Kinect-Sensor-SDK
+function build_k4a {
+    echo "Building Azure Kinect Sensor SDK"
+    git clone --depth 1 --branch v1.4.1 \
+        https://github.com/microsoft/Azure-Kinect-Sensor-SDK.git
+    pushd Azure-Kinect-Sensor-SDK
+
+    # Use our version of spdlog
+    patch -p1 < $SOURCE_DIR/k4a.patch
+
+    mkdir build && cd build
+    CFLAGS="-MP" CXXFLAGS="-MP" cmake \
+        -G "Visual Studio 15 2017 Win64" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/k4a \
+        -Dspdlog_DIR=${LOCAL_DIR}/spdlog/lib/cmake/spdlog \
+        -DBUILD_TESTING=OFF \
+        ..
+    cmake --build . --config Release --target install
+    cd ..
+    popd
+}
+
 export SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd | sed -e 's,^/c/,c:/,')"
 
 echo "Cleaning tmp directory"
@@ -246,6 +269,7 @@ build_zdepth
 build_yaml_cpp
 build_libzmq
 build_cppzmq
+build_k4a
 
 version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
 prefix=`date +%Y%m%d%H%M`
@@ -256,6 +280,7 @@ tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   cereal \
   cppzmq \
   ffmpeg \
+  k4a \
   libzmq \
   opencv \
   spdlog \

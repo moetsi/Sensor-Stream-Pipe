@@ -5,6 +5,9 @@
 #pragma once
 
 #include <iostream>
+
+#undef min
+#undef max
 #include <k4a/k4a.hpp>
 
 #if (SSP_WITH_K4A_BODYTRACK)
