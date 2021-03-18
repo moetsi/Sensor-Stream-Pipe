@@ -88,7 +88,7 @@ endif()
 option(SSP_WITH_ZMQ_POLLING "Compile with ZeroMQ polling" OFF)
 
 if (SSP_WITH_NVPIPE_SUPPORT)
-    find_package(NvPipe)
+    find_package(NvPipe CONFIG)
 
     # If not found disable NvPipe support
     if (NvPipe_FOUND)
@@ -169,7 +169,7 @@ set(SOURCE_FILES
 )
 
 if (SSP_WITH_NVPIPE_SUPPORT)
-    list(APPEND SOURCE_FILES encoders/nv_encoder.cc decoders/nv_decoder.cc)
+    list(APPEND SOURCE_FILES encoders/nv_encoder.cc encoders/nv_encoder.h decoders/nv_decoder.cc decoders/nv_decoder.h)
 endif ()
 
 if (SSP_WITH_KINECT_SUPPORT)
@@ -190,7 +190,7 @@ target_link_libraries(ssp PUBLIC
 )
 
 if (SSP_WITH_NVPIPE_SUPPORT)
-    target_link_libraries(ssp PUBLIC NvPipe::NvPipe)
+    target_link_libraries(ssp PUBLIC NvPipe)
 endif ()
 
 if (SSP_WITH_KINECT_SUPPORT)

@@ -2,7 +2,9 @@
 // Created by amourao on 11-09-2019.
 //
 
+#ifndef WIN32
 #include <unistd.h>
+#endif
 
 #include "../utils/logger.h"
 
