@@ -12,7 +12,7 @@
 #include <io.h>
 #else
 #include <unistd.h>
-#endif 
+#endif
 
 #include <k4a/k4a.h>
 #include <opencv2/imgproc.hpp>
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
   spdlog::set_level(spdlog::level::debug);
   av_log_set_level(AV_LOG_QUIET);
 
-  srand(time(NULL) * getpid());
+  srand(time(NULL));
 
   try {
 

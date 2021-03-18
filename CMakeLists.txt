@@ -128,6 +128,12 @@ if (SSP_WITH_K4A_BODYTRACK)
 
     if (k4abt_FOUND)
         add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
+
+        if (WIN32)
+            message(STATUS "k4abt: ${k4abt_ROOT}")
+            file(COPY ${k4abt_ROOT}/windows-desktop/amd64/release/bin/k4abt.dll
+                 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
+        endif ()
     else()
         set(SSP_WITH_K4A_BODYTRACK OFF)
         message(STATUS "Setting SSP_WITH_K4A_BODYTRACK to OFF")
@@ -210,6 +216,11 @@ if (SSP_WITH_KINECT_SUPPORT)
     target_link_libraries(ssp PUBLIC k4a::k4a)
 endif ()
 
+if (SSP_WITH_K4A_BODYTRACK)
+    target_link_libraries(ssp PUBLIC k4a::k4abt)
+endif ()
+
+
 #############################
 ### Build the applications
 #############################
@@ -236,11 +247,10 @@ target_link_libraries(ssp_tester ssp)
 
 if (SSP_WITH_K4A_BODYTRACK)
     add_executable(ssp_client_k4a clients/ssp_client_k4a.cc)
-    target_link_libraries(ssp_client_k4a ssp k4abt)
+    target_link_libraries(ssp_client_k4a ssp)
 
     add_executable(ssp_client_pointcloud clients/ssp_client_pointcloud.cc)
-    target_link_libraries(ssp_client_pointcloud ssp k4abt)
-    
-    target_sources(ssp_plugin PRIVATE clients/ssp_client_k4a.cc clients/ssp_client_pointcloud.cc)
-    target_link_libraries(ssp_plugin ssp k4abt)
+    target_link_libraries(ssp_client_pointcloud ssp)
+
+    #target_sources(ssp_plugin PRIVATE clients/ssp_client_k4a.cc clients/ssp_client_pointcloud.cc)
 endif ()
