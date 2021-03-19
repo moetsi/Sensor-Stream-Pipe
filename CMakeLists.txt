@@ -114,7 +114,8 @@ if (SSP_WITH_KINECT_SUPPORT)
         add_definitions(-DSSP_WITH_KINECT_SUPPORT=1)
 
         if (WIN32)
-            file(COPY ${k4a_DIR}/../../../bin/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
+            file(COPY ${k4a_DIR}/../../../bin/
+                 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
                  FILES_MATCHING PATTERN "*.dll")
         endif ()
     else()
@@ -130,9 +131,10 @@ if (SSP_WITH_K4A_BODYTRACK)
         add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
 
         if (WIN32)
-            message(STATUS "k4abt: ${k4abt_ROOT}")
-            file(COPY ${k4abt_ROOT}/windows-desktop/amd64/release/bin/k4abt.dll
-                 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
+            message(STATUS "Found Kinect Body Tracking: ${k4abt_ROOT}")
+            file(COPY ${k4abt_ROOT}/windows-desktop/amd64/release/bin/
+                 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
+                 FILES_MATCHING PATTERN "*.dll")
         endif ()
     else()
         set(SSP_WITH_K4A_BODYTRACK OFF)
