@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.11...3.19)
 project(ssp)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Set default build type to Release if none is defined
 set(default_build_type "Release")
@@ -27,6 +28,12 @@ elseif (WIN32)
     ssp_dep
     URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103181613__ssp_windep.tar.gz
     URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
+  )
+elseif (UNIX)
+  FetchContent_Declare(
+    ssp_dep
+    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103291435__ssp_lindep.tar.gz
+    URL_HASH MD5=9345a0fe8dbe902917e75c251e9aabe2
   )
 endif()
 

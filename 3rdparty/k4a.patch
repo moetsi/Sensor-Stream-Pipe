@@ -35,10 +35,18 @@ index cbf0e4d..a6aa348 100644
 \ No newline at end of file
 +add_library(k4ainternal::logging ALIAS k4a_logging)
 diff --git a/src/logging/logging.cpp b/src/logging/logging.cpp
-index 05264c5..3b7fbdd 100644
+index 05264c5..add9c3f 100644
 --- a/src/logging/logging.cpp
 +++ b/src/logging/logging.cpp
-@@ -24,6 +24,8 @@
+@@ -12,6 +12,7 @@
+ #include <azure_c_shared_utility/threadapi.h>
+ 
+ // System dependencies
++#include <stdarg.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+@@ -24,6 +25,8 @@
  #pragma warning(disable : 4702)
  #endif
  #include <spdlog/spdlog.h>
