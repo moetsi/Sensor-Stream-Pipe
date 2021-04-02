@@ -1,11 +1,14 @@
 #!/bin/bash
 
-# Compile Linux dependencies needed to compile Sensor-Stream-Pipe on Linux
+# Compile Linux dependencies needed to compile Sensor-Stream-Pipe on Ubuntu 18.04
 # This script should be run under Terminal
 # Previously, you should install :
 # - dev tools
 # - cmake 3.11+
-# - sudo apt-get install nasm
+# sudo apt-get update
+# sudo apt-get install build-essential
+# sudo apt-get install nasm
+# sudo snap install --classic cmake
 
 # For k4a
 # - sudo apt-get install xorg-dev
