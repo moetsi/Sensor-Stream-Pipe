@@ -8,6 +8,7 @@
 # sudo apt-get update
 # sudo apt-get install build-essential
 # sudo apt-get install nasm
+# sudo apt-get install libgtk2.0-dev
 # sudo snap install --classic cmake
 
 # For k4a
@@ -57,7 +58,7 @@ function build_opencv {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=OFF \
-        -DBUILD_opencv_apps:BOOL=OFF \
+        -DBUILD_opencv_apps:BOOL=ON \
         -DBUILD_opencv_calib3d:BOOL=OFF \
         -DBUILD_opencv_core:BOOL=ON \
         -DBUILD_opencv_dnn:BOOL=OFF \
@@ -88,6 +89,7 @@ function build_opencv {
         -DBUILD_PERF_TESTS=OFF \
         -DBUILD_PROTOBUF=OFF \
         -DBUILD_TESTS=OFF \
+        -DBUILD_JPEG=ON -DBUILD_PNG=ON -DBUILD_ZLIB=ON \
         -DWITH_EIGEN=OFF -DWITH_FFMPEG=OFF \
         -DWITH_QUIRC=OFF \
         -DWITH_LAPACK=NO \
@@ -270,7 +272,6 @@ tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   cereal \
   cppzmq \
   ffmpeg \
-  k4a \
   libzmq \
   opencv \
   spdlog \

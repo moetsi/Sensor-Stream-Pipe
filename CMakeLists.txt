@@ -32,8 +32,8 @@ elseif (WIN32)
 elseif (UNIX)
   FetchContent_Declare(
     ssp_dep
-    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202104021505__ssp_lindep.tar.gz
-    URL_HASH MD5=5866a368ebd2aa23774921aa34686365
+    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202104061701__ssp_lindep.tar.gz
+    URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
   )
 endif()
 
