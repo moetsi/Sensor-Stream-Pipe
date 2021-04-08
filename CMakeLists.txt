@@ -261,5 +261,5 @@ if (SSP_WITH_K4A_BODYTRACK)
     add_executable(ssp_client_pointcloud clients/ssp_client_pointcloud.cc)
     target_link_libraries(ssp_client_pointcloud ssp)
 
-    #target_sources(ssp_plugin PRIVATE clients/ssp_client_k4a.cc clients/ssp_client_pointcloud.cc)
+    target_sources(ssp_plugin PRIVATE clients/ssp_client_k4a.cc)
 endif ()
