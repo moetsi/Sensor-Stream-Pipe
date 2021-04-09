@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b22b2e7..15506ee 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,8 +28,8 @@ else()
+     # Static library: -fPIC
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+ 
+-    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -march=native -fstack-protector")
+-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native")
++    #set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -march=native -fstack-protector")
++    #set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native")
+ endif()
+ 
+ 
+@@ -73,8 +73,8 @@ target_include_directories(zdepth PUBLIC
+ 
+ # zdepth test application
+ 
+-add_executable(zdepth_test tests/zdepth_test.cpp)
+-target_link_libraries(zdepth_test PRIVATE zdepth)
++#add_executable(zdepth_test tests/zdepth_test.cpp)
++#target_link_libraries(zdepth_test PRIVATE zdepth)
+ 
+ 
+ ################################################################################
