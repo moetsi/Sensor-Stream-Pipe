@@ -42,7 +42,8 @@ public:
 
     int update();
     int getBodyCount() const;
-    int getBodies(k4abt_body_t* pBodies, int n) const;
+    int getBodiesStruct(k4abt_body_t* pBodies, int n) const;
+    int getBodies(k4abt_skeleton_t* pSkeletons, int* pIds, int n) const;
 
 private:
     NetworkReader* m_reader;
@@ -136,7 +137,7 @@ int BodyTracker::getBodyCount() const
   return num;
 }
 
-int BodyTracker::getBodies(k4abt_body_t* pBodies, int n) const
+int BodyTracker::getBodiesStruct(k4abt_body_t* pBodies, int n) const
 {
   // If the number has changed since call to getBodyCount
   // Fill at most n bodies
@@ -144,6 +145,23 @@ int BodyTracker::getBodies(k4abt_body_t* pBodies, int n) const
   m_mutex.lock();
   int num = std::min(n, (int)m_bodies.size());
   memcpy(pBodies, &m_bodies[0], num * sizeof(k4abt_body_t));
+  m_mutex.unlock();
+
+  return num;
+}
+
+int BodyTracker::getBodies(k4abt_skeleton_t* pSkeletons, int* pIds, int n) const
+{
+  // If the number has changed since call to getBodyCount
+  // Fill at most n bodies
+
+  m_mutex.lock();
+  int num = std::min(n, (int)m_bodies.size());
+  for (int i = 0; i < num; i++)
+  {
+    pIds[i] = m_bodies[i].id;
+    pSkeletons[i] = m_bodies[i].skeleton;
+  }
   m_mutex.unlock();
 
   return num;
@@ -186,9 +204,14 @@ extern "C" SSP_EXPORT int getBodyCount()
     return gTracker->getBodyCount();
 }
 
-extern "C" SSP_EXPORT int getBodies(k4abt_body_t* pBodies, int n)
+extern "C" SSP_EXPORT int getBodiesStruct(k4abt_body_t* pBodies, int n)
 {
-    return gTracker->getBodies(pBodies, n);
+  return gTracker->getBodiesStruct(pBodies, n);
+}
+
+extern "C" SSP_EXPORT int getBodies(k4abt_skeleton_t* pSkeletons, int* pIds, int n)
+{
+    return gTracker->getBodies(pSkeletons, pIds, n);
 }
 
 void PrintBodyInformation(k4abt_body_t body) {
