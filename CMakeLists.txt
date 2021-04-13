@@ -280,7 +280,6 @@ add_executable(ssp_tester testers/ssp_tester.cc)
 target_link_libraries(ssp_tester ssp)
 
 if (IOS)
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.moetsi.\${PRODUCT_NAME:identifier}")
     set_target_properties(
       ssp_client_opencv
       ssp_client_template
@@ -288,8 +287,10 @@ if (IOS)
       ssp_tester
       PROPERTIES
       XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "4A95ACP6M5"
+      XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.moetsi.\${PRODUCT_NAME:identifier}"
       MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
       MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
+      MACOSX_BUNDLE_GUI_IDENTIFIER "com.moetsi.\${PRODUCT_NAME:identifier}"
     )
 endif()
 

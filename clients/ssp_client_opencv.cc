@@ -39,6 +39,18 @@ extern "C" {
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
 
+// imshow not available on iOS/iPhone Simulator
+#if __APPLE__
+  #include <TargetConditionals.h>
+  #if TARGET_OS_MAC
+    #define HAS_IMSHOW 1
+  #else
+    #define HAS_IMSHOW 0
+  #endif
+#else
+  #define HAS_IMSHOW 1
+#endif
+
 extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 {
   av_log_set_level(AV_LOG_QUIET);
@@ -79,9 +91,11 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
             img.convertTo(img, CV_8U);
           }
 
+#if HAS_IMSHOW
           cv::namedWindow(decoder_id);
           cv::imshow(decoder_id, img);
           cv::waitKey(1);
+#endif
         }
       }
     }
