@@ -17,7 +17,13 @@ endif()
 # Download dependencies
 include(FetchContent)
 
-if (APPLE)
+if (IOS)
+  FetchContent_Declare(
+    ssp_dep
+    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202104091831__ssp_iosdep.tar.gz
+    URL_HASH MD5=89578a5752c950f983b570b0b9a602b5
+  )
+elseif (APPLE)
   FetchContent_Declare(
     ssp_dep
     URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103161130__ssp_macdep.tar.gz
@@ -69,14 +75,31 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 
 find_package(Threads REQUIRED)
-find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
-find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
 find_package(cereal REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(ZeroMQ REQUIRED)
 find_package(cppzmq REQUIRED)
 find_package(zdepth REQUIRED)
+
+if (IOS)
+  add_definitions(-DFFMPEG_AS_FRAMEWORK)
+  set(FFMPEG_LIBRARIES
+    ${ssp_dep_SOURCE_DIR}/lib/FFmpeg.framework
+    -liconv -lm -lbz2 -lz -pthread
+    "-framework AudioToolbox"
+    "-framework CoreFoundation"
+    "-framework CoreMedia"
+    "-framework CoreServices"
+    "-framework CoreVideo"
+    "-framework Security"
+    "-framework VideoToolbox"
+  )
+  set(OpenCV_LIBS ${ssp_dep_SOURCE_DIR}/lib/opencv2.framework)
+else()
+  find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
+  find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
+endif()
 
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBRARY_OUTPUT_PATH lib)
@@ -234,6 +257,7 @@ endif ()
 ### Build the applications
 #############################
 
+if (NOT IOS)
 add_library(ssp_plugin MODULE
     servers/ssp_server.cc
     clients/ssp_client_opencv.cc
@@ -241,6 +265,7 @@ add_library(ssp_plugin MODULE
 )
 target_compile_definitions(ssp_plugin PRIVATE SSP_PLUGIN)
 target_link_libraries(ssp_plugin ssp)
+endif()
 
 add_executable(ssp_client_opencv clients/ssp_client_opencv.cc)
 target_link_libraries(ssp_client_opencv ssp)
@@ -253,6 +278,20 @@ target_link_libraries(ssp_server ssp)
 
 add_executable(ssp_tester testers/ssp_tester.cc)
 target_link_libraries(ssp_tester ssp)
+
+if (IOS)
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.moetsi.\${PRODUCT_NAME:identifier}")
+    set_target_properties(
+      ssp_client_opencv
+      ssp_client_template
+      ssp_server
+      ssp_tester
+      PROPERTIES
+      XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "4A95ACP6M5"
+      MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
+      MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
+    )
+endif()
 
 if (SSP_WITH_K4A_BODYTRACK)
     add_executable(ssp_client_k4a clients/ssp_client_k4a.cc)

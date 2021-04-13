@@ -10,10 +10,17 @@
 
 
 extern "C" {
+#ifdef FFMPEG_AS_FRAMEWORK
+#include <FFmpeg/avcodec.h>
+#include <FFmpeg/avformat.h>
+#include <FFmpeg/avio.h>
+#include <FFmpeg/file.h>
+#else
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
 #include <libavutil/file.h>
+#endif
 };
 
 #include "../structs/frame_struct.hpp"

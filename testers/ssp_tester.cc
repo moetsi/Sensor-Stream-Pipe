@@ -13,12 +13,21 @@
 #endif 
 
 extern "C" {
+#ifdef FFMPEG_AS_FRAMEWORK
+#include <FFmpeg/avcodec.h>
+#include <FFmpeg/avformat.h>
+#include <FFmpeg/avutil.h>
+#include <FFmpeg/log.h>
+#include <FFmpeg/pixdesc.h>
+#include <FFmpeg/swscale.h>
+#else
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 #include <libavutil/log.h>
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
+#endif
 }
 
 #include "../encoders/libav_encoder.h"
