@@ -280,6 +280,23 @@ add_executable(ssp_tester testers/ssp_tester.cc)
 target_link_libraries(ssp_tester ssp)
 
 if (IOS)
+    set_source_files_properties(servers/ssp_server.cc PROPERTIES
+                            COMPILE_FLAGS "-x objective-c++")
+    cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
+    configure_file(configs/serve_video_ios.yaml.in serve_video_ios.yaml)
+    # Resources for testing iOS version of ssp_server
+    message(STATUS "Download sample video file")
+    file(DOWNLOAD
+        https://moetsiblob.blob.core.windows.net/public-datasets/1080p_ShadesDown_Darker_Closer_Right_Moving_Right.mkv
+         1080p_ShadesDown_Darker_Closer_Right_Moving_Right.mkv
+         SHOW_PROGRESS
+         EXPECTED_MD5 812ae7f17d00912587bc304aec9eb717)
+    set(IOS_RESOURCES serve_video_ios.yaml
+        1080p_ShadesDown_Darker_Closer_Right_Moving_Right.mkv)
+    target_sources(ssp_server PUBLIC ${IOS_RESOURCES})
+    set_source_files_properties(${IOS_RESOURCES}
+      PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
     set_target_properties(
       ssp_client_opencv
       ssp_client_template

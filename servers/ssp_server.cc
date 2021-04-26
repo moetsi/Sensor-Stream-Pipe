@@ -11,6 +11,13 @@
 #define SSP_EXPORT
 #endif
 
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#if TARGET_OS_IOS
+#import <Foundation/Foundation.h>
+#endif
+#endif
+
 #include "../utils/logger.h"
 
 #include <ctime>
@@ -37,7 +44,7 @@
 #include "../utils/kinect_utils.h"
 #endif
 
-extern "C" SSP_EXPORT int ssp_server(char* filename)
+extern "C" SSP_EXPORT int ssp_server(const char* filename)
 {
   av_log_set_level(AV_LOG_QUIET);
 
@@ -73,6 +80,18 @@ extern "C" SSP_EXPORT int ssp_server(char* filename)
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
               .as<std::string>();
+
+#if TARGET_OS_IOS
+      // Find the corresponding path in the application bundle
+      NSString* file_path = [NSString stringWithCString:path.c_str()
+                                               encoding:[NSString defaultCStringEncoding]];
+      NSString* bundle_path = [[NSBundle mainBundle] pathForResource:file_path
+                                                              ofType:nil];
+      if (bundle_path != nil)
+        path = std::string([bundle_path UTF8String]);
+#endif
+
+        
       if (general_parameters["frame_source"]["parameters"]["streams"]
               .IsDefined()) {
         std::vector<unsigned int> streams =
@@ -249,11 +268,20 @@ int main(int argc, char *argv[]) {
 
   srand(time(NULL));
 
+  std::string filename;
+#if TARGET_OS_IOS
+  // Path to embedded config file
+  NSString* path = [[NSBundle mainBundle] pathForResource:@"serve_video_ios"
+                                                   ofType:@"yaml"];
+  if (path != nil)
+    filename = std::string([path UTF8String]);
+#else
   if (argc < 2) {
     std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
     return 1;
   }
+#endif
     
-  return ssp_server(argv[1]);
+  return ssp_server(filename.c_str());
 }
 #endif
