@@ -168,6 +168,8 @@ int BodyTracker::getBodies(k4abt_skeleton_t* pSkeletons, int* pIds, int n) const
 }
 
 BodyTracker *gTracker = NULL;
+std::thread gUpdateThread;
+bool gStop = false;
 
 extern "C" SSP_EXPORT int open_k4a(int port)
 {
@@ -179,7 +181,7 @@ extern "C" SSP_EXPORT int open_k4a(int port)
     return 0;
 }
 
-extern "C" SSP_EXPORT int close_k4a(int port)
+extern "C" SSP_EXPORT int close_k4a()
 {
     if (gTracker == NULL)
         return -1;
@@ -187,6 +189,42 @@ extern "C" SSP_EXPORT int close_k4a(int port)
     delete gTracker;
     gTracker = NULL;
     return 0;
+}
+
+void update()
+{
+  while (!gStop && gTracker != NULL)
+  {
+    gTracker->update();
+  }
+}
+
+extern "C" SSP_EXPORT int start_k4a(int port)
+{
+  if (gTracker != NULL)
+    return -1;
+
+  gTracker = new BodyTracker(port);
+
+  // Start update thread
+  gStop = false;
+  gUpdateThread = std::thread(update);
+
+  return 0;
+}
+
+extern "C" SSP_EXPORT int stop_k4a()
+{
+  if (gTracker == NULL)
+    return -1;
+
+  gStop = true;
+  if (gUpdateThread.joinable())
+    gUpdateThread.join();
+
+  delete gTracker;
+  gTracker = NULL;
+  return 0;
 }
 
 extern "C" SSP_EXPORT int update_k4a()
