@@ -294,6 +294,7 @@ if (IOS)
     set(IOS_RESOURCES serve_video_ios.yaml
         1080p_ShadesDown_Darker_Closer_Right_Moving_Right.mkv)
     target_sources(ssp_server PUBLIC ${IOS_RESOURCES})
+    target_link_libraries(ssp_server "-framework UIKit")
     set_source_files_properties(${IOS_RESOURCES}
       PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 

@@ -15,6 +15,7 @@
 #include <TargetConditionals.h>
 #if TARGET_OS_IOS
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #endif
 #endif
 
@@ -275,6 +276,14 @@ int main(int argc, char *argv[]) {
                                                    ofType:@"yaml"];
   if (path != nil)
     filename = std::string([path UTF8String]);
+
+  // Launch ssp_server in a background queue
+  dispatch_queue_t aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+  dispatch_async(aQueue, ^{ ssp_server(filename.c_str()); });
+
+  @autoreleasepool {
+    return UIApplicationMain(argc, argv, nil, nil);
+  }
 #else
   if (argc < 2) {
     std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
