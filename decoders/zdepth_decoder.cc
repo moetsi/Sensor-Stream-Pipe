@@ -18,6 +18,7 @@ cv::Mat ZDepthDecoder::Decode(FrameStruct& frame) {
       decompressor_.Decompress(frame.frame, width_, height_, decompressed_buffer_);
   if (result != zdepth::DepthResult::Success) {
     // Handle input error
+    return cv::Mat();
   }
 
   return cv::Mat(height_, width_, CV_16UC1, decompressed_buffer_.data(),

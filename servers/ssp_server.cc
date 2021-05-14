@@ -289,6 +289,8 @@ int main(int argc, char *argv[]) {
     std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
     return 1;
   }
+
+  filename = std::string(argv[1]);
 #endif
     
   return ssp_server(filename.c_str());
