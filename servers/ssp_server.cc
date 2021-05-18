@@ -53,6 +53,12 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_PUSH);
 
+    // Do not accumulate packets if no client is connected
+    socket.set(zmq::sockopt::immediate, true);
+
+    // Do not keep packets if there is network congestion
+    socket.set(zmq::sockopt::conflate, true);
+
     std::string codec_parameters_file = std::string(filename);
 
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
