@@ -16,6 +16,7 @@
 #if TARGET_OS_IOS
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#include "../readers/iphone_reader.h"
 #endif
 #endif
 
@@ -115,6 +116,12 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
       ExtendedAzureConfig c = BuildKinectConfigFromYAML(
           general_parameters["frame_source"]["parameters"]);
       reader = std::unique_ptr<KinectReader>(new KinectReader(0, c));
+#else
+      return 1;
+#endif
+    } else if (reader_type == "iphone") {
+#if TARGET_OS_IOS
+      reader = std::unique_ptr<iPhoneReader>(new iPhoneReader());
 #else
       return 1;
 #endif
@@ -278,7 +285,7 @@ int main(int argc, char *argv[]) {
   std::string filename;
 #if TARGET_OS_IOS
   // Path to embedded config file
-  NSString* path = [[NSBundle mainBundle] pathForResource:@"serve_video_ios"
+  NSString* path = [[NSBundle mainBundle] pathForResource:@"serve_ios_raw"
                                                    ofType:@"yaml"];
   if (path != nil)
     filename = std::string([path UTF8String]);

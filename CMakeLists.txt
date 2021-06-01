@@ -240,6 +240,11 @@ target_link_libraries(ssp PUBLIC
     zdepth::zdepth
 )
 
+if (IOS)
+    target_sources(ssp PRIVATE readers/iphone_reader.mm readers/iphone_reader.h)
+    target_link_libraries(ssp PRIVATE "-framework ARKit")
+endif ()
+
 if (SSP_WITH_NVPIPE_SUPPORT)
     target_link_libraries(ssp PUBLIC NvPipe)
 endif ()
@@ -283,16 +288,8 @@ if (IOS)
     set_source_files_properties(servers/ssp_server.cc PROPERTIES
                             COMPILE_FLAGS "-x objective-c++")
     cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
-    configure_file(configs/serve_video_ios.yaml.in serve_video_ios.yaml)
-    # Resources for testing iOS version of ssp_server
-    message(STATUS "Download sample video file")
-    file(DOWNLOAD
-        https://moetsiblob.blob.core.windows.net/public-datasets/1080p_ShadesDown_Darker_Closer_Right_Moving_Right.mkv
-         1080p_ShadesDown_Darker_Closer_Right_Moving_Right.mkv
-         SHOW_PROGRESS
-         EXPECTED_MD5 812ae7f17d00912587bc304aec9eb717)
-    set(IOS_RESOURCES serve_video_ios.yaml
-        1080p_ShadesDown_Darker_Closer_Right_Moving_Right.mkv)
+    configure_file(configs/serve_ios_raw.yaml.in serve_ios_raw.yaml)
+    set(IOS_RESOURCES serve_ios_raw.yaml)
     target_sources(ssp_server PUBLIC ${IOS_RESOURCES})
     target_link_libraries(ssp_server "-framework UIKit")
     set_source_files_properties(${IOS_RESOURCES}
@@ -309,6 +306,7 @@ if (IOS)
       MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
       MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
       MACOSX_BUNDLE_GUI_IDENTIFIER "com.moetsi.\${PRODUCT_NAME:identifier}"
+      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/servers/Info.plist.in
     )
 endif()
 
