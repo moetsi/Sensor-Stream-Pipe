@@ -33,9 +33,12 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
-    // TODO: just use Y for the moment, handle YUV420 later
-    img =
-        cv::Mat(rows, cols, CV_8UC1, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
+
+    cv::Mat y(rows, cols, CV_8UC1, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
+    cv::Mat uv(rows/2, cols/2, CV_8UC2, (void *)&f.frame[8 + rows*cols], cv::Mat::AUTO_STEP);
+    
+    // NV12 (UVUV) vs NV21 (VUVU) : https://www.programmersought.com/article/74944045497/
+    cv::cvtColorTwoPlane(y, uv, img, cv::COLOR_YUV2BGR_NV12);
     img_changed = true;
   } else if (f.frame_data_type == 0 || f.frame_data_type == 1) {
 

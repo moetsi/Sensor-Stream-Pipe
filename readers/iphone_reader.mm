@@ -169,7 +169,7 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     size_t h_uv = CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
     size_t bpr_uv = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
     size_t len_uv = h_uv * bpr_uv;
-    s->frame.resize(len_y + 2 * sizeof(int));
+    s->frame.resize(len_y + len_uv + 2 * sizeof(int));
     
     s->timestamps[0] = 0;
     s->timestamps[1] = CurrentTimeMs();
@@ -178,15 +178,13 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     memcpy(&s->frame[4], &rows, sizeof(int));
 
     CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+    // Y part
     void *baseaddress = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
     memcpy(&s->frame[8], baseaddress, len_y);
-    
-    // TODO: handle UV part
-#if 0
+    // UV/CbCr part
     baseaddress = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
     memcpy(&s->frame[8+len_y], baseaddress, len_uv);
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-#endif
 
     res.push_back(s);
   }
