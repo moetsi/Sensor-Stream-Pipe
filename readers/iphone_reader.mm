@@ -85,7 +85,7 @@ iPhoneReader::iPhoneReader()
   pImpl->image = std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
   pImpl->image->sensor_id = 0;
   pImpl->image->frame_type = 0;      // image
-  pImpl->image->frame_data_type = 2; // RGBA
+  pImpl->image->frame_data_type = 6; // YUV
   pImpl->image->timestamps.push_back(0);
   pImpl->image->timestamps.push_back(CurrentTimeMs());
 
@@ -153,18 +153,40 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
   // Copy data from capture thread
   pthread_mutex_lock(&pImpl->delegate->_mutex);
   
-  if (pImpl->delegate->_pixelBuffer != nil)
+  CVPixelBufferRef pixelBuffer = pImpl->delegate->_pixelBuffer;
+  if (pixelBuffer != nil && CVPixelBufferIsPlanar(pixelBuffer) &&
+      CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange &&
+      CVPixelBufferGetPlaneCount(pixelBuffer) >= 2)
   {
     std::shared_ptr<FrameStruct> s = pImpl->image;
     
-    int cols = 256;
-    int rows = 192;
-    size_t size = cols*rows*4;
-    s->frame.resize(size + 2 * sizeof(int));
+    int cols = (int)CVPixelBufferGetWidth(pixelBuffer);
+    int rows = (int)CVPixelBufferGetHeight(pixelBuffer);
     
-    memset(&s->frame[0], 255, s->frame.size());
+    size_t h_y = CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+    size_t bpr_y = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    size_t len_y = h_y * bpr_y;
+    size_t h_uv = CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
+    size_t bpr_uv = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    size_t len_uv = h_uv * bpr_uv;
+    s->frame.resize(len_y + 2 * sizeof(int));
+    
+    s->timestamps[0] = 0;
+    s->timestamps[1] = CurrentTimeMs();
+
     memcpy(&s->frame[0], &cols, sizeof(int));
     memcpy(&s->frame[4], &rows, sizeof(int));
+
+    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+    void *baseaddress = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+    memcpy(&s->frame[8], baseaddress, len_y);
+    
+    // TODO: handle UV part
+#if 0
+    baseaddress = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
+    memcpy(&s->frame[8+len_y], baseaddress, len_uv);
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+#endif
 
     res.push_back(s);
   }
@@ -185,10 +207,10 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     memcpy(&s->frame[0], &cols, sizeof(int));
     memcpy(&s->frame[4], &rows, sizeof(int));
     
-    CVPixelBufferLockBaseAddress(depthBuffer, 0);
+    CVPixelBufferLockBaseAddress(depthBuffer, kCVPixelBufferLock_ReadOnly);
     void *baseaddress = CVPixelBufferGetBaseAddress(depthBuffer);
     memcpy(&s->frame[8], baseaddress, size);
-    CVPixelBufferUnlockBaseAddress(depthBuffer, 0);
+    CVPixelBufferUnlockBaseAddress(depthBuffer, kCVPixelBufferLock_ReadOnly);
     
     res.push_back(s);
   }
