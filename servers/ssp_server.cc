@@ -58,7 +58,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
     socket.set(zmq::sockopt::immediate, true);
 
     // Do not keep packets if there is network congestion
-    socket.set(zmq::sockopt::conflate, true);
+    //socket.set(zmq::sockopt::conflate, true);
 
     std::string codec_parameters_file = std::string(filename);
 

@@ -117,6 +117,11 @@ void LibAvEncoder::PrepareFrame() {
              frame_av_->height * frame_av_->width / 4);
     }
 
+  } else if (f->frame_data_type == 6) {
+    uint8_t *data = &f->frame[8];
+    memcpy(frame_av_->data[0], data, frame_av_->height * frame_av_->width);
+    data = &f->frame[8 + frame_av_->height * frame_av_->width];
+    memcpy(frame_av_->data[1], data, frame_av_->height * frame_av_->width / 2);
   } else if (f->frame_data_type == 0 || f->frame_data_type == 1) {
 
     AVFrameSharedP frame_av_O =
@@ -278,6 +283,10 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
     memcpy(&width, &fs->frame[0], sizeof(int));
     memcpy(&height, &fs->frame[4], sizeof(int));
     pxl_format = AV_PIX_FMT_GRAY16LE;
+  } else if (fs->frame_data_type == 6) {
+    memcpy(&width, &fs->frame[0], sizeof(int));
+    memcpy(&height, &fs->frame[4], sizeof(int));
+    pxl_format = AV_PIX_FMT_NV12;
   }
 
   av_codec_context_->width = width;
