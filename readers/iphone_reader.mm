@@ -20,6 +20,7 @@ using namespace std;
   @public pthread_mutex_t _mutex;
   @public CVPixelBufferRef _pixelBuffer;
   @public CVPixelBufferRef _depthBuffer;
+  @public CVPixelBufferRef _confidenceBuffer;
 }
 @end
 
@@ -34,6 +35,7 @@ using namespace std;
       pthread_mutex_init(&_mutex, NULL);
       _pixelBuffer = nil;
       _depthBuffer = nil;
+      _confidenceBuffer = nil;
     }
     
     return self;
@@ -51,6 +53,8 @@ using namespace std;
     {
       CVPixelBufferRelease(_depthBuffer);
       _depthBuffer = CVPixelBufferRetain(frame.sceneDepth.depthMap);
+      CVPixelBufferRelease(_confidenceBuffer);
+      _confidenceBuffer = CVPixelBufferRetain(frame.sceneDepth.confidenceMap);
     }
   }
   pthread_mutex_unlock(&_mutex);
@@ -67,6 +71,7 @@ public:
   unsigned int fps;
   std::shared_ptr<FrameStruct> image;
   std::shared_ptr<FrameStruct> depth;
+  std::shared_ptr<FrameStruct> confidence;
 };
 
 iPhoneReader::iPhoneReader()
@@ -95,6 +100,13 @@ iPhoneReader::iPhoneReader()
   pImpl->depth->frame_data_type = 5; // float
   pImpl->depth->timestamps.push_back(0);
   pImpl->depth->timestamps.push_back(CurrentTimeMs());
+  
+  pImpl->confidence = std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+  pImpl->confidence->sensor_id = 2;
+  pImpl->confidence->frame_type = 3;      // confidence
+  pImpl->confidence->frame_data_type = 7; // U8C1
+  pImpl->confidence->timestamps.push_back(0);
+  pImpl->confidence->timestamps.push_back(CurrentTimeMs());
 
   @autoreleasepool
   {
@@ -189,7 +201,8 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     res.push_back(s);
   }
   
-  if (pImpl->delegate->_depthBuffer != nil)
+  if (pImpl->delegate->_depthBuffer != nil &&
+      CVPixelBufferGetPixelFormatType(pImpl->delegate->_depthBuffer) == kCVPixelFormatType_DepthFloat32)
   {
     CVPixelBufferRef depthBuffer = pImpl->delegate->_depthBuffer;
     
@@ -209,6 +222,31 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     void *baseaddress = CVPixelBufferGetBaseAddress(depthBuffer);
     memcpy(&s->frame[8], baseaddress, size);
     CVPixelBufferUnlockBaseAddress(depthBuffer, kCVPixelBufferLock_ReadOnly);
+    
+    res.push_back(s);
+  }
+
+  if (pImpl->delegate->_confidenceBuffer != nil &&
+      CVPixelBufferGetPixelFormatType(pImpl->delegate->_confidenceBuffer) == kCVPixelFormatType_OneComponent8)
+  {
+    CVPixelBufferRef confidenceBuffer = pImpl->delegate->_confidenceBuffer;
+    
+    std::shared_ptr<FrameStruct> s = pImpl->confidence;
+    int cols = (int)CVPixelBufferGetWidth(confidenceBuffer);
+    int rows = (int)CVPixelBufferGetHeight(confidenceBuffer);
+    size_t size = cols*rows*sizeof(unsigned char);
+    s->frame.resize(size + 2 * sizeof(int));
+
+    s->timestamps[0] = 0;
+    s->timestamps[1] = CurrentTimeMs();
+    
+    memcpy(&s->frame[0], &cols, sizeof(int));
+    memcpy(&s->frame[4], &rows, sizeof(int));
+    
+    CVPixelBufferLockBaseAddress(confidenceBuffer, kCVPixelBufferLock_ReadOnly);
+    void *baseaddress = CVPixelBufferGetBaseAddress(confidenceBuffer);
+    memcpy(&s->frame[8], baseaddress, size);
+    CVPixelBufferUnlockBaseAddress(confidenceBuffer, kCVPixelBufferLock_ReadOnly);
     
     res.push_back(s);
   }
@@ -242,6 +280,7 @@ vector<unsigned int> iPhoneReader::GetType()
     if ([ARWorldTrackingConfiguration supportsFrameSemantics:ARFrameSemanticSceneDepth])
     {
       res.push_back(1); // Depth
+      res.push_back(3); // Confidence
     }
   }
   return res;

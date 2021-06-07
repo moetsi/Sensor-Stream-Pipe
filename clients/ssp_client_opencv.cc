@@ -92,6 +92,9 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
             double max = 1024;
             img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
             img.convertTo(img, CV_8U);
+          } else if (f.frame_type == 3) {
+            cv::Mat imgOut;
+            img *= 127; // iOS confidence is 0:low, 1:medium, 2:high
           }
 
 #if HAS_IMSHOW

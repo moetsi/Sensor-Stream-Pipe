@@ -9,5 +9,5 @@ video_encoder:
     type: "null"
   1: #depth
     type: "null"
-  2: #confidence
+  3: #confidence
     type: "null"
