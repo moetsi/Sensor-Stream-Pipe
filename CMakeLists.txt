@@ -262,14 +262,25 @@ endif ()
 ### Build the applications
 #############################
 
-if (NOT IOS)
-add_library(ssp_plugin MODULE
+if (IOS)
+  set(PLUGIN_TYPE STATIC)
+else()
+  set(PLUGIN_TYPE MODULE)
+endif()
+
+add_library(ssp_plugin ${PLUGIN_TYPE}
     servers/ssp_server.cc
     clients/ssp_client_opencv.cc
     clients/ssp_client_template.cc
 )
 target_compile_definitions(ssp_plugin PRIVATE SSP_PLUGIN)
 target_link_libraries(ssp_plugin ssp)
+
+if (IOS)
+  # Pack all the needed libraries for Unity3D iOS usage
+  add_custom_target(unity
+          ${CMAKE_SOURCE_DIR}/cmake/package_for_unity.sh
+          DEPENDS ssp_plugin)
 endif()
 
 add_executable(ssp_client_opencv clients/ssp_client_opencv.cc)
