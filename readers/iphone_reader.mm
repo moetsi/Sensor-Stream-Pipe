@@ -111,7 +111,29 @@ iPhoneReader::iPhoneReader()
   @autoreleasepool
   {
     pImpl->session = [ARSession new];
+
+    // Need WorldTracking to get reconstruction of depth buffer from LiDAR
+    // but disable unused features to lower power usage
     ARWorldTrackingConfiguration* configuration = [ARWorldTrackingConfiguration new];
+    if (@available(iOS 13.0, *))
+    {
+      configuration.collaborationEnabled = NO;
+      configuration.userFaceTrackingEnabled = NO;
+      configuration.wantsHDREnvironmentTextures = NO;
+    }
+    if (@available(iOS 13.4, *))
+      configuration.sceneReconstruction = ARSceneReconstructionNone;
+    if (@available(iOS 14.3, *))
+      configuration.appClipCodeTrackingEnabled = NO;
+    if (@available(iOS 12.0, *))
+    {
+      configuration.environmentTexturing = AREnvironmentTexturingNone;
+      configuration.maximumNumberOfTrackedImages = 0;
+    }
+    configuration.planeDetection = ARPlaneDetectionNone;
+    configuration.lightEstimationEnabled = NO;
+    configuration.providesAudioData = NO;
+
     pImpl->delegate = [[SessionDelegate alloc] init];
     pImpl->session.delegate = pImpl->delegate;
     
