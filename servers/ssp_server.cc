@@ -171,20 +171,22 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
     uint64_t sent_frames = 0;
     uint64_t processing_time = 0;
 
-    double sent_mbytes = 0;
+    double sent_kbytes = 0;
 
     double sent_latency = 0;
 
     socket.connect("tcp://" + host + ":" + std::to_string(port));
 
     unsigned int fps = reader->GetFps();
+    unsigned int frame_time = 1000/fps;
 
     while (1) {
 
-      uint64_t sleep_time = (1000 / fps) - processing_time;
-
-      if (sleep_time > 1)
+      if (processing_time < frame_time)
+      {
+        uint64_t sleep_time = frame_time - processing_time;
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+      }
 
       start_frame_time = CurrentTimeMs();
 
@@ -225,9 +227,9 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
 
         zmq::message_t request(message.size());
         memcpy(request.data(), message.c_str(), message.size());
-        socket.send(request);
+        socket.send(request, zmq::send_flags::none);
         sent_frames += 1;
-        sent_mbytes += message.size() / 1000.0;
+        sent_kbytes += message.size() / 1000.0;
 
         uint64_t diff_time = CurrentTimeMs() - last_time;
 
@@ -247,12 +249,11 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
         sent_latency += diff_time;
 
         spdlog::debug(
-            "Message sent, took {} ms (avg. {}); packet size {}; avg {} fps; "
-            "{} "
-            "Mbps; {} Mbps expected",
+            "Message sent, took {} ms (avg. {:3.2f}); packet size {}; avg {} fps; "
+            "{:3.2f} Mbps; {:3.2f} Mbps expected",
             diff_time, sent_latency / sent_frames, message.size(), avg_fps,
-            8 * (sent_mbytes / (CurrentTimeMs() - start_time)),
-            8 * (sent_mbytes * reader->GetFps() / (sent_frames * 1000)));
+            8 * (sent_kbytes / (CurrentTimeMs() - start_time)),
+            8 * (sent_kbytes * reader->GetFps() / (sent_frames * 1000)));
 
         for (unsigned int i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);

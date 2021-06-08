@@ -39,6 +39,14 @@ bool NetworkReader::HasNextFrame() {
 #endif
 }
 
+unsigned long elapsed(unsigned long start, unsigned long end)
+{
+  if (end < start)
+    return start - end;
+  else
+    return end - start;
+}
+
 void NetworkReader::NextFrame() {
   zmq::message_t request;
 
@@ -76,19 +84,19 @@ void NetworkReader::NextFrame() {
   current_frame_internal_ = f_list;
 
   spdlog::debug(
-      "Message received, took {} ms; packet size {}; avg {} fps; {} avg "
+      "Message received, took {} ms; packet size {}; avg {} fps; {:3.2f} avg "
       "Mbps; latency: {} ms",
       diff_time, request.size(), avg_fps,
       8 * (rec_mbytes_ / (CurrentTimeMs() - start_time_)),
-      (f_list.front().timestamps.back() - f_list.front().timestamps.at(1)));
+      elapsed(f_list.front().timestamps.back(), f_list.front().timestamps.at(1)));
   for (FrameStruct f : f_list) {
     std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
     rec_mbytes_per_stream_[decoder_id] += f.frame.size() / 1000;
-    spdlog::debug("\t{};{};{} {} avg Mbps; latency: {} ms", f.device_id,
+    spdlog::debug("\t{};{};{} {:3.2f} avg Mbps; latency: {} ms", f.device_id,
                   f.sensor_id, f.frame_id,
                   8 * (rec_mbytes_per_stream_[decoder_id] /
                        (CurrentTimeMs() - start_time_)),
-                  (f.timestamps.back() - f.timestamps.at(1)));
+                  elapsed(f.timestamps.back(), f.timestamps.at(1)));
   }
 
 }

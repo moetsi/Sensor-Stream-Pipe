@@ -21,6 +21,7 @@ using namespace std;
   @public CVPixelBufferRef _pixelBuffer;
   @public CVPixelBufferRef _depthBuffer;
   @public CVPixelBufferRef _confidenceBuffer;
+  @public unsigned long _timestamp;
 }
 @end
 
@@ -36,6 +37,7 @@ using namespace std;
       _pixelBuffer = nil;
       _depthBuffer = nil;
       _confidenceBuffer = nil;
+      _timestamp = 0;
     }
     
     return self;
@@ -46,6 +48,7 @@ using namespace std;
   pthread_mutex_lock(&_mutex);
   CVPixelBufferRelease(_pixelBuffer);
   _pixelBuffer = CVPixelBufferRetain(frame.capturedImage);
+  _timestamp = CurrentTimeMs();
     
   if (@available(iOS 14.0, *))
   {
@@ -91,21 +94,21 @@ iPhoneReader::iPhoneReader()
   pImpl->image->sensor_id = 0;
   pImpl->image->frame_type = 0;      // image
   pImpl->image->frame_data_type = 6; // YUV
-  pImpl->image->timestamps.push_back(0);
+  pImpl->image->timestamps.push_back(CurrentTimeMs());
   pImpl->image->timestamps.push_back(CurrentTimeMs());
 
   pImpl->depth = std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
   pImpl->depth->sensor_id = 1;
   pImpl->depth->frame_type = 1;      // depth
   pImpl->depth->frame_data_type = 5; // float
-  pImpl->depth->timestamps.push_back(0);
+  pImpl->depth->timestamps.push_back(CurrentTimeMs());
   pImpl->depth->timestamps.push_back(CurrentTimeMs());
   
   pImpl->confidence = std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
   pImpl->confidence->sensor_id = 2;
   pImpl->confidence->frame_type = 3;      // confidence
   pImpl->confidence->frame_data_type = 7; // U8C1
-  pImpl->confidence->timestamps.push_back(0);
+  pImpl->confidence->timestamps.push_back(CurrentTimeMs());
   pImpl->confidence->timestamps.push_back(CurrentTimeMs());
 
   @autoreleasepool
@@ -136,7 +139,7 @@ iPhoneReader::iPhoneReader()
 
     pImpl->delegate = [[SessionDelegate alloc] init];
     pImpl->session.delegate = pImpl->delegate;
-    
+
     pImpl->fps = 60;
     
     if (@available(iOS 11.3, *))
@@ -205,7 +208,7 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     size_t len_uv = h_uv * bpr_uv;
     s->frame.resize(len_y + len_uv + 2 * sizeof(int));
     
-    s->timestamps[0] = 0;
+    s->timestamps[0] = pImpl->delegate->_timestamp;
     s->timestamps[1] = CurrentTimeMs();
 
     memcpy(&s->frame[0], &cols, sizeof(int));
@@ -234,7 +237,7 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     size_t size = cols*rows*sizeof(float);
     s->frame.resize(size + 2 * sizeof(int));
 
-    s->timestamps[0] = 0;
+    s->timestamps[0] = pImpl->delegate->_timestamp;
     s->timestamps[1] = CurrentTimeMs();
     
     memcpy(&s->frame[0], &cols, sizeof(int));
@@ -259,7 +262,7 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     size_t size = cols*rows*sizeof(unsigned char);
     s->frame.resize(size + 2 * sizeof(int));
 
-    s->timestamps[0] = 0;
+    s->timestamps[0] = pImpl->delegate->_timestamp;
     s->timestamps[1] = CurrentTimeMs();
     
     memcpy(&s->frame[0], &cols, sizeof(int));
