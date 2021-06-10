@@ -55,7 +55,7 @@ void LibAvEncoder::NextPacket() {
 
 void LibAvEncoder::PrepareFrame() {
   std::shared_ptr<FrameStruct> f = buffer_fs_.front();
-  if (f->frame_data_type == 2) {
+  if (f->frame_data_type == 2) { // raw RGBA data
     uint8_t *in_data[1] = {&f->frame[8]};
     int in_linesize[1] = {4 * frame_av_->width};
 
@@ -117,10 +117,12 @@ void LibAvEncoder::PrepareFrame() {
              frame_av_->height * frame_av_->width / 4);
     }
 
-  } else if (f->frame_data_type == 6) {
+  } else if (f->frame_data_type == 6) { // YUV NV12 format
     uint8_t *data = &f->frame[8];
+    // Copy Y plane
     memcpy(frame_av_->data[0], data, frame_av_->height * frame_av_->width);
     data = &f->frame[8 + frame_av_->height * frame_av_->width];
+    // Copy UV plane
     memcpy(frame_av_->data[1], data, frame_av_->height * frame_av_->width / 2);
   } else if (f->frame_data_type == 0 || f->frame_data_type == 1) {
 

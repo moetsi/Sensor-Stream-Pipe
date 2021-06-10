@@ -9,27 +9,27 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
 
   bool img_changed = false;
 
-  if (f.frame_data_type == 2) {
+  if (f.frame_data_type == 2) {         // raw RGBA data
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
     img = cv::Mat(rows, cols, CV_8UC4, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
     img_changed = true;
-  } else if (f.frame_data_type == 3) {
+  } else if (f.frame_data_type == 3) {  // raw GRAY16LE data
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
     img =
         cv::Mat(rows, cols, CV_16UC1, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
     img_changed = true;
-  } else if (f.frame_data_type == 5) {
+  } else if (f.frame_data_type == 5) {  // raw 32FC1 data
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
     img =
         cv::Mat(rows, cols, CV_32FC1, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
     img_changed = true;
-  } else if (f.frame_data_type == 6) {
+  } else if (f.frame_data_type == 6) {  // raw YUV NV12 data in 2 planes
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
@@ -40,7 +40,7 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
     // NV12 (UVUV) vs NV21 (VUVU) : https://www.programmersought.com/article/74944045497/
     cv::cvtColorTwoPlane(y, uv, img, cv::COLOR_YUV2BGR_NV12);
     img_changed = true;
-  } else if (f.frame_data_type == 7) {
+  } else if (f.frame_data_type == 7) {  // raw U8C1 data
     int rows, cols;
     memcpy(&cols, &f.frame[0], sizeof(int));
     memcpy(&rows, &f.frame[4], sizeof(int));
