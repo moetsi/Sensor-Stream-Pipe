@@ -20,25 +20,25 @@ include(FetchContent)
 if (IOS)
   FetchContent_Declare(
     ssp_dep
-    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202104091831__ssp_iosdep.tar.gz
+    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104091831__ssp_iosdep.tar.gz
     URL_HASH MD5=89578a5752c950f983b570b0b9a602b5
   )
 elseif (APPLE)
   FetchContent_Declare(
     ssp_dep
-    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103161130__ssp_macdep.tar.gz
+    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103161130__ssp_macdep.tar.gz
     URL_HASH MD5=8cdef0d14b1ef3be77f2a023fd399ee0
   )
 elseif (WIN32)
   FetchContent_Declare(
     ssp_dep
-    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202103181613__ssp_windep.tar.gz
+    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103181613__ssp_windep.tar.gz
     URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
   )
 elseif (UNIX)
   FetchContent_Declare(
     ssp_dep
-    URL http://r2d3.geldreich.net/downloads/.20210308.ssp/202104061701__ssp_lindep.tar.gz
+    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
     URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
   )
 endif()
