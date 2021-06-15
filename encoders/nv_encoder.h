@@ -10,11 +10,13 @@
 #include "../decoders/libav_decoder.h"
 #include "../utils/image_decoder.h"
 #include "iencoder.h"
-#include "../readers/kinect_reader.h"
 #include "../structs/frame_struct.hpp"
-#include "../utils/kinect_utils.h"
 #include "../utils/utils.h"
 
+#ifdef SSP_WITH_KINECT_SUPPORT
+#include "../readers/kinect_reader.h"
+#include "../utils/kinect_utils.h"
+#endif
 
 class NvEncoder : public IEncoder {
 

@@ -1,0 +1,29 @@
+diff --git a/build-ffmpeg-iOS-framework.sh b/build-ffmpeg-iOS-framework.sh
+index 56e2be6..85e17c7 100755
+--- a/build-ffmpeg-iOS-framework.sh
++++ b/build-ffmpeg-iOS-framework.sh
+@@ -2,9 +2,9 @@
+ 
+ # directories
+ SCRATCH=`pwd`/"scratch"
+-ARCHS="arm64 armv7 i386 x86_64"
++ARCHS="arm64 x86_64"
+ 
+-FFMPEG_VERSION="3.4"
++FFMPEG_VERSION="4.3.1"
+ export FFMPEG_VERSION
+ HEADER_SUFFIX=".h"
+ CURRENT_FOLDER=`pwd`
+diff --git a/build-ffmpeg.sh b/build-ffmpeg.sh
+index 319fadb..72a8f86 100755
+--- a/build-ffmpeg.sh
++++ b/build-ffmpeg.sh
+@@ -39,7 +39,7 @@ ARCHS="arm64 armv7 x86_64 i386"
+ COMPILE="y"
+ LIPO="y"
+ 
+-DEPLOYMENT_TARGET="8.0"
++DEPLOYMENT_TARGET="9.0"
+ 
+ if [ "$*" ]
+ then

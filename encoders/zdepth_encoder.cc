@@ -112,7 +112,8 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
       memcpy(&width_, &fs->frame[0], sizeof(int));
       memcpy(&height_, &fs->frame[4], sizeof(int));
       data = reinterpret_cast<uint16_t *>(&fs->frame[8]);
-    }
+    } else
+      spdlog::error("zdepth: Unsupported frame_data_type {}", fs->frame_data_type);
 
     if (codec_params_struct_ == nullptr)
       GetCodecParamsStruct();

@@ -3,6 +3,15 @@
 //
 
 extern "C" {
+#ifdef FFMPEG_AS_FRAMEWORK
+#include <FFmpeg/avcodec.h>
+#include <FFmpeg/avformat.h>
+#include <FFmpeg/avutil.h>
+#include <FFmpeg/imgutils.h>
+#include <FFmpeg/opt.h>
+#include <FFmpeg/pixdesc.h>
+#include <FFmpeg/swscale.h>
+#else
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
@@ -10,6 +19,7 @@ extern "C" {
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
+#endif
 }
 
 #pragma once
@@ -73,9 +83,9 @@ struct AVIOContextDeleter {
   }
 };
 
-auto AVFrameSharedDeleter = [](AVFrame *ptr) { av_frame_free(&ptr); };
+static auto AVFrameSharedDeleter = [](AVFrame *ptr) { av_frame_free(&ptr); };
 
-auto AVPacketSharedDeleter = [](AVPacket *ptr) { av_packet_free(&ptr); };
+static auto AVPacketSharedDeleter = [](AVPacket *ptr) { av_packet_free(&ptr); };
 
 typedef std::unique_ptr<AVFrame, AVFrameDeleter> AVFrameSafeP;
 typedef std::shared_ptr<AVFrame> AVFrameSharedP;

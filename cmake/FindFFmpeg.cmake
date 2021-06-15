@@ -61,7 +61,6 @@ macro(find_component _component _pkgconfig _library _header)
     if (NOT WIN32)
         # use pkg-config to get the directories and then use these values
         # in the FIND_PATH() and FIND_LIBRARY() calls
-        find_package(PkgConfig)
         if (PKG_CONFIG_FOUND)
             pkg_check_modules(PC_${_component} ${_pkgconfig})
         endif ()
@@ -71,6 +70,7 @@ macro(find_component _component _pkgconfig _library _header)
             HINTS
             ${PC_LIB${_component}_INCLUDEDIR}
             ${PC_LIB${_component}_INCLUDE_DIRS}
+            ${FFMPEG_ROOT}/include
             PATH_SUFFIXES
             ffmpeg
             )
@@ -79,6 +79,7 @@ macro(find_component _component _pkgconfig _library _header)
             HINTS
             ${PC_LIB${_component}_LIBDIR}
             ${PC_LIB${_component}_LIBRARY_DIRS}
+            ${FFMPEG_ROOT}/lib
             )
 
     set(${_component}_DEFINITIONS ${PC_${_component}_CFLAGS_OTHER} CACHE STRING "The ${_component} CFLAGS.")
@@ -94,9 +95,10 @@ macro(find_component _component _pkgconfig _library _header)
 
 endmacro()
 
-
 # Check for cached results. If there are skip the costly part.
 if (NOT FFMPEG_LIBRARIES)
+
+    find_package(PkgConfig)
 
     # Check for all possible component.
     find_component(AVCODEC libavcodec avcodec libavcodec/avcodec.h)

@@ -58,11 +58,12 @@ struct FrameStruct {
   // message id, currenly set to 0
   unsigned short message_type;
 
-  // 0 for color, 1 for depth, 2 for ir
+  // 0 for color, 1 for depth, 2 for ir, 3 for confidence
   unsigned short frame_type;
 
   // 0 for image frames, 1 for libav packets, 2 for raw RGBA data, 3 for raw
-  // GRAY16LE data, 4 for NvPipe packets
+  // GRAY16LE data, 4 for NvPipe packets, 5 for raw 32FC1 data, 6 for YUV data
+  // 7 for raw U8C1 data
   unsigned short frame_data_type;
 
   // random 16 char string that uniquely ids the frame stream

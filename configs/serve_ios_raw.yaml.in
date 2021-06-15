@@ -1,0 +1,19 @@
+---
+general:
+  host: "@HOSTNAME@"
+  port: 9999
+  frame_source:
+    type: "iphone"
+video_encoder:
+  0: #color
+    type: "libav"
+    codec_name: "h264_videotoolbox"
+    pix_fmt: "nv12"
+    bit_rate: 4000000
+    options:
+      preset: "veryfast"
+      crf: "23"
+  1: #depth
+    type: "null"
+  3: #confidence
+    type: "null"

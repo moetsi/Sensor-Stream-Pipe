@@ -13,17 +13,25 @@
 #endif 
 
 extern "C" {
+#ifdef FFMPEG_AS_FRAMEWORK
+#include <FFmpeg/avcodec.h>
+#include <FFmpeg/avformat.h>
+#include <FFmpeg/avutil.h>
+#include <FFmpeg/log.h>
+#include <FFmpeg/pixdesc.h>
+#include <FFmpeg/swscale.h>
+#else
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 #include <libavutil/log.h>
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
+#endif
 }
 
 #include "../encoders/libav_encoder.h"
 #include "../structs/frame_struct.hpp"
-#include <cv.hpp>
 
 #include "../decoders/idecoder.h"
 #include "../decoders/libav_decoder.h"
@@ -54,8 +62,7 @@ int main(int argc, char *argv[]) {
   spdlog::set_level(spdlog::level::debug);
   av_log_set_level(AV_LOG_QUIET);
 
-  srand(time(NULL) * getpid());
-  // srand(getpid());
+  srand(time(NULL));
 
   std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 

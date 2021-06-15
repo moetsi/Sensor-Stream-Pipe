@@ -5,8 +5,19 @@
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
+#define SSP_EXPORT __declspec(dllexport)
 #else
 #include <unistd.h>
+#define SSP_EXPORT
+#endif
+
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#if TARGET_OS_IOS
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#include "../readers/iphone_reader.h"
+#endif
 #endif
 
 #include "../utils/logger.h"
@@ -35,24 +46,21 @@
 #include "../utils/kinect_utils.h"
 #endif
 
-int main(int argc, char *argv[]) {
-
-  spdlog::set_level(spdlog::level::debug);
-
-  srand(time(NULL) * getpid());
+extern "C" SSP_EXPORT int ssp_server(const char* filename)
+{
+  av_log_set_level(AV_LOG_QUIET);
 
   try {
-    av_log_set_level(AV_LOG_QUIET);
-
-    if (argc < 2) {
-      std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
-      return 1;
-    }
-
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_PUSH);
 
-    std::string codec_parameters_file = std::string(argv[1]);
+    // Do not accumulate packets if no client is connected
+    socket.set(zmq::sockopt::immediate, true);
+
+    // Do not keep packets if there is network congestion
+    //socket.set(zmq::sockopt::conflate, true);
+
+    std::string codec_parameters_file = std::string(filename);
 
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
@@ -80,6 +88,18 @@ int main(int argc, char *argv[]) {
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
               .as<std::string>();
+
+#if TARGET_OS_IOS
+      // Find the corresponding path in the application bundle
+      NSString* file_path = [NSString stringWithCString:path.c_str()
+                                               encoding:[NSString defaultCStringEncoding]];
+      NSString* bundle_path = [[NSBundle mainBundle] pathForResource:file_path
+                                                              ofType:nil];
+      if (bundle_path != nil)
+        path = std::string([bundle_path UTF8String]);
+#endif
+
+        
       if (general_parameters["frame_source"]["parameters"]["streams"]
               .IsDefined()) {
         std::vector<unsigned int> streams =
@@ -97,13 +117,19 @@ int main(int argc, char *argv[]) {
           general_parameters["frame_source"]["parameters"]);
       reader = std::unique_ptr<KinectReader>(new KinectReader(0, c));
 #else
-      exit(1);
+      return 1;
+#endif
+    } else if (reader_type == "iphone") {
+#if TARGET_OS_IOS
+      reader = std::unique_ptr<iPhoneReader>(new iPhoneReader());
+#else
+      return 1;
 #endif
     } else {
       spdlog::error("Unknown reader type: \"{}\". Supported types are "
                     "\"frames\", \"video\" and \"kinect\"",
                     reader_type);
-      exit(1);
+      return 1;
     }
 
     std::unordered_map<unsigned int, std::shared_ptr<IEncoder>> encoders;
@@ -123,7 +149,7 @@ int main(int argc, char *argv[]) {
 #else
         spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
                       "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
-        exit(1);
+        return 1;
 #endif
       } else if (encoder_type == "zdepth")
         fe =
@@ -134,7 +160,7 @@ int main(int argc, char *argv[]) {
         spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                       "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
                       encoder_type);
-        exit(1);
+        return 1;
       }
       encoders[type] = fe;
     }
@@ -145,20 +171,22 @@ int main(int argc, char *argv[]) {
     uint64_t sent_frames = 0;
     uint64_t processing_time = 0;
 
-    double sent_mbytes = 0;
+    double sent_kbytes = 0;
 
     double sent_latency = 0;
 
     socket.connect("tcp://" + host + ":" + std::to_string(port));
 
     unsigned int fps = reader->GetFps();
+    unsigned int frame_time = 1000/fps;
 
     while (1) {
 
-      uint64_t sleep_time = (1000 / fps) - processing_time;
-
-      if (sleep_time > 1)
+      if (processing_time < frame_time)
+      {
+        uint64_t sleep_time = frame_time - processing_time;
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+      }
 
       start_frame_time = CurrentTimeMs();
 
@@ -199,9 +227,9 @@ int main(int argc, char *argv[]) {
 
         zmq::message_t request(message.size());
         memcpy(request.data(), message.c_str(), message.size());
-        socket.send(request);
+        socket.send(request, zmq::send_flags::none);
         sent_frames += 1;
-        sent_mbytes += message.size() / 1000.0;
+        sent_kbytes += message.size() / 1000.0;
 
         uint64_t diff_time = CurrentTimeMs() - last_time;
 
@@ -221,12 +249,11 @@ int main(int argc, char *argv[]) {
         sent_latency += diff_time;
 
         spdlog::debug(
-            "Message sent, took {} ms (avg. {}); packet size {}; avg {} fps; "
-            "{} "
-            "Mbps; {} Mbps expected",
+            "Message sent, took {} ms (avg. {:3.2f}); packet size {}; avg {} fps; "
+            "{:3.2f} Mbps; {:3.2f} Mbps expected",
             diff_time, sent_latency / sent_frames, message.size(), avg_fps,
-            8 * (sent_mbytes / (CurrentTimeMs() - start_time)),
-            8 * (sent_mbytes * reader->GetFps() / (sent_frames * 1000)));
+            8 * (sent_kbytes / (CurrentTimeMs() - start_time)),
+            8 * (sent_kbytes * reader->GetFps() / (sent_frames * 1000)));
 
         for (unsigned int i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
@@ -248,3 +275,38 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
+#ifndef SSP_PLUGIN
+int main(int argc, char *argv[]) {
+
+  spdlog::set_level(spdlog::level::debug);
+
+  srand(time(NULL));
+
+  std::string filename;
+#if TARGET_OS_IOS
+  // Path to embedded config file
+  NSString* path = [[NSBundle mainBundle] pathForResource:@"serve_ios_raw"
+                                                   ofType:@"yaml"];
+  if (path != nil)
+    filename = std::string([path UTF8String]);
+
+  // Launch ssp_server in a background queue
+  dispatch_queue_t aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+  dispatch_async(aQueue, ^{ ssp_server(filename.c_str()); });
+
+  @autoreleasepool {
+    return UIApplicationMain(argc, argv, nil, nil);
+  }
+#else
+  if (argc < 2) {
+    std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
+    return 1;
+  }
+
+  filename = std::string(argv[1]);
+#endif
+    
+  return ssp_server(filename.c_str());
+}
+#endif
