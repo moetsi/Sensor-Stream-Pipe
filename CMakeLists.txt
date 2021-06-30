@@ -278,6 +278,9 @@ target_link_libraries(ssp_plugin ssp)
 
 if (IOS)
   # Pack all the needed libraries for Unity3D iOS usage
+  # Usage:
+  # cmake --build . --config Release --target unity
+  # mv ssp_plugin_unity ~/UnityProject/Assets/Plugins/iOS
   add_custom_target(unity
           ${CMAKE_SOURCE_DIR}/cmake/package_for_unity.sh
           DEPENDS ssp_plugin)

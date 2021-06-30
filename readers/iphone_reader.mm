@@ -22,8 +22,23 @@ using namespace std;
   @public CVPixelBufferRef _depthBuffer;
   @public CVPixelBufferRef _confidenceBuffer;
   @public unsigned long _timestamp;
+  @private id<ARSessionDelegate> _parent;
 }
 @end
+
+static id<ARSessionDelegate> gSession = nil;
+
+struct UnityXRNativeSessionPtr
+{
+ int version;
+ void* session;
+};
+
+extern "C" void use_session(void* session)
+{
+    auto data = static_cast<UnityXRNativeSessionPtr*>(session);
+    gSession = (__bridge id<ARSessionDelegate>)(data->session);
+}
 
 @implementation SessionDelegate
 
@@ -38,6 +53,7 @@ using namespace std;
       _depthBuffer = nil;
       _confidenceBuffer = nil;
       _timestamp = 0;
+      _parent = gSession;
     }
     
     return self;
