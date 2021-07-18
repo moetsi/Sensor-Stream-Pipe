@@ -14,6 +14,7 @@ Currently, Moetsi’s Sensor Stream Pipe supports:
 * .mkv \(matroska\) RGB-D recordings
 * [Azure Kinect DK](https://azure.microsoft.com/en-us/services/kinect-dk/) RGB-D camera 
 * seminal computer vision/spatial computing datasets \(e.g. [BundleFusion](https://graphics.stanford.edu/projects/bundlefusion/), [MS RGB-D 7 scenes](https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/) and [VSFS](http://graphics.stanford.edu/projects/vsfs/)\)
+* iOS ARKit data \(streams [ARFrame data](https://developer.apple.com/documentation/arkit/arframe)\)
 
 We’re planning to support other cameras and devices \(e.g. Kinect v2 and Structure Core\) in the near future. At the same time, we’ve made the Moetsi SSP totally open source so that anyone can build out support for any device.
 
@@ -25,7 +26,7 @@ We’re planning to support other cameras and devices \(e.g. Kinect v2 and Struc
 * Support for Azure Kinect DK \(live and recorded video streaming\) and image datasets \(e.g. [BundleFusion](https://graphics.stanford.edu/projects/bundlefusion/), [MS RGB-D 7 scenes](https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/) and [VSFS](http://graphics.stanford.edu/projects/vsfs/)\) and .mkv \(matroska\) files
 * Hardware-accelerated encoding \(e.g. Nvidia codec\), providing you with the lowest possible latency and bandwidth without compromising on quality
 * Interoperability with Libav and FFmpeg creates a hyperflexible framework for all the use cases you brilliant developers can come up with!
-* Access to the calibration data for each of the sensors on the Kinect, enabling you to build a point cloud from the color and depth images, perform body tracking, bundle fusion, etc.
+* Access to the calibration data for each of the sensors on the Kinect, enabling you to build a point cloud from the color and depth images, perform body tracking, etc.
 
 ### But why though...?
 
