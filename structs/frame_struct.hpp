@@ -56,6 +56,8 @@ struct CodecParamsStruct {
 struct FrameStruct {
 
   // message id, currenly set to 0
+  //This is to be used as "versioning", so if how messages are updated so that Sensor Stream Client
+  //must interpret different "versions" of messages then this field will indicate the message version
   unsigned short message_type;
 
   // 0 for color, 1 for depth, 2 for ir, 3 for confidence
@@ -64,15 +66,22 @@ struct FrameStruct {
   // 0 for image frames, 1 for libav packets, 2 for raw RGBA data, 3 for raw
   // GRAY16LE data, 4 for NvPipe packets, 5 for raw 32FC1 data, 6 for YUV data
   // 7 for raw U8C1 data
+  //This is used to select the decoder on the "receiving" side of the Pipe
+  //Not all frame_type + frame_data_type combinations "make sense" or will be used
   unsigned short frame_data_type;
 
   // random 16 char string that uniquely ids the frame stream
+  //Some decoders (like video) are stateful and so must keep track of streams
+  //This is automatically generated
   std::string stream_id;
 
   // frame binary data
+  //We use a vector to know the size, basically a vector of bytes to store binary data
   std::vector<unsigned char> frame;
 
   // codec info for video frames, null for image frames
+  //Video decoder needs to know about the last receive frame
+  //Requires to know the codec as well as additional parameters
   CodecParamsStruct codec_data;
 
   // codec info for video frames, null for image frames
@@ -86,13 +95,17 @@ struct FrameStruct {
   unsigned int sensor_id;
 
   // integer device id: distingish between devices in the same scene
+  //Can be set by user
   unsigned int device_id;
 
   // current frame number (increases over time)
+  //Increases by 1 for each frame automatically when SSP server starts
   unsigned int frame_id;
 
+  //Use for logging and timing to understand processing speeds
   std::vector<unsigned long> timestamps;
 
+  //Serialize method (not used by Server but is available)
   template <class Archive> void serialize(Archive &ar) {
     ar(message_type, frame_type, frame_data_type, stream_id, frame, codec_data,
        camera_calibration_data, scene_desc, sensor_id, device_id, frame_id,
