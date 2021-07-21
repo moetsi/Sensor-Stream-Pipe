@@ -28,8 +28,7 @@ function build_ffmpeg {
         --disable-static \
         --enable-shared \
         --enable-rpath \
-        --disable-programs \
-        --disable-ffmpeg \
+        --enable-ffmpeg \
         --disable-ffplay \
         --disable-ffprobe \
         --disable-securetransport
