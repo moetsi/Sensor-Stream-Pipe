@@ -171,13 +171,12 @@ iPhoneReader::iPhoneReader()
     pImpl->fps = 60;
     
     if (@available(iOS 11.3, *))
-      if (configuration)
         pImpl->fps = (unsigned int)configuration.videoFormat.framesPerSecond;
     
     // Depth is only supported on iOS 14 and above
     if (@available(iOS 14.0, *))
     {
-      if ([ARWorldTrackingConfiguration supportsFrameSemantics:ARFrameSemanticSceneDepth])
+      if ([ARWorldTrackingConfiguration supportsFrameSemantics:ARFrameSemanticSceneDepth] && configuration)
       {
         configuration.frameSemantics = ARFrameSemanticSceneDepth;
         spdlog::debug("Adding SceneDepth to configuration");
