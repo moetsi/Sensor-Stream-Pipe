@@ -8,7 +8,7 @@
 # sudo apt-get update
 # sudo apt-get install build-essential
 # sudo apt-get install nasm
-# sudo apt-get install libgtk2.0-dev
+# sudo apt-get install libgtk2.0-dev libusb-1.0-0-dev
 # sudo snap install --classic cmake
 
 # For k4a
@@ -237,6 +237,20 @@ function build_k4a {
     popd
 }
 
+# https://github.com/luxonis/depthai-core/tree/main
+function build_depthai {
+    echo "Building Depthai-core"
+    git clone --depth 1 --branch main \
+        https://github.com/luxonis/depthai-core.git
+    pushd depthai-core
+    git submodule update --init --recursive
+    cmake -H. -Bbuild -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai
+    cmake --build build
+    cmake --build build --target install
+    cd ..
+    popd
+}
+
 export SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd | sed -e 's,^/c/,c:/,')"
 
 echo "Cleaning tmp directory"
@@ -262,10 +276,12 @@ build_yaml_cpp
 build_libzmq
 build_cppzmq
 #build_k4a
+build_depthai
 
-version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
+
+# version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
 prefix=`date +%Y%m%d%H%M`
-filename=${prefix}_${version}_ssp_lindep
+filename=${prefix}__ssp_lindep
 
 echo "Packing ${LOCAL_DIR} to ${filename}.tar"
 tar -C ${LOCAL_DIR} -cf ${filename}.tar \
@@ -276,6 +292,7 @@ tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   opencv \
   spdlog \
   yaml-cpp \
+  depthai \
   zdepth
 
 echo "Compressing ${filename}.tar"

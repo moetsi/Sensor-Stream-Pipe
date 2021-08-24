@@ -38,8 +38,8 @@ elseif (WIN32)
 elseif (UNIX)
   FetchContent_Declare(
     ssp_dep
-    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
-    URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
+    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202108232137__ssp_lindep.tar.gz
+    URL_HASH MD5=af57ded69da2b98f955598068f5ecdf3
   )
 endif()
 
@@ -64,6 +64,7 @@ if (ssp_dep_POPULATED)
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
   endif()
   set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog CACHE PATH "spdlog installation path")
+  set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai/cmake/Depthai CACHE PATH "depthai installation path")
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
@@ -81,6 +82,7 @@ find_package(yaml-cpp REQUIRED)
 find_package(ZeroMQ REQUIRED)
 find_package(cppzmq REQUIRED)
 find_package(zdepth REQUIRED)
+find_package(depthai CONFIG REQUIRED)
 
 if (IOS)
   add_definitions(-DFFMPEG_AS_FRAMEWORK)
@@ -229,6 +231,7 @@ endif ()
 
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
+target_link_libraries(ssp PRIVATE depthai::opencv)
 
 target_link_libraries(ssp PUBLIC
     cereal
