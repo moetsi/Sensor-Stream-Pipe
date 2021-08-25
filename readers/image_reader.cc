@@ -1,12 +1,13 @@
-//
+/**
+ * \file image_reader.cc @brief Image reader
+ */
 // Created by amourao on 26-06-2019.
-//
-
 #include "image_reader.h"
+
+namespace moetsi::ssp {
 
 ImageReader::ImageReader(std::string filename) {
   // bundle_fusion_apt0;0;0;30
-
   // std::string sceneDesc;
   // unsigned int sensocpsrId;
   // unsigned int deviceId;
@@ -28,7 +29,7 @@ ImageReader::ImageReader(std::string filename) {
 
     sensor_id_ = std::stoul(sensor_id_str);
     device_id_ = std::stoul(device_id_str);
-    frame_type_ = std::stoul(frame_type_str);
+    frame_type_ = FrameType(std::stoul(frame_type_str));
     fps_ = std::stoul(fps_str);
 
     // get frame count
@@ -90,15 +91,14 @@ std::shared_ptr<FrameStruct> ImageReader::CreateFrameStruct(unsigned int frame_i
   std::vector<unsigned char> file_data = ReadFile(frame_path);
   std::shared_ptr<FrameStruct> frame = std::shared_ptr<FrameStruct>(new FrameStruct());
 
-  frame->message_type = 0;
-
-  frame->frame_data_type = 0;
+  frame->message_type = SSPMessageType::MessageTypeDefault; // 0;
+  frame->frame_data_type = FrameDataType::FrameDataTypeImageFrame; // 0;
   frame->scene_desc = scene_desc_;
   frame->device_id = device_id_;
   frame->sensor_id = sensor_id_;
   frame->frame_type = frame_type_;
-  frame->timestamps.push_back(1000.0 / fps_ * frame_counter_);
-  frame->timestamps.push_back(CurrentTimeMs());
+  frame->timestamps.push_back((1000000000ULL / uint64_t(fps_)) * frame_counter_);
+  frame->timestamps.push_back(CurrentTimeNs());
 
   frame->frame_id = read_frame_id;
 
@@ -145,8 +145,10 @@ void ImageReader::Reset() {
 
 unsigned int ImageReader::GetFps() { return fps_; }
 
-std::vector<unsigned int> ImageReader::GetType() {
-  std::vector<unsigned int> result;
+std::vector<FrameType> ImageReader::GetType() {
+  std::vector<FrameType> result;
   result.push_back(frame_type_);
   return result;
 }
+
+} // namespace moetsi::ssp

@@ -1,6 +1,7 @@
-//
+/**
+ * \file nv_encoder.cc @brief NvPipe encoder
+ */
 // Created by amourao on 11-09-2019.
-//
 
 #ifndef WIN32
 #include <unistd.h>
@@ -20,6 +21,8 @@
 //#include <opencv2/imgproc.hpp>
 
 #include "nv_encoder.h"
+
+namespace moetsi::ssp {
 
 NvEncoder::NvEncoder(YAML::Node _codec_parameters, unsigned int _fps) {
   BuildEncoder(_codec_parameters);
@@ -312,3 +315,5 @@ void NvEncoder::BuildEncoder(YAML::Node _codec_parameters) {
     spdlog::warn("Missing key: \"bit_rate\", Using default: {}", bitrate_);
   }
 }
+
+} // namespace moetsi::ssp

@@ -1,8 +1,10 @@
-//
+/**
+ * \file libav_encoder.cc @brief Jpef/Mpeg encoder
+ */
 // Created by amourao on 26-06-2019.
-//
-
 #include "libav_encoder.h"
+
+namespace moetsi::ssp {
 
 LibAvEncoder::LibAvEncoder(std::string codec_parameters_file,
                            unsigned int _fps) {
@@ -55,14 +57,18 @@ void LibAvEncoder::NextPacket() {
 
 void LibAvEncoder::PrepareFrame() {
   std::shared_ptr<FrameStruct> f = buffer_fs_.front();
-  if (f->frame_data_type == 2) { // raw RGBA data
+  //FrameDataType::FrameDataTypeRawRGBA = 2
+  //if (f->frame_data_type == 2) { // raw RGBA data  
+  if (f->frame_data_type == FrameDataType::FrameDataTypeRawRGBA) { // raw RGBA data
     uint8_t *in_data[1] = {&f->frame[8]};
     int in_linesize[1] = {4 * frame_av_->width};
 
     sws_scale(sws_context_.get(), (const uint8_t *const *)in_data, in_linesize,
               0, frame_av_->height, frame_av_->data, frame_av_->linesize);
 
-  } else if (f->frame_data_type == 3) {
+  //FrameDataType::FrameDataTypeGRAY16LE = 3
+  //} else if (f->frame_data_type == 3) {  
+  } else if (f->frame_data_type == FrameDataType::FrameDataTypeGRAY16LE) {
     if (frame_av_->format == AV_PIX_FMT_GRAY12LE) {
       int i = 0;
       uint8_t *data = &f->frame[8];
@@ -117,21 +123,29 @@ void LibAvEncoder::PrepareFrame() {
              frame_av_->height * frame_av_->width / 4);
     }
 
-  } else if (f->frame_data_type == 6) { // YUV NV12 format
+  //FrameDataType::FrameDataTypeYUV = 6
+  //} else if (f->frame_data_type == 6) { // YUV NV12 format
+  } else if (f->frame_data_type == FrameDataType::FrameDataTypeYUV) { // YUV NV12 format
     uint8_t *data = &f->frame[8];
     // Copy Y plane
     memcpy(frame_av_->data[0], data, frame_av_->height * frame_av_->width);
     data = &f->frame[8 + frame_av_->height * frame_av_->width];
     // Copy UV plane
     memcpy(frame_av_->data[1], data, frame_av_->height * frame_av_->width / 2);
-  } else if (f->frame_data_type == 0 || f->frame_data_type == 1) {
+  
+  // FrameDataType::FrameDataTypeImageFrame = 0
+  // FrameDataType::FrameDataTypeLibavPackets= 1
+  //} else if (f->frame_data_type == 0 || f->frame_data_type == 1) {
+  } else if (f->frame_data_type == FrameDataType::FrameDataTypeImageFrame || f->frame_data_type == FrameDataType::FrameDataTypeLibavPackets) {
 
     AVFrameSharedP frame_av_O =
         std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 
     std::vector<unsigned char> frameData = f->frame;
 
-    if (f->frame_data_type == 0) {
+    //FrameDataType::FrameDataTypeImageFrame = 0
+    //if (f->frame_data_type == 0) {
+    if (f->frame_data_type == FrameDataType::FrameDataTypeImageFrame) {
       image_decoder_.ImageBufferToAVFrame(f, frame_av_O);
     } else {
       if (lib_av_decoder_ == nullptr) {
@@ -237,7 +251,7 @@ void LibAvEncoder::Encode() {
 
   EncodeA();
 
-  buffer_fs_.front()->timestamps.push_back(CurrentTimeMs());
+  buffer_fs_.front()->timestamps.push_back(CurrentTimeNs());
 }
 
 void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
@@ -248,6 +262,9 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
   av_codec_ =
       std::unique_ptr<AVCodec, AVCodecDeleter>(avcodec_find_encoder_by_name(
           codec_parameters_["codec_name"].as<std::string>().c_str()));
+
+  // std::cerr << "codec name " <<  codec_parameters_["codec_name"].as<std::string>().c_str() << " " << (!!av_codec_) << std::endl;
+
   av_codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(
       avcodec_alloc_context3(av_codec_.get()));
   av_codec_parameters_ =
@@ -256,7 +273,9 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
 
   int width = 0, height = 0, pxl_format = 0;
 
-  if (fs->frame_data_type == 0) {
+  // FrameDataType::FrameDataTypeImageFrame = 0
+  // if (fs->frame_data_type == 0) {
+  if (fs->frame_data_type == FrameDataType::FrameDataTypeImageFrame) {
     AVFrameSharedP frame_av_O =
         std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 
@@ -265,7 +284,9 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
     width = frame_av_O->width;
     height = frame_av_O->height;
     pxl_format = frame_av_O->format;
-  } else if (fs->frame_data_type == 1) {
+  //FrameDataType::FrameDataTypeLibavPackets
+  //} else if (fs->frame_data_type == 1) {
+  } else if (fs->frame_data_type == FrameDataType::FrameDataTypeLibavPackets) {
 
     if (lib_av_decoder_ == nullptr) {
       lib_av_decoder_ = std::unique_ptr<LibAvDecoder>(new LibAvDecoder());
@@ -277,15 +298,21 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
     height = frame_av_O->height;
 
     pxl_format = frame_av_O->format;
-  } else if (fs->frame_data_type == 2) {
+  //FrameDataType::FrameDataTypeRawRGBA = 2
+  //} else if (fs->frame_data_type == 2) {    
+  } else if (fs->frame_data_type == FrameDataType::FrameDataTypeRawRGBA) {
     memcpy(&width, &fs->frame[0], sizeof(int));
     memcpy(&height, &fs->frame[4], sizeof(int));
     pxl_format = AV_PIX_FMT_BGRA;
-  } else if (fs->frame_data_type == 3) {
+  //FrameDataType::FrameDataTypeGRAY16LE = 3
+  // } else if (fs->frame_data_type == 3) {
+  } else if (fs->frame_data_type == FrameDataType::FrameDataTypeGRAY16LE) {
     memcpy(&width, &fs->frame[0], sizeof(int));
     memcpy(&height, &fs->frame[4], sizeof(int));
     pxl_format = AV_PIX_FMT_GRAY16LE;
-  } else if (fs->frame_data_type == 6) {
+  //FrameDataType::FrameDataTypeYUV = 6
+  //} else if (fs->frame_data_type == 6) {
+  } else if (fs->frame_data_type == FrameDataType::FrameDataTypeYUV) {
     memcpy(&width, &fs->frame[0], sizeof(int));
     memcpy(&height, &fs->frame[4], sizeof(int));
     pxl_format = AV_PIX_FMT_NV12;
@@ -404,7 +431,9 @@ std::shared_ptr<CodecParamsStruct> LibAvEncoder::GetCodecParamsStruct() {
     memcpy(&data_buffer[0], av_codec_parameters_.get(), data_size);
     memcpy(&extra_data_buffer[0], extra_data_pointer, extra_data_size);
     codec_params_struct_ = std::shared_ptr<CodecParamsStruct>(
-        new CodecParamsStruct(0, data_buffer, extra_data_buffer));
+        new CodecParamsStruct(
+        CodecParamsType::CodecParamsTypeAv, // 0
+          data_buffer, extra_data_buffer));
   }
 
   return codec_params_struct_;
@@ -414,8 +443,8 @@ std::shared_ptr<FrameStruct> LibAvEncoder::CurrentFrameEncoded() {
   std::shared_ptr<FrameStruct> f =
       std::shared_ptr<FrameStruct>(new FrameStruct(*buffer_fs_.front()));
 
-  f->message_type = 0;
-  f->frame_data_type = 1;
+  f->message_type = SSPMessageType::MessageTypeDefault; // 0;
+  f->frame_data_type = FrameDataType::FrameDataTypeLibavPackets; // 1;
   f->codec_data = *GetCodecParamsStruct();
   f->frame = CurrentFrameBytes();
   f->frame_id = total_frame_counter_;
@@ -435,7 +464,7 @@ void LibAvEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
     ready_ = true;
     Init(fs);
   }
-  fs->timestamps.push_back(CurrentTimeMs());
+  fs->timestamps.push_back(CurrentTimeNs());
   buffer_fs_.push(fs);
   Encode();
 }
@@ -443,3 +472,5 @@ void LibAvEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
 unsigned int LibAvEncoder::GetFps() { return fps_; }
 
 bool LibAvEncoder::HasNextPacket() { return !buffer_packet_.empty(); }
+
+} // namespace moetsi::ssp

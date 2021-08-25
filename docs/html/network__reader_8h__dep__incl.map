@@ -1,0 +1,6 @@
+<map id="network_reader.h" name="network_reader.h">
+<area shape="rect" id="node2" href="$ssp__client__k4a_8cc.html" title="SSP client with lib k4a. " alt="" coords="5,80,132,107"/>
+<area shape="rect" id="node3" href="$ssp__client__opencv_8cc.html" title="OpenCV based ssp client client. " alt="" coords="156,80,304,107"/>
+<area shape="rect" id="node4" href="$ssp__client__template_8cc.html" title="Template for an SSP client. " alt="" coords="328,80,484,107"/>
+<area shape="rect" id="node5" href="$network__reader_8cc.html" title="Network reader. " alt="" coords="508,80,637,107"/>
+</map>

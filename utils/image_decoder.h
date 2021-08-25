@@ -1,13 +1,12 @@
-//
+/**
+ * \file image_decoder.h @brief AV Image decoder
+ */
 // Created by amourao on 28/08/19.
-//
-
 #pragma once
 
 #include <fstream>
 #include <iostream>
 #include <vector>
-
 
 extern "C" {
 #ifdef FFMPEG_AS_FRAMEWORK
@@ -23,14 +22,18 @@ extern "C" {
 #endif
 };
 
-#include "../structs/frame_struct.hpp"
+#include "../structs/frame_struct.h"
 #include "libav_types.h"
 #include "utils.h"
 
+namespace moetsi::ssp {
+
+/**
+ * @brief Decode image to AV frame
+ */
 class ImageDecoder {
 
 private:
-
   AVFormatContextSafeP av_format_context_;
   AVIOContextSafeP avio_context_;
   AVCodecParametersSafePNullDelete av_codec_parameters_;
@@ -48,13 +51,19 @@ private:
   void Init(std::vector<unsigned char> &buffer);
 
   int DecodePacket(AVFrameSharedP pFrame);
-
-
 public:
+  /** @brief Contructor */
   ImageDecoder();
-
+  /** @brief Destructor */
   ~ImageDecoder();
 
+  /**
+   * @brief Read frame structs to AVFrame.s
+   * \param fs frame structs
+   * \param pFrame destination AVFrame
+   */
   void ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
                             AVFrameSharedP pFrame);
 };
+
+} // namespace moetsi::ssp

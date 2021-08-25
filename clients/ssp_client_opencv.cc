@@ -1,6 +1,7 @@
-//
+/**
+ * \file ssp_client_opencv.cc @brief OpenCV based ssp client client
+ */
 // Created by amourao on 26-06-2019.
-//
 
 #include <chrono>
 #include <iostream>
@@ -51,6 +52,8 @@ extern "C" {
   #define HAS_IMSHOW 1
 #endif
 
+using namespace moetsi::ssp;
+
 extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 {
   av_log_set_level(AV_LOG_QUIET);
@@ -75,7 +78,8 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
         if (imgChanged && !img.empty()) {
 
           // Manipulate image to show as a color map
-          if (f.frame_type == 1) {
+          // if (f.frame_type == 1) {
+          if (f.frame_type == FrameType::FrameTypeDepth) {
             if (img.type() == CV_16U) {
               // Compress images to show up on a 255 valued color map
               img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
@@ -87,12 +91,14 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 
             img.convertTo(imgOut, CV_8U);
             cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
-          } else if (f.frame_type == 2) {
+          //} else if (f.frame_type == 2) {
+          } else if (f.frame_type == FrameType::FrameTypeIR) {
 
             double max = 1024;
             img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
             img.convertTo(img, CV_8U);
-          } else if (f.frame_type == 3) {
+          //} else if (f.frame_type == 3) {
+          } else if (f.frame_type == FrameType::FrameTypeConfidence) {
             cv::Mat imgOut;
             img *= 127; // iOS confidence is 0:low, 1:medium, 2:high
           }

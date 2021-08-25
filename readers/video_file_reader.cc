@@ -1,16 +1,16 @@
-//
+/**
+ * \file video_file_reader.cc @brief Video file reader
+ */
 // Created by amourao on 26-06-2019.
-//
-
 #include "video_file_reader.h"
+
+namespace moetsi::ssp {
 
 VideoFileReader::VideoFileReader(std::string &filename) {
   current_frame_counter_ = 0;
   eof_reached_ = false;
   libav_ready_ = false;
-
   filename_ = filename;
-
   video_stream_indexes_from_file_ = false;
 }
 
@@ -19,9 +19,7 @@ VideoFileReader::VideoFileReader(
   current_frame_counter_ = 0;
   eof_reached_ = false;
   libav_ready_ = false;
-
   filename_ = filename;
-
   video_stream_indexes_ = _video_stream_indexes;
   video_stream_indexes_from_file_ = true;
 }
@@ -73,7 +71,7 @@ void VideoFileReader::Init(std::string &filename) {
   }
 
   camera_calibration_struct_ = std::shared_ptr<CameraCalibrationStruct>(new CameraCalibrationStruct());
-  camera_calibration_struct_->type = 0;
+  camera_calibration_struct_->type = CameraCalibrationType::CameraCalibrationTypeKinect; // 0;
   camera_calibration_struct_->extra_data.resize(2);
   // the component that knows how to enCOde and DECode the stream
   // it's the codec (audio or video)
@@ -105,8 +103,9 @@ void VideoFileReader::Init(std::string &filename) {
     if (codec == NULL) {
       spdlog::warn("Non video stream detected ({}), skipping", i);
       if (av_format_context_->streams[i]->codec->extradata_size) {
-        if (camera_calibration_struct_->type == -1) {
-          camera_calibration_struct_->type = 0;
+        // CameraCalibrationType::CameraCalibrationTypeDefault=-1
+        if (camera_calibration_struct_->type == CameraCalibrationType::CameraCalibrationTypeDefault) {
+          camera_calibration_struct_->type = CameraCalibrationType::CameraCalibrationTypeKinect; // = 0;
           camera_calibration_struct_->extra_data.resize(2);
         }
         camera_calibration_struct_->data = std::vector<unsigned char>(
@@ -148,8 +147,9 @@ void VideoFileReader::Init(std::string &filename) {
         while ((t = av_dict_get(metadata, "", t, AV_DICT_IGNORE_SUFFIX))) {
           std::string metadata_key = t->key;
           std::string metadata_value = t->value;
-          if (camera_calibration_struct_->type == -1) {
-            camera_calibration_struct_->type = 0;
+          // CameraCalibrationType::CameraCalibrationTypeDefault = -1
+          if (camera_calibration_struct_->type == CameraCalibrationType::CameraCalibrationTypeDefault) {
+            camera_calibration_struct_->type = CameraCalibrationType::CameraCalibrationTypeKinect; // = 0;
             camera_calibration_struct_->extra_data.resize(2);
           }
           if (metadata_key == "K4A_COLOR_MODE") {
@@ -178,7 +178,9 @@ void VideoFileReader::Init(std::string &filename) {
         memcpy(&e[0], codec_parameter, sSize);
         memcpy(&ed[0], sEPointer, sESize);
 
-        CodecParamsStruct codec_params_struct(0, e, ed);
+        CodecParamsStruct codec_params_struct(
+          //0
+          CodecParamsType::CodecParamsTypeAv, e, ed);
         codec_params_structs_[i] = codec_params_struct;
 
         // avcodec_parameters_free(&pCodecParameter);
@@ -192,9 +194,8 @@ void VideoFileReader::Init(std::string &filename) {
     exit(-1);
   }
 
-  frame_struct_template_.message_type = 0;
-
-  frame_struct_template_.frame_data_type = 1;
+  frame_struct_template_.message_type = SSPMessageType::MessageTypeDefault; // = 0;
+  frame_struct_template_.frame_data_type = FrameDataType::FrameDataTypeLibavPackets ; // = 1;
   frame_struct_template_.stream_id = RandomString(16);
   frame_struct_template_.device_id = 0;
   frame_struct_template_.camera_calibration_data = *camera_calibration_struct_;
@@ -233,9 +234,9 @@ void VideoFileReader::NextFrame() {
           &packet_->data[0], &packet_->data[0] + packet_->size);
       frame_struct->frame_id = current_frame_counter_;
       frame_struct->sensor_id = packet_->stream_index;
-      frame_struct->frame_type = packet_->stream_index;
+      frame_struct->frame_type = FrameType(packet_->stream_index);
       frame_struct->timestamps.push_back(packet_->pts);
-      frame_struct->timestamps.push_back(CurrentTimeMs());
+      frame_struct->timestamps.push_back(CurrentTimeNs());
       frame_struct->codec_data = codec_params_structs_[packet_->stream_index];
 
       if (frame_structs_.empty() ||
@@ -331,10 +332,12 @@ typedef enum {
   VIDEO_READER_K4A_COLOR_RESOLUTION_3072P, /**< 4096 * 3072 4:3  */
 } video_reader_k4a_color_resolution_t;
 
-std::vector<unsigned int> VideoFileReader::GetType() {
+std::vector<FrameType> VideoFileReader::GetType() {
   if (!libav_ready_)
     Init(this->filename_);
-  return video_stream_indexes_;
+  std::vector<FrameType> ft;
+  for (auto &t : video_stream_indexes_) ft.push_back(FrameType(t));
+  return ft;
 }
 ushort VideoFileReader::GetKinectColorResolution(std::string &metadata_value) {
   std::string ending = metadata_value.substr(metadata_value.size() - 5, 5);
@@ -366,3 +369,5 @@ ushort VideoFileReader::GetKinectDepthMode(std::string &metadata_value) {
     return VIDEO_READER_K4A_DEPTH_MODE_PASSIVE_IR;
   return 0;
 }
+
+} //  namespace moetsi::ssp

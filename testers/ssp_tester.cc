@@ -1,6 +1,7 @@
-//
+/**
+ * \file ssp_tester.cc @brief SSP test program
+ */
 // Created by amourao on 07/08/19.
-//
 
 #include <chrono>
 #include <iostream>
@@ -31,7 +32,7 @@ extern "C" {
 }
 
 #include "../encoders/libav_encoder.h"
-#include "../structs/frame_struct.hpp"
+#include "../structs/frame_struct.h"
 
 #include "../decoders/idecoder.h"
 #include "../decoders/libav_decoder.h"
@@ -55,7 +56,7 @@ extern "C" {
 #include "../utils/kinect_utils.h"
 #endif
 
-
+using namespace moetsi::ssp;
 
 int main(int argc, char *argv[]) {
 
@@ -147,10 +148,10 @@ int main(int argc, char *argv[]) {
 
   std::unordered_map<unsigned int, std::shared_ptr<IEncoder>> encoders;
 
-  std::vector<unsigned int> types = reader->GetType();
+  std::vector<FrameType> types = reader->GetType();
 
-  for (unsigned int type : types) {
-    YAML::Node v = codec_parameters["video_encoder"][type];
+  for (FrameType type : types) {
+    YAML::Node v = codec_parameters["video_encoder"][unsigned(type)];
     std::string encoder_type = v["type"].as<std::string>();
     std::shared_ptr<IEncoder> fe = nullptr;
     if (encoder_type == "libav")
@@ -173,7 +174,7 @@ int main(int argc, char *argv[]) {
                     encoder_type);
       exit(1);
     }
-    encoders[type] = fe;
+    encoders[unsigned(type)] = fe;
   }
 
   std::queue<FrameStruct> buffer;
@@ -191,7 +192,7 @@ int main(int argc, char *argv[]) {
           reader->GetCurrentFrame();
       for (std::shared_ptr<FrameStruct> frame_struct : frame_structs) {
         std::shared_ptr<IEncoder> frameEncoder =
-            encoders[frame_struct->frame_type];
+            encoders[unsigned(frame_struct->frame_type)];
 
         frameEncoder->AddFrameStruct(frame_struct);
         if (frameEncoder->HasNextPacket()) {
@@ -212,7 +213,7 @@ int main(int argc, char *argv[]) {
 
             counts[decoder_id] = 0;
 
-            types_map[decoder_id] = f.frame_type;
+            types_map[decoder_id] = unsigned(f.frame_type);
 
             fps[decoder_id] = reader->GetFps();
           }
@@ -281,11 +282,13 @@ int main(int argc, char *argv[]) {
         }
 
         if (show_graphical_output) {
-          if (f.frame_type == 0) {
+          //if (f.frame_type == 0) {
+          if (f.frame_type == FrameType::FrameTypeColor) {
 
             absdiff(frame_ori, img, frame_diff);
 
-          } else if (f.frame_type == 1) {
+          // } else if (f.frame_type == 1) {
+          } else if (f.frame_type == FrameType::FrameTypeDepth) {
 
             absdiff(frame_ori, img, frame_diff);
 
@@ -305,7 +308,8 @@ int main(int argc, char *argv[]) {
             cv::applyColorMap(img, img, cv::COLORMAP_JET);
             cv::applyColorMap(frame_ori, frame_ori, cv::COLORMAP_JET);
           }
-          if (f.frame_type == 2) {
+          //if (f.frame_type == 2) {
+          if (f.frame_type == FrameType::FrameTypeIR) {
             absdiff(frame_ori, img, frame_diff);
 
             double max = 1024;

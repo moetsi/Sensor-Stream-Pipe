@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11...3.19)
 project(ssp)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Set default build type to Release if none is defined
@@ -12,6 +12,11 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   # Set the possible values of build type for cmake-gui
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
+option(LOCAL_DEP_BUILD_LINUX "Build deps locally on linux with some options" OFF)
+if (LOCAL_DEP_BUILD_LINUX)
+# add script here?
 endif()
 
 # Download dependencies
@@ -36,11 +41,19 @@ elseif (WIN32)
     URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
   )
 elseif (UNIX)
-  FetchContent_Declare(
-    ssp_dep
-    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
-    URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
-  )
+  if (LOCAL_DEP_BUILD_LINUX)
+    message(STATUS "please make sure you have gone to 3rdpary and run build_lin_dep.sh")
+    FetchContent_Declare(
+      ssp_dep
+      SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/tmp/local.ssp
+    )
+  else ()
+    FetchContent_Declare(
+      ssp_dep
+      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
+      URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
+    )
+  endif()
 endif()
 
 FetchContent_GetProperties(ssp_dep)
@@ -67,12 +80,30 @@ if (ssp_dep_POPULATED)
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
+  if (LOCAL_DEP_BUILD_LINUX)
+  message(STATUS " searching for openh264 in " ${ssp_dep_SOURCE_DIR}/openh264/)
+    set(openh264_INCLUDE_DIR ${ssp_dep_SOURCE_DIR}/openh264/include)
+    set(openh264_DIR ${ssp_dep_SOURCE_DIR}/openh264)
+    set(openh264_LIBRARY ${ssp_dep_SOURCE_DIR}/openh264/lib/libopenh264.so.6) # yes this is linux for now
+  endif()
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Parallel build with VisualStudio
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+
+option(ASAN "Build with ASAN" OFF)
+if (ASAN)
+  add_compile_options("-fsanitize=address")
+  add_link_options("-fsanitize=address")
+endif(ASAN)
+
+option(TSAN "Build with TSAN" OFF)
+if (TSAN)
+  add_compile_options("-fsanitize=thread")
+  add_link_options("-fsanitize=thread")
+endif(TSAN)
 
 find_package(Threads REQUIRED)
 find_package(cereal REQUIRED)
@@ -81,6 +112,10 @@ find_package(yaml-cpp REQUIRED)
 find_package(ZeroMQ REQUIRED)
 find_package(cppzmq REQUIRED)
 find_package(zdepth REQUIRED)
+
+if (LOCAL_DEP_BUILD_LINUX)
+  find_package(openh264 REQUIRED)
+endif()
 
 if (IOS)
   add_definitions(-DFFMPEG_AS_FRAMEWORK)
@@ -185,7 +220,7 @@ set(SOURCE_FILES
     readers/image_reader.h
     readers/multi_image_reader.cc
     readers/multi_image_reader.h
-    structs/frame_struct.hpp
+    structs/frame_struct.h
     utils/image_converter.cc
     utils/image_converter.h
     utils/image_decoder.cc
@@ -199,11 +234,13 @@ set(SOURCE_FILES
     utils/video_utils.cc
     utils/video_utils.h
 
+    decoders/idecoder.cc
     decoders/libav_decoder.cc
     decoders/libav_decoder.h
     decoders/zdepth_decoder.cc
     decoders/zdepth_decoder.h
 
+    encoders/iencoder.cc
     encoders/zdepth_encoder.cc
     encoders/zdepth_encoder.h
     encoders/null_encoder.cc
@@ -211,6 +248,7 @@ set(SOURCE_FILES
     encoders/libav_encoder.cc
     encoders/libav_encoder.h
 
+    readers/ireader.cc
     readers/video_file_reader.cc
     readers/video_file_reader.h
     readers/image_reader.cc
@@ -239,6 +277,11 @@ target_link_libraries(ssp PUBLIC
     ${YAML_CPP_LIBRARIES}
     zdepth::zdepth
 )
+
+if (openh264_FOUND)
+    message(STATUS "adding openh264 to link libraries")
+    target_link_libraries(ssp PUBLIC openh264::openh264)
+endif()
 
 if (IOS)
     target_sources(ssp PRIVATE readers/iphone_reader.mm readers/iphone_reader.h)
@@ -333,3 +376,11 @@ if (SSP_WITH_K4A_BODYTRACK)
 
     target_sources(ssp_plugin PRIVATE clients/ssp_client_k4a.cc)
 endif ()
+
+if (LOCAL_DEP_BUILD_LINUX)
+  message(STATUS "in order to be able to run the server, some Linux machines require to export an LD_LIBRARY_PATH"
+          " that points to libswresample.so.3 and libopenh264.so.6"
+          " ex: export LD_LIBRARY_PATH=$ProjectDir/3rdparty/tmp/local.ssp/ffmpeg/lib:$ProjectDir/3rdparty/tmp/local.ssp/openh264/lib; ./ssp_server serve_video.yaml "
+          " ... "
+  )
+endif()

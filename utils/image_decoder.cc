@@ -1,8 +1,10 @@
-//
+/**
+ * \file image_decoder.cc @brief mpeg/jpeg image decoder
+ */
 // Created by amourao on 28/08/19.
-//
-
 #include "image_decoder.h"
+
+namespace moetsi::ssp {
 
 int ImageDecoder::DecodePacket(AVFrameSharedP pFrame) {
   // Supply raw packet data as input to a decoder
@@ -137,7 +139,6 @@ void ImageDecoder::Init(std::vector<unsigned char> &buffer) {
   libav_ready_ = true;
 }
 
-
 // http://guru-coder.blogspot.com/2014/01/in-memory-jpeg-decode-using-ffmpeg.html
 void ImageDecoder::ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
                                         AVFrameSharedP pFrame) {
@@ -159,7 +160,9 @@ void ImageDecoder::ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
     memcpy(&data_buffer[0], av_codec_parameters_.get(), data_size);
     memcpy(&extra_data_buffer[0], extra_data_pointer, extra_data_size);
     codec_params_struct_ =
-        std::unique_ptr<CodecParamsStruct>(new CodecParamsStruct(0, data_buffer, extra_data_buffer));
+        std::unique_ptr<CodecParamsStruct>(new CodecParamsStruct(
+          // 0
+          CodecParamsType::CodecParamsTypeAv, data_buffer, extra_data_buffer));
   }
 
   fs->codec_data = *codec_params_struct_;
@@ -175,6 +178,7 @@ void ImageDecoder::ImageBufferToAVFrame(std::shared_ptr<FrameStruct> &fs,
 
 }
 
+} // namespace moetsi::ssp
 
 /*
 int main(){
@@ -199,7 +203,5 @@ Bloopers-LNiZG48b0W0.mp4";
     id.imageBufferToAVFrame(vecBuf);
 
     av_file_unmap(buffer, buffer_size);
-
-
 }
 */

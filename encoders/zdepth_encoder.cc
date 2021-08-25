@@ -1,8 +1,10 @@
-//
+/**
+ * \file zdepth_encoder.cc @brief ZDepth encoder
+ */
 // Created by amourao on 23-09-2019.
-//
-
 #include "zdepth_encoder.h"
+
+namespace moetsi::ssp {
 
 ZDepthEncoder::ZDepthEncoder(YAML::Node& _codec_parameters, int _fps) {
   fps_ = _fps;
@@ -38,7 +40,7 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
       frame_compressed_ = std::shared_ptr<FrameStruct>(new FrameStruct());
 
     frame_compressed_->device_id = fs->device_id;
-    frame_compressed_->frame_data_type = 1;
+    frame_compressed_->frame_data_type = FrameDataType::FrameDataTypeLibavPackets; // = 1;
     frame_compressed_->frame_id = total_frame_counter_;
     frame_compressed_->frame_type = fs->frame_type;
     frame_compressed_->message_type = fs->message_type;
@@ -46,9 +48,9 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
     frame_compressed_->stream_id = stream_id_;
     frame_compressed_->scene_desc = fs->scene_desc;
     frame_compressed_->timestamps.clear();
-    frame_compressed_->timestamps = std::vector<unsigned long>();
+    frame_compressed_->timestamps = std::vector<uint64_t>();
     frame_compressed_->timestamps.push_back(frame_original_->timestamps.front());
-    frame_compressed_->timestamps.push_back(CurrentTimeMs());
+    frame_compressed_->timestamps.push_back(CurrentTimeNs());
     frame_compressed_->camera_calibration_data = fs->camera_calibration_data;
 
     uint16_t *data = nullptr;
@@ -58,7 +60,9 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
     AVFrameSharedP pFrameO = nullptr;
     AVFrameSharedP pFrame = nullptr;
 
-    if (fs->frame_data_type == 0) {
+    // FrameDataType::FrameDataTypeImageFrame = 0
+    // if (fs->frame_data_type == 0) {
+    if (fs->frame_data_type == FrameDataType::FrameDataTypeImageFrame) {      
 
       AVFrame *tmp = av_frame_alloc();
       pFrameO = std::shared_ptr<AVFrame>(tmp, AVFrameSharedDeleter);
@@ -87,7 +91,9 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
 
       data = reinterpret_cast<uint16_t *>(&pFrame->data[0][0]);
 
-    } else if (fs->frame_data_type == 1) {
+    // FrameDataType::FrameDataTypeLibavPackets = 1
+    // } else if (fs->frame_data_type == 1) {
+    } else if (fs->frame_data_type == FrameDataType::FrameDataTypeLibavPackets) {
 
       if (libav_decoder_ == nullptr) {
         libav_decoder_ = std::unique_ptr<LibAvDecoder>(new LibAvDecoder());
@@ -100,13 +106,18 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
       width_ = img.cols;
       height_ = img.rows;
 
-      if (frame_compressed_->frame_type == 0) {
+      // FrameType::FrameTypeColor = 0
+      // if (frame_compressed_->frame_type == 0) {
+      if (frame_compressed_->frame_type == FrameType::FrameTypeColor) {
         cv::cvtColor(img, img, CV_BGR2BGRA);
       }
 
       data = reinterpret_cast<uint16_t *>(img.data);
 
-    } else if (fs->frame_data_type == 2 || fs->frame_data_type == 3) {
+    // FrameDataType::FrameDataTypeRawRGBA = 2
+    // FrameDataType::FrameDataTypeGRAY16LE = 3
+    // } else if (fs->frame_data_type == 2 || fs->frame_data_type == 3) {
+    } else if (fs->frame_data_type == FrameDataType::FrameDataTypeRawRGBA || fs->frame_data_type == FrameDataType::FrameDataTypeGRAY16LE) {
       // fs->frame[8] ignores width and height set at [0] and [4] by
       // KinectReader
       memcpy(&width_, &fs->frame[0], sizeof(int));
@@ -126,7 +137,7 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
     frame_compressed_->codec_data = *codec_params_struct_;
     frame_compressed_->frame = std::vector<unsigned char>(
         compressed_buffer_.data(), compressed_buffer_.data() + compressed_buffer_.size());
-    frame_compressed_->timestamps.push_back(CurrentTimeMs());
+    frame_compressed_->timestamps.push_back(CurrentTimeNs());
     total_frame_counter_++;
 
   }
@@ -150,7 +161,7 @@ std::shared_ptr<FrameStruct> ZDepthEncoder::CurrentFrameOriginal() {
 std::shared_ptr<CodecParamsStruct> ZDepthEncoder::GetCodecParamsStruct() {
   if (codec_params_struct_ == NULL) {
     codec_params_struct_ = std::shared_ptr<CodecParamsStruct>(new CodecParamsStruct());
-    codec_params_struct_->type = 2;
+    codec_params_struct_->type = CodecParamsType::CodecParamsTypeZDepth; // 2;
     codec_params_struct_->data.resize(4 + 4);
 
     memcpy(&codec_params_struct_->data[0], &width_, sizeof(int));
@@ -160,3 +171,5 @@ std::shared_ptr<CodecParamsStruct> ZDepthEncoder::GetCodecParamsStruct() {
 }
 
 unsigned int ZDepthEncoder::GetFps() { return fps_; }
+
+} // namespace moetsi::ssp

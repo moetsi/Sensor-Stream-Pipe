@@ -34,3 +34,5 @@ bin/
 
 cmake-*/
 .idea/
+build
+build_release

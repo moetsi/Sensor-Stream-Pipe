@@ -1,6 +1,7 @@
-//
+/**
+ * \file ssp_client_template.cc @brief Template for an SSP client
+ */
 // Created by amourao on 26-06-2019.
-//
 
 #include <chrono>
 #include <iostream>
@@ -38,6 +39,8 @@ extern "C" {
 #include "../readers/network_reader.h"
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
+
+using namespace moetsi::ssp;
 
 extern "C" SSP_EXPORT int ssp_client_template(int port) {
   av_log_set_level(AV_LOG_QUIET);

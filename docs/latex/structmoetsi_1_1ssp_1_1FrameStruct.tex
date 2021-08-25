@@ -1,0 +1,140 @@
+\hypertarget{structmoetsi_1_1ssp_1_1FrameStruct}{}\section{moetsi\+:\+:ssp\+:\+:Frame\+Struct Struct Reference}
+\label{structmoetsi_1_1ssp_1_1FrameStruct}\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+
+
+Frame struct\+: S\+SP frame.  
+
+
+
+
+{\ttfamily \#include $<$frame\+\_\+struct.\+h$>$}
+
+
+
+Collaboration diagram for moetsi\+:\+:ssp\+:\+:Frame\+Struct\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{structmoetsi_1_1ssp_1_1FrameStruct__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_af53f4e76978e2a4575b7cd661d30e01f}\label{structmoetsi_1_1ssp_1_1FrameStruct_af53f4e76978e2a4575b7cd661d30e01f}} 
+{\footnotesize template$<$class Archive $>$ }\\void {\bfseries serialize} (Archive \&ar)
+\item 
+\mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_af53f4e76978e2a4575b7cd661d30e01f}\label{structmoetsi_1_1ssp_1_1FrameStruct_af53f4e76978e2a4575b7cd661d30e01f}} 
+{\footnotesize template$<$class Archive $>$ }\\void {\bfseries serialize} (Archive \&ar)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{namespacemoetsi_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546}{S\+S\+P\+Message\+Type} \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_a6c6ff38e4cbbf4e3af7cdcb6192e8ba8}{message\+\_\+type}
+\item 
+\hyperlink{namespacemoetsi_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}{Frame\+Type} \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_ac7fe0bfa84d7492827728c49544fc0a2}{frame\+\_\+type}
+\item 
+\hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4}{Frame\+Data\+Type} \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_a281ef582bcbb8b6b3d0f0eb3efd615c6}{frame\+\_\+data\+\_\+type}
+\item 
+std\+::string \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_a14a7976abfb26a9ca42e17555f8b1a8c}{stream\+\_\+id}
+\item 
+std\+::vector$<$ unsigned char $>$ \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_a7556ce8749c65cd5b22ea9c7a4c17619}{frame}
+\item 
+\hyperlink{structmoetsi_1_1ssp_1_1CodecParamsStruct}{Codec\+Params\+Struct} \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_a84ed01cb3227bcece29c43ba8ec322ee}{codec\+\_\+data}
+\item 
+\hyperlink{structmoetsi_1_1ssp_1_1CameraCalibrationStruct}{Camera\+Calibration\+Struct} \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_acbdc93c52c66264ed3f4c06a088c955d}{camera\+\_\+calibration\+\_\+data}
+\item 
+std\+::string \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_a7e717ab7290ddbb430c3c5a8858ddac6}{scene\+\_\+desc}
+\item 
+unsigned int \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_ae585f1be534924a69c8617b2f5f83568}{sensor\+\_\+id}
+\item 
+unsigned int \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_af3b1ea702009be5df748af30a159a38a}{device\+\_\+id}
+\item 
+unsigned int \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_aebc84f95b5024225412d92a56ddf24ad}{frame\+\_\+id}
+\item 
+std\+::vector$<$ uint64\+\_\+t $>$ \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_aa445729218d4963e527377d760ac8015}{timestamps}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Frame struct\+: S\+SP frame. 
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_acbdc93c52c66264ed3f4c06a088c955d}\label{structmoetsi_1_1ssp_1_1FrameStruct_acbdc93c52c66264ed3f4c06a088c955d}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!camera\+\_\+calibration\+\_\+data@{camera\+\_\+calibration\+\_\+data}}
+\index{camera\+\_\+calibration\+\_\+data@{camera\+\_\+calibration\+\_\+data}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{camera\+\_\+calibration\+\_\+data}{camera\_calibration\_data}}
+{\footnotesize\ttfamily \hyperlink{structmoetsi_1_1ssp_1_1CameraCalibrationStruct}{Camera\+Calibration\+Struct} moetsi\+::ssp\+::\+Frame\+Struct\+::camera\+\_\+calibration\+\_\+data}
+
+Codec info for video frames, null for image frames \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_a84ed01cb3227bcece29c43ba8ec322ee}\label{structmoetsi_1_1ssp_1_1FrameStruct_a84ed01cb3227bcece29c43ba8ec322ee}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!codec\+\_\+data@{codec\+\_\+data}}
+\index{codec\+\_\+data@{codec\+\_\+data}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{codec\+\_\+data}{codec\_data}}
+{\footnotesize\ttfamily \hyperlink{structmoetsi_1_1ssp_1_1CodecParamsStruct}{Codec\+Params\+Struct} moetsi\+::ssp\+::\+Frame\+Struct\+::codec\+\_\+data}
+
+Codec info for video frames, null for image frames Video decoder needs to know about the last receive frame Requires to know the codec as well as additional parameters \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_af3b1ea702009be5df748af30a159a38a}\label{structmoetsi_1_1ssp_1_1FrameStruct_af3b1ea702009be5df748af30a159a38a}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!device\+\_\+id@{device\+\_\+id}}
+\index{device\+\_\+id@{device\+\_\+id}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{device\+\_\+id}{device\_id}}
+{\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::\+Frame\+Struct\+::device\+\_\+id}
+
+Integer device id\+: distingish between devices in the same scene Can be set by user. \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_a7556ce8749c65cd5b22ea9c7a4c17619}\label{structmoetsi_1_1ssp_1_1FrameStruct_a7556ce8749c65cd5b22ea9c7a4c17619}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!frame@{frame}}
+\index{frame@{frame}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{frame}{frame}}
+{\footnotesize\ttfamily std\+::vector$<$ unsigned char $>$ moetsi\+::ssp\+::\+Frame\+Struct\+::frame}
+
+Frame binary data We use a vector to know the size, basically a vector of bytes to store binary data \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_a281ef582bcbb8b6b3d0f0eb3efd615c6}\label{structmoetsi_1_1ssp_1_1FrameStruct_a281ef582bcbb8b6b3d0f0eb3efd615c6}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!frame\+\_\+data\+\_\+type@{frame\+\_\+data\+\_\+type}}
+\index{frame\+\_\+data\+\_\+type@{frame\+\_\+data\+\_\+type}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{frame\+\_\+data\+\_\+type}{frame\_data\_type}}
+{\footnotesize\ttfamily \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4}{Frame\+Data\+Type} moetsi\+::ssp\+::\+Frame\+Struct\+::frame\+\_\+data\+\_\+type}
+
+Frame data type \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_aebc84f95b5024225412d92a56ddf24ad}\label{structmoetsi_1_1ssp_1_1FrameStruct_aebc84f95b5024225412d92a56ddf24ad}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!frame\+\_\+id@{frame\+\_\+id}}
+\index{frame\+\_\+id@{frame\+\_\+id}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{frame\+\_\+id}{frame\_id}}
+{\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::\+Frame\+Struct\+::frame\+\_\+id}
+
+Current frame number (increases over time) Increases by 1 for each frame automatically when S\+SP server starts \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_ac7fe0bfa84d7492827728c49544fc0a2}\label{structmoetsi_1_1ssp_1_1FrameStruct_ac7fe0bfa84d7492827728c49544fc0a2}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!frame\+\_\+type@{frame\+\_\+type}}
+\index{frame\+\_\+type@{frame\+\_\+type}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{frame\+\_\+type}{frame\_type}}
+{\footnotesize\ttfamily \hyperlink{namespacemoetsi_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}{Frame\+Type} moetsi\+::ssp\+::\+Frame\+Struct\+::frame\+\_\+type}
+
+Frame type \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_a6c6ff38e4cbbf4e3af7cdcb6192e8ba8}\label{structmoetsi_1_1ssp_1_1FrameStruct_a6c6ff38e4cbbf4e3af7cdcb6192e8ba8}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!message\+\_\+type@{message\+\_\+type}}
+\index{message\+\_\+type@{message\+\_\+type}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{message\+\_\+type}{message\_type}}
+{\footnotesize\ttfamily \hyperlink{namespacemoetsi_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546}{S\+S\+P\+Message\+Type} moetsi\+::ssp\+::\+Frame\+Struct\+::message\+\_\+type}
+
+S\+SP message type \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_a7e717ab7290ddbb430c3c5a8858ddac6}\label{structmoetsi_1_1ssp_1_1FrameStruct_a7e717ab7290ddbb430c3c5a8858ddac6}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!scene\+\_\+desc@{scene\+\_\+desc}}
+\index{scene\+\_\+desc@{scene\+\_\+desc}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{scene\+\_\+desc}{scene\_desc}}
+{\footnotesize\ttfamily std\+::string moetsi\+::ssp\+::\+Frame\+Struct\+::scene\+\_\+desc}
+
+Optional\+: scene description \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_ae585f1be534924a69c8617b2f5f83568}\label{structmoetsi_1_1ssp_1_1FrameStruct_ae585f1be534924a69c8617b2f5f83568}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!sensor\+\_\+id@{sensor\+\_\+id}}
+\index{sensor\+\_\+id@{sensor\+\_\+id}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{sensor\+\_\+id}{sensor\_id}}
+{\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::\+Frame\+Struct\+::sensor\+\_\+id}
+
+Sensor id \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_a14a7976abfb26a9ca42e17555f8b1a8c}\label{structmoetsi_1_1ssp_1_1FrameStruct_a14a7976abfb26a9ca42e17555f8b1a8c}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!stream\+\_\+id@{stream\+\_\+id}}
+\index{stream\+\_\+id@{stream\+\_\+id}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{stream\+\_\+id}{stream\_id}}
+{\footnotesize\ttfamily std\+::string moetsi\+::ssp\+::\+Frame\+Struct\+::stream\+\_\+id}
+
+Random 16 char string that uniquely ids the frame stream. Some decoders (like video) are stateful and so must keep track of streams. This is automatically generated. \mbox{\Hypertarget{structmoetsi_1_1ssp_1_1FrameStruct_aa445729218d4963e527377d760ac8015}\label{structmoetsi_1_1ssp_1_1FrameStruct_aa445729218d4963e527377d760ac8015}} 
+\index{moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}!timestamps@{timestamps}}
+\index{timestamps@{timestamps}!moetsi\+::ssp\+::\+Frame\+Struct@{moetsi\+::ssp\+::\+Frame\+Struct}}
+\subsubsection{\texorpdfstring{timestamps}{timestamps}}
+{\footnotesize\ttfamily std\+::vector$<$ uint64\+\_\+t $>$ moetsi\+::ssp\+::\+Frame\+Struct\+::timestamps}
+
+Use for logging and timing to understand processing speeds. Times are in ns 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/structs/frame\+\_\+struct.\+h\end{DoxyCompactItemize}

@@ -1,8 +1,11 @@
-//
+/**
+ * \file libav_decoder.cc @brief Jpeg/Mpeg decoder
+ */ 
 // Created by amourao on 12-09-2019.
-//
 
 #include "libav_decoder.h"
+
+namespace moetsi::ssp {
 
 LibAvDecoder::LibAvDecoder() {}
 
@@ -45,7 +48,11 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
     // Return decoded output data (into a frame) from a decoder
     response = avcodec_receive_frame(codec_context_.get(), frame_av.get());
     if (response >= 0) {
-      if (frame_struct.frame_type == 1 || frame_struct.frame_type == 2) {
+      // FrameType::FrameTypeColor = 0
+      // FrameType::FrameTypeDepth = 1
+      // FrameType::FrameTypeIR = 2
+      //if (frame_struct.frame_type == 1 || frame_struct.frame_type == 2) {
+      if (frame_struct.frame_type == FrameType::FrameTypeDepth || frame_struct.frame_type == FrameType::FrameTypeIR) {        
         if (codec_context_->pix_fmt == AV_PIX_FMT_GRAY12LE ||
             codec_context_->pix_fmt == AV_PIX_FMT_GRAY16BE) {
           AVFrameToMatGray(frame_av, img);
@@ -82,3 +89,5 @@ AVFrameSharedP LibAvDecoder::DecodeFrame(FrameStruct &frame_struct) {
   }
   return frame_av;
 }
+
+} // namespace moetsi::ssp
