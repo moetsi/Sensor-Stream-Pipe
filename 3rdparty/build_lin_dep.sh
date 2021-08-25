@@ -244,7 +244,7 @@ function build_depthai {
         https://github.com/luxonis/depthai-core.git
     pushd depthai-core
     git submodule update --init --recursive
-    cmake -H. -Bbuild -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai
+    cmake -H. -Bbuild -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core
     cmake --build build
     cmake --build build --target install
     cd ..
@@ -292,7 +292,7 @@ tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   opencv \
   spdlog \
   yaml-cpp \
-  depthai \
+  depthai-core \
   zdepth
 
 echo "Compressing ${filename}.tar"
