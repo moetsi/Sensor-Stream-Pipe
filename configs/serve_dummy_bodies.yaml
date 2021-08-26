@@ -1,0 +1,9 @@
+---
+general:
+  host: "localhost"
+  port: 9999
+  frame_source:
+    type: "dummybody"
+video_encoder:
+  4: #body
+    type: "null"

@@ -38,8 +38,8 @@ elseif (WIN32)
 elseif (UNIX)
   FetchContent_Declare(
     ssp_dep
-    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
-    URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
+    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202108241228__ssp_lindep.tar.gz
+    URL_HASH MD5=90ccba057cf14bfb05e4dacc3c3e8f72
   )
 endif()
 
@@ -64,6 +64,7 @@ if (ssp_dep_POPULATED)
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
   endif()
   set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog CACHE PATH "spdlog installation path")
+  set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "depthai installation path")
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
@@ -99,6 +100,7 @@ if (IOS)
 else()
   find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
   find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
+  find_package(depthai CONFIG REQUIRED)
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH bin)
@@ -229,6 +231,7 @@ endif ()
 
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
+target_link_libraries(ssp PRIVATE depthai::core)
 
 target_link_libraries(ssp PUBLIC
     cereal

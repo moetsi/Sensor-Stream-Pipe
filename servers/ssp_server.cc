@@ -84,6 +84,9 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
             general_parameters["frame_source"]["parameters"]["path"]
                 .as<std::string>()));
 
+    } else if (reader_type == "dummybody") {
+      reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader());
+
     } else if (reader_type == "video") {
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
