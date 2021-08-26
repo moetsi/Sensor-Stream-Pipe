@@ -188,6 +188,7 @@ set(SOURCE_FILES
     readers/multi_image_reader.cc
     readers/multi_image_reader.h
     structs/frame_struct.hpp
+    structs/body_struct.hpp
     utils/image_converter.cc
     utils/image_converter.h
     utils/image_decoder.cc
@@ -217,6 +218,8 @@ set(SOURCE_FILES
     readers/video_file_reader.h
     readers/image_reader.cc
     readers/image_reader.h
+    readers/dummy_body_reader.cc
+    readers/dummy_body_reader.h
     readers/network_reader.cc
     readers/network_reader.h
 )
@@ -291,6 +294,9 @@ endif()
 
 add_executable(ssp_client_opencv clients/ssp_client_opencv.cc)
 target_link_libraries(ssp_client_opencv ssp)
+
+add_executable(ssp_client_body_logger clients/ssp_client_body_logger.cc)
+target_link_libraries(ssp_client_body_logger ssp)
 
 add_executable(ssp_client_template clients/ssp_client_template.cc)
 target_link_libraries(ssp_client_template ssp)

@@ -36,6 +36,7 @@
 #include "../encoders/zdepth_encoder.h"
 #include "../readers/video_file_reader.h"
 #include "../readers/multi_image_reader.h"
+#include "../readers/dummy_body_reader.h"
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../encoders/nv_encoder.h"

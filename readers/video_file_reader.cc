@@ -192,11 +192,11 @@ void VideoFileReader::Init(std::string &filename) {
     exit(-1);
   }
 
-  frame_struct_template_.message_type = 0;
+  // frame_struct_template_.message_type = 0;
 
-  frame_struct_template_.frame_data_type = 1;
-  frame_struct_template_.stream_id = RandomString(16);
-  frame_struct_template_.device_id = 0;
+  // frame_struct_template_.frame_data_type = 1;
+  // frame_struct_template_.stream_id = RandomString(16);
+  // frame_struct_template_.device_id = 0;
   frame_struct_template_.camera_calibration_data = *camera_calibration_struct_;
 
   libav_ready_ = true;

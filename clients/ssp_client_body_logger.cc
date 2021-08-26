@@ -68,41 +68,8 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
       for (FrameStruct f : f_list) {
         std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
+        spdlog::debug("\t description: {} counter: {}", f.scene_desc, f.frame_id);
 
-        cv::Mat img;
-        imgChanged = FrameStructToMat(f, img, decoders);
-
-        if (imgChanged && !img.empty()) {
-
-          // Manipulate image to show as a color map
-          if (f.frame_type == 1) {
-            if (img.type() == CV_16U) {
-              // Compress images to show up on a 255 valued color map
-              img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
-            } else if (img.type() == CV_32F) {
-              // Normalize image to 0;255
-              cv::normalize(img, img, 255, 0, cv::NORM_MINMAX);
-            }
-            cv::Mat imgOut;
-
-            img.convertTo(imgOut, CV_8U);
-            cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
-          } else if (f.frame_type == 2) {
-
-            double max = 1024;
-            img *= (MAX_DEPTH_VALUE_8_BITS / (float)max);
-            img.convertTo(img, CV_8U);
-          } else if (f.frame_type == 3) {
-            cv::Mat imgOut;
-            img *= 127; // iOS confidence is 0:low, 1:medium, 2:high
-          }
-
-#if HAS_IMSHOW
-          cv::namedWindow(decoder_id);
-          cv::imshow(decoder_id, img);
-          cv::waitKey(1);
-#endif
-        }
       }
     }
 

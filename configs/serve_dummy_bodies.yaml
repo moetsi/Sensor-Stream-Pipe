@@ -5,5 +5,5 @@ general:
   frame_source:
     type: "dummybody"
 video_encoder:
-  4: #body
+  4: #object-human
     type: "null"

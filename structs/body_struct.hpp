@@ -15,131 +15,264 @@
 
 #include "../utils/utils.h"
 
-struct CameraCalibrationStruct {
-  // 0: Kinect parameters
-  short type = -1;
-  std::vector<unsigned char> data;
-  std::vector<unsigned char> extra_data;
+typedef struct _object_human_t
+{
+  int32_t Id;
+  float pelvis_x;
+  float pelvis_y;
+  float pelvis_z;
+  float pelvis_QX;
+  float pelvis_QY;
+  float pelvis_QZ;
+  float pelvis_QW;
+  uint8_t pelvis_conf;
+  float spine_navel_x;
+  float spine_navel_y;
+  float spine_navel_z;
+  float spine_navel_QX;
+  float spine_navel_QY;
+  float spine_navel_QZ;
+  float spine_navel_QW;
+  uint8_t spine_navel_conf;
+  float spine_chest_x;
+  float spine_chest_y;
+  float spine_chest_z;
+  float spine_chest_QX;
+  float spine_chest_QY;
+  float spine_chest_QZ;
+  float spine_chest_QW;
+  uint8_t spine_chest_conf;
+  float neck_x;
+  float neck_y;
+  float neck_z;
+  float neck_QX;
+  float neck_QY;
+  float neck_QZ;
+  float neck_QW;
+  uint8_t neck_conf;
+  float clavicle_left_x;
+  float clavicle_left_y;
+  float clavicle_left_z;
+  float clavicle_left_QX;
+  float clavicle_left_QY;
+  float clavicle_left_QZ;
+  float clavicle_left_QW;
+  uint8_t clavicle_left_conf;
+  float shoulder_left_x;
+  float shoulder_left_y;
+  float shoulder_left_z;
+  float shoulder_left_QX;
+  float shoulder_left_QY;
+  float shoulder_left_QZ;
+  float shoulder_left_QW;
+  uint8_t shoulder_left_conf;
+  float elbow_left_x;
+  float elbow_left_y;
+  float elbow_left_z;
+  float elbow_left_QX;
+  float elbow_left_QY;
+  float elbow_left_QZ;
+  float elbow_left_QW;
+  uint8_t elbow_left_conf;
+  float wrist_left_x;
+  float wrist_left_y;
+  float wrist_left_z;
+  float wrist_left_QX;
+  float wrist_left_QY;
+  float wrist_left_QZ;
+  float wrist_left_QW;
+  uint8_t wrist_left_conf;
+  float hand_left_x;
+  float hand_left_y;
+  float hand_left_z;
+  float hand_left_QX;
+  float hand_left_QY;
+  float hand_left_QZ;
+  float hand_left_QW;
+  uint8_t hand_left_conf;
+  float handtip_left_x;
+  float handtip_left_y;
+  float handtip_left_z;
+  float handtip_left_QX;
+  float handtip_left_QY;
+  float handtip_left_QZ;
+  float handtip_left_QW;
+  uint8_t handtip_left_conf;
+  float thumb_left_x;
+  float thumb_left_y;
+  float thumb_left_z;
+  float thumb_left_QX;
+  float thumb_left_QY;
+  float thumb_left_QZ;
+  float thumb_left_QW;
+  uint8_t thumb_left_conf;
+  float clavicle_right_x;
+  float clavicle_right_y;
+  float clavicle_right_z;
+  float clavicle_right_QX;
+  float clavicle_right_QY;
+  float clavicle_right_QZ;
+  float clavicle_right_QW;
+  uint8_t clavicle_right_conf;
+  float shoulder_right_x;
+  float shoulder_right_y;
+  float shoulder_right_z;
+  float shoulder_right_QX;
+  float shoulder_right_QY;
+  float shoulder_right_QZ;
+  float shoulder_right_QW;
+  uint8_t shoulder_right_conf;
+  float elbow_right_x;
+  float elbow_right_y;
+  float elbow_right_z;
+  float elbow_right_QX;
+  float elbow_right_QY;
+  float elbow_right_QZ;
+  float elbow_right_QW;
+  uint8_t elbow_right_conf;
+  float wrist_right_x;
+  float wrist_right_y;
+  float wrist_right_z;
+  float wrist_right_QX;
+  float wrist_right_QY;
+  float wrist_right_QZ;
+  float wrist_right_QW;
+  uint8_t wrist_right_conf;
+  float hand_right_x;
+  float hand_right_y;
+  float hand_right_z;
+  float hand_right_QX;
+  float hand_right_QY;
+  float hand_right_QZ;
+  float hand_right_QW;
+  uint8_t hand_right_conf;
+  float handtip_right_x;
+  float handtip_right_y;
+  float handtip_right_z;
+  float handtip_right_QX;
+  float handtip_right_QY;
+  float handtip_right_QZ;
+  float handtip_right_QW;
+  uint8_t handtip_right_conf;
+  float thumb_right_x;
+  float thumb_right_y;
+  float thumb_right_z;
+  float thumb_right_QX;
+  float thumb_right_QY;
+  float thumb_right_QZ;
+  float thumb_right_QW;
+  uint8_t thumb_right_conf;
+  float hip_left_x;
+  float hip_left_y;
+  float hip_left_z;
+  float hip_left_QX;
+  float hip_left_QY;
+  float hip_left_QZ;
+  float hip_left_QW;
+  uint8_t hip_left_conf;
+  float knee_left_x;
+  float knee_left_y;
+  float knee_left_z;
+  float knee_left_QX;
+  float knee_left_QY;
+  float knee_left_QZ;
+  float knee_left_QW;
+  uint8_t knee_left_conf;
+  float ankle_left_x;
+  float ankle_left_y;
+  float ankle_left_z;
+  float ankle_left_QX;
+  float ankle_left_QY;
+  float ankle_left_QZ;
+  float ankle_left_QW;
+  uint8_t ankle_left_conf;
+  float foot_left_x;
+  float foot_left_y;
+  float foot_left_z;
+  float foot_left_QX;
+  float foot_left_QY;
+  float foot_left_QZ;
+  float foot_left_QW;
+  uint8_t foot_left_conf;
+  float hip_right_x;
+  float hip_right_y;
+  float hip_right_z;
+  float hip_right_QX;
+  float hip_right_QY;
+  float hip_right_QZ;
+  float hip_right_QW;
+  uint8_t hip_right_conf;
+  float knee_right_x;
+  float knee_right_y;
+  float knee_right_z;
+  float knee_right_QX;
+  float knee_right_QY;
+  float knee_right_QZ;
+  float knee_right_QW;
+  uint8_t knee_right_conf;
+  float ankle_right_x;
+  float ankle_right_y;
+  float ankle_right_z;
+  float ankle_right_QX;
+  float ankle_right_QY;
+  float ankle_right_QZ;
+  float ankle_right_QW;
+  uint8_t ankle_right_conf;
+  float foot_right_x;
+  float foot_right_y;
+  float foot_right_z;
+  float foot_right_QX;
+  float foot_right_QY;
+  float foot_right_QZ;
+  float foot_right_QW;
+  uint8_t foot_right_conf;
+  float head_x;
+  float head_y;
+  float head_z;
+  float head_QX;
+  float head_QY;
+  float head_QZ;
+  float head_QW;
+  uint8_t head_conf;
+  float nose_x;
+  float nose_y;
+  float nose_z;
+  float nose_QX;
+  float nose_QY;
+  float nose_QZ;
 
-  CameraCalibrationStruct() {}
-
-  CameraCalibrationStruct(unsigned int t, std::vector<unsigned char> d,
-                          std::vector<unsigned char> ed)
-      : type(t), data(d), extra_data(ed) {}
-
-  template <class Archive> void serialize(Archive &ar) {
-    ar(type, data, extra_data);
-  }
-};
-
-struct CodecParamsStruct {
-  // 0: av parameters, 1: nvPipe parameters, 2: zDepth parameters
-  short type = -1;
-  std::vector<unsigned char> data;
-  std::vector<unsigned char> extra_data;
-
-  CodecParamsStruct() {}
-
-  CodecParamsStruct(unsigned int t, std::vector<unsigned char> d,
-                    std::vector<unsigned char> ed)
-      : type(t), data(d), extra_data(ed) {}
-
-  void SetData(std::vector<unsigned char> &d) { data = d; }
-
-  void SetExtraData(std::vector<unsigned char> &ed) { extra_data = ed; }
-
-  template <class Archive> void serialize(Archive &ar) {
-    ar(type, data, extra_data);
-  }
-};
-
-struct FrameStruct {
-
-  // message id, currenly set to 0
-  //This is to be used as "versioning", so if how messages are updated so that Sensor Stream Client
-  //must interpret different "versions" of messages then this field will indicate the message version
-  unsigned short message_type;
-
-  // 0 for color, 1 for depth, 2 for ir, 3 for confidence
-  unsigned short frame_type;
-
-  // 0 for image frames, 1 for libav packets, 2 for raw RGBA data, 3 for raw
-  // GRAY16LE data, 4 for NvPipe packets, 5 for raw 32FC1 data, 6 for YUV data
-  // 7 for raw U8C1 data
-  //This is used to select the decoder on the "receiving" side of the Pipe
-  //Not all frame_type + frame_data_type combinations "make sense" or will be used
-  unsigned short frame_data_type;
-
-  // random 16 char string that uniquely ids the frame stream
-  //Some decoders (like video) are stateful and so must keep track of streams
-  //This is automatically generated
-  std::string stream_id;
-
-  // frame binary data
-  //We use a vector to know the size, basically a vector of bytes to store binary data
-  std::vector<unsigned char> frame;
-
-  // codec info for video frames, null for image frames
-  //Video decoder needs to know about the last receive frame
-  //Requires to know the codec as well as additional parameters
-  CodecParamsStruct codec_data;
-
-  // codec info for video frames, null for image frames
-  CameraCalibrationStruct camera_calibration_data;
-
-  // optional: scene description
-  std::string scene_desc;
-
-  // 0 for color, 1 for depth: currently redundant with frameType, but
-  // distinction may be needed in the future
-  unsigned int sensor_id;
-
-  // integer device id: distingish between devices in the same scene
-  //Can be set by user
-  unsigned int device_id;
-
-  // current frame number (increases over time)
-  //Increases by 1 for each frame automatically when SSP server starts
-  unsigned int frame_id;
-
-  //Use for logging and timing to understand processing speeds
-  std::vector<unsigned long> timestamps;
-
-  //Serialize method (not used by Server but is available)
-  template <class Archive> void serialize(Archive &ar) {
-    ar(message_type, frame_type, frame_data_type, stream_id, frame, codec_data,
-       camera_calibration_data, scene_desc, sensor_id, device_id, frame_id,
-       timestamps);
-  }
-};
-
-template <typename T>
-static const std::string CerealStructToString(const T &t) {
-  std::ostringstream os(std::ios::binary);
-  {
-    cereal::BinaryOutputArchive oarchive(os);
-    oarchive(t);
-  }
-
-  return os.str();
-}
-
-template <typename T> static const std::string FrameStructToString(const T *t) {
-  std::ostringstream os(std::ios::binary);
-  {
-    cereal::BinaryOutputArchive oarchive(os);
-    oarchive(*t);
-  }
-
-  return os.str();
-}
-
-template <typename T> static T ParseCerealStructFromString(std::string &data) {
-  T frame_in;
-  std::istringstream is(data, std::ios::binary);
-  {
-    cereal::BinaryInputArchive iarchive(is);
-    iarchive(frame_in);
-  }
-  return frame_in;
-}
+  float nose_QW;
+  uint8_t nose_conf;
+  float eye_left_x;
+  float eye_left_y;
+  float eye_left_z;
+  float eye_left_QX;
+  float eye_left_QY;
+  float eye_left_QZ;
+  float eye_left_QW;
+  uint8_t eye_left_conf;
+  float ear_left_x;
+  float ear_left_y;
+  float ear_left_z;
+  float ear_left_QX;
+  float ear_left_QY;
+  float ear_left_QZ;
+  float ear_left_QW;
+  uint8_t ear_left_conf;
+  float eye_right_x;
+  float eye_right_y;
+  float eye_right_z;
+  float eye_right_QX;
+  float eye_right_QY;
+  float eye_right_QZ;
+  float eye_right_QW;
+  uint8_t eye_right_conf;
+  float ear_right_x;
+  float ear_right_y;
+  float ear_right_z;
+  float ear_right_QX;
+  float ear_right_QY;
+  float ear_right_QZ;
+  float ear_right_QW;
+  uint8_t ear_right_conf;
+} object_human_t;

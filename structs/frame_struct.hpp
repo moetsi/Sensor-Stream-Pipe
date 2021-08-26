@@ -60,12 +60,12 @@ struct FrameStruct {
   //must interpret different "versions" of messages then this field will indicate the message version
   unsigned short message_type;
 
-  // 0 for color, 1 for depth, 2 for ir, 3 for confidence, 4 for body
+  // 0 for color, 1 for depth, 2 for ir, 3 for confidence, 4 for object
   unsigned short frame_type;
 
   // 0 for image frames, 1 for libav packets, 2 for raw RGBA data, 3 for raw
   // GRAY16LE data, 4 for NvPipe packets, 5 for raw 32FC1 data, 6 for YUV data
-  // 7 for raw U8C1 data //8 for body data
+  // 7 for raw U8C1 data //8 for object-human data
   //This is used to select the decoder on the "receiving" side of the Pipe
   //Not all frame_type + frame_data_type combinations "make sense" or will be used
   unsigned short frame_data_type;
