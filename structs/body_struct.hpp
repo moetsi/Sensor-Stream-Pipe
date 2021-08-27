@@ -240,7 +240,6 @@ typedef struct _object_human_t
   float nose_QX;
   float nose_QY;
   float nose_QZ;
-
   float nose_QW;
   uint8_t nose_conf;
   float eye_left_x;

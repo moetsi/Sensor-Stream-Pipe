@@ -7,6 +7,7 @@
 #include "../decoders/idecoder.h"
 #include "../decoders/libav_decoder.h"
 #include "../structs/frame_struct.hpp"
+#include "../structs/body_struct.hpp"
 #include <opencv2/core/mat.hpp>
 
 bool FrameStructToMat(FrameStruct &f, cv::Mat &img,

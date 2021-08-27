@@ -13,7 +13,9 @@
 #include <cereal/archives/binary.hpp>
 
 #include "../structs/frame_struct.hpp"
+#include "../utils/image_decoder.h"
 #include "../structs/body_struct.hpp"
+#include "../utils/video_utils.h"
 #include "ireader.h"
 
 
@@ -46,3 +48,4 @@ public:
 
   std::vector<unsigned int> GetType();
 };
+
