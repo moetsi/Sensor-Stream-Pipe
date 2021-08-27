@@ -3,13 +3,6 @@
 //
 
 
-// Inludes common necessary includes for development using depthai library
-// #include "../build/_deps/ssp_dep-src/depthai/include/depthai/depthai.hpp" works
-// #include <depthai/include/depthai/depthai.hpp> not work
-#include <depthai>
-// #include <depthai.hpp>
-
-
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
@@ -52,6 +45,10 @@
 #ifdef SSP_WITH_KINECT_SUPPORT
 #include "../readers/kinect_reader.h"
 #include "../utils/kinect_utils.h"
+#endif
+
+#ifdef SSP_WITH_DEPTHAI_SUPPORT
+#include "depthai/depthai.hpp"
 #endif
 
 extern "C" SSP_EXPORT int ssp_server(const char* filename)

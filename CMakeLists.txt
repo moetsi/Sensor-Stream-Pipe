@@ -64,7 +64,6 @@ if (ssp_dep_POPULATED)
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
   endif()
   set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog CACHE PATH "spdlog installation path")
-  set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/build/install/lib/cmake/depthai CACHE PATH "depthai installation path")
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
@@ -100,7 +99,6 @@ if (IOS)
 else()
   find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
   find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
-  find_package(depthai CONFIG REQUIRED)
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH bin)
@@ -126,6 +124,8 @@ else()
     option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" ON)
 endif()
 option(SSP_WITH_ZMQ_POLLING "Compile with ZeroMQ polling" OFF)
+
+option(SSP_WITH_DEPTHAI_SUPPORT "Compile with DepthAI support" ON)
 
 if (SSP_WITH_NVPIPE_SUPPORT)
     find_package(NvPipe CONFIG)
@@ -177,6 +177,22 @@ endif()
 if (SSP_WITH_ZMQ_POLLING)
     add_definitions(-DSSP_WITH_ZMQ_POLLING=1)
 endif ()
+
+if (SSP_WITH_DEPTHAI_SUPPORT)
+    set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "DepthAI installation path")
+    find_package(depthai CONFIG)
+
+    # If not found disable DepthAI support
+    if (depthai_FOUND)
+        add_definitions(-DSSP_WITH_DEPTHAI_SUPPORT=1)
+        include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include)
+        #include_directories(${INTERFACE_INCLUDE_DIRECTORIES})
+        message("Using DepthAI")
+    else()
+        set(SSP_WITH_DEPTHAI_SUPPORT OFF)
+        message(STATUS "Setting SSP_WITH_DEPTHAI_SUPPORT to OFF")
+    endif()
+endif()
 
 #########################
 ### Build the library
@@ -231,7 +247,10 @@ endif ()
 
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
-target_link_libraries(ssp PRIVATE depthai::core)
+
+if (SSP_WITH_DEPTHAI_SUPPORT)
+    target_link_libraries(ssp PRIVATE depthai::core)
+endif ()
 
 target_link_libraries(ssp PUBLIC
     cereal
