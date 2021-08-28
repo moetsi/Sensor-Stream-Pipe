@@ -104,6 +104,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmoetsi_1_1ssp_1_1CodecParamsStruct.html">CodecParamsStruct</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Codec parameters.  <a href="structmoetsi_1_1ssp_1_1CodecParamsStruct.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmoetsi_1_1ssp_1_1DummyBodyReader.html">DummyBodyReader</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmoetsi_1_1ssp_1_1ExtendedAzureConfig.html">ExtendedAzureConfig</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Azure Kinect configuration.  <a href="structmoetsi_1_1ssp_1_1ExtendedAzureConfig.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -152,9 +154,13 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmoetsi_1_1ssp_1_1NVPipeDeleter.html">NVPipeDeleter</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmoetsi_1_1ssp_1_1object__human__t.html">object_human_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmoetsi_1_1ssp_1_1SwsContextDeleter.html">SwsContextDeleter</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmoetsi_1_1ssp_1_1VideoFileReader.html">VideoFileReader</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmoetsi_1_1ssp_1_1XlinkReader.html">XlinkReader</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmoetsi_1_1ssp_1_1ZDepthDecoder.html">ZDepthDecoder</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmoetsi_1_1ssp_1_1ZDepthDecoder.html" title="ZDepthDecoder ZDepth format decoder. ">ZDepthDecoder</a> ZDepth format decoder.  <a href="classmoetsi_1_1ssp_1_1ZDepthDecoder.html#details">More...</a><br /></td></tr>
@@ -258,15 +264,18 @@ Enumerations</h2></td></tr>
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f47aa00e2f9251d8ad59fa">FrameDataType::FrameDataTypeYUV</a> = 6, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b">FrameDataType::FrameDataTypeU8C1</a> = 7, 
 <br />
-&#160;&#160;<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d24eab84554c0bf415903d">FrameDataType::FrameDataTypeImageFrame</a> = 0, 
+&#160;&#160;<b>FrameDataTypeObjectHumanData</b> = 8, 
+<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d24eab84554c0bf415903d">FrameDataType::FrameDataTypeImageFrame</a> = 0, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69865a40eb4db132fe7096">FrameDataType::FrameDataTypeLibavPackets</a> = 1, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4ac2cdf85544553bda5453b401b79964eb">FrameDataType::FrameDataTypeRawRGBA</a> = 2, 
-<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a44d909233498ad3dec5a3e3e95e908ca">FrameDataType::FrameDataTypeGRAY16LE</a> = 3, 
 <br />
-&#160;&#160;<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722acd71d3e90b51c8faa31c">FrameDataType::FrameDataTypeNvPipePacket</a> = 4, 
+&#160;&#160;<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a44d909233498ad3dec5a3e3e95e908ca">FrameDataType::FrameDataTypeGRAY16LE</a> = 3, 
+<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722acd71d3e90b51c8faa31c">FrameDataType::FrameDataTypeNvPipePacket</a> = 4, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc6efcecf59e0e1e6c9387">FrameDataType::FrameDataTypeRaw32FC1</a> = 5, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f47aa00e2f9251d8ad59fa">FrameDataType::FrameDataTypeYUV</a> = 6, 
-<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b">FrameDataType::FrameDataTypeU8C1</a> = 7
+<br />
+&#160;&#160;<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b">FrameDataType::FrameDataTypeU8C1</a> = 7, 
+<b>FrameDataTypeObjectHumanData</b> = 8
 <br />
  }<tr class="memdesc:aa9b059f0bc7a91855545ee887f2d56c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frame data type. This is a precise binary format information.  <a href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4">More...</a><br /></td></tr>
 </td></tr>
@@ -362,15 +371,18 @@ Enumerations</h2></td></tr>
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f47aa00e2f9251d8ad59fa">FrameDataType::FrameDataTypeYUV</a> = 6, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b">FrameDataType::FrameDataTypeU8C1</a> = 7, 
 <br />
-&#160;&#160;<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d24eab84554c0bf415903d">FrameDataType::FrameDataTypeImageFrame</a> = 0, 
+&#160;&#160;<b>FrameDataTypeObjectHumanData</b> = 8, 
+<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d24eab84554c0bf415903d">FrameDataType::FrameDataTypeImageFrame</a> = 0, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69865a40eb4db132fe7096">FrameDataType::FrameDataTypeLibavPackets</a> = 1, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4ac2cdf85544553bda5453b401b79964eb">FrameDataType::FrameDataTypeRawRGBA</a> = 2, 
-<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a44d909233498ad3dec5a3e3e95e908ca">FrameDataType::FrameDataTypeGRAY16LE</a> = 3, 
 <br />
-&#160;&#160;<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722acd71d3e90b51c8faa31c">FrameDataType::FrameDataTypeNvPipePacket</a> = 4, 
+&#160;&#160;<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a44d909233498ad3dec5a3e3e95e908ca">FrameDataType::FrameDataTypeGRAY16LE</a> = 3, 
+<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722acd71d3e90b51c8faa31c">FrameDataType::FrameDataTypeNvPipePacket</a> = 4, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc6efcecf59e0e1e6c9387">FrameDataType::FrameDataTypeRaw32FC1</a> = 5, 
 <a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f47aa00e2f9251d8ad59fa">FrameDataType::FrameDataTypeYUV</a> = 6, 
-<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b">FrameDataType::FrameDataTypeU8C1</a> = 7
+<br />
+&#160;&#160;<a class="el" href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b">FrameDataType::FrameDataTypeU8C1</a> = 7, 
+<b>FrameDataTypeObjectHumanData</b> = 8
 <br />
  }<tr class="memdesc:aa9b059f0bc7a91855545ee887f2d56c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frame data type. This is a precise binary format information.  <a href="namespacemoetsi_1_1ssp.html#aa9b059f0bc7a91855545ee887f2d56c4">More...</a><br /></td></tr>
 </td></tr>

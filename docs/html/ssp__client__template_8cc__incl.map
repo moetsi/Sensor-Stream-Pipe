@@ -1,12 +1,13 @@
 <map id="ssp_client_template.cc" name="ssp_client_template.cc">
-<area shape="rect" id="node13" href="$logger_8h.html" title="Logger header. " alt="" coords="189,490,297,517"/>
-<area shape="rect" id="node15" href="$network__reader_8h.html" title="Network reader. " alt="" coords="183,80,310,121"/>
-<area shape="rect" id="node30" href="$video__utils_8h.html" title="Video utilities. " alt="" coords="1119,87,1254,114"/>
-<area shape="rect" id="node42" href="$utils_2image__converter_8h_source.html" title="../utils/image_converter.h" alt="" coords="291,177,461,203"/>
-<area shape="rect" id="node16" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="511,333,673,360"/>
-<area shape="rect" id="node29" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="260,259,332,285"/>
-<area shape="rect" id="node24" href="$utils_8h.html" title="Utilities. " alt="" coords="682,408,779,435"/>
-<area shape="rect" id="node36" href="$decoders_2idecoder_8h_source.html" title="../decoders/idecoder.h" alt="" coords="643,259,794,285"/>
-<area shape="rect" id="node37" href="$zdepth__decoder_8h.html" title="ZDepth decoder. " alt="" coords="864,169,995,211"/>
-<area shape="rect" id="node39" href="$libav__types_8h_source.html" title="../utils/libav_types.h" alt="" coords="1171,177,1309,203"/>
+<area shape="rect" id="node13" href="$logger_8h.html" title="Logger header. " alt="" coords="323,490,431,517"/>
+<area shape="rect" id="node15" href="$network__reader_8h.html" title="Network reader. " alt="" coords="2109,80,2235,121"/>
+<area shape="rect" id="node30" href="$video__utils_8h.html" title="Video utilities. " alt="" coords="1005,87,1139,114"/>
+<area shape="rect" id="node42" href="$utils_2image__converter_8h_source.html" title="../utils/image_converter.h" alt="" coords="1855,177,2025,203"/>
+<area shape="rect" id="node16" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="1876,333,2039,360"/>
+<area shape="rect" id="node29" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="2125,259,2197,285"/>
+<area shape="rect" id="node24" href="$utils_8h.html" title="Utilities. " alt="" coords="867,408,965,435"/>
+<area shape="rect" id="node36" href="$decoders_2idecoder_8h_source.html" title="../decoders/idecoder.h" alt="" coords="1526,259,1677,285"/>
+<area shape="rect" id="node37" href="$zdepth__decoder_8h.html" title="ZDepth decoder. " alt="" coords="1185,169,1316,211"/>
+<area shape="rect" id="node39" href="$libav__types_8h_source.html" title="../utils/libav_types.h" alt="" coords="871,177,1009,203"/>
+<area shape="rect" id="node43" href="$structs_2body__struct_8h_source.html" title="../structs/body_struct.h" alt="" coords="1695,333,1852,360"/>
 </map>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['extendedazureconfig',['ExtendedAzureConfig',['../structmoetsi_1_1ssp_1_1ExtendedAzureConfig.html',1,'moetsi::ssp']]]
+  ['dummybodyreader',['DummyBodyReader',['../classmoetsi_1_1ssp_1_1DummyBodyReader.html',1,'moetsi::ssp']]]
 ];

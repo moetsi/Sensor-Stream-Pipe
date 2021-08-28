@@ -30,6 +30,8 @@ struct \hyperlink{structmoetsi_1_1ssp_1_1CameraCalibrationStruct}{Camera\+Calibr
 \begin{DoxyCompactList}\small\item\em Camera calibration data. \end{DoxyCompactList}\item 
 struct \hyperlink{structmoetsi_1_1ssp_1_1CodecParamsStruct}{Codec\+Params\+Struct}
 \begin{DoxyCompactList}\small\item\em Codec parameters. \end{DoxyCompactList}\item 
+class \hyperlink{classmoetsi_1_1ssp_1_1DummyBodyReader}{Dummy\+Body\+Reader}
+\item 
 struct \hyperlink{structmoetsi_1_1ssp_1_1ExtendedAzureConfig}{Extended\+Azure\+Config}
 \begin{DoxyCompactList}\small\item\em Azure Kinect configuration. \end{DoxyCompactList}\item 
 struct \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}
@@ -66,9 +68,13 @@ class \hyperlink{classmoetsi_1_1ssp_1_1NvEncoder}{Nv\+Encoder}
 \begin{DoxyCompactList}\small\item\em Nv\+Pipe encoder. \end{DoxyCompactList}\item 
 struct \hyperlink{structmoetsi_1_1ssp_1_1NVPipeDeleter}{N\+V\+Pipe\+Deleter}
 \item 
+struct \hyperlink{structmoetsi_1_1ssp_1_1object__human__t}{object\+\_\+human\+\_\+t}
+\item 
 struct \hyperlink{structmoetsi_1_1ssp_1_1SwsContextDeleter}{Sws\+Context\+Deleter}
 \item 
 class \hyperlink{classmoetsi_1_1ssp_1_1VideoFileReader}{Video\+File\+Reader}
+\item 
+class \hyperlink{classmoetsi_1_1ssp_1_1XlinkReader}{Xlink\+Reader}
 \item 
 class \hyperlink{classmoetsi_1_1ssp_1_1ZDepthDecoder}{Z\+Depth\+Decoder}
 \begin{DoxyCompactList}\small\item\em \hyperlink{classmoetsi_1_1ssp_1_1ZDepthDecoder}{Z\+Depth\+Decoder} Z\+Depth format decoder. \end{DoxyCompactList}\item 
@@ -164,15 +170,18 @@ enum \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4}{Frame\
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f47aa00e2f9251d8ad59fa}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Y\+UV} = 6, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+U8\+C1} = 7, 
 \newline
+{\bfseries Frame\+Data\+Type\+Object\+Human\+Data} = 8, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d24eab84554c0bf415903d}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Image\+Frame} = 0, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69865a40eb4db132fe7096}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Libav\+Packets} = 1, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf85544553bda5453b401b79964eb}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Raw\+R\+G\+BA} = 2, 
-\hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498ad3dec5a3e3e95e908ca}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+G\+R\+A\+Y16\+LE} = 3, 
 \newline
+\hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498ad3dec5a3e3e95e908ca}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+G\+R\+A\+Y16\+LE} = 3, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722acd71d3e90b51c8faa31c}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Nv\+Pipe\+Packet} = 4, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc6efcecf59e0e1e6c9387}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Raw32\+F\+C1} = 5, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f47aa00e2f9251d8ad59fa}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Y\+UV} = 6, 
-\hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+U8\+C1} = 7
+\newline
+\hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+U8\+C1} = 7, 
+{\bfseries Frame\+Data\+Type\+Object\+Human\+Data} = 8
  \}\begin{DoxyCompactList}\small\item\em Frame data type. This is a precise binary format information. \end{DoxyCompactList}
 \item 
 enum \hyperlink{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474de}{Sensor\+Type} \+: short \{ \newline
@@ -256,15 +265,18 @@ enum \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4}{Frame\
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f47aa00e2f9251d8ad59fa}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Y\+UV} = 6, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+U8\+C1} = 7, 
 \newline
+{\bfseries Frame\+Data\+Type\+Object\+Human\+Data} = 8, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d24eab84554c0bf415903d}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Image\+Frame} = 0, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69865a40eb4db132fe7096}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Libav\+Packets} = 1, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf85544553bda5453b401b79964eb}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Raw\+R\+G\+BA} = 2, 
-\hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498ad3dec5a3e3e95e908ca}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+G\+R\+A\+Y16\+LE} = 3, 
 \newline
+\hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498ad3dec5a3e3e95e908ca}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+G\+R\+A\+Y16\+LE} = 3, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722acd71d3e90b51c8faa31c}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Nv\+Pipe\+Packet} = 4, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc6efcecf59e0e1e6c9387}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Raw32\+F\+C1} = 5, 
 \hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f47aa00e2f9251d8ad59fa}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+Y\+UV} = 6, 
-\hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+U8\+C1} = 7
+\newline
+\hyperlink{namespacemoetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13ef44a9806046ae34d56b}{Frame\+Data\+Type\+::\+Frame\+Data\+Type\+U8\+C1} = 7, 
+{\bfseries Frame\+Data\+Type\+Object\+Human\+Data} = 8
  \}\begin{DoxyCompactList}\small\item\em Frame data type. This is a precise binary format information. \end{DoxyCompactList}
 \item 
 enum \hyperlink{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474de}{Sensor\+Type} \+: short \{ \newline

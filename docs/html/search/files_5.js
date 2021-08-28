@@ -1,9 +1,12 @@
 var searchData=
 [
-  ['similarity_5fmeasures_2eh',['similarity_measures.h',['../similarity__measures_8h.html',1,'']]],
-  ['ssp_5fclient_5fk4a_2ecc',['ssp_client_k4a.cc',['../ssp__client__k4a_8cc.html',1,'']]],
-  ['ssp_5fclient_5fopencv_2ecc',['ssp_client_opencv.cc',['../ssp__client__opencv_8cc.html',1,'']]],
-  ['ssp_5fclient_5ftemplate_2ecc',['ssp_client_template.cc',['../ssp__client__template_8cc.html',1,'']]],
-  ['ssp_5fserver_2ecc',['ssp_server.cc',['../ssp__server_8cc.html',1,'']]],
-  ['ssp_5ftester_2ecc',['ssp_tester.cc',['../ssp__tester_8cc.html',1,'']]]
+  ['network_5freader_2ecc',['network_reader.cc',['../network__reader_8cc.html',1,'']]],
+  ['network_5freader_2eh',['network_reader.h',['../network__reader_8h.html',1,'']]],
+  ['null_5fencoder_2ecc',['null_encoder.cc',['../null__encoder_8cc.html',1,'']]],
+  ['null_5fencoder_2eh',['null_encoder.h',['../null__encoder_8h.html',1,'']]],
+  ['nv_5fdecoder_2ecc',['nv_decoder.cc',['../nv__decoder_8cc.html',1,'']]],
+  ['nv_5fdecoder_2eh',['nv_decoder.h',['../nv__decoder_8h.html',1,'']]],
+  ['nv_5fencoder_2ecc',['nv_encoder.cc',['../nv__encoder_8cc.html',1,'']]],
+  ['nv_5fencoder_2eh',['nv_encoder.h',['../nv__encoder_8h.html',1,'']]],
+  ['nvpipe_5ftypes_2eh',['nvpipe_types.h',['../nvpipe__types_8h.html',1,'']]]
 ];

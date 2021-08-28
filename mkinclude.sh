@@ -11,5 +11,6 @@ mkdir include/readers
 cp -fv readers/ireader.h include/readers
 mkdir include/structs 
 cp -fv structs/frame_struct.h include/structs
+cp -fv structs/body_struct.h include/structs
 mkdir include/utils
 cp -fv utils/image_converter.h include/utils

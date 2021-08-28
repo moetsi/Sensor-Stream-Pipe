@@ -6,6 +6,8 @@
 
 #include "../decoders/idecoder.h"
 #include "../structs/frame_struct.h"
+#include "../structs/body_struct.h"
+
 #include <opencv2/core/mat.hpp>
 
 namespace moetsi::ssp {
