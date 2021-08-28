@@ -1,12 +1,12 @@
 <map id="dummy_body_reader.h" name="dummy_body_reader.h">
-<area shape="rect" id="node6" href="$logger_8h.html" title="Logger header. " alt="" coords="187,475,295,502"/>
-<area shape="rect" id="node8" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="1833,319,1996,345"/>
-<area shape="rect" id="node20" href="$image__decoder_8h.html" title="AV Image decoder. " alt="" coords="582,80,743,107"/>
-<area shape="rect" id="node31" href="$structs_2body__struct_8h_source.html" title="../structs/body_struct.h" alt="" coords="2263,319,2420,345"/>
-<area shape="rect" id="node32" href="$video__utils_8h.html" title="Video utilities. " alt="" coords="1810,80,1945,107"/>
-<area shape="rect" id="node43" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="1283,80,1355,107"/>
-<area shape="rect" id="node15" href="$utils_8h.html" title="Utilities. " alt="" coords="582,393,679,420"/>
-<area shape="rect" id="node25" href="$libav__types_8h_source.html" title="libav_types.h" alt="" coords="1305,162,1404,189"/>
-<area shape="rect" id="node40" href="$decoders_2idecoder_8h_source.html" title="../decoders/idecoder.h" alt="" coords="2213,244,2363,271"/>
-<area shape="rect" id="node41" href="$zdepth__decoder_8h.html" title="ZDepth decoder. " alt="" coords="2523,155,2653,196"/>
+<area shape="rect" id="node6" href="$logger_8h.html" title="Logger header. " alt="" coords="2338,475,2446,502"/>
+<area shape="rect" id="node8" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="1024,319,1187,345"/>
+<area shape="rect" id="node20" href="$image__decoder_8h.html" title="AV Image decoder. " alt="" coords="1430,80,1591,107"/>
+<area shape="rect" id="node31" href="$structs_2body__struct_8h_source.html" title="../structs/body_struct.h" alt="" coords="735,319,892,345"/>
+<area shape="rect" id="node33" href="$video__utils_8h.html" title="Video utilities. " alt="" coords="2245,80,2379,107"/>
+<area shape="rect" id="node44" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="1200,80,1272,107"/>
+<area shape="rect" id="node15" href="$utils_8h.html" title="Utilities. " alt="" coords="1399,393,1497,420"/>
+<area shape="rect" id="node25" href="$libav__types_8h_source.html" title="libav_types.h" alt="" coords="1923,162,2021,189"/>
+<area shape="rect" id="node41" href="$decoders_2idecoder_8h_source.html" title="../decoders/idecoder.h" alt="" coords="2757,244,2907,271"/>
+<area shape="rect" id="node42" href="$zdepth__decoder_8h.html" title="ZDepth decoder. " alt="" coords="2299,155,2429,196"/>
 </map>

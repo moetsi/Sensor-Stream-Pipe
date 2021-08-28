@@ -27,7 +27,6 @@ void DummyBodyReader::NextFrame() {
 
   current_frame_.clear();
 
-
   uint64_t capture_timestamp = CurrentTimeMs();
     std::shared_ptr<FrameStruct> s =
         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
@@ -35,6 +34,7 @@ void DummyBodyReader::NextFrame() {
     s->timestamps.push_back(capture_timestamp);
 
     s->frame = std::vector<uchar>();
+    // TODO: hton/ntoh!!!
     s->frame.resize(sizeof(object_human_t) + sizeof(int32_t));
     //here we will say we detected 1 body
     int32_t bodyCount = 1;

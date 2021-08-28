@@ -6,6 +6,7 @@
 
 #include <iterator>
 #include <vector>
+#include <cstdint>
 
 #ifndef __MOETSI_RAAS__
 #include <cereal/archives/binary.hpp>

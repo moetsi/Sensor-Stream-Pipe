@@ -3,6 +3,7 @@
  */
 #pragma once
 #include "structs/frame_struct.h"
+#include "structs/body_struct.h"
 #include "encoders/iencoder.h"
 #include "decoders/idecoder.h"
 #include "readers/ireader.h"
