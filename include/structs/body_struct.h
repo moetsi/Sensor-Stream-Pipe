@@ -16,8 +16,6 @@
 #include <cereal/types/vector.hpp>
 #endif // !__MOETSI_RAAS__
 
-#include "../utils/utils.h"
-
 namespace moetsi::ssp {
 
 struct object_human_t
