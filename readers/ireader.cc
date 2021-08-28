@@ -19,6 +19,8 @@
 #include "../encoders/zdepth_encoder.h"
 #include "../readers/video_file_reader.h"
 #include "../readers/multi_image_reader.h"
+#include "../readers/xlink_reader.h"
+#include "../readers/dummy_body_reader.h"
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../encoders/nv_encoder.h"
@@ -76,6 +78,18 @@ std::shared_ptr<IReader> IReaderFactory(const std::string & config) {
       } else {
         reader = std::shared_ptr<VideoFileReader>(new VideoFileReader(path));
       }
+      return reader;
+    } else if (reader_type == "xlink") {      
+#ifdef SSP_WITH_KINECT_SUPPORT
+      ExtendedAzureConfig c = BuildKinectConfigFromYAML(
+          general_parameters["frame_source"]["parameters"]);
+      reader = std::shared_ptr<XlinkReader>(new XlinkReader(0, c));
+#else
+    return reader;
+#endif
+    } else if (reader_type == "dummybody") {
+        reader = std::make_shared<DummyBodyReader>();
+        return reader;
     } else if (reader_type == "kinect") {
 #ifdef SSP_WITH_KINECT_SUPPORT
       ExtendedAzureConfig c = BuildKinectConfigFromYAML(

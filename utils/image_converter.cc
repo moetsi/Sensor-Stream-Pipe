@@ -9,6 +9,8 @@
 #include "../decoders/nv_decoder.h"
 #endif
 
+#include <opencv2/imgproc.hpp>
+
 namespace moetsi::ssp {
 
 bool FrameStructToMat(FrameStruct &f, cv::Mat &img,

@@ -107,7 +107,10 @@ enum class FrameDataType: short {
     // 7 for raw U8C1 data
     
     /** U8C1 data */
-    FrameDataTypeU8C1 = 7
+    FrameDataTypeU8C1 = 7,
+
+    // 8 for object-human data
+    FrameDataTypeObjectHumanData = 8
 }; 
 
 /**

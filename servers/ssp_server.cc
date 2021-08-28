@@ -37,6 +37,7 @@
 #include "../encoders/zdepth_encoder.h"
 #include "../readers/video_file_reader.h"
 #include "../readers/multi_image_reader.h"
+#include "../readers/dummy_body_reader.h"
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../encoders/nv_encoder.h"
@@ -90,6 +91,9 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
         reader = std::unique_ptr<ImageReader>(new ImageReader(
             general_parameters["frame_source"]["parameters"]["path"]
                 .as<std::string>()));
+
+    } else if (reader_type == "dummybody") {
+      reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader());
 
     } else if (reader_type == "video") {
       std::string path =

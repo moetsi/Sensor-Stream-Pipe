@@ -49,9 +49,13 @@ elseif (UNIX)
     )
   else ()
     FetchContent_Declare(
+      #ssp_dep
+      #URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
+      #URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
+
       ssp_dep
-      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
-      URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
+      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202108241228__ssp_lindep.tar.gz
+      URL_HASH MD5=90ccba057cf14bfb05e4dacc3c3e8f72
     )
   endif()
 endif()
@@ -72,16 +76,19 @@ if (ssp_dep_POPULATED)
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/CMake CACHE PATH "yaml-cpp installation path")
     set(k4a_DIR ${ssp_dep_SOURCE_DIR}/k4a/lib/cmake/k4a CACHE PATH "k4a installation path")
   else()
+    message(STATUS "OpenCV could be at " ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV)
     set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV CACHE PATH "OpenCV installation path")
     set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/lib/cmake/ZeroMQ CACHE PATH "ZeroMQ installation path")
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
   endif()
   set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog CACHE PATH "spdlog installation path")
+  message(STATUS "depthai could be at " ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai)
+  set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "depthai installation path")
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
   if (LOCAL_DEP_BUILD_LINUX)
-  message(STATUS " searching for openh264 in " ${ssp_dep_SOURCE_DIR}/openh264/)
+    message(STATUS " searching for openh264 in " ${ssp_dep_SOURCE_DIR}/openh264/)
     set(openh264_INCLUDE_DIR ${ssp_dep_SOURCE_DIR}/openh264/include)
     set(openh264_DIR ${ssp_dep_SOURCE_DIR}/openh264)
     set(openh264_LIBRARY ${ssp_dep_SOURCE_DIR}/openh264/lib/libopenh264.so.6) # yes this is linux for now
@@ -133,8 +140,16 @@ if (IOS)
   set(OpenCV_LIBS ${ssp_dep_SOURCE_DIR}/lib/opencv2.framework)
 else()
   find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
-  find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
+  find_package(depthai CONFIG REQUIRED)
+  find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED PATHS ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV NO_DEFAULT_PATH)
 endif()
+
+if(OpenCV_FOUND)
+  message(STATUS "Found OpenCV")
+  message(STATUS "Includes: " ${OpenCV_INCLUDE_DIRS})
+else(OpenCV_FOUND)
+  message(STATUS "Cannot find OpenCV")
+endif(OpenCV_FOUND)
 
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBRARY_OUTPUT_PATH lib)
@@ -142,6 +157,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # TODO: modify FindFFmpeg to add this automatically
 include_directories(${FFMPEG_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
+message(STATUS "OpenCV_DIR = " ${OpenCV_DIR})
 
 if (WIN32)
     file(COPY ${FFMPEG_INCLUDE_DIRS}/../bin/
@@ -221,6 +238,8 @@ set(SOURCE_FILES
     readers/multi_image_reader.cc
     readers/multi_image_reader.h
     structs/frame_struct.h
+    structs/body_struct.h
+
     utils/image_converter.cc
     utils/image_converter.h
     utils/image_decoder.cc
@@ -253,6 +272,8 @@ set(SOURCE_FILES
     readers/video_file_reader.h
     readers/image_reader.cc
     readers/image_reader.h
+    readers/dummy_body_reader.cc
+    readers/dummy_body_reader.h
     readers/network_reader.cc
     readers/network_reader.h
 )
@@ -267,6 +288,9 @@ endif ()
 
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
+target_link_libraries(ssp PRIVATE depthai::core)
+
+message(STATUS "open cv linked as " ${OpenCV_LIBS} " and includes: " ${OpenCV_INCLUDE_DIRS})
 
 target_link_libraries(ssp PUBLIC
     cereal
@@ -300,7 +324,6 @@ if (SSP_WITH_K4A_BODYTRACK)
     target_link_libraries(ssp PUBLIC k4a::k4abt)
 endif ()
 
-
 #############################
 ### Build the applications
 #############################
@@ -331,6 +354,9 @@ endif()
 
 add_executable(ssp_client_opencv clients/ssp_client_opencv.cc)
 target_link_libraries(ssp_client_opencv ssp)
+
+add_executable(ssp_client_body_logger clients/ssp_client_body_logger.cc)
+target_link_libraries(ssp_client_body_logger ssp)
 
 add_executable(ssp_client_template clients/ssp_client_template.cc)
 target_link_libraries(ssp_client_template ssp)
