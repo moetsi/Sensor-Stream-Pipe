@@ -124,6 +124,8 @@ if (LOCAL_DEP_BUILD_LINUX)
   find_package(openh264 REQUIRED)
 endif()
 
+option(SSP_WITH_DEPTHAI_SUPPORT "Compile with DepthAI support" OFF)
+
 if (IOS)
   add_definitions(-DFFMPEG_AS_FRAMEWORK)
   set(FFMPEG_LIBRARIES
@@ -140,7 +142,9 @@ if (IOS)
   set(OpenCV_LIBS ${ssp_dep_SOURCE_DIR}/lib/opencv2.framework)
 else()
   find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
-  find_package(depthai CONFIG REQUIRED)
+  if (SSP_WITH_DEPTHAI_SUPPORT)
+    find_package(depthai CONFIG REQUIRED)
+  endif()
   find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED PATHS ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV NO_DEFAULT_PATH)
 endif()
 
@@ -171,9 +175,9 @@ if (APPLE)
     option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" OFF)
     option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
 else()
-    option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" ON)
-    option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" ON)
-    option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" ON)
+    option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" OFF)
+    option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" OFF)
+    option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
 endif()
 option(SSP_WITH_ZMQ_POLLING "Compile with ZeroMQ polling" OFF)
 
@@ -227,6 +231,22 @@ endif()
 if (SSP_WITH_ZMQ_POLLING)
     add_definitions(-DSSP_WITH_ZMQ_POLLING=1)
 endif ()
+
+if (SSP_WITH_DEPTHAI_SUPPORT)
+    set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "DepthAI installation path")
+    find_package(depthai CONFIG)
+
+    # If not found disable DepthAI support
+    if (depthai_FOUND)
+        add_definitions(-DSSP_WITH_DEPTHAI_SUPPORT=1)
+        include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include)
+        #include_directories(${INTERFACE_INCLUDE_DIRECTORIES})
+        message("Using DepthAI")
+    else()
+        set(SSP_WITH_DEPTHAI_SUPPORT OFF)
+        message(STATUS "Setting SSP_WITH_DEPTHAI_SUPPORT to OFF")
+    endif()
+endif()
 
 #########################
 ### Build the library
@@ -288,9 +308,12 @@ endif ()
 
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
-target_link_libraries(ssp PRIVATE depthai::core)
 
 message(STATUS "open cv linked as " ${OpenCV_LIBS} " and includes: " ${OpenCV_INCLUDE_DIRS})
+
+if (SSP_WITH_DEPTHAI_SUPPORT)
+    target_link_libraries(ssp PRIVATE depthai::core)
+endif ()
 
 target_link_libraries(ssp PUBLIC
     cereal
