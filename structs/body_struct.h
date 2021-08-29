@@ -18,6 +18,32 @@
 
 namespace moetsi::ssp {
 
+inline void inplace_hton(uint32_t & h) {
+  uint32_t idx = 0x00010203;
+  uint32_t dest = 0x0;
+  uint8_t *ip = (uint8_t *)&idx;
+  uint8_t *sp = (uint8_t *)&h;
+  uint8_t *dp = (uint8_t *)&dest;
+  for (int i=0; i<3; ++i) {
+    int k = ip[i];
+    dp[i] = sp[k];
+  }
+  h = dest;
+}
+
+inline void inplace_hton(int32_t &h) {
+  uint32_t &h2 = *((uint32_t *)&h);
+  inplace_hton(h2);
+}
+
+inline void inplace_ntoh(uint32_t &h) {
+  inplace_hton(h);
+}
+
+inline void inplace_ntoh(int32_t &h) {
+  inplace_hton(h);
+}
+
 struct object_human_t
 {
   int32_t Id;
