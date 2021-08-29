@@ -302,9 +302,16 @@ void DummyBodyReader::NextFrame() {
   memcpy(&s->frame[0], &bodyCount, sizeof(int32_t));
   memcpy(&s->frame[4], &bodyStruct, sizeof(object_human_t));
   current_frame_.push_back(s);
+
+  if (counter_ ++ > 100) {
+    has_next_ = false;
+  }
 }
 
-bool DummyBodyReader::HasNextFrame() { return true; }
+bool DummyBodyReader::HasNextFrame() { 
+  return has_next_;
+  // ** return true; 
+}
 
 void DummyBodyReader::Reset() {}
 

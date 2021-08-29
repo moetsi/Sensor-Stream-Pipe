@@ -24,7 +24,8 @@ private:
   FrameStruct frame_template_;
 
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
-
+  int counter_ = 0;
+  bool has_next_ = true;
 public:
   DummyBodyReader();
 
