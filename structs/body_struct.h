@@ -24,7 +24,7 @@ inline void inplace_hton(uint32_t & h) {
   uint8_t *ip = (uint8_t *)&idx;
   uint8_t *sp = (uint8_t *)&h;
   uint8_t *dp = (uint8_t *)&dest;
-  for (int i=0; i<3; ++i) {
+  for (int i=0; i<4; ++i) {
     int k = ip[i];
     dp[i] = sp[k];
   }
