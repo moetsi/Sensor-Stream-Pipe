@@ -24,4 +24,3 @@ video_encoder:
     codec_name: "NVPIPE_HEVC"
     input_format: "NVPIPE_UINT16"
     bit_rate: 40000000
-    
