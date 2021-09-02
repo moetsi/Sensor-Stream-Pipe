@@ -64,6 +64,7 @@ if (ssp_dep_POPULATED)
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
   endif()
   set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog CACHE PATH "spdlog installation path")
+  set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "depthai installation path")
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
@@ -99,6 +100,7 @@ if (IOS)
 else()
   find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
   find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
+  find_package(depthai CONFIG REQUIRED)
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH bin)
@@ -204,6 +206,7 @@ set(SOURCE_FILES
     readers/multi_image_reader.cc
     readers/multi_image_reader.h
     structs/frame_struct.hpp
+    structs/body_struct.hpp
     utils/image_converter.cc
     utils/image_converter.h
     utils/image_decoder.cc
@@ -233,6 +236,8 @@ set(SOURCE_FILES
     readers/video_file_reader.h
     readers/image_reader.cc
     readers/image_reader.h
+    readers/dummy_body_reader.cc
+    readers/dummy_body_reader.h
     readers/network_reader.cc
     readers/network_reader.h
 )
@@ -247,6 +252,7 @@ endif ()
 
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
+target_link_libraries(ssp PRIVATE depthai::core)
 
 if (SSP_WITH_DEPTHAI_SUPPORT)
     target_link_libraries(ssp PRIVATE depthai::core)
@@ -310,6 +316,9 @@ endif()
 
 add_executable(ssp_client_opencv clients/ssp_client_opencv.cc)
 target_link_libraries(ssp_client_opencv ssp)
+
+add_executable(ssp_client_body_logger clients/ssp_client_body_logger.cc)
+target_link_libraries(ssp_client_body_logger ssp)
 
 add_executable(ssp_client_template clients/ssp_client_template.cc)
 target_link_libraries(ssp_client_template ssp)
