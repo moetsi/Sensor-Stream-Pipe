@@ -277,7 +277,7 @@ void VideoFileReader::GoToFrame(unsigned int frame_id) {
   int error =
       av_seek_frame(av_format_context_, -1, frame_id, AVSEEK_FLAG_FRAME);
   if (error < 0) {
-    spdlog::error("Error seeking to frame {}: {}", frame_id, av_err2str(error));
+    spdlog::error("Error seeking to frame {}: {}", frame_id, _av_err2str(error));
   }
 }
 
@@ -288,7 +288,7 @@ void VideoFileReader::Reset() {
   int error = av_seek_frame(av_format_context_, -1, 0, AVSEEK_FLAG_BACKWARD);
 
   if (error < 0) {
-    spdlog::error("Error seeking to frame {}: {}", 0, av_err2str(error));
+    spdlog::error("Error seeking to frame {}: {}", 0, _av_err2str(error));
   }
 }
 

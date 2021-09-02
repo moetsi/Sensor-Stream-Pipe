@@ -1,21 +1,21 @@
 <map id="ireader.cc" name="ireader.cc">
-<area shape="rect" id="node2" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="869,408,941,435"/>
-<area shape="rect" id="node14" href="$logger_8h.html" title="Logger header. " alt="" coords="2565,632,2633,659"/>
-<area shape="rect" id="node22" href="$libav__encoder_8h.html" title="Jpeg/Mpeg encoder. " alt="" coords="3137,237,3319,263"/>
-<area shape="rect" id="node39" href="$null__encoder_8h.html" title="../encoders/null_encoder.h" alt="" coords="715,155,890,181"/>
-<area shape="rect" id="node40" href="$zdepth__encoder_8h.html" title="encoder " alt="" coords="3900,229,4031,271"/>
-<area shape="rect" id="node42" href="$video__file__reader_8h.html" title="Video file reader support. " alt="" coords="2571,319,2707,360"/>
-<area shape="rect" id="node43" href="$multi__image__reader_8h.html" title="Multi image reader. " alt="" coords="558,229,709,271"/>
-<area shape="rect" id="node44" href="$xlink__reader_8h_source.html" title="../readers/xlink_reader.h" alt="" coords="1497,80,1660,107"/>
-<area shape="rect" id="node49" href="$dummy__body__reader_8h.html" title="Dumy Body Reader. " alt="" coords="630,319,789,360"/>
-<area shape="rect" id="node3" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="1157,483,1320,509"/>
-<area shape="rect" id="node11" href="$utils_8h.html" title="Utilities. " alt="" coords="1855,557,1953,584"/>
-<area shape="rect" id="node31" href="$image__reader_8h.html" title="Image reader. " alt="" coords="1215,326,1385,353"/>
-<area shape="rect" id="node32" href="$image__decoder_8h.html" title="AV Image decoder. " alt="" coords="1646,408,1807,435"/>
-<area shape="rect" id="node35" href="$video__utils_8h.html" title="Video utilities. " alt="" coords="3390,408,3525,435"/>
-<area shape="rect" id="node36" href="$encoders_2iencoder_8h_source.html" title="iencoder.h" alt="" coords="1819,326,1901,353"/>
-<area shape="rect" id="node37" href="$libav__decoder_8h.html" title="Jpeg/Mpeg decoder. " alt="" coords="3007,326,3190,353"/>
-<area shape="rect" id="node47" href="$kinect__utils_8h.html" title="Utils for Kinect RT integration. " alt="" coords="2267,237,2405,263"/>
-<area shape="rect" id="node48" href="$kinect__reader_8h.html" title="Kinect driver. " alt="" coords="1392,155,1563,181"/>
-<area shape="rect" id="node50" href="$structs_2body__struct_8h_source.html" title="../structs/body_struct.h" alt="" coords="925,483,1083,509"/>
+<area shape="rect" id="node2" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="695,408,767,435"/>
+<area shape="rect" id="node14" href="$logger_8h.html" title="Logger header. " alt="" coords="3553,632,3621,659"/>
+<area shape="rect" id="node22" href="$libav__encoder_8h.html" title="Jpeg/Mpeg encoder. " alt="" coords="2006,237,2189,263"/>
+<area shape="rect" id="node39" href="$null__encoder_8h.html" title="../encoders/null_encoder.h" alt="" coords="753,155,927,181"/>
+<area shape="rect" id="node40" href="$zdepth__encoder_8h.html" title="encoder " alt="" coords="3080,229,3211,271"/>
+<area shape="rect" id="node42" href="$video__file__reader_8h.html" title="Video file reader support. " alt="" coords="2428,319,2564,360"/>
+<area shape="rect" id="node43" href="$multi__image__reader_8h.html" title="Multi image reader. " alt="" coords="483,229,634,271"/>
+<area shape="rect" id="node44" href="$xlink__reader_8h_source.html" title="../readers/xlink_reader.h" alt="" coords="1436,80,1599,107"/>
+<area shape="rect" id="node49" href="$dummy__body__reader_8h.html" title="Dumy Body Reader. " alt="" coords="870,319,1029,360"/>
+<area shape="rect" id="node3" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="1112,483,1275,509"/>
+<area shape="rect" id="node11" href="$utils_8h.html" title="Utilities. " alt="" coords="2027,557,2125,584"/>
+<area shape="rect" id="node31" href="$image__reader_8h.html" title="Image reader. " alt="" coords="472,326,643,353"/>
+<area shape="rect" id="node32" href="$image__decoder_8h.html" title="AV Image decoder. " alt="" coords="1451,408,1613,435"/>
+<area shape="rect" id="node35" href="$video__utils_8h.html" title="Video utilities. " alt="" coords="2939,408,3074,435"/>
+<area shape="rect" id="node36" href="$encoders_2iencoder_8h_source.html" title="iencoder.h" alt="" coords="1408,326,1491,353"/>
+<area shape="rect" id="node37" href="$libav__decoder_8h.html" title="Jpeg/Mpeg decoder. " alt="" coords="3041,326,3223,353"/>
+<area shape="rect" id="node47" href="$kinect__utils_8h.html" title="Utils for Kinect RT integration. " alt="" coords="3235,237,3373,263"/>
+<area shape="rect" id="node48" href="$kinect__reader_8h.html" title="Kinect driver. " alt="" coords="1371,155,1541,181"/>
+<area shape="rect" id="node50" href="$structs_2body__struct_8h_source.html" title="../structs/body_struct.h" alt="" coords="931,483,1088,509"/>
 </map>

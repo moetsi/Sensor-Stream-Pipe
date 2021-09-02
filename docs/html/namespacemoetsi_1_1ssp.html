@@ -410,12 +410,24 @@ Functions</h2></td></tr>
 <tr class="memitem:ad7a44286de625366acc78a320113e09b"><td class="memItemLeft" align="right" valign="top">std::unordered_map&lt; <a class="el" href="namespacemoetsi_1_1ssp.html#a46efdfa2cd5a28ead465dcc8006b5a87">FrameType</a>, std::shared_ptr&lt; <a class="el" href="classmoetsi_1_1ssp_1_1IEncoder.html">IEncoder</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#ad7a44286de625366acc78a320113e09b">IEncoderFactory</a> (const std::string &amp;config, const std::vector&lt; <a class="el" href="namespacemoetsi_1_1ssp.html#a46efdfa2cd5a28ead465dcc8006b5a87">FrameType</a> &gt; &amp;types)</td></tr>
 <tr class="memdesc:ad7a44286de625366acc78a320113e09b"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmoetsi_1_1ssp_1_1IEncoder.html" title="IEncoder abstract encoder class. ">IEncoder</a> factory.  <a href="#ad7a44286de625366acc78a320113e09b">More...</a><br /></td></tr>
 <tr class="separator:ad7a44286de625366acc78a320113e09b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0af356ab87e92f92c49e7118b9cb1ba2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#a0af356ab87e92f92c49e7118b9cb1ba2">SetupLogging</a> (std::string &amp;level, std::string &amp;file)</td></tr>
-<tr class="memdesc:a0af356ab87e92f92c49e7118b9cb1ba2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup logging.  <a href="#a0af356ab87e92f92c49e7118b9cb1ba2">More...</a><br /></td></tr>
-<tr class="separator:a0af356ab87e92f92c49e7118b9cb1ba2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67a600c84b18e25713a78f85283c7fa9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#a67a600c84b18e25713a78f85283c7fa9">SetupLogging</a> (const std::string &amp;level, const std::string &amp;file)</td></tr>
+<tr class="memdesc:a67a600c84b18e25713a78f85283c7fa9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup logging.  <a href="#a67a600c84b18e25713a78f85283c7fa9">More...</a><br /></td></tr>
+<tr class="separator:a67a600c84b18e25713a78f85283c7fa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5e820c4c6a1a43d5e85608a06b86ea8"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classmoetsi_1_1ssp_1_1IReader.html">IReader</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#ad5e820c4c6a1a43d5e85608a06b86ea8">IReaderFactory</a> (const std::string &amp;config)</td></tr>
 <tr class="memdesc:ad5e820c4c6a1a43d5e85608a06b86ea8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmoetsi_1_1ssp_1_1IReader.html" title="SSP reader interface - abstract class. ">IReader</a> factory.  <a href="#ad5e820c4c6a1a43d5e85608a06b86ea8">More...</a><br /></td></tr>
 <tr class="separator:ad5e820c4c6a1a43d5e85608a06b86ea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a847e1a4429b781f120e04becebbe66a0"><td class="memItemLeft" align="right" valign="top"><a id="a847e1a4429b781f120e04becebbe66a0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>inplace_hton</b> (uint32_t &amp;h)</td></tr>
+<tr class="separator:a847e1a4429b781f120e04becebbe66a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fafd59fa54249bb95a66105f66c4c7d"><td class="memItemLeft" align="right" valign="top"><a id="a9fafd59fa54249bb95a66105f66c4c7d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>inplace_hton</b> (int32_t &amp;h)</td></tr>
+<tr class="separator:a9fafd59fa54249bb95a66105f66c4c7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01d4a0ba876f5c5f602a9087dcb0c06d"><td class="memItemLeft" align="right" valign="top"><a id="a01d4a0ba876f5c5f602a9087dcb0c06d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>inplace_ntoh</b> (uint32_t &amp;h)</td></tr>
+<tr class="separator:a01d4a0ba876f5c5f602a9087dcb0c06d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af27a97cef0ab519ed119c1d5786af84e"><td class="memItemLeft" align="right" valign="top"><a id="af27a97cef0ab519ed119c1d5786af84e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>inplace_ntoh</b> (int32_t &amp;h)</td></tr>
+<tr class="separator:af27a97cef0ab519ed119c1d5786af84e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac87377cef5da79f1a9cf7a4acdc42af6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#ac87377cef5da79f1a9cf7a4acdc42af6">FrameStructToMat</a> (<a class="el" href="structmoetsi_1_1ssp_1_1FrameStruct.html">FrameStruct</a> &amp;f, cv::Mat &amp;img, std::unordered_map&lt; std::string, std::shared_ptr&lt; <a class="el" href="classmoetsi_1_1ssp_1_1IDecoder.html">IDecoder</a> &gt;&gt; &amp;decoders)</td></tr>
 <tr class="memdesc:ac87377cef5da79f1a9cf7a4acdc42af6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert frame struct to opencv matrix.  <a href="#ac87377cef5da79f1a9cf7a4acdc42af6">More...</a><br /></td></tr>
 <tr class="separator:ac87377cef5da79f1a9cf7a4acdc42af6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -456,6 +468,9 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr class="memitem:a732d178071710fdceab189671f2d7c25"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#a732d178071710fdceab189671f2d7c25">SetupLogging</a> (YAML::Node &amp;general_parameters)</td></tr>
 <tr class="memdesc:a732d178071710fdceab189671f2d7c25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup SSP logging.  <a href="#a732d178071710fdceab189671f2d7c25">More...</a><br /></td></tr>
 <tr class="separator:a732d178071710fdceab189671f2d7c25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0af356ab87e92f92c49e7118b9cb1ba2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#a0af356ab87e92f92c49e7118b9cb1ba2">SetupLogging</a> (std::string &amp;level, std::string &amp;file)</td></tr>
+<tr class="memdesc:a0af356ab87e92f92c49e7118b9cb1ba2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup SSP logging.  <a href="#a0af356ab87e92f92c49e7118b9cb1ba2">More...</a><br /></td></tr>
+<tr class="separator:a0af356ab87e92f92c49e7118b9cb1ba2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82e9b74b4a9a35255cc5d4ff66dc776f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#a82e9b74b4a9a35255cc5d4ff66dc776f">AVFrameToMatYUV</a> (AVFrameSharedP &amp;frame, cv::Mat &amp;image)</td></tr>
 <tr class="memdesc:a82e9b74b4a9a35255cc5d4ff66dc776f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert an AVFrame to YUV image.  <a href="#a82e9b74b4a9a35255cc5d4ff66dc776f">More...</a><br /></td></tr>
 <tr class="separator:a82e9b74b4a9a35255cc5d4ff66dc776f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1536,8 +1551,71 @@ std::atomic_bool&#160;</td><td class="memItemRight" valign="bottom"><b>exiting</
 
 </div>
 </div>
+<a id="a67a600c84b18e25713a78f85283c7fa9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67a600c84b18e25713a78f85283c7fa9">&#9670;&nbsp;</a></span>SetupLogging() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void moetsi::ssp::SetupLogging </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>file</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Setup logging. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">level</td><td>logging level </td></tr>
+    <tr><td class="paramname">file</td><td>logging file </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a732d178071710fdceab189671f2d7c25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a732d178071710fdceab189671f2d7c25">&#9670;&nbsp;</a></span>SetupLogging() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void moetsi::ssp::SetupLogging </td>
+          <td>(</td>
+          <td class="paramtype">YAML::Node &amp;&#160;</td>
+          <td class="paramname"><em>general_parameters</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Setup SSP logging. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">general_parameters</td><td>configuration </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a0af356ab87e92f92c49e7118b9cb1ba2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0af356ab87e92f92c49e7118b9cb1ba2">&#9670;&nbsp;</a></span>SetupLogging() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0af356ab87e92f92c49e7118b9cb1ba2">&#9670;&nbsp;</a></span>SetupLogging() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1562,40 +1640,11 @@ std::atomic_bool&#160;</td><td class="memItemRight" valign="bottom"><b>exiting</
       </table>
 </div><div class="memdoc">
 
-<p>Setup logging. </p>
-<p>Setup SSP logging.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">level</td><td>logging level </td></tr>
-    <tr><td class="paramname">file</td><td>logging file</td></tr>
-    <tr><td class="paramname">level</td><td>logging level </td></tr>
-    <tr><td class="paramname">file</td><td>log file </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a732d178071710fdceab189671f2d7c25"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a732d178071710fdceab189671f2d7c25">&#9670;&nbsp;</a></span>SetupLogging() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void moetsi::ssp::SetupLogging </td>
-          <td>(</td>
-          <td class="paramtype">YAML::Node &amp;&#160;</td>
-          <td class="paramname"><em>general_parameters</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
 <p>Setup SSP logging. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">general_parameters</td><td>configuration </td></tr>
+    <tr><td class="paramname">level</td><td>logging level </td></tr>
+    <tr><td class="paramname">file</td><td>log file </td></tr>
   </table>
   </dd>
 </dl>

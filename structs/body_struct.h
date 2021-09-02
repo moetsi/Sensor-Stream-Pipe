@@ -18,6 +18,8 @@
 
 namespace moetsi::ssp {
 
+#ifndef SWIG 
+
 inline void inplace_hton(uint32_t & h) {
   uint32_t idx = 0x00010203;
   uint32_t dest = 0x0;
@@ -44,8 +46,18 @@ inline void inplace_ntoh(int32_t &h) {
   inplace_hton(h);
 }
 
+#endif
+
 struct object_human_t
 {
+  inline void ntoh() {
+    inplace_ntoh(Id);
+  }
+
+  inline void hton() {
+    inplace_hton(Id);
+  }
+
   int32_t Id;
   float pelvis_x;
   float pelvis_y;

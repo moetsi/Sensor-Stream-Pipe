@@ -13,7 +13,7 @@ namespace moetsi::ssp {
  * \param level logging level
  * \param file logging file
  */
-void SetupLogging(std::string &level, std::string &file);
+void SetupLogging(const std::string &level, const std::string &file);
 
 /**
  * @brief SSP reader interface - abstract class.

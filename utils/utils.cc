@@ -52,7 +52,7 @@ void SetupLogging(YAML::Node &general_parameters) {
         "basic_logger", general_parameters["log_file"].as<std::string>()));
 }
 
-void SetupLogging(std::string &level, std::string &file) {
+void SetupLogging(const std::string &level, const std::string &file) {
   spdlog::set_level(spdlog::level::from_str(level));
   if (!file.empty())
     spdlog::set_default_logger(spdlog::basic_logger_mt("basic_logger", file));

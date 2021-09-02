@@ -13,7 +13,7 @@ int ImageDecoder::DecodePacket(AVFrameSharedP pFrame) {
 
   if (response < 0) {
     spdlog::error("Error while sending a packet to the decoder: {}",
-                  av_err2str(response));
+                  _av_err2str(response));
     return response;
   }
 
@@ -25,7 +25,7 @@ int ImageDecoder::DecodePacket(AVFrameSharedP pFrame) {
       break;
     } else if (response < 0) {
       spdlog::error("Error while receiving a frame from the decoder: {}",
-                    av_err2str(response));
+                    _av_err2str(response));
       return response;
     }
 

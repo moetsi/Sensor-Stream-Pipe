@@ -8,8 +8,6 @@
 #include <iostream>
 #include <queue>
 #include <vector>
-
-// #include <cereal/archives/binary.hpp>
 #include <yaml-cpp/yaml.h>
 
 extern "C" {

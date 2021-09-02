@@ -60,8 +60,6 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
     AVFrameSharedP pFrameO = nullptr;
     AVFrameSharedP pFrame = nullptr;
 
-    // FrameDataType::FrameDataTypeImageFrame = 0
-    // if (fs->frame_data_type == 0) {
     if (fs->frame_data_type == FrameDataType::FrameDataTypeImageFrame) {      
 
       AVFrame *tmp = av_frame_alloc();
@@ -91,8 +89,6 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
 
       data = reinterpret_cast<uint16_t *>(&pFrame->data[0][0]);
 
-    // FrameDataType::FrameDataTypeLibavPackets = 1
-    // } else if (fs->frame_data_type == 1) {
     } else if (fs->frame_data_type == FrameDataType::FrameDataTypeLibavPackets) {
 
       if (libav_decoder_ == nullptr) {
@@ -106,17 +102,12 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
       width_ = img.cols;
       height_ = img.rows;
 
-      // FrameType::FrameTypeColor = 0
-      // if (frame_compressed_->frame_type == 0) {
       if (frame_compressed_->frame_type == FrameType::FrameTypeColor) {
         cv::cvtColor(img, img, CV_BGR2BGRA);
       }
 
       data = reinterpret_cast<uint16_t *>(img.data);
 
-    // FrameDataType::FrameDataTypeRawRGBA = 2
-    // FrameDataType::FrameDataTypeGRAY16LE = 3
-    // } else if (fs->frame_data_type == 2 || fs->frame_data_type == 3) {
     } else if (fs->frame_data_type == FrameDataType::FrameDataTypeRawRGBA || fs->frame_data_type == FrameDataType::FrameDataTypeGRAY16LE) {
       // fs->frame[8] ignores width and height set at [0] and [4] by
       // KinectReader
