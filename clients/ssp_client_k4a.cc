@@ -44,7 +44,7 @@ typedef struct _custom_k4abt_body_t
   float pelvis_QY;
   float pelvis_QZ;
   float pelvis_QW;
-  BYTE pelvis_conf;
+  uint8_t pelvis_conf;
   float spine_navel_x;
   float spine_navel_y;
   float spine_navel_z;
@@ -52,7 +52,7 @@ typedef struct _custom_k4abt_body_t
   float spine_navel_QY;
   float spine_navel_QZ;
   float spine_navel_QW;
-  BYTE spine_navel_conf;
+  uint8_t spine_navel_conf;
   float spine_chest_x;
   float spine_chest_y;
   float spine_chest_z;
@@ -60,7 +60,7 @@ typedef struct _custom_k4abt_body_t
   float spine_chest_QY;
   float spine_chest_QZ;
   float spine_chest_QW;
-  BYTE spine_chest_conf;
+  uint8_t spine_chest_conf;
   float neck_x;
   float neck_y;
   float neck_z;
@@ -68,7 +68,7 @@ typedef struct _custom_k4abt_body_t
   float neck_QY;
   float neck_QZ;
   float neck_QW;
-  BYTE neck_conf;
+  uint8_t neck_conf;
   float clavicle_left_x;
   float clavicle_left_y;
   float clavicle_left_z;
@@ -76,7 +76,7 @@ typedef struct _custom_k4abt_body_t
   float clavicle_left_QY;
   float clavicle_left_QZ;
   float clavicle_left_QW;
-  BYTE clavicle_left_conf;
+  uint8_t clavicle_left_conf;
   float shoulder_left_x;
   float shoulder_left_y;
   float shoulder_left_z;
@@ -84,7 +84,7 @@ typedef struct _custom_k4abt_body_t
   float shoulder_left_QY;
   float shoulder_left_QZ;
   float shoulder_left_QW;
-  BYTE shoulder_left_conf;
+  uint8_t shoulder_left_conf;
   float elbow_left_x;
   float elbow_left_y;
   float elbow_left_z;
@@ -92,7 +92,7 @@ typedef struct _custom_k4abt_body_t
   float elbow_left_QY;
   float elbow_left_QZ;
   float elbow_left_QW;
-  BYTE elbow_left_conf;
+  uint8_t elbow_left_conf;
   float wrist_left_x;
   float wrist_left_y;
   float wrist_left_z;
@@ -100,7 +100,7 @@ typedef struct _custom_k4abt_body_t
   float wrist_left_QY;
   float wrist_left_QZ;
   float wrist_left_QW;
-  BYTE wrist_left_conf;
+  uint8_t wrist_left_conf;
   float hand_left_x;
   float hand_left_y;
   float hand_left_z;
@@ -108,7 +108,7 @@ typedef struct _custom_k4abt_body_t
   float hand_left_QY;
   float hand_left_QZ;
   float hand_left_QW;
-  BYTE hand_left_conf;
+  uint8_t hand_left_conf;
   float handtip_left_x;
   float handtip_left_y;
   float handtip_left_z;
@@ -116,7 +116,7 @@ typedef struct _custom_k4abt_body_t
   float handtip_left_QY;
   float handtip_left_QZ;
   float handtip_left_QW;
-  BYTE handtip_left_conf;
+  uint8_t handtip_left_conf;
   float thumb_left_x;
   float thumb_left_y;
   float thumb_left_z;
@@ -124,7 +124,7 @@ typedef struct _custom_k4abt_body_t
   float thumb_left_QY;
   float thumb_left_QZ;
   float thumb_left_QW;
-  BYTE thumb_left_conf;
+  uint8_t thumb_left_conf;
   float clavicle_right_x;
   float clavicle_right_y;
   float clavicle_right_z;
@@ -132,7 +132,7 @@ typedef struct _custom_k4abt_body_t
   float clavicle_right_QY;
   float clavicle_right_QZ;
   float clavicle_right_QW;
-  BYTE clavicle_right_conf;
+  uint8_t clavicle_right_conf;
   float shoulder_right_x;
   float shoulder_right_y;
   float shoulder_right_z;
@@ -140,7 +140,7 @@ typedef struct _custom_k4abt_body_t
   float shoulder_right_QY;
   float shoulder_right_QZ;
   float shoulder_right_QW;
-  BYTE shoulder_right_conf;
+  uint8_t shoulder_right_conf;
   float elbow_right_x;
   float elbow_right_y;
   float elbow_right_z;
@@ -148,7 +148,7 @@ typedef struct _custom_k4abt_body_t
   float elbow_right_QY;
   float elbow_right_QZ;
   float elbow_right_QW;
-  BYTE elbow_right_conf;
+  uint8_t elbow_right_conf;
   float wrist_right_x;
   float wrist_right_y;
   float wrist_right_z;
@@ -156,7 +156,7 @@ typedef struct _custom_k4abt_body_t
   float wrist_right_QY;
   float wrist_right_QZ;
   float wrist_right_QW;
-  BYTE wrist_right_conf;
+  uint8_t wrist_right_conf;
   float hand_right_x;
   float hand_right_y;
   float hand_right_z;
@@ -164,7 +164,7 @@ typedef struct _custom_k4abt_body_t
   float hand_right_QY;
   float hand_right_QZ;
   float hand_right_QW;
-  BYTE hand_right_conf;
+  uint8_t hand_right_conf;
   float handtip_right_x;
   float handtip_right_y;
   float handtip_right_z;
@@ -172,7 +172,7 @@ typedef struct _custom_k4abt_body_t
   float handtip_right_QY;
   float handtip_right_QZ;
   float handtip_right_QW;
-  BYTE handtip_right_conf;
+  uint8_t handtip_right_conf;
   float thumb_right_x;
   float thumb_right_y;
   float thumb_right_z;
@@ -180,7 +180,7 @@ typedef struct _custom_k4abt_body_t
   float thumb_right_QY;
   float thumb_right_QZ;
   float thumb_right_QW;
-  BYTE thumb_right_conf;
+  uint8_t thumb_right_conf;
   float hip_left_x;
   float hip_left_y;
   float hip_left_z;
@@ -188,7 +188,7 @@ typedef struct _custom_k4abt_body_t
   float hip_left_QY;
   float hip_left_QZ;
   float hip_left_QW;
-  BYTE hip_left_conf;
+  uint8_t hip_left_conf;
   float knee_left_x;
   float knee_left_y;
   float knee_left_z;
@@ -196,7 +196,7 @@ typedef struct _custom_k4abt_body_t
   float knee_left_QY;
   float knee_left_QZ;
   float knee_left_QW;
-  BYTE knee_left_conf;
+  uint8_t knee_left_conf;
   float ankle_left_x;
   float ankle_left_y;
   float ankle_left_z;
@@ -204,7 +204,7 @@ typedef struct _custom_k4abt_body_t
   float ankle_left_QY;
   float ankle_left_QZ;
   float ankle_left_QW;
-  BYTE ankle_left_conf;
+  uint8_t ankle_left_conf;
   float foot_left_x;
   float foot_left_y;
   float foot_left_z;
@@ -212,7 +212,7 @@ typedef struct _custom_k4abt_body_t
   float foot_left_QY;
   float foot_left_QZ;
   float foot_left_QW;
-  BYTE foot_left_conf;
+  uint8_t foot_left_conf;
   float hip_right_x;
   float hip_right_y;
   float hip_right_z;
@@ -220,7 +220,7 @@ typedef struct _custom_k4abt_body_t
   float hip_right_QY;
   float hip_right_QZ;
   float hip_right_QW;
-  BYTE hip_right_conf;
+  uint8_t hip_right_conf;
   float knee_right_x;
   float knee_right_y;
   float knee_right_z;
@@ -228,7 +228,7 @@ typedef struct _custom_k4abt_body_t
   float knee_right_QY;
   float knee_right_QZ;
   float knee_right_QW;
-  BYTE knee_right_conf;
+  uint8_t knee_right_conf;
   float ankle_right_x;
   float ankle_right_y;
   float ankle_right_z;
@@ -236,7 +236,7 @@ typedef struct _custom_k4abt_body_t
   float ankle_right_QY;
   float ankle_right_QZ;
   float ankle_right_QW;
-  BYTE ankle_right_conf;
+  uint8_t ankle_right_conf;
   float foot_right_x;
   float foot_right_y;
   float foot_right_z;
@@ -244,7 +244,7 @@ typedef struct _custom_k4abt_body_t
   float foot_right_QY;
   float foot_right_QZ;
   float foot_right_QW;
-  BYTE foot_right_conf;
+  uint8_t foot_right_conf;
   float head_x;
   float head_y;
   float head_z;
@@ -252,7 +252,7 @@ typedef struct _custom_k4abt_body_t
   float head_QY;
   float head_QZ;
   float head_QW;
-  BYTE head_conf;
+  uint8_t head_conf;
   float nose_x;
   float nose_y;
   float nose_z;
@@ -261,7 +261,7 @@ typedef struct _custom_k4abt_body_t
   float nose_QZ;
 
   float nose_QW;
-  BYTE nose_conf;
+  uint8_t nose_conf;
   float eye_left_x;
   float eye_left_y;
   float eye_left_z;
@@ -269,7 +269,7 @@ typedef struct _custom_k4abt_body_t
   float eye_left_QY;
   float eye_left_QZ;
   float eye_left_QW;
-  BYTE eye_left_conf;
+  uint8_t eye_left_conf;
   float ear_left_x;
   float ear_left_y;
   float ear_left_z;
@@ -277,7 +277,7 @@ typedef struct _custom_k4abt_body_t
   float ear_left_QY;
   float ear_left_QZ;
   float ear_left_QW;
-  BYTE ear_left_conf;
+  uint8_t ear_left_conf;
   float eye_right_x;
   float eye_right_y;
   float eye_right_z;
@@ -285,7 +285,7 @@ typedef struct _custom_k4abt_body_t
   float eye_right_QY;
   float eye_right_QZ;
   float eye_right_QW;
-  BYTE eye_right_conf;
+  uint8_t eye_right_conf;
   float ear_right_x;
   float ear_right_y;
   float ear_right_z;
@@ -293,7 +293,7 @@ typedef struct _custom_k4abt_body_t
   float ear_right_QY;
   float ear_right_QZ;
   float ear_right_QW;
-  BYTE ear_right_conf;
+  uint8_t ear_right_conf;
 } custom_k4abt_body_t;
 
 class BodyTracker
@@ -549,7 +549,7 @@ void PrintBodyInformation(k4abt_body_t body) {
 void PrintBodyIndexMapMiddleLine(k4a::image body_index_map) {
   uint8_t *body_index_map_buffer = body_index_map.get_buffer();
 
-  assert(body_index_map.get_stride_bytes() ==
+  assert(body_index_map.get_stride_uint8_ts() ==
          body_index_map.get_width_pixels());
 
   int middle_line_num = body_index_map.get_height_pixels() / 2;

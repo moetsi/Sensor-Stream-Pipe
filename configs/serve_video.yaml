@@ -7,11 +7,11 @@ general:
   frame_source:
     type: "video"
     parameters:
-      path: "/home/amourao/dataset_kinect_testB.mkv"
+      path: "1080p_ShadesDown_Darker_Closer_Right_Moving_Right.mkv"
 video_encoder:
   0: #color
-    type: "libav"
-    codec_name: "libx265"
+    type: "null"
+    codec_name: "libx264"
     pix_fmt: "yuv420p"
     bit_rate: 8000000
     options:
@@ -20,7 +20,7 @@ video_encoder:
   1: #depth
     type: "zdepth"
   2: #ir
-    type: "nvenc"
+    type: "null"
     codec_name: "NVPIPE_HEVC"
     input_format: "NVPIPE_UINT16"
     bit_rate: 40000000
