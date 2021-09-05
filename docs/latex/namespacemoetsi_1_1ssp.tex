@@ -316,6 +316,19 @@ void {\bfseries inplace\+\_\+ntoh} (int32\+\_\+t \&h)
 \item 
 bool \hyperlink{namespacemoetsi_1_1ssp_ac87377cef5da79f1a9cf7a4acdc42af6}{Frame\+Struct\+To\+Mat} (\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \&f, cv\+::\+Mat \&img, std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ \hyperlink{classmoetsi_1_1ssp_1_1IDecoder}{I\+Decoder} $>$$>$ \&decoders)
 \begin{DoxyCompactList}\small\item\em Convert frame struct to opencv matrix. \end{DoxyCompactList}\item 
+uint64\+\_\+t \hyperlink{namespacemoetsi_1_1ssp_a3aaefb86d19ad4cca7f0db6c37682195}{Current\+Time\+Ms} ()
+\begin{DoxyCompactList}\small\item\em Get current time in ms. \end{DoxyCompactList}\item 
+uint64\+\_\+t \hyperlink{namespacemoetsi_1_1ssp_ad7107897c233642c927f0129f2aea2e0}{Current\+Time\+Us} ()
+\begin{DoxyCompactList}\small\item\em Get current time in usec/microseconds. \end{DoxyCompactList}\item 
+uint64\+\_\+t \hyperlink{namespacemoetsi_1_1ssp_ae09a8f6b1d89b0bdb6eec602dd581192}{Current\+Time\+Ns} ()
+\begin{DoxyCompactList}\small\item\em Get current time in ns/nanosecconds. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}\label{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}} 
+std\+::string \hyperlink{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}{Random\+String} (size\+\_\+t length)
+\begin{DoxyCompactList}\small\item\em Build a random string. \end{DoxyCompactList}\item 
+void \hyperlink{namespacemoetsi_1_1ssp_a732d178071710fdceab189671f2d7c25}{Setup\+Logging} (Y\+A\+M\+L\+::\+Node \&general\+\_\+parameters)
+\begin{DoxyCompactList}\small\item\em Setup S\+SP logging. \end{DoxyCompactList}\item 
+void \hyperlink{namespacemoetsi_1_1ssp_a0af356ab87e92f92c49e7118b9cb1ba2}{Setup\+Logging} (std\+::string \&level, std\+::string \&file)
+\begin{DoxyCompactList}\small\item\em Setup S\+SP logging. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{namespacemoetsi_1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}\label{namespacemoetsi_1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}} 
 std\+::atomic\+\_\+bool {\bfseries exiting} (false)
 \item 
@@ -332,19 +345,6 @@ double \hyperlink{namespacemoetsi_1_1ssp_a0290f5110cb2cd2c9327c2fa6a528c84}{Get\
 \begin{DoxyCompactList}\small\item\em Get Peak Signal to Noise Ration similarity. \end{DoxyCompactList}\item 
 Scalar \hyperlink{namespacemoetsi_1_1ssp_ae44d43d11d27495335b5494d0cff7601}{Get\+M\+S\+S\+IM} (const Mat \&i1, const Mat \&i2)
 \begin{DoxyCompactList}\small\item\em Get Structural Similarity between 2 images cf. for instance \href{http://amroamroamro.github.io/mexopencv/opencv/image_similarity_demo.html}{\tt http\+://amroamroamro.\+github.\+io/mexopencv/opencv/image\+\_\+similarity\+\_\+demo.\+html} for a simple S\+S\+IM introduction. \end{DoxyCompactList}\item 
-uint64\+\_\+t \hyperlink{namespacemoetsi_1_1ssp_a3aaefb86d19ad4cca7f0db6c37682195}{Current\+Time\+Ms} ()
-\begin{DoxyCompactList}\small\item\em Get current time in ms. \end{DoxyCompactList}\item 
-uint64\+\_\+t \hyperlink{namespacemoetsi_1_1ssp_ad7107897c233642c927f0129f2aea2e0}{Current\+Time\+Us} ()
-\begin{DoxyCompactList}\small\item\em Get current time in usec/microseconds. \end{DoxyCompactList}\item 
-uint64\+\_\+t \hyperlink{namespacemoetsi_1_1ssp_ae09a8f6b1d89b0bdb6eec602dd581192}{Current\+Time\+Ns} ()
-\begin{DoxyCompactList}\small\item\em Get current time in ns/nanosecconds. \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}\label{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}} 
-std\+::string \hyperlink{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}{Random\+String} (size\+\_\+t length)
-\begin{DoxyCompactList}\small\item\em Build a random string. \end{DoxyCompactList}\item 
-void \hyperlink{namespacemoetsi_1_1ssp_a732d178071710fdceab189671f2d7c25}{Setup\+Logging} (Y\+A\+M\+L\+::\+Node \&general\+\_\+parameters)
-\begin{DoxyCompactList}\small\item\em Setup S\+SP logging. \end{DoxyCompactList}\item 
-void \hyperlink{namespacemoetsi_1_1ssp_a0af356ab87e92f92c49e7118b9cb1ba2}{Setup\+Logging} (std\+::string \&level, std\+::string \&file)
-\begin{DoxyCompactList}\small\item\em Setup S\+SP logging. \end{DoxyCompactList}\item 
 void \hyperlink{namespacemoetsi_1_1ssp_a82e9b74b4a9a35255cc5d4ff66dc776f}{A\+V\+Frame\+To\+Mat\+Y\+UV} (A\+V\+Frame\+SharedP \&frame, cv\+::\+Mat \&image)
 \begin{DoxyCompactList}\small\item\em Convert an A\+V\+Frame to Y\+UV image. \end{DoxyCompactList}\item 
 void \hyperlink{namespacemoetsi_1_1ssp_a028ac1fd9c21f63f40dfa1131c589ad5}{A\+V\+Frame\+To\+Mat\+Gray} (A\+V\+Frame\+SharedP \&frame, cv\+::\+Mat \&image)

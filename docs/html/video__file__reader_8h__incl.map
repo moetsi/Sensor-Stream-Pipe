@@ -1,6 +1,6 @@
 <map id="video_file_reader.h" name="video_file_reader.h">
 <area shape="rect" id="node5" href="$logger_8h.html" title="Logger header. " alt="" coords="1081,311,1189,338"/>
 <area shape="rect" id="node12" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="731,155,893,181"/>
-<area shape="rect" id="node19" href="$utils_8h.html" title="Utilities. " alt="" coords="203,229,301,256"/>
+<area shape="rect" id="node19" href="$utils_2utils_8h_source.html" title="../utils/utils.h" alt="" coords="203,229,301,256"/>
 <area shape="rect" id="node24" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="799,80,871,107"/>
 </map>

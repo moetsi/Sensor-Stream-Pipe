@@ -14,3 +14,4 @@ cp -fv structs/frame_struct.h include/structs
 cp -fv structs/body_struct.h include/structs
 mkdir include/utils
 cp -fv utils/image_converter.h include/utils
+cp -fv utils/utils.h include/utils
