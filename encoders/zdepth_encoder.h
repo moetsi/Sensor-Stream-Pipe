@@ -26,7 +26,7 @@ private:
   unsigned int fps_;
   unsigned int width_, height_;
   zdepth::DepthCompressor compressor_;
-  std::unique_ptr<LibAvDecoder> libav_decoder_;
+  std::shared_ptr<LibAvDecoder> libav_decoder_;
   ImageDecoder image_decoder_;
   SwsContextSafeP sws_context_;
   std::vector<uint8_t> compressed_buffer_;

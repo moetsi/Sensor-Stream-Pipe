@@ -91,9 +91,15 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
 
     } else if (fs->frame_data_type == FrameDataType::FrameDataTypeLibavPackets) {
 
-      if (libav_decoder_ == nullptr) {
-        libav_decoder_ = std::unique_ptr<LibAvDecoder>(new LibAvDecoder());
-        libav_decoder_->Init(getParams(*fs));
+      if (!libav_decoder_) {
+        auto p= getParams(*fs);
+        libav_decoder_ = std::shared_ptr<LibAvDecoder>(new LibAvDecoder(), [p](LibAvDecoder *d){ 
+            //std::cerr << "custom deleter" << std::endl << std::flush;
+            auto pp = p;
+            avcodec_parameters_free(&pp);
+            delete d; 
+        });
+        libav_decoder_->Init(p);
       }
 
       FrameStruct fss = *fs;

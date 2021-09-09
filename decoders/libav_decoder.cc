@@ -43,6 +43,8 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
   packet_av->size = frame_struct.frame.size();
 
   cv::Mat img;
+  //assert(!!codec_context_);
+  //assert(!!packet_av);
   int response = avcodec_send_packet(codec_context_.get(), packet_av.get());
   if (response >= 0) {
     // Return decoded output data (into a frame) from a decoder

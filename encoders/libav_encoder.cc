@@ -261,9 +261,15 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
     pxl_format = frame_av_O->format;
   } else if (fs->frame_data_type == FrameDataType::FrameDataTypeLibavPackets) {
 
-    if (lib_av_decoder_ == nullptr) {
-      lib_av_decoder_ = std::unique_ptr<LibAvDecoder>(new LibAvDecoder());
-      lib_av_decoder_->Init(getParams(*fs));
+    if (!lib_av_decoder_) {
+      auto p= getParams(*fs);
+      lib_av_decoder_ = std::shared_ptr<LibAvDecoder>(new LibAvDecoder(), [p](LibAvDecoder *d){ 
+          //std::cerr << "libav_encoder custom deleter" << std::endl << std::flush;
+          auto pp = p;
+          avcodec_parameters_free(&pp);
+          delete d; 
+      });
+      lib_av_decoder_->Init(p);
     }
     AVFrameSharedP frame_av_O = lib_av_decoder_->DecodeFrame(*fs);
 

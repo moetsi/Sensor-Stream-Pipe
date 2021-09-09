@@ -66,6 +66,7 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
     std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
     bool imgChanged = false;
+    int c = 0;
     while (reader.HasNextFrame()) {
       reader.NextFrame();
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
@@ -107,6 +108,12 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 #endif
         }
       }
+
+#if 0
+      if (c++ > 100) {
+        break;
+      }
+#endif      
     }
 
   } catch (std::exception &e) {

@@ -263,6 +263,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
     unsigned int fps = reader->GetFps();    
     unsigned int frame_time = 1000000000ULL/fps;
 
+    int c = 0;
     while (1) {
 
       if (processing_time < frame_time)
@@ -361,6 +362,12 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
           vO.at(i) = nullptr;
         }
       }
+
+#if 0
+      if (c++ > 200) {
+        break;
+      }
+#endif      
     }
   } catch (YAML::Exception &e) {
     spdlog::error("Error on the YAML configuration file");

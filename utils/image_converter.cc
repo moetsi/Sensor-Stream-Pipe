@@ -62,10 +62,16 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
 
     if (decoders.find(decoder_id) == decoders.end()) {
       CodecParamsStruct data = f.codec_data;
-      // if (data.type == 0) {
       if (data.type == CodecParamsType::CodecParamsTypeAv) {
-        std::shared_ptr<LibAvDecoder> fd = std::shared_ptr<LibAvDecoder>(new LibAvDecoder());
-        fd->Init(getParams(f));
+        auto p = getParams(f);
+        std::shared_ptr<LibAvDecoder> fd = std::shared_ptr<LibAvDecoder>(new LibAvDecoder(), 
+          [p](LibAvDecoder *d){ 
+              //std::cerr << "custom deleter" << std::endl << std::flush;
+              auto pp = p;
+              avcodec_parameters_free(&pp);
+              delete d;
+            });
+        fd->Init(p);
         decoders[decoder_id] = fd;
       } else if (data.type == CodecParamsType::CodecParamsTypeNvPipe) {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
