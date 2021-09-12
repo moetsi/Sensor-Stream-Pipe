@@ -27,11 +27,15 @@ public:
   /** @brief Get current frame data */
   virtual std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame() = 0;
 
+#ifndef SWIG
   /** 
    * @brief Get frame types
    * \return a vector of FrameType, listing available data types 
    */
   virtual std::vector<FrameType> GetType() = 0;
+#endif
+
+  std::vector<FrameType> GetFrameType() { return GetType(); }
 
   /**
    * @brief Check if there is a next frame

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.14)  5 SEP 2021 15:34
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.14)  12 SEP 2021 23:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -3652,65 +3652,73 @@ ored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.56 ...ere is a next frame. \end{DoxyCompactList}
-                                                  \itempdfTeX warning (ext4): d
-estination with the same identifier (name{classmoetsi_1_1ssp_1_1IReader_a357439
-182128e3911d77335c136035c0}) has been already used, duplicate ignored
+l.61 v
+      irtual bool \hyperlink{classmoetsi_1_1ssp_1_1IReader_af9186ba41e136dc4...
+pdfTeX warning (ext4): destination with the same identifier (name{classmoetsi_1
+_1ssp_1_1IReader_a357439182128e3911d77335c136035c0}) has been already used, dup
+licate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.56 ...ere is a next frame. \end{DoxyCompactList}
-                                                  \item <./classmoetsi_1_1ssp_1
-_1IReader__inherit__graph.pdf>]pdfTeX warning (ext4): destination with the same
- identifier (name{classmoetsi_1_1ssp_1_1IReader_a49e82a786cca55248e27e7fac8f97a
-17}) has been already used, duplicate ignored
+l.61 v
+      irtual bool \hyperlink{classmoetsi_1_1ssp_1_1IReader_af9186ba41e136dc4...
+ <./classmoetsi_1_1ssp_1_1IReader__inherit__graph.pdf>]pdfTeX warning (ext4): d
+estination with the same identifier (name{classmoetsi_1_1ssp_1_1IReader_a49e82a
+786cca55248e27e7fac8f97a17}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.57 ...Reader_a49e82a786cca55248e27e7fac8f97a17}}
+l.63 ...Reader_a49e82a786cca55248e27e7fac8f97a17}}
                                                   pdfTeX warning (ext4): destin
 ation with the same identifier (name{classmoetsi_1_1ssp_1_1IReader_ad6e2ef78fc2
 466884aa877ecef54889d}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.60 ...Reader_ad6e2ef78fc2466884aa877ecef54889d}}
+l.66 ...Reader_ad6e2ef78fc2466884aa877ecef54889d}}
                                                   
-Underfull \hbox (badness 10000) detected at line 85
+Underfull \hbox (badness 10000) detected at line 91
 [][][]
  []
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 90--91
+Underfull \hbox (badness 1014) in paragraph at lines 96--97
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 102
+Underfull \hbox (badness 10000) detected at line 108
 [][][]
  []
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 107--108
+Underfull \hbox (badness 1014) in paragraph at lines 113--114
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
  []
 
 [73pdfTeX warning (ext4): destination with the same identifier (name{classmoets
-i_1_1ssp_1_1IReader_ac292d83eb06dee277baaa06e281a562d}) has been already used, 
+i_1_1ssp_1_1IReader_a304ee5995522eff86ae0102d4d7342f8}) has been already used, 
 duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.119 \begin{DoxyReturn}{Returns}
+l.125 \begin{DoxyReturn}{Returns}
+                                 pdfTeX warning (ext4): destination with the sa
+me identifier (name{classmoetsi_1_1ssp_1_1IReader_ac292d83eb06dee277baaa06e281a
+562d}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.125 \begin{DoxyReturn}{Returns}
                                  ]
-Underfull \hbox (badness 10000) detected at line 119
+Underfull \hbox (badness 10000) detected at line 125
 [][][]
  []
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 124--125
+Underfull \hbox (badness 1014) in paragraph at lines 130--131
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
@@ -3721,38 +3729,38 @@ _1ssp_1_1IReader_a9f6a8650ca290b011b8e5451eeae9f32}) has been already used, dup
 licate ignored
 <to be read again> 
                    \relax 
-l.126 ...eader_a9f6a8650ca290b011b8e5451eeae9f32}}
+l.132 ...eader_a9f6a8650ca290b011b8e5451eeae9f32}}
                                                   
-Underfull \hbox (badness 10000) detected at line 136
+Underfull \hbox (badness 10000) detected at line 142
 [][][]
  []
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 141--142
+Underfull \hbox (badness 1014) in paragraph at lines 147--148
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 153
+Underfull \hbox (badness 10000) detected at line 159
 [][][]
  []
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 158--159
+Underfull \hbox (badness 1014) in paragraph at lines 164--165
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 170
+Underfull \hbox (badness 10000) detected at line 176
 [][][]
  []
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 175--176
+Underfull \hbox (badness 1014) in paragraph at lines 181--182
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
@@ -3764,14 +3772,14 @@ duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.182 
+l.188 
       ]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.13 on input line 191.
+(longtable)                in table 8.13 on input line 197.
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 194--195
+Underfull \hbox (badness 1014) in paragraph at lines 200--201
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
@@ -3779,10 +3787,10 @@ r[][], [][]moetsi[]
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.14 on input line 210.
+(longtable)                in table 8.14 on input line 216.
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 213--214
+Underfull \hbox (badness 1014) in paragraph at lines 219--220
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
@@ -3794,14 +3802,14 @@ duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.218 ...ace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+l.224 ...ace{0.1cm}{\footnotesize\ttfamily [1/2]}}
                                                   ]
-Underfull \hbox (badness 10000) detected at line 225
+Underfull \hbox (badness 10000) detected at line 231
 [][][]
  []
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 230--231
+Underfull \hbox (badness 1014) in paragraph at lines 236--237
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
@@ -3812,21 +3820,21 @@ _1ssp_1_1IReader_af9186ba41e136dc4ec3242b5dd55fa04}) has been already used, dup
 licate ignored
 <to be read again> 
                    \relax 
-l.232 ...eader_af9186ba41e136dc4ec3242b5dd55fa04}}
+l.238 ...eader_af9186ba41e136dc4ec3242b5dd55fa04}}
                                                   
-Underfull \hbox (badness 10000) detected at line 242
+Underfull \hbox (badness 10000) detected at line 248
 [][][]
  []
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 247--248
+Underfull \hbox (badness 1014) in paragraph at lines 253--254
 []\T1/phv/m/n/10 Implemented in [][]moetsi[]::ssp[]::[]Kinect[]Reader[][], [][]
 moetsi[]::ssp[]::[]Video[]File[]Reader[][], [][]moetsi[]::ssp[]::[]Xlink[]Reade
 r[][], [][]moetsi[]
  []
 
 ) (./classmoetsi_1_1ssp_1_1KinectReader.tex
-<classmoetsi_1_1ssp_1_1KinectReader__inherit__graph.pdf, id=2080, 213.79875pt x
+<classmoetsi_1_1ssp_1_1KinectReader__inherit__graph.pdf, id=2084, 213.79875pt x
  156.585pt>
 File: classmoetsi_1_1ssp_1_1KinectReader__inherit__graph.pdf Graphic file (type
  pdf)
@@ -3834,7 +3842,7 @@ File: classmoetsi_1_1ssp_1_1KinectReader__inherit__graph.pdf Graphic file (type
 Package pdftex.def Info: classmoetsi_1_1ssp_1_1KinectReader__inherit__graph.pdf
   used on input line 10.
 (pdftex.def)             Requested size: 213.0pt x 155.99922pt.
-<classmoetsi_1_1ssp_1_1KinectReader__coll__graph.pdf, id=2081, 213.79875pt x 15
+<classmoetsi_1_1ssp_1_1KinectReader__coll__graph.pdf, id=2085, 213.79875pt x 15
 6.585pt>
 File: classmoetsi_1_1ssp_1_1KinectReader__coll__graph.pdf Graphic file (type pd
 f)
@@ -3867,7 +3875,7 @@ Underfull \hbox (badness 10000) detected at line 131
  []
 
 ) (./classmoetsi_1_1ssp_1_1LibAvDecoder.tex
-<classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph.pdf, id=2151, 215.80624pt x
+<classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph.pdf, id=2154, 215.80624pt x
  156.585pt>
 File: classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph.pdf Graphic file (type
  pdf)
@@ -3875,7 +3883,7 @@ File: classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph.pdf Graphic file (type
 Package pdftex.def Info: classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph.pdf
   used on input line 19.
 (pdftex.def)             Requested size: 215.0pt x 156.004pt.
-<classmoetsi_1_1ssp_1_1LibAvDecoder__coll__graph.pdf, id=2152, 215.80624pt x 15
+<classmoetsi_1_1ssp_1_1LibAvDecoder__coll__graph.pdf, id=2155, 215.80624pt x 15
 6.585pt>
 File: classmoetsi_1_1ssp_1_1LibAvDecoder__coll__graph.pdf Graphic file (type pd
 f)
@@ -3913,7 +3921,7 @@ Package longtable Warning: Column widths have changed
 (longtable)                in table 8.18 on input line 107.
 
 ) (./classmoetsi_1_1ssp_1_1LibAvEncoder.tex
-<classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph.pdf, id=2206, 214.8025pt x 
+<classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph.pdf, id=2209, 214.8025pt x 
 156.585pt>
 File: classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph.pdf Graphic file (type
  pdf)
@@ -3921,7 +3929,7 @@ File: classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph.pdf Graphic file (type
 Package pdftex.def Info: classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph.pdf
   used on input line 19.
 (pdftex.def)             Requested size: 214.0pt x 156.00162pt.
-<classmoetsi_1_1ssp_1_1LibAvEncoder__coll__graph.pdf, id=2207, 214.8025pt x 156
+<classmoetsi_1_1ssp_1_1LibAvEncoder__coll__graph.pdf, id=2210, 214.8025pt x 156
 .585pt>
 File: classmoetsi_1_1ssp_1_1LibAvEncoder__coll__graph.pdf Graphic file (type pd
 f)
@@ -3976,7 +3984,7 @@ Underfull \hbox (badness 10000) detected at line 197
  []
 
 ) (./classmoetsi_1_1ssp_1_1MultiImageReader.tex
-<classmoetsi_1_1ssp_1_1MultiImageReader__inherit__graph.pdf, id=2283, 233.87375
+<classmoetsi_1_1ssp_1_1MultiImageReader__inherit__graph.pdf, id=2286, 233.87375
 pt x 156.585pt>
 File: classmoetsi_1_1ssp_1_1MultiImageReader__inherit__graph.pdf Graphic file (
 type pdf)
@@ -3985,7 +3993,7 @@ Package pdftex.def Info: classmoetsi_1_1ssp_1_1MultiImageReader__inherit__graph
 .pdf  used on input line 10.
 (pdftex.def)             Requested size: 233.0pt x 156.00879pt.
  [84]
-<classmoetsi_1_1ssp_1_1MultiImageReader__coll__graph.pdf, id=2292, 233.87375pt 
+<classmoetsi_1_1ssp_1_1MultiImageReader__coll__graph.pdf, id=2295, 233.87375pt 
 x 156.585pt>
 File: classmoetsi_1_1ssp_1_1MultiImageReader__coll__graph.pdf Graphic file (typ
 e pdf)
@@ -4026,7 +4034,7 @@ Underfull \hbox (badness 10000) detected at line 131
 
 ) (./classmoetsi_1_1ssp_1_1NetworkReader.tex [87])
 (./classmoetsi_1_1ssp_1_1NullEncoder.tex
-<classmoetsi_1_1ssp_1_1NullEncoder__inherit__graph.pdf, id=2354, 207.77625pt x 
+<classmoetsi_1_1ssp_1_1NullEncoder__inherit__graph.pdf, id=2357, 207.77625pt x 
 156.585pt>
 File: classmoetsi_1_1ssp_1_1NullEncoder__inherit__graph.pdf Graphic file (type 
 pdf)
@@ -4034,7 +4042,7 @@ pdf)
 Package pdftex.def Info: classmoetsi_1_1ssp_1_1NullEncoder__inherit__graph.pdf 
  used on input line 19.
 (pdftex.def)             Requested size: 207.0pt x 156.0064pt.
-<classmoetsi_1_1ssp_1_1NullEncoder__coll__graph.pdf, id=2355, 207.77625pt x 156
+<classmoetsi_1_1ssp_1_1NullEncoder__coll__graph.pdf, id=2358, 207.77625pt x 156
 .585pt>
 File: classmoetsi_1_1ssp_1_1NullEncoder__coll__graph.pdf Graphic file (type pdf
 )
@@ -4085,7 +4093,7 @@ Underfull \hbox (badness 10000) detected at line 176
  []
 
 ) (./classmoetsi_1_1ssp_1_1NvDecoder.tex
-<classmoetsi_1_1ssp_1_1NvDecoder__inherit__graph.pdf, id=2434, 203.76125pt x 15
+<classmoetsi_1_1ssp_1_1NvDecoder__inherit__graph.pdf, id=2437, 203.76125pt x 15
 6.585pt>
 File: classmoetsi_1_1ssp_1_1NvDecoder__inherit__graph.pdf Graphic file (type pd
 f)
@@ -4094,7 +4102,7 @@ Package pdftex.def Info: classmoetsi_1_1ssp_1_1NvDecoder__inherit__graph.pdf  u
 sed on input line 19.
 (pdftex.def)             Requested size: 203.0pt x 156.0064pt.
  [91]
-<classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.pdf, id=2442, 203.76125pt x 156.5
+<classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.pdf, id=2445, 203.76125pt x 156.5
 85pt>
 File: classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.pdf Graphic file (type pdf)
 <use classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.pdf>
@@ -4121,7 +4129,7 @@ Package longtable Warning: Column widths have changed
 (longtable)                in table 8.26 on input line 87.
 
 ) (./classmoetsi_1_1ssp_1_1NvEncoder.tex
-<classmoetsi_1_1ssp_1_1NvEncoder__inherit__graph.pdf, id=2480, 202.7575pt x 156
+<classmoetsi_1_1ssp_1_1NvEncoder__inherit__graph.pdf, id=2483, 202.7575pt x 156
 .585pt>
 File: classmoetsi_1_1ssp_1_1NvEncoder__inherit__graph.pdf Graphic file (type pd
 f)
@@ -4130,7 +4138,7 @@ Package pdftex.def Info: classmoetsi_1_1ssp_1_1NvEncoder__inherit__graph.pdf  u
 sed on input line 19.
 (pdftex.def)             Requested size: 202.0pt x 156.004pt.
  [93]
-<classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.pdf, id=2492, 202.7575pt x 156.58
+<classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.pdf, id=2495, 202.7575pt x 156.58
 5pt>
 File: classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.pdf Graphic file (type pdf)
 <use classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.pdf>
@@ -4202,7 +4210,7 @@ y used, duplicate ignored
 l.84 \mbox
           {\Hypertarget{structmoetsi_1_1ssp_1_1object__human__t_ab3f682371cc...
 ] [98] [99] [100] [101]) (./interfaceSessionDelegate.tex
-<interfaceSessionDelegate__inherit__graph.pdf, id=2815, 275.0275pt x 156.585pt>
+<interfaceSessionDelegate__inherit__graph.pdf, id=2818, 275.0275pt x 156.585pt>
 
 File: interfaceSessionDelegate__inherit__graph.pdf Graphic file (type pdf)
 <use interfaceSessionDelegate__inherit__graph.pdf>
@@ -4210,7 +4218,7 @@ Package pdftex.def Info: interfaceSessionDelegate__inherit__graph.pdf  used on
 input line 10.
 (pdftex.def)             Requested size: 274.0pt x 156.01357pt.
  [102]
-<interfaceSessionDelegate__coll__graph.pdf, id=2859, 275.0275pt x 156.585pt>
+<interfaceSessionDelegate__coll__graph.pdf, id=2862, 275.0275pt x 156.585pt>
 File: interfaceSessionDelegate__coll__graph.pdf Graphic file (type pdf)
 <use interfaceSessionDelegate__coll__graph.pdf>
 Package pdftex.def Info: interfaceSessionDelegate__coll__graph.pdf  used on inp
@@ -4224,7 +4232,7 @@ _graph.pdf> <./interfaceSessionDelegate__coll__graph.pdf
 pdfTeX warning: pdflatex (file ./interfaceSessionDelegate__coll__graph.pdf): PD
 F inclusion: multiple pdfs with page group included in a single page
 >]) (./classmoetsi_1_1ssp_1_1VideoFileReader.tex
-<classmoetsi_1_1ssp_1_1VideoFileReader__inherit__graph.pdf, id=2887, 226.8475pt
+<classmoetsi_1_1ssp_1_1VideoFileReader__inherit__graph.pdf, id=2890, 226.8475pt
  x 156.585pt>
 File: classmoetsi_1_1ssp_1_1VideoFileReader__inherit__graph.pdf Graphic file (t
 ype pdf)
@@ -4232,7 +4240,7 @@ ype pdf)
 Package pdftex.def Info: classmoetsi_1_1ssp_1_1VideoFileReader__inherit__graph.
 pdf  used on input line 10.
 (pdftex.def)             Requested size: 226.0pt x 156.00162pt.
-<classmoetsi_1_1ssp_1_1VideoFileReader__coll__graph.pdf, id=2888, 226.8475pt x 
+<classmoetsi_1_1ssp_1_1VideoFileReader__coll__graph.pdf, id=2891, 226.8475pt x 
 156.585pt>
 File: classmoetsi_1_1ssp_1_1VideoFileReader__coll__graph.pdf Graphic file (type
  pdf)
@@ -4271,7 +4279,7 @@ Underfull \hbox (badness 10000) detected at line 134
  []
 
 ) (./classmoetsi_1_1ssp_1_1XlinkReader.tex
-<classmoetsi_1_1ssp_1_1XlinkReader__inherit__graph.pdf, id=2947, 207.77625pt x 
+<classmoetsi_1_1ssp_1_1XlinkReader__inherit__graph.pdf, id=2950, 207.77625pt x 
 156.585pt>
 File: classmoetsi_1_1ssp_1_1XlinkReader__inherit__graph.pdf Graphic file (type 
 pdf)
@@ -4280,7 +4288,7 @@ Package pdftex.def Info: classmoetsi_1_1ssp_1_1XlinkReader__inherit__graph.pdf
  used on input line 10.
 (pdftex.def)             Requested size: 207.0pt x 156.0064pt.
  [106]
-<classmoetsi_1_1ssp_1_1XlinkReader__coll__graph.pdf, id=2956, 207.77625pt x 156
+<classmoetsi_1_1ssp_1_1XlinkReader__coll__graph.pdf, id=2959, 207.77625pt x 156
 .585pt>
 File: classmoetsi_1_1ssp_1_1XlinkReader__coll__graph.pdf Graphic file (type pdf
 )
@@ -4319,7 +4327,7 @@ Underfull \hbox (badness 10000) detected at line 131
  []
 
 ) (./classmoetsi_1_1ssp_1_1ZDepthDecoder.tex
-<classmoetsi_1_1ssp_1_1ZDepthDecoder__inherit__graph.pdf, id=3007, 223.83624pt 
+<classmoetsi_1_1ssp_1_1ZDepthDecoder__inherit__graph.pdf, id=3010, 223.83624pt 
 x 156.585pt>
 File: classmoetsi_1_1ssp_1_1ZDepthDecoder__inherit__graph.pdf Graphic file (typ
 e pdf)
@@ -4327,7 +4335,7 @@ e pdf)
 Package pdftex.def Info: classmoetsi_1_1ssp_1_1ZDepthDecoder__inherit__graph.pd
 f  used on input line 19.
 (pdftex.def)             Requested size: 223.0pt x 156.004pt.
-<classmoetsi_1_1ssp_1_1ZDepthDecoder__coll__graph.pdf, id=3008, 223.83624pt x 1
+<classmoetsi_1_1ssp_1_1ZDepthDecoder__coll__graph.pdf, id=3011, 223.83624pt x 1
 56.585pt>
 File: classmoetsi_1_1ssp_1_1ZDepthDecoder__coll__graph.pdf Graphic file (type p
 df)
@@ -4350,7 +4358,7 @@ Package longtable Warning: Column widths have changed
 (longtable)                in table 8.32 on input line 87.
 
 ) (./classmoetsi_1_1ssp_1_1ZDepthEncoder.tex
-<classmoetsi_1_1ssp_1_1ZDepthEncoder__inherit__graph.pdf, id=3058, 222.8325pt x
+<classmoetsi_1_1ssp_1_1ZDepthEncoder__inherit__graph.pdf, id=3061, 222.8325pt x
  156.585pt>
 File: classmoetsi_1_1ssp_1_1ZDepthEncoder__inherit__graph.pdf Graphic file (typ
 e pdf)
@@ -4358,7 +4366,7 @@ e pdf)
 Package pdftex.def Info: classmoetsi_1_1ssp_1_1ZDepthEncoder__inherit__graph.pd
 f  used on input line 19.
 (pdftex.def)             Requested size: 222.0pt x 156.00162pt.
-<classmoetsi_1_1ssp_1_1ZDepthEncoder__coll__graph.pdf, id=3059, 222.8325pt x 15
+<classmoetsi_1_1ssp_1_1ZDepthEncoder__coll__graph.pdf, id=3062, 222.8325pt x 15
 6.585pt>
 File: classmoetsi_1_1ssp_1_1ZDepthEncoder__coll__graph.pdf Graphic file (type p
 df)
@@ -4411,14 +4419,14 @@ Underfull \hbox (badness 10000) detected at line 178
 ) [114]
 Chapter 9.
 (./dummy__body__reader_8cc.tex
-<dummy__body__reader_8cc__incl.pdf, id=3139, 2413.015pt x 572.1375pt>
+<dummy__body__reader_8cc__incl.pdf, id=3142, 2413.015pt x 572.1375pt>
 File: dummy__body__reader_8cc__incl.pdf Graphic file (type pdf)
 <use dummy__body__reader_8cc__incl.pdf>
 Package pdftex.def Info: dummy__body__reader_8cc__incl.pdf  used on input line 
 14.
 (pdftex.def)             Requested size: 350.0pt x 82.97963pt.
 ) (./dummy__body__reader_8h.tex
-<dummy__body__reader_8h__incl.pdf, id=3141, 2413.015pt x 515.9275pt>
+<dummy__body__reader_8h__incl.pdf, id=3144, 2413.015pt x 515.9275pt>
 File: dummy__body__reader_8h__incl.pdf Graphic file (type pdf)
 <use dummy__body__reader_8h__incl.pdf>
 Package pdftex.def Info: dummy__body__reader_8h__incl.pdf  used on input line 2
@@ -4427,14 +4435,14 @@ Package pdftex.def Info: dummy__body__reader_8h__incl.pdf  used on input line 2
  [115
 
  <./dummy__body__reader_8cc__incl.pdf>]
-<dummy__body__reader_8h__dep__incl.pdf, id=3158, 376.40625pt x 156.585pt>
+<dummy__body__reader_8h__dep__incl.pdf, id=3161, 376.40625pt x 156.585pt>
 File: dummy__body__reader_8h__dep__incl.pdf Graphic file (type pdf)
 <use dummy__body__reader_8h__dep__incl.pdf>
 Package pdftex.def Info: dummy__body__reader_8h__dep__incl.pdf  used on input l
 ine 31.
 (pdftex.def)             Requested size: 350.0pt x 145.61058pt.
 ) (./idecoder_8cc.tex
-<idecoder_8cc__incl.pdf, id=3161, 1219.55624pt x 392.46625pt>
+<idecoder_8cc__incl.pdf, id=3164, 1219.55624pt x 392.46625pt>
 File: idecoder_8cc__incl.pdf Graphic file (type pdf)
 <use idecoder_8cc__incl.pdf>
 Package pdftex.def Info: idecoder_8cc__incl.pdf  used on input line 14.
@@ -4445,14 +4453,14 @@ Package pdftex.def Info: idecoder_8cc__incl.pdf  used on input line 14.
 pdfTeX warning: pdflatex (file ./dummy__body__reader_8h__dep__incl.pdf): PDF in
 clusion: multiple pdfs with page group included in a single page
 >]) (./include_2decoders_2idecoder_8h.tex
-<include_2decoders_2idecoder_8h__incl.pdf, id=3185, 1219.55624pt x 336.25626pt>
+<include_2decoders_2idecoder_8h__incl.pdf, id=3188, 1219.55624pt x 336.25626pt>
 
 File: include_2decoders_2idecoder_8h__incl.pdf Graphic file (type pdf)
 <use include_2decoders_2idecoder_8h__incl.pdf>
 Package pdftex.def Info: include_2decoders_2idecoder_8h__incl.pdf  used on inpu
 t line 15.
 (pdftex.def)             Requested size: 350.0pt x 96.50104pt.
-<include_2decoders_2idecoder_8h__dep__incl.pdf, id=3186, 199.74625pt x 212.795p
+<include_2decoders_2idecoder_8h__dep__incl.pdf, id=3189, 199.74625pt x 212.795p
 t>
 File: include_2decoders_2idecoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use include_2decoders_2idecoder_8h__dep__incl.pdf>
@@ -4464,14 +4472,14 @@ Package pdftex.def Info: include_2decoders_2idecoder_8h__dep__incl.pdf  used on
 pdfTeX warning: pdflatex (file ./include_2decoders_2idecoder_8h__incl.pdf): PDF
  inclusion: multiple pdfs with page group included in a single page
 >]) (./iencoder_8cc.tex
-<iencoder_8cc__incl.pdf, id=3215, 3095.565pt x 628.3475pt>
+<iencoder_8cc__incl.pdf, id=3218, 3095.565pt x 628.3475pt>
 File: iencoder_8cc__incl.pdf Graphic file (type pdf)
 <use iencoder_8cc__incl.pdf>
 Package pdftex.def Info: iencoder_8cc__incl.pdf  used on input line 27.
 (pdftex.def)             Requested size: 350.0pt x 71.036pt.
  [118 <./include_2decoders_2idecoder_8h__dep__incl.pdf>]) (./include_2encoders_
 2iencoder_8h.tex
-<include_2encoders_2iencoder_8h__incl.pdf, id=3234, 1219.55624pt x 336.25626pt>
+<include_2encoders_2iencoder_8h__incl.pdf, id=3237, 1219.55624pt x 336.25626pt>
 
 File: include_2encoders_2iencoder_8h__incl.pdf Graphic file (type pdf)
 <use include_2encoders_2iencoder_8h__incl.pdf>
@@ -4479,7 +4487,7 @@ Package pdftex.def Info: include_2encoders_2iencoder_8h__incl.pdf  used on inpu
 t line 15.
 (pdftex.def)             Requested size: 350.0pt x 96.50104pt.
  [119 <./iencoder_8cc__incl.pdf>]
-<include_2encoders_2iencoder_8h__dep__incl.pdf, id=3251, 142.5325pt x 156.585pt
+<include_2encoders_2iencoder_8h__dep__incl.pdf, id=3254, 142.5325pt x 156.585pt
 >
 File: include_2encoders_2iencoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use include_2encoders_2iencoder_8h__dep__incl.pdf>
@@ -4493,14 +4501,14 @@ Package pdftex.def Info: include_2encoders_2iencoder_8h__dep__incl.pdf  used on
 pdfTeX warning: pdflatex (file ./include_2encoders_2iencoder_8h__dep__incl.pdf)
 : PDF inclusion: multiple pdfs with page group included in a single page
 >]
-<image__converter_8cc__incl.pdf, id=3278, 2112.89375pt x 572.1375pt>
+<image__converter_8cc__incl.pdf, id=3281, 2112.89375pt x 572.1375pt>
 File: image__converter_8cc__incl.pdf Graphic file (type pdf)
 <use image__converter_8cc__incl.pdf>
 Package pdftex.def Info: image__converter_8cc__incl.pdf  used on input line 17.
 
 (pdftex.def)             Requested size: 350.0pt x 94.774pt.
 ) (./image__decoder_8cc.tex
-<image__decoder_8cc__incl.pdf, id=3281, 2010.51125pt x 392.46625pt>
+<image__decoder_8cc__incl.pdf, id=3284, 2010.51125pt x 392.46625pt>
 File: image__decoder_8cc__incl.pdf Graphic file (type pdf)
 <use image__decoder_8cc__incl.pdf>
 Package pdftex.def Info: image__decoder_8cc__incl.pdf  used on input line 14.
@@ -4510,12 +4518,12 @@ Package pdftex.def Info: image__decoder_8cc__incl.pdf  used on input line 14.
 pdfTeX warning: pdflatex (file ./image__decoder_8cc__incl.pdf): PDF inclusion: 
 multiple pdfs with page group included in a single page
 >]) (./image__decoder_8h.tex
-<image__decoder_8h__incl.pdf, id=3307, 2010.51125pt x 336.25626pt>
+<image__decoder_8h__incl.pdf, id=3310, 2010.51125pt x 336.25626pt>
 File: image__decoder_8h__incl.pdf Graphic file (type pdf)
 <use image__decoder_8h__incl.pdf>
 Package pdftex.def Info: image__decoder_8h__incl.pdf  used on input line 23.
 (pdftex.def)             Requested size: 350.0pt x 58.53273pt.
-<image__decoder_8h__dep__incl.pdf, id=3308, 1082.0425pt x 269.005pt>
+<image__decoder_8h__dep__incl.pdf, id=3311, 1082.0425pt x 269.005pt>
 File: image__decoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use image__decoder_8h__dep__incl.pdf>
 Package pdftex.def Info: image__decoder_8h__dep__incl.pdf  used on input line 3
@@ -4526,30 +4534,30 @@ Package pdftex.def Info: image__decoder_8h__dep__incl.pdf  used on input line 3
 pdfTeX warning: pdflatex (file ./image__decoder_8h__dep__incl.pdf): PDF inclusi
 on: multiple pdfs with page group included in a single page
 >]) (./image__reader_8cc.tex
-<image__reader_8cc__incl.pdf, id=3333, 1888.05376pt x 448.67625pt>
+<image__reader_8cc__incl.pdf, id=3336, 1888.05376pt x 448.67625pt>
 File: image__reader_8cc__incl.pdf Graphic file (type pdf)
 <use image__reader_8cc__incl.pdf>
 Package pdftex.def Info: image__reader_8cc__incl.pdf  used on input line 14.
 (pdftex.def)             Requested size: 350.0pt x 83.1681pt.
 ) (./image__reader_8h.tex
-<image__reader_8h__incl.pdf, id=3335, 1888.05376pt x 392.46625pt>
+<image__reader_8h__incl.pdf, id=3338, 1888.05376pt x 392.46625pt>
 File: image__reader_8h__incl.pdf Graphic file (type pdf)
 <use image__reader_8h__incl.pdf>
 Package pdftex.def Info: image__reader_8h__incl.pdf  used on input line 19.
 (pdftex.def)             Requested size: 350.0pt x 72.74884pt.
-<image__reader_8h__dep__incl.pdf, id=3336, 658.46pt x 212.795pt>
+<image__reader_8h__dep__incl.pdf, id=3339, 658.46pt x 212.795pt>
 File: image__reader_8h__dep__incl.pdf Graphic file (type pdf)
 <use image__reader_8h__dep__incl.pdf>
 Package pdftex.def Info: image__reader_8h__dep__incl.pdf  used on input line 27
 .
 (pdftex.def)             Requested size: 350.0pt x 113.11198pt.
  [123 <./image__reader_8cc__incl.pdf>]) (./iphone__reader_8h.tex
-<iphone__reader_8h__incl.pdf, id=3357, 1256.695pt x 392.46625pt>
+<iphone__reader_8h__incl.pdf, id=3360, 1256.695pt x 392.46625pt>
 File: iphone__reader_8h__incl.pdf Graphic file (type pdf)
 <use iphone__reader_8h__incl.pdf>
 Package pdftex.def Info: iphone__reader_8h__incl.pdf  used on input line 16.
 (pdftex.def)             Requested size: 350.0pt x 109.30292pt.
-<iphone__reader_8h__dep__incl.pdf, id=3358, 177.66376pt x 156.585pt>
+<iphone__reader_8h__dep__incl.pdf, id=3361, 177.66376pt x 156.585pt>
 File: iphone__reader_8h__dep__incl.pdf Graphic file (type pdf)
 <use iphone__reader_8h__dep__incl.pdf>
 Package pdftex.def Info: iphone__reader_8h__dep__incl.pdf  used on input line 2
@@ -4560,7 +4568,7 @@ Package pdftex.def Info: iphone__reader_8h__dep__incl.pdf  used on input line 2
 pdfTeX warning: pdflatex (file ./image__reader_8h__dep__incl.pdf): PDF inclusio
 n: multiple pdfs with page group included in a single page
 >]) (./iphone__reader_8mm.tex
-<iphone__reader_8mm__incl.pdf, id=3383, 1256.695pt x 448.67625pt>
+<iphone__reader_8mm__incl.pdf, id=3386, 1256.695pt x 448.67625pt>
 File: iphone__reader_8mm__incl.pdf Graphic file (type pdf)
 <use iphone__reader_8mm__incl.pdf>
 Package pdftex.def Info: iphone__reader_8mm__incl.pdf  used on input line 20.
@@ -4570,14 +4578,14 @@ Package pdftex.def Info: iphone__reader_8mm__incl.pdf  used on input line 20.
 pdfTeX warning: pdflatex (file ./iphone__reader_8h__dep__incl.pdf): PDF inclusi
 on: multiple pdfs with page group included in a single page
 >]) (./ireader_8cc.tex
-<ireader_8cc__incl.pdf, id=3408, 3354.5325pt x 628.3475pt>
+<ireader_8cc__incl.pdf, id=3411, 3354.5325pt x 628.3475pt>
 File: ireader_8cc__incl.pdf Graphic file (type pdf)
 <use ireader_8cc__incl.pdf>
 Package pdftex.def Info: ireader_8cc__incl.pdf  used on input line 29.
 (pdftex.def)             Requested size: 350.0pt x 65.55177pt.
  [126 <./iphone__reader_8mm__incl.pdf>])
 (./kinect__reader_8cc.tex
-<kinect__reader_8cc__incl.pdf, id=3429, 2384.91pt x 684.5575pt>
+<kinect__reader_8cc__incl.pdf, id=3432, 2384.91pt x 684.5575pt>
 File: kinect__reader_8cc__incl.pdf Graphic file (type pdf)
 <use kinect__reader_8cc__incl.pdf>
 Package pdftex.def Info: kinect__reader_8cc__incl.pdf  used on input line 14.
@@ -4589,12 +4597,12 @@ as been already used, duplicate ignored
                    \relax 
 l.25 ...1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}}
                                                   ) (./kinect__reader_8h.tex
-<kinect__reader_8h__incl.pdf, id=3446, 2384.91pt x 628.3475pt>
+<kinect__reader_8h__incl.pdf, id=3449, 2384.91pt x 628.3475pt>
 File: kinect__reader_8h__incl.pdf Graphic file (type pdf)
 <use kinect__reader_8h__incl.pdf>
 Package pdftex.def Info: kinect__reader_8h__incl.pdf  used on input line 25.
 (pdftex.def)             Requested size: 350.0pt x 92.20586pt.
-<kinect__reader_8h__dep__incl.pdf, id=3447, 300.12125pt x 212.795pt>
+<kinect__reader_8h__dep__incl.pdf, id=3450, 300.12125pt x 212.795pt>
 File: kinect__reader_8h__dep__incl.pdf Graphic file (type pdf)
 <use kinect__reader_8h__dep__incl.pdf>
 Package pdftex.def Info: kinect__reader_8h__dep__incl.pdf  used on input line 3
@@ -4613,18 +4621,18 @@ ncl.pdf> <./kinect__reader_8h__dep__incl.pdf
 pdfTeX warning: pdflatex (file ./kinect__reader_8h__dep__incl.pdf): PDF inclusi
 on: multiple pdfs with page group included in a single page
 >]) (./kinect__utils_8cc.tex
-<kinect__utils_8cc__incl.pdf, id=3489, 2178.1375pt x 628.3475pt>
+<kinect__utils_8cc__incl.pdf, id=3492, 2178.1375pt x 628.3475pt>
 File: kinect__utils_8cc__incl.pdf Graphic file (type pdf)
 <use kinect__utils_8cc__incl.pdf>
 Package pdftex.def Info: kinect__utils_8cc__incl.pdf  used on input line 14.
 (pdftex.def)             Requested size: 350.0pt x 100.9595pt.
 ) (./kinect__utils_8h.tex [130 <./kinect__utils_8cc__incl.pdf>]
-<kinect__utils_8h__incl.pdf, id=3510, 2178.1375pt x 572.1375pt>
+<kinect__utils_8h__incl.pdf, id=3513, 2178.1375pt x 572.1375pt>
 File: kinect__utils_8h__incl.pdf Graphic file (type pdf)
 <use kinect__utils_8h__incl.pdf>
 Package pdftex.def Info: kinect__utils_8h__incl.pdf  used on input line 20.
 (pdftex.def)             Requested size: 350.0pt x 91.928pt.
-<kinect__utils_8h__dep__incl.pdf, id=3511, 415.5525pt x 269.005pt>
+<kinect__utils_8h__dep__incl.pdf, id=3514, 415.5525pt x 269.005pt>
 File: kinect__utils_8h__dep__incl.pdf Graphic file (type pdf)
 <use kinect__utils_8h__dep__incl.pdf>
 Package pdftex.def Info: kinect__utils_8h__dep__incl.pdf  used on input line 28
@@ -4635,26 +4643,26 @@ Package pdftex.def Info: kinect__utils_8h__dep__incl.pdf  used on input line 28
 pdfTeX warning: pdflatex (file ./kinect__utils_8h__dep__incl.pdf): PDF inclusio
 n: multiple pdfs with page group included in a single page
 >]) (./libav__decoder_8cc.tex
-<libav__decoder_8cc__incl.pdf, id=3536, 2220.295pt x 572.1375pt>
+<libav__decoder_8cc__incl.pdf, id=3539, 2220.295pt x 572.1375pt>
 File: libav__decoder_8cc__incl.pdf Graphic file (type pdf)
 <use libav__decoder_8cc__incl.pdf>
 Package pdftex.def Info: libav__decoder_8cc__incl.pdf  used on input line 14.
 (pdftex.def)             Requested size: 350.0pt x 90.18196pt.
 ) (./libav__decoder_8h.tex
-<libav__decoder_8h__incl.pdf, id=3538, 2220.295pt x 515.9275pt>
+<libav__decoder_8h__incl.pdf, id=3541, 2220.295pt x 515.9275pt>
 File: libav__decoder_8h__incl.pdf Graphic file (type pdf)
 <use libav__decoder_8h__incl.pdf>
 Package pdftex.def Info: libav__decoder_8h__incl.pdf  used on input line 25.
 (pdftex.def)             Requested size: 350.0pt x 81.32199pt.
  [132 <./libav__decoder_8cc__incl.pdf>]
-<libav__decoder_8h__dep__incl.pdf, id=3557, 1167.36125pt x 325.215pt>
+<libav__decoder_8h__dep__incl.pdf, id=3560, 1167.36125pt x 325.215pt>
 File: libav__decoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use libav__decoder_8h__dep__incl.pdf>
 Package pdftex.def Info: libav__decoder_8h__dep__incl.pdf  used on input line 3
 3.
 (pdftex.def)             Requested size: 350.0pt x 97.50569pt.
 ) (./libav__encoder_8cc.tex
-<libav__encoder_8cc__incl.pdf, id=3560, 2680.0125pt x 628.3475pt>
+<libav__encoder_8cc__incl.pdf, id=3563, 2680.0125pt x 628.3475pt>
 File: libav__encoder_8cc__incl.pdf Graphic file (type pdf)
 <use libav__encoder_8cc__incl.pdf>
 Package pdftex.def Info: libav__encoder_8cc__incl.pdf  used on input line 14.
@@ -4664,12 +4672,12 @@ Package pdftex.def Info: libav__encoder_8cc__incl.pdf  used on input line 14.
 pdfTeX warning: pdflatex (file ./libav__decoder_8h__dep__incl.pdf): PDF inclusi
 on: multiple pdfs with page group included in a single page
 >]) (./libav__encoder_8h.tex
-<libav__encoder_8h__incl.pdf, id=3583, 2680.0125pt x 572.1375pt>
+<libav__encoder_8h__incl.pdf, id=3586, 2680.0125pt x 572.1375pt>
 File: libav__encoder_8h__incl.pdf Graphic file (type pdf)
 <use libav__encoder_8h__incl.pdf>
 Package pdftex.def Info: libav__encoder_8h__incl.pdf  used on input line 32.
 (pdftex.def)             Requested size: 350.0pt x 74.71222pt.
-<libav__encoder_8h__dep__incl.pdf, id=3584, 525.965pt x 156.585pt>
+<libav__encoder_8h__dep__incl.pdf, id=3587, 525.965pt x 156.585pt>
 File: libav__encoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use libav__encoder_8h__dep__incl.pdf>
 Package pdftex.def Info: libav__encoder_8h__dep__incl.pdf  used on input line 4
@@ -4677,7 +4685,7 @@ Package pdftex.def Info: libav__encoder_8h__dep__incl.pdf  used on input line 4
 (pdftex.def)             Requested size: 350.0pt x 104.20178pt.
  [134 <./libav__encoder_8cc__incl.pdf>])
 (./logger_8h.tex
-<logger_8h__incl.pdf, id=3603, 165.61874pt x 156.585pt>
+<logger_8h__incl.pdf, id=3606, 165.61874pt x 156.585pt>
 File: logger_8h__incl.pdf Graphic file (type pdf)
 <use logger_8h__incl.pdf>
 Package pdftex.def Info: logger_8h__incl.pdf  used on input line 14.
@@ -4687,13 +4695,13 @@ Package pdftex.def Info: logger_8h__incl.pdf  used on input line 14.
 pdfTeX warning: pdflatex (file ./libav__encoder_8h__dep__incl.pdf): PDF inclusi
 on: multiple pdfs with page group included in a single page
 >]
-<logger_8h__dep__incl.pdf, id=3626, 3056.41875pt x 662.475pt>
+<logger_8h__dep__incl.pdf, id=3629, 3056.41875pt x 662.475pt>
 File: logger_8h__dep__incl.pdf Graphic file (type pdf)
 <use logger_8h__dep__incl.pdf>
 Package pdftex.def Info: logger_8h__dep__incl.pdf  used on input line 22.
 (pdftex.def)             Requested size: 350.0pt x 75.85449pt.
 ) (./multi__image__reader_8cc.tex
-<multi__image__reader_8cc__incl.pdf, id=3627, 2100.84875pt x 504.88625pt>
+<multi__image__reader_8cc__incl.pdf, id=3630, 2100.84875pt x 504.88625pt>
 File: multi__image__reader_8cc__incl.pdf Graphic file (type pdf)
 <use multi__image__reader_8cc__incl.pdf>
 Package pdftex.def Info: multi__image__reader_8cc__incl.pdf  used on input line
@@ -4709,20 +4717,20 @@ iple pdfs with page group included in a single page
 pdfTeX warning: pdflatex (file ./multi__image__reader_8cc__incl.pdf): PDF inclu
 sion: multiple pdfs with page group included in a single page
 >]
-<multi__image__reader_8h__incl.pdf, id=3655, 2100.84875pt x 448.67625pt>
+<multi__image__reader_8h__incl.pdf, id=3658, 2100.84875pt x 448.67625pt>
 File: multi__image__reader_8h__incl.pdf Graphic file (type pdf)
 <use multi__image__reader_8h__incl.pdf>
 Package pdftex.def Info: multi__image__reader_8h__incl.pdf  used on input line 
 20.
 (pdftex.def)             Requested size: 350.0pt x 74.74724pt.
-<multi__image__reader_8h__dep__incl.pdf, id=3656, 550.055pt x 156.585pt>
+<multi__image__reader_8h__dep__incl.pdf, id=3659, 550.055pt x 156.585pt>
 File: multi__image__reader_8h__dep__incl.pdf Graphic file (type pdf)
 <use multi__image__reader_8h__dep__incl.pdf>
 Package pdftex.def Info: multi__image__reader_8h__dep__incl.pdf  used on input 
 line 28.
 (pdftex.def)             Requested size: 350.0pt x 99.63823pt.
 ) (./network__reader_8cc.tex
-<network__reader_8cc__incl.pdf, id=3659, 1581.91pt x 515.9275pt>
+<network__reader_8cc__incl.pdf, id=3662, 1581.91pt x 515.9275pt>
 File: network__reader_8cc__incl.pdf Graphic file (type pdf)
 <use network__reader_8cc__incl.pdf>
 Package pdftex.def Info: network__reader_8cc__incl.pdf  used on input line 15.
@@ -4739,12 +4747,12 @@ e ignored
                    \relax 
 l.26 ...1_1ssp_a884aae59668e7913051f2875b047688e}}
                                                   ) (./network__reader_8h.tex
-<network__reader_8h__incl.pdf, id=3683, 1219.55624pt x 392.46625pt>
+<network__reader_8h__incl.pdf, id=3686, 1219.55624pt x 392.46625pt>
 File: network__reader_8h__incl.pdf Graphic file (type pdf)
 <use network__reader_8h__incl.pdf>
 Package pdftex.def Info: network__reader_8h__incl.pdf  used on input line 16.
 (pdftex.def)             Requested size: 350.0pt x 112.63254pt.
-<network__reader_8h__dep__incl.pdf, id=3684, 556.0775pt x 156.585pt>
+<network__reader_8h__dep__incl.pdf, id=3687, 556.0775pt x 156.585pt>
 File: network__reader_8h__dep__incl.pdf Graphic file (type pdf)
 <use network__reader_8h__dep__incl.pdf>
 Package pdftex.def Info: network__reader_8h__dep__incl.pdf  used on input line 
@@ -4756,7 +4764,7 @@ Package pdftex.def Info: network__reader_8h__dep__incl.pdf  used on input line
 pdfTeX warning: pdflatex (file ./network__reader_8h__incl.pdf): PDF inclusion: 
 multiple pdfs with page group included in a single page
 >]) (./null__encoder_8cc.tex
-<null__encoder_8cc__incl.pdf, id=3709, 1219.55624pt x 448.67625pt>
+<null__encoder_8cc__incl.pdf, id=3712, 1219.55624pt x 448.67625pt>
 File: null__encoder_8cc__incl.pdf Graphic file (type pdf)
 <use null__encoder_8cc__incl.pdf>
 Package pdftex.def Info: null__encoder_8cc__incl.pdf  used on input line 14.
@@ -4767,12 +4775,12 @@ ncoder_8cc__incl.pdf
 pdfTeX warning: pdflatex (file ./null__encoder_8cc__incl.pdf): PDF inclusion: m
 ultiple pdfs with page group included in a single page
 >]
-<null__encoder_8h__incl.pdf, id=3735, 1219.55624pt x 392.46625pt>
+<null__encoder_8h__incl.pdf, id=3738, 1219.55624pt x 392.46625pt>
 File: null__encoder_8h__incl.pdf Graphic file (type pdf)
 <use null__encoder_8h__incl.pdf>
 Package pdftex.def Info: null__encoder_8h__incl.pdf  used on input line 9.
 (pdftex.def)             Requested size: 350.0pt x 112.63254pt.
-<null__encoder_8h__dep__incl.pdf, id=3736, 519.9425pt x 156.585pt>
+<null__encoder_8h__dep__incl.pdf, id=3739, 519.9425pt x 156.585pt>
 File: null__encoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use null__encoder_8h__dep__incl.pdf>
 Package pdftex.def Info: null__encoder_8h__dep__incl.pdf  used on input line 17
@@ -4784,18 +4792,18 @@ h__dep__incl.pdf
 pdfTeX warning: pdflatex (file ./null__encoder_8h__dep__incl.pdf): PDF inclusio
 n: multiple pdfs with page group included in a single page
 >]
-<nv__decoder_8cc__incl.pdf, id=3761, 1800.7275pt x 572.1375pt>
+<nv__decoder_8cc__incl.pdf, id=3764, 1800.7275pt x 572.1375pt>
 File: nv__decoder_8cc__incl.pdf Graphic file (type pdf)
 <use nv__decoder_8cc__incl.pdf>
 Package pdftex.def Info: nv__decoder_8cc__incl.pdf  used on input line 14.
 (pdftex.def)             Requested size: 350.0pt x 111.20406pt.
 ) (./nv__decoder_8h.tex
-<nv__decoder_8h__incl.pdf, id=3763, 1800.7275pt x 515.9275pt>
+<nv__decoder_8h__incl.pdf, id=3766, 1800.7275pt x 515.9275pt>
 File: nv__decoder_8h__incl.pdf Graphic file (type pdf)
 <use nv__decoder_8h__incl.pdf>
 Package pdftex.def Info: nv__decoder_8h__incl.pdf  used on input line 19.
 (pdftex.def)             Requested size: 350.0pt x 100.27875pt.
-<nv__decoder_8h__dep__incl.pdf, id=3764, 160.6pt x 156.585pt>
+<nv__decoder_8h__dep__incl.pdf, id=3767, 160.6pt x 156.585pt>
 File: nv__decoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use nv__decoder_8h__dep__incl.pdf>
 Package pdftex.def Info: nv__decoder_8h__dep__incl.pdf  used on input line 27.
@@ -4805,7 +4813,7 @@ Package pdftex.def Info: nv__decoder_8h__dep__incl.pdf  used on input line 27.
 pdfTeX warning: pdflatex (file ./nv__decoder_8h__incl.pdf): PDF inclusion: mult
 iple pdfs with page group included in a single page
 >]) (./nv__encoder_8cc.tex
-<nv__encoder_8cc__incl.pdf, id=3790, 2302.6025pt x 628.3475pt>
+<nv__encoder_8cc__incl.pdf, id=3793, 2302.6025pt x 628.3475pt>
 File: nv__encoder_8cc__incl.pdf Graphic file (type pdf)
 <use nv__encoder_8cc__incl.pdf>
 Package pdftex.def Info: nv__encoder_8cc__incl.pdf  used on input line 23.
@@ -4815,12 +4823,12 @@ Package pdftex.def Info: nv__encoder_8cc__incl.pdf  used on input line 23.
 pdfTeX warning: pdflatex (file ./nv__encoder_8cc__incl.pdf): PDF inclusion: mul
 tiple pdfs with page group included in a single page
 >]) (./nv__encoder_8h.tex
-<nv__encoder_8h__incl.pdf, id=3813, 2373.86874pt x 572.1375pt>
+<nv__encoder_8h__incl.pdf, id=3816, 2373.86874pt x 572.1375pt>
 File: nv__encoder_8h__incl.pdf Graphic file (type pdf)
 <use nv__encoder_8h__incl.pdf>
 Package pdftex.def Info: nv__encoder_8h__incl.pdf  used on input line 20.
 (pdftex.def)             Requested size: 350.0pt x 84.35025pt.
-<nv__encoder_8h__dep__incl.pdf, id=3814, 160.6pt x 156.585pt>
+<nv__encoder_8h__dep__incl.pdf, id=3817, 160.6pt x 156.585pt>
 File: nv__encoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use nv__encoder_8h__dep__incl.pdf>
 Package pdftex.def Info: nv__encoder_8h__dep__incl.pdf  used on input line 28.
@@ -4830,12 +4838,12 @@ Package pdftex.def Info: nv__encoder_8h__dep__incl.pdf  used on input line 28.
 pdfTeX warning: pdflatex (file ./nv__encoder_8h__dep__incl.pdf): PDF inclusion:
  multiple pdfs with page group included in a single page
 >]) (./nvpipe__types_8h.tex
-<nvpipe__types_8h__incl.pdf, id=3839, 208.78pt x 156.585pt>
+<nvpipe__types_8h__incl.pdf, id=3842, 208.78pt x 156.585pt>
 File: nvpipe__types_8h__incl.pdf Graphic file (type pdf)
 <use nvpipe__types_8h__incl.pdf>
 Package pdftex.def Info: nvpipe__types_8h__incl.pdf  used on input line 15.
 (pdftex.def)             Requested size: 208.0pt x 156.00879pt.
-<nvpipe__types_8h__dep__incl.pdf, id=3840, 163.61125pt x 212.795pt>
+<nvpipe__types_8h__dep__incl.pdf, id=3843, 163.61125pt x 212.795pt>
 File: nvpipe__types_8h__dep__incl.pdf Graphic file (type pdf)
 <use nvpipe__types_8h__dep__incl.pdf>
 Package pdftex.def Info: nvpipe__types_8h__dep__incl.pdf  used on input line 23
@@ -4853,13 +4861,13 @@ e ignored
 l.39 ...1_1ssp_a9113dc526e642001a9213326b2c5539f}}
                                                   )
 (./similarity__measures_8h.tex
-<similarity__measures_8h__incl.pdf, id=3863, 319.1925pt x 156.585pt>
+<similarity__measures_8h__incl.pdf, id=3866, 319.1925pt x 156.585pt>
 File: similarity__measures_8h__incl.pdf Graphic file (type pdf)
 <use similarity__measures_8h__incl.pdf>
 Package pdftex.def Info: similarity__measures_8h__incl.pdf  used on input line 
 15.
 (pdftex.def)             Requested size: 318.0pt x 156.00162pt.
-<similarity__measures_8h__dep__incl.pdf, id=3864, 192.72pt x 156.585pt>
+<similarity__measures_8h__dep__incl.pdf, id=3867, 192.72pt x 156.585pt>
 File: similarity__measures_8h__dep__incl.pdf Graphic file (type pdf)
 <use similarity__measures_8h__dep__incl.pdf>
 Package pdftex.def Info: similarity__measures_8h__dep__incl.pdf  used on input 
@@ -4877,7 +4885,7 @@ ance [][]\T1/pcr/m/n/9 http[]://amroamroamro.[]github.[]
  []
 
 ) (./ssp__client__k4a_8cc.tex
-<ssp__client__k4a_8cc__incl.pdf, id=3892, 2681.01625pt x 639.38875pt>
+<ssp__client__k4a_8cc__incl.pdf, id=3895, 2681.01625pt x 639.38875pt>
 File: ssp__client__k4a_8cc__incl.pdf Graphic file (type pdf)
 <use ssp__client__k4a_8cc__incl.pdf>
 Package pdftex.def Info: ssp__client__k4a_8cc__incl.pdf  used on input line 29.
@@ -4885,21 +4893,21 @@ Package pdftex.def Info: ssp__client__k4a_8cc__incl.pdf  used on input line 29.
 (pdftex.def)             Requested size: 350.0pt x 83.46492pt.
  [146 <./ssp__client__k4a_8cc__incl.pdf>])
 (./ssp__client__opencv_8cc.tex
-<ssp__client__opencv_8cc__incl.pdf, id=3914, 1871.99374pt x 526.96875pt>
+<ssp__client__opencv_8cc__incl.pdf, id=3917, 1871.99374pt x 526.96875pt>
 File: ssp__client__opencv_8cc__incl.pdf Graphic file (type pdf)
 <use ssp__client__opencv_8cc__incl.pdf>
 Package pdftex.def Info: ssp__client__opencv_8cc__incl.pdf  used on input line 
 28.
 (pdftex.def)             Requested size: 350.0pt x 98.52496pt.
  [147]) (./ssp__client__template_8cc.tex
-<ssp__client__template_8cc__incl.pdf, id=3943, 1871.99374pt x 526.96875pt>
+<ssp__client__template_8cc__incl.pdf, id=3947, 1871.99374pt x 526.96875pt>
 File: ssp__client__template_8cc__incl.pdf Graphic file (type pdf)
 <use ssp__client__template_8cc__incl.pdf>
 Package pdftex.def Info: ssp__client__template_8cc__incl.pdf  used on input lin
 e 28.
 (pdftex.def)             Requested size: 350.0pt x 98.52496pt.
  [148 <./ssp__client__opencv_8cc__incl.pdf>]) (./ssp__server_8cc.tex
-<ssp__server_8cc__incl.pdf, id=3964, 3685.77pt x 515.9275pt>
+<ssp__server_8cc__incl.pdf, id=3967, 3685.77pt x 515.9275pt>
 File: ssp__server_8cc__incl.pdf Graphic file (type pdf)
 <use ssp__server_8cc__incl.pdf>
 Package pdftex.def Info: ssp__server_8cc__incl.pdf  used on input line 28.
@@ -4911,13 +4919,13 @@ ver_8cc__incl.pdf
 pdfTeX warning: pdflatex (file ./ssp__server_8cc__incl.pdf): PDF inclusion: mul
 tiple pdfs with page group included in a single page
 >]
-<ssp__tester_8cc__incl.pdf, id=3990, 3787.14874pt x 526.96875pt>
+<ssp__tester_8cc__incl.pdf, id=3993, 3787.14874pt x 526.96875pt>
 File: ssp__tester_8cc__incl.pdf Graphic file (type pdf)
 <use ssp__tester_8cc__incl.pdf>
 Package pdftex.def Info: ssp__tester_8cc__incl.pdf  used on input line 35.
 (pdftex.def)             Requested size: 350.0pt x 48.69559pt.
 ) (./video__file__reader_8cc.tex
-<video__file__reader_8cc__incl.pdf, id=3991, 1378.14874pt x 448.67625pt>
+<video__file__reader_8cc__incl.pdf, id=3994, 1378.14874pt x 448.67625pt>
 File: video__file__reader_8cc__incl.pdf Graphic file (type pdf)
 <use video__file__reader_8cc__incl.pdf>
 Package pdftex.def Info: video__file__reader_8cc__incl.pdf  used on input line 
@@ -4967,14 +4975,14 @@ Underfull \hbox (badness 10000) in paragraph at lines 35--45
  []
 
 ) (./video__file__reader_8h.tex
-<video__file__reader_8h__incl.pdf, id=4024, 1378.14874pt x 392.46625pt>
+<video__file__reader_8h__incl.pdf, id=4027, 1378.14874pt x 392.46625pt>
 File: video__file__reader_8h__incl.pdf Graphic file (type pdf)
 <use video__file__reader_8h__incl.pdf>
 Package pdftex.def Info: video__file__reader_8h__incl.pdf  used on input line 2
 5.
 (pdftex.def)             Requested size: 350.0pt x 99.67332pt.
  [151 <./video__file__reader_8cc__incl.pdf>]
-<video__file__reader_8h__dep__incl.pdf, id=4044, 539.01375pt x 156.585pt>
+<video__file__reader_8h__dep__incl.pdf, id=4047, 539.01375pt x 156.585pt>
 File: video__file__reader_8h__dep__incl.pdf Graphic file (type pdf)
 <use video__file__reader_8h__dep__incl.pdf>
 Package pdftex.def Info: video__file__reader_8h__dep__incl.pdf  used on input l
@@ -4987,12 +4995,12 @@ __reader_8h__dep__incl.pdf
 pdfTeX warning: pdflatex (file ./video__file__reader_8h__dep__incl.pdf): PDF in
 clusion: multiple pdfs with page group included in a single page
 >]
-<video__utils_8h__incl.pdf, id=4069, 1533.73pt x 459.7175pt>
+<video__utils_8h__incl.pdf, id=4072, 1533.73pt x 459.7175pt>
 File: video__utils_8h__incl.pdf Graphic file (type pdf)
 <use video__utils_8h__incl.pdf>
 Package pdftex.def Info: video__utils_8h__incl.pdf  used on input line 30.
 (pdftex.def)             Requested size: 350.0pt x 104.90506pt.
-<video__utils_8h__dep__incl.pdf, id=4070, 1483.5425pt x 381.425pt>
+<video__utils_8h__dep__incl.pdf, id=4073, 1483.5425pt x 381.425pt>
 File: video__utils_8h__dep__incl.pdf Graphic file (type pdf)
 <use video__utils_8h__dep__incl.pdf>
 Package pdftex.def Info: video__utils_8h__dep__incl.pdf  used on input line 38.
@@ -5009,7 +5017,7 @@ e ignored
                    \relax 
 l.76 ...1_1ssp_ac6e1b3e0caadb02f6e5a8387e6fee988}}
                                                   ) (./xlink__reader_8cc.tex
-<xlink__reader_8cc__incl.pdf, id=4103, 2589.675pt x 740.7675pt>
+<xlink__reader_8cc__incl.pdf, id=4106, 2589.675pt x 740.7675pt>
 File: xlink__reader_8cc__incl.pdf Graphic file (type pdf)
 <use xlink__reader_8cc__incl.pdf>
 Package pdftex.def Info: xlink__reader_8cc__incl.pdf  used on input line 14.
@@ -5021,19 +5029,19 @@ ignored
                    \relax 
 l.25 ...1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}}
                                                   ) (./zdepth__decoder_8cc.tex
-<zdepth__decoder_8cc__incl.pdf, id=4105, 1219.55624pt x 448.67625pt>
+<zdepth__decoder_8cc__incl.pdf, id=4108, 1219.55624pt x 448.67625pt>
 File: zdepth__decoder_8cc__incl.pdf Graphic file (type pdf)
 <use zdepth__decoder_8cc__incl.pdf>
 Package pdftex.def Info: zdepth__decoder_8cc__incl.pdf  used on input line 14.
 (pdftex.def)             Requested size: 350.0pt x 128.76407pt.
 
 [154 <./xlink__reader_8cc__incl.pdf>]) (./zdepth__decoder_8h.tex
-<zdepth__decoder_8h__incl.pdf, id=4124, 1219.55624pt x 392.46625pt>
+<zdepth__decoder_8h__incl.pdf, id=4127, 1219.55624pt x 392.46625pt>
 File: zdepth__decoder_8h__incl.pdf Graphic file (type pdf)
 <use zdepth__decoder_8h__incl.pdf>
 Package pdftex.def Info: zdepth__decoder_8h__incl.pdf  used on input line 15.
 (pdftex.def)             Requested size: 350.0pt x 112.63254pt.
-<zdepth__decoder_8h__dep__incl.pdf, id=4125, 1676.2625pt x 437.635pt>
+<zdepth__decoder_8h__dep__incl.pdf, id=4128, 1676.2625pt x 437.635pt>
 File: zdepth__decoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use zdepth__decoder_8h__dep__incl.pdf>
 Package pdftex.def Info: zdepth__decoder_8h__dep__incl.pdf  used on input line 
@@ -5044,7 +5052,7 @@ Package pdftex.def Info: zdepth__decoder_8h__dep__incl.pdf  used on input line
 pdfTeX warning: pdflatex (file ./zdepth__decoder_8h__incl.pdf): PDF inclusion: 
 multiple pdfs with page group included in a single page
 >]) (./zdepth__encoder_8cc.tex
-<zdepth__encoder_8cc__incl.pdf, id=4150, 2166.0925pt x 628.3475pt>
+<zdepth__encoder_8cc__incl.pdf, id=4153, 2166.0925pt x 628.3475pt>
 File: zdepth__encoder_8cc__incl.pdf Graphic file (type pdf)
 <use zdepth__encoder_8cc__incl.pdf>
 Package pdftex.def Info: zdepth__encoder_8cc__incl.pdf  used on input line 14.
@@ -5055,12 +5063,12 @@ h__encoder_8cc__incl.pdf
 pdfTeX warning: pdflatex (file ./zdepth__encoder_8cc__incl.pdf): PDF inclusion:
  multiple pdfs with page group included in a single page
 >]
-<zdepth__encoder_8h__incl.pdf, id=4175, 2166.0925pt x 572.1375pt>
+<zdepth__encoder_8h__incl.pdf, id=4178, 2166.0925pt x 572.1375pt>
 File: zdepth__encoder_8h__incl.pdf Graphic file (type pdf)
 <use zdepth__encoder_8h__incl.pdf>
 Package pdftex.def Info: zdepth__encoder_8h__incl.pdf  used on input line 19.
 (pdftex.def)             Requested size: 350.0pt x 92.44307pt.
-<zdepth__encoder_8h__dep__incl.pdf, id=4176, 533.995pt x 156.585pt>
+<zdepth__encoder_8h__dep__incl.pdf, id=4179, 533.995pt x 156.585pt>
 File: zdepth__encoder_8h__dep__incl.pdf Graphic file (type pdf)
 <use zdepth__encoder_8h__dep__incl.pdf>
 Package pdftex.def Info: zdepth__encoder_8h__dep__incl.pdf  used on input line 
@@ -5103,13 +5111,13 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 259.
  ) 
 Here is how much of TeX's memory you used:
- 18356 strings out of 494880
- 372605 string characters out of 6179600
+ 18358 strings out of 494880
+ 372733 string characters out of 6179600
  402227 words of memory out of 5000000
- 19329 multiletter control sequences out of 15000+600000
+ 19330 multiletter control sequences out of 15000+600000
  69430 words of font info for 89 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 53i,16n,92p,1300b,980s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 53i,16n,92p,1300b,981s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{libav__types_8h_source} has been referenced but d
 oes not exist, replaced by a fixed one
 
@@ -5131,10 +5139,10 @@ share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/share/texliv
 e/texmf-dist/fonts/type1/urw/helvetic/uhvb8ac.pfb></usr/share/texlive/texmf-dis
 t/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type
 1/urw/helvetic/uhvro8a.pfb>
-Output written on refman.pdf (162 pages, 899321 bytes).
+Output written on refman.pdf (162 pages, 899627 bytes).
 PDF statistics:
- 4619 PDF objects out of 5155 (max. 8388607)
- 4167 compressed objects within 42 object streams
- 1811 named destinations out of 2073 (max. 500000)
+ 4622 PDF objects out of 5155 (max. 8388607)
+ 4170 compressed objects within 42 object streams
+ 1812 named destinations out of 2073 (max. 500000)
  526 words of extra memory for PDF output out of 10000 (max. 10000000)
 
