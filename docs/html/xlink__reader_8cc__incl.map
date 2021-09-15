@@ -1,15 +1,3 @@
 <map id="xlink_reader.cc" name="xlink_reader.cc">
-<area shape="rect" id="node2" href="$xlink__reader_8h_source.html" title="xlink_reader.h" alt="" coords="738,80,841,107"/>
-<area shape="rect" id="node7" href="$logger_8h.html" title="Logger header. " alt="" coords="3167,774,3275,801"/>
-<area shape="rect" id="node11" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="1367,617,1529,644"/>
-<area shape="rect" id="node22" href="$image__decoder_8h.html" title="AV Image decoder. " alt="" coords="519,379,681,405"/>
-<area shape="rect" id="node33" href="$kinect__utils_8h.html" title="Utils for Kinect RT integration. " alt="" coords="2803,229,2941,256"/>
-<area shape="rect" id="node39" href="$video__utils_8h.html" title="Video utilities. " alt="" coords="1518,379,1653,405"/>
-<area shape="rect" id="node48" href="$kinect__reader_8h.html" title="Kinect driver. " alt="" coords="1500,155,1671,181"/>
-<area shape="rect" id="node49" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="753,229,825,256"/>
-<area shape="rect" id="node17" href="$utils_2utils_8h_source.html" title="../utils/utils.h" alt="" coords="413,692,510,719"/>
-<area shape="rect" id="node27" href="$libav__types_8h_source.html" title="libav_types.h" alt="" coords="1283,461,1381,487"/>
-<area shape="rect" id="node35" href="$decoders_2idecoder_8h_source.html" title="../decoders/idecoder.h" alt="" coords="2377,543,2527,569"/>
-<area shape="rect" id="node37" href="$libav__decoder_8h.html" title="Jpeg/Mpeg decoder. " alt="" coords="2063,304,2246,331"/>
-<area shape="rect" id="node46" href="$zdepth__decoder_8h.html" title="ZDepth decoder. " alt="" coords="2293,453,2424,495"/>
+<area shape="rect" id="node2" href="$xlink__reader_8h_source.html" title="xlink_reader.h" alt="" coords="119,80,222,107"/>
 </map>

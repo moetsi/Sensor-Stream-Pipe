@@ -1,23 +1,21 @@
 <map id="image_decoder.h" name="image_decoder.h">
-<area shape="rect" id="node2" href="$image__reader_8h.html" title="Image reader. " alt="" coords="349,80,459,107"/>
-<area shape="rect" id="node3" href="$libav__encoder_8h.html" title="Jpeg/Mpeg encoder. " alt="" coords="175,155,289,181"/>
-<area shape="rect" id="node9" href="$multi__image__reader_8h.html" title="Multi image reader. " alt="" coords="456,155,603,181"/>
-<area shape="rect" id="node12" href="$zdepth__encoder_8h.html" title="encoder " alt="" coords="627,155,752,181"/>
-<area shape="rect" id="node14" href="$nv__encoder_8h.html" title="NvPipe encoder. " alt="" coords="1083,80,1183,107"/>
-<area shape="rect" id="node16" href="$dummy__body__reader_8h.html" title="Dumy Body Reader. " alt="" coords="776,155,931,181"/>
-<area shape="rect" id="node18" href="$xlink__reader_8h_source.html" title="xlink_reader.h" alt="" coords="955,155,1058,181"/>
-<area shape="rect" id="node20" href="$kinect__reader_8h.html" title="Kinect driver. " alt="" coords="949,80,1059,107"/>
-<area shape="rect" id="node22" href="$image__decoder_8cc.html" title="mpeg/jpeg image decoder " alt="" coords="1208,80,1336,107"/>
-<area shape="rect" id="node11" href="$image__reader_8cc.html" title="Image reader. " alt="" coords="313,155,431,181"/>
+<area shape="rect" id="node2" href="$image__reader_8h.html" title="Image reader. " alt="" coords="311,80,422,107"/>
+<area shape="rect" id="node3" href="$libav__encoder_8h.html" title="Jpeg/Mpeg encoder. " alt="" coords="138,155,251,181"/>
+<area shape="rect" id="node9" href="$multi__image__reader_8h.html" title="Multi image reader. " alt="" coords="419,155,565,181"/>
+<area shape="rect" id="node12" href="$zdepth__encoder_8h.html" title="encoder " alt="" coords="589,155,715,181"/>
+<area shape="rect" id="node14" href="$nv__encoder_8h.html" title="NvPipe encoder. " alt="" coords="741,80,841,107"/>
+<area shape="rect" id="node16" href="$dummy__body__reader_8h.html" title="Dumy Body Reader. " alt="" coords="739,155,893,181"/>
+<area shape="rect" id="node18" href="$kinect__reader_8h.html" title="Kinect driver. " alt="" coords="865,80,975,107"/>
+<area shape="rect" id="node20" href="$image__decoder_8cc.html" title="mpeg/jpeg image decoder " alt="" coords="1000,80,1128,107"/>
+<area shape="rect" id="node11" href="$image__reader_8cc.html" title="Image reader. " alt="" coords="275,155,394,181"/>
 <area shape="rect" id="node4" href="$iencoder_8cc.html" title="IEncoder factory. " alt="" coords="150,229,239,256"/>
 <area shape="rect" id="node5" href="$libav__encoder_8cc.html" title="Jpef/Mpeg encoder. " alt="" coords="5,229,125,256"/>
-<area shape="rect" id="node6" href="$ireader_8cc.html" title="IReader factory. " alt="" coords="853,229,931,256"/>
-<area shape="rect" id="node7" href="$ssp__server_8cc.html" title="SSP, server side. " alt="" coords="568,229,672,256"/>
-<area shape="rect" id="node8" href="$ssp__tester_8cc.html" title="SSP test program. " alt="" coords="264,229,365,256"/>
-<area shape="rect" id="node10" href="$multi__image__reader_8cc.html" title="Multi image reader. " alt="" coords="390,229,543,256"/>
-<area shape="rect" id="node13" href="$zdepth__encoder_8cc.html" title="ZDepth encoder. " alt="" coords="697,229,829,256"/>
-<area shape="rect" id="node15" href="$nv__encoder_8cc.html" title="NvPipe encoder. " alt="" coords="1225,155,1332,181"/>
+<area shape="rect" id="node6" href="$ireader_8cc.html" title="IReader factory. " alt="" coords="567,229,646,256"/>
+<area shape="rect" id="node7" href="$ssp__server_8cc.html" title="SSP, server side. " alt="" coords="671,229,775,256"/>
+<area shape="rect" id="node8" href="$ssp__tester_8cc.html" title="SSP test program. " alt="" coords="441,229,543,256"/>
+<area shape="rect" id="node10" href="$multi__image__reader_8cc.html" title="Multi image reader. " alt="" coords="263,229,417,256"/>
+<area shape="rect" id="node13" href="$zdepth__encoder_8cc.html" title="ZDepth encoder. " alt="" coords="799,229,931,256"/>
+<area shape="rect" id="node15" href="$nv__encoder_8cc.html" title="NvPipe encoder. " alt="" coords="917,155,1024,181"/>
 <area shape="rect" id="node17" href="$dummy__body__reader_8cc.html" title="Dumy Body Reader. " alt="" coords="955,229,1117,256"/>
-<area shape="rect" id="node19" href="$xlink__reader_8cc.html" title="XLink reader. " alt="" coords="1141,229,1251,256"/>
-<area shape="rect" id="node21" href="$kinect__reader_8cc.html" title="Kinect driver. " alt="" coords="1082,155,1201,181"/>
+<area shape="rect" id="node19" href="$kinect__reader_8cc.html" title="Kinect driver. " alt="" coords="1049,155,1167,181"/>
 </map>

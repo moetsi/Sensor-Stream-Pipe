@@ -9,6 +9,8 @@
 #include <iostream>
 #include <vector>
 
+#if 0
+
 #include "../utils/logger.h"
 #include <k4a/k4a.h>
 #include <cereal/archives/binary.hpp>
@@ -96,3 +98,4 @@ public:
 };
 
 }
+#endif
