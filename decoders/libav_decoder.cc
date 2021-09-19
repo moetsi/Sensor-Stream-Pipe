@@ -12,10 +12,10 @@ LibAvDecoder::LibAvDecoder() {}
 LibAvDecoder::~LibAvDecoder() {}
 
 void LibAvDecoder::Init(AVCodecParameters *codec_parameters) {
-  av_register_all();
+  //av_register_all();
 
   codec_ = std::unique_ptr<AVCodec, AVCodecDeleter>(
-      avcodec_find_decoder(codec_parameters->codec_id));
+      const_cast<AVCodec *>(avcodec_find_decoder(codec_parameters->codec_id)));
   codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(avcodec_alloc_context3(codec_.get()));
   if (!codec_context_) {
     spdlog::error("Failed to allocated memory for AVCodecContext.");

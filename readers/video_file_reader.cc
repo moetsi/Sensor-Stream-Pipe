@@ -39,7 +39,7 @@ VideoFileReader::~VideoFileReader() {
 
 void VideoFileReader::Init(std::string &filename) {
   camera_calibration_struct_ = nullptr;
-  av_register_all();
+  //av_register_all();
   spdlog::info("VideoFileReader: initializing all the containers, codecs and "
                "protocols.");
 
@@ -99,19 +99,19 @@ void VideoFileReader::Init(std::string &filename) {
     spdlog::info("finding the proper decoder (CODEC)",
                  av_format_context_->streams[i]->duration);
 
-    AVCodec *codec = avcodec_find_decoder(codec_parameter->codec_id);
+    AVCodec *codec = const_cast<AVCodec*>(avcodec_find_decoder(codec_parameter->codec_id));
     if (codec == NULL) {
       spdlog::warn("Non video stream detected ({}), skipping", i);
-      if (av_format_context_->streams[i]->codec->extradata_size) {
+      if (av_format_context_->streams[i]->codecpar->extradata_size) {
         // CameraCalibrationType::CameraCalibrationTypeDefault=-1
         if (camera_calibration_struct_->type == CameraCalibrationType::CameraCalibrationTypeDefault) {
           camera_calibration_struct_->type = CameraCalibrationType::CameraCalibrationTypeKinect; // = 0;
           camera_calibration_struct_->extra_data.resize(2);
         }
         camera_calibration_struct_->data = std::vector<unsigned char>(
-            av_format_context_->streams[i]->codec->extradata,
-            av_format_context_->streams[i]->codec->extradata +
-                av_format_context_->streams[i]->codec->extradata_size + 1);
+            av_format_context_->streams[i]->codecpar->extradata,
+            av_format_context_->streams[i]->codecpar->extradata +
+                av_format_context_->streams[i]->codecpar->extradata_size + 1);
       }
     } else if (codec_parameter->codec_type == AVMEDIA_TYPE_VIDEO) {
       spdlog::warn("Video stream detected ({})", i);

@@ -18,6 +18,10 @@ option(LOCAL_DEP_BUILD_LINUX "Build deps locally on linux with some options" OFF
 if (LOCAL_DEP_BUILD_LINUX)
 # add script here?
 endif()
+option(LOCAL_DEP_BUILD_WINDOWS "Build deps locally on windows with some options" OFF)
+if (LOCAL_DEP_BUILD_WINDOWS)
+# add script here?
+endif()
 
 # Download dependencies
 include(FetchContent)
@@ -35,11 +39,19 @@ elseif (APPLE)
     URL_HASH MD5=8cdef0d14b1ef3be77f2a023fd399ee0
   )
 elseif (WIN32)
-  FetchContent_Declare(
-    ssp_dep
-    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103181613__ssp_windep.tar.gz
-    URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
-  )
+  if (LOCAL_DEP_BUILD_WINDOWS)
+    message(STATUS "please make sure you have gone to 3rdpary and run build_win_dep.sh")
+    FetchContent_Declare(
+      ssp_dep
+      SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/tmp/local.ssp
+    )
+  else ()
+    FetchContent_Declare(
+      ssp_dep
+      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103181613__ssp_windep.tar.gz
+      URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
+    )
+  endif()
 elseif (UNIX)
   if (LOCAL_DEP_BUILD_LINUX)
     message(STATUS "please make sure you have gone to 3rdpary and run build_lin_dep.sh")

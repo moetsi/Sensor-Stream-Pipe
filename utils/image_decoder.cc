@@ -57,7 +57,7 @@ ImageDecoder::ImageDecoder() {
   codec_params_struct_ = NULL;
   av_format_context_ = NULL;
   avio_context_ = NULL;
-  av_register_all();
+  // av_register_all();
 }
 
 ImageDecoder::~ImageDecoder() {}
@@ -108,7 +108,8 @@ void ImageDecoder::Init(std::vector<unsigned char> &buffer) {
     if (avcodec_find_decoder(av_codec_parameters_tmp->codec_id) != NULL &&
         av_codec_parameters_tmp->codec_type == AVMEDIA_TYPE_VIDEO) {
       av_codec_parameters_ = std::unique_ptr<AVCodecParameters, AVCodecParametersNullDeleter>(av_codec_parameters_tmp);
-      codec_ = std::unique_ptr<AVCodec, AVCodecDeleter>(avcodec_find_decoder(av_codec_parameters_->codec_id));
+      AVCodecDeleter d;
+      codec_ = std::unique_ptr<AVCodec, AVCodecDeleter>(const_cast<AVCodec*>(avcodec_find_decoder(av_codec_parameters_->codec_id)), d);
       break;
     }
   }

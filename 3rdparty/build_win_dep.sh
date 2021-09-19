@@ -20,15 +20,16 @@ function install_yasm {
 
 function build_ffmpeg {
     echo "Building ffmpeg"
-
-    export FFMPEG_NAME=ffmpeg-n4.3.2-160-gfbb9368226-win64-lgpl-shared-4.3
+    #https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared.zip
+    export FFMPEG_NAME=ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared
     curl -L -O \
-      https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-03-12-12-32/${FFMPEG_NAME}.zip
+      https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/${FFMPEG_NAME}.zip
     unzip -d ${LOCAL_DIR} ${FFMPEG_NAME}.zip
-
-    mv ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
+    
+    mv -v ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
     return
 
+    # a path of pain below ~
     git clone --depth 1 --branch release/4.3 \
          https://git.ffmpeg.org/ffmpeg.git ffmpeg
     pushd ffmpeg
@@ -41,8 +42,8 @@ function build_ffmpeg {
          --enable-asm \
          --enable-w32threads \
          --disable-programs \
-         --disable-ffserver \
          --disable-ffmpeg \
+         --disable-ffserver \
          --disable-ffplay \
          --disable-ffprobe
     make -j12
@@ -58,7 +59,7 @@ function build_opencv {
     pushd opencv
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -a x64 \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=OFF \
@@ -109,7 +110,7 @@ function build_cereal {
         https://github.com/USCiLab/cereal.git
     pushd cereal
     mkdir build && cd build
-    cmake -G "Visual Studio 15 2017 Win64" \
+    cmake -G "Visual Studio 16 2019" -a "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cereal \
         -DJUST_INSTALL_CEREAL=ON \
         ..
@@ -126,7 +127,7 @@ function build_spdlog {
     pushd spdlog
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -a "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/spdlog \
         -DSPDLOG_BUILD_SHARED=OFF \
         ..
@@ -147,7 +148,7 @@ function build_zdepth {
 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -a "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/zdepth \
         -DCMAKE_DEBUG_POSTFIX=d \
         ..
@@ -165,7 +166,7 @@ function build_yaml_cpp {
     pushd yaml-cpp
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -a "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/yaml-cpp \
         -DYAML_BUILD_SHARED_LIBS=OFF \
         -DYAML_CPP_BUILD_CONTRIB=OFF \
@@ -187,7 +188,7 @@ function build_libzmq {
     pushd libzmq
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -a "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
         -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
         -DBUILD_TESTS=OFF -DWITH_TLS=OFF \
@@ -208,7 +209,7 @@ function build_cppzmq {
     pushd cppzmq
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -a "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cppzmq \
         -DZeroMQ_DIR=${LOCAL_DIR}/libzmq/CMake \
         -DCPPZMQ_BUILD_TESTS=OFF \
@@ -230,7 +231,7 @@ function build_k4a {
 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -a "x64" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/k4a \
         -Dspdlog_DIR=${LOCAL_DIR}/spdlog/lib/cmake/spdlog \
@@ -260,7 +261,7 @@ mkdir -p ${LOCAL_DIR}
 
 [ ${BUILD_DEBUG} ] && echo "Build Release+Debug version" || echo "Build only Release version"
 
-#install_yasm
+install_yasm
 build_ffmpeg
 build_opencv
 build_cereal
@@ -269,18 +270,28 @@ build_zdepth
 build_yaml_cpp
 build_libzmq
 build_cppzmq
-build_k4a
+##build_k4a
 
 version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
 prefix=`date +%Y%m%d%H%M`
 filename=${prefix}_${version}_ssp_windep
 
 echo "Packing ${LOCAL_DIR} to ${filename}.tar"
+#tar -C ${LOCAL_DIR} -cf ${filename}.tar \
+#  cereal \
+#  cppzmq \
+#  ffmpeg \
+#  k4a \
+#  libzmq \
+#  opencv \
+#  spdlog \
+#  yaml-cpp \
+#  zdepth
+
 tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   cereal \
   cppzmq \
   ffmpeg \
-  k4a \
   libzmq \
   opencv \
   spdlog \

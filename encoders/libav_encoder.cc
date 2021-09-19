@@ -10,7 +10,7 @@ LibAvEncoder::LibAvEncoder(std::string codec_parameters_file,
                            unsigned int _fps) {
   codec_parameters_ = YAML::LoadFile(codec_parameters_file);
   fps_ = _fps;
-  av_register_all();
+  //av_register_all();
 
   ready_ = false;
   codec_params_struct_ = NULL;
@@ -20,7 +20,7 @@ LibAvEncoder::LibAvEncoder(std::string codec_parameters_file,
 }
 
 LibAvEncoder::LibAvEncoder(YAML::Node &_codec_parameters, unsigned int _fps) {
-  av_register_all();
+  //av_register_all();
   codec_parameters_ = _codec_parameters;
   fps_ = _fps;
 
@@ -238,8 +238,8 @@ void LibAvEncoder::Init(std::shared_ptr<FrameStruct> &fs) {
   //spdlog::info("Codec information:\n {}", codec_parameters_);
 
   av_codec_ =
-      std::unique_ptr<AVCodec, AVCodecDeleter>(avcodec_find_encoder_by_name(
-          codec_parameters_["codec_name"].as<std::string>().c_str()));
+      std::unique_ptr<AVCodec, AVCodecDeleter>(const_cast<AVCodec*>(avcodec_find_encoder_by_name(
+          codec_parameters_["codec_name"].as<std::string>().c_str())));
 
   // std::cerr << "codec name " <<  codec_parameters_["codec_name"].as<std::string>().c_str() << " " << (!!av_codec_) << std::endl;
   av_codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(
