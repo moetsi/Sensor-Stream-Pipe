@@ -58,6 +58,8 @@ function build_opencv {
         https://github.com/opencv/opencv.git
     pushd opencv
     mkdir build && cd build
+    
+    cmake --help
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
         -G "Visual Studio 16 2019" -a x64 \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
