@@ -26,11 +26,16 @@ function build_ffmpeg {
       https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/${FFMPEG_NAME}.zip
     pwd
     FFMPEG_ZIP=$PWD/$FFMPEG_NAME.zip
-    pushd ${LOCALDIR}
+    pushd ${LOCAL_DIR}
+    pwd
     jar xvf $FFMPEG_ZIP
+    pwd
+    ls 
     popd
     #> unzip -d ${LOCAL_DIR} ${FFMPEG_NAME}.zip unzip dll boom with cygwin libraries versions
-    
+    # /d/a/RaaSCL/RaaSCL/3rdparty/tmp/Sensor-Stream-Pipe/3rdparty
+    # ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared/
+    # => /d/a/RaaSCL/RaaSCL/3rdparty/tmp/Sensor-Stream-Pipe/3rdparty/tmp/local.ssp/ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared    
     mv -v ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
     return
 
