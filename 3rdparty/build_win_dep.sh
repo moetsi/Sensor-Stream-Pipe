@@ -58,10 +58,10 @@ function build_opencv {
         https://github.com/opencv/opencv.git
     pushd opencv
     mkdir build && cd build
-    
+
     cmake --help
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -a x64 \
+        -G "Visual Studio 16 2019" -A x64 \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=OFF \
@@ -112,7 +112,7 @@ function build_cereal {
         https://github.com/USCiLab/cereal.git
     pushd cereal
     mkdir build && cd build
-    cmake -G "Visual Studio 16 2019" -a "x64" \
+    cmake -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cereal \
         -DJUST_INSTALL_CEREAL=ON \
         ..
@@ -129,7 +129,7 @@ function build_spdlog {
     pushd spdlog
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -a "x64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/spdlog \
         -DSPDLOG_BUILD_SHARED=OFF \
         ..
@@ -150,7 +150,7 @@ function build_zdepth {
 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -a "x64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/zdepth \
         -DCMAKE_DEBUG_POSTFIX=d \
         ..
@@ -168,7 +168,7 @@ function build_yaml_cpp {
     pushd yaml-cpp
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -a "x64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/yaml-cpp \
         -DYAML_BUILD_SHARED_LIBS=OFF \
         -DYAML_CPP_BUILD_CONTRIB=OFF \
@@ -190,7 +190,7 @@ function build_libzmq {
     pushd libzmq
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -a "x64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
         -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
         -DBUILD_TESTS=OFF -DWITH_TLS=OFF \
@@ -211,7 +211,7 @@ function build_cppzmq {
     pushd cppzmq
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -a "x64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cppzmq \
         -DZeroMQ_DIR=${LOCAL_DIR}/libzmq/CMake \
         -DCPPZMQ_BUILD_TESTS=OFF \
@@ -233,7 +233,7 @@ function build_k4a {
 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -a "x64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/k4a \
         -Dspdlog_DIR=${LOCAL_DIR}/spdlog/lib/cmake/spdlog \
