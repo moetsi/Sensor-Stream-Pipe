@@ -24,7 +24,12 @@ function build_ffmpeg {
     export FFMPEG_NAME=ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared
     curl -L -O \
       https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/${FFMPEG_NAME}.zip
-    unzip -d ${LOCAL_DIR} ${FFMPEG_NAME}.zip
+    pwd
+    FFMPEG_ZIP=$PWD/$FFMPEG_NAME.zip
+    pushd ${LOCALDIR}
+    jar xvf $FFMPEG_ZIP
+    popd
+    #> unzip -d ${LOCAL_DIR} ${FFMPEG_NAME}.zip unzip dll boom with cygwin libraries versions
     
     mv -v ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
     return
