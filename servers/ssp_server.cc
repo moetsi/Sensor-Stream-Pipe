@@ -38,6 +38,7 @@
 #include "../readers/video_file_reader.h"
 #include "../readers/multi_image_reader.h"
 #include "../readers/dummy_body_reader.h"
+#include "../readers/oakd_xlink_reader.h"
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../encoders/nv_encoder.h"
@@ -54,69 +55,6 @@
 
 extern "C" SSP_EXPORT int ssp_server(const char* filename)
 {
-
-// // NONSENSE!
-//   // Create pipeline
-//   // Closer-in minimum depth, disparity range is doubled (from 95 to 190):
-//   static std::atomic<bool> extended_disparity{false};
-//   // Better accuracy for longer distance, fractional disparity 32-levels:
-//   static std::atomic<bool> subpixel{false};
-//   // Better handling for occlusions:
-//   static std::atomic<bool> lr_check{false};
-//   dai::Pipeline pipeline;
-
-//   // Define sources and outputs
-//   auto monoLeft = pipeline.create<dai::node::MonoCamera>();
-//   auto monoRight = pipeline.create<dai::node::MonoCamera>();
-//   auto depth = pipeline.create<dai::node::StereoDepth>();
-//   auto xout = pipeline.create<dai::node::XLinkOut>();
-
-//   xout->setStreamName("disparity");
-
-//   // Properties
-//   monoLeft->setResolution(dai::MonoCameraProperties::SensorResolution::THE_400_P);
-//   monoLeft->setBoardSocket(dai::CameraBoardSocket::LEFT);
-//   monoRight->setResolution(dai::MonoCameraProperties::SensorResolution::THE_400_P);
-//   monoRight->setBoardSocket(dai::CameraBoardSocket::RIGHT);
-
-//   // Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
-//   depth->initialConfig.setConfidenceThreshold(200);
-//   // Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
-//   depth->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
-//   depth->setLeftRightCheck(lr_check);
-//   depth->setExtendedDisparity(extended_disparity);
-//   depth->setSubpixel(subpixel);
-
-//   // Linking
-//   monoLeft->out.link(depth->left);
-//   monoRight->out.link(depth->right);
-//   depth->disparity.link(xout->input);
-
-//   // Connect to device and start pipeline
-//   dai::Device device(pipeline);
-
-//   // Output queue will be used to get the disparity frames from the outputs defined above
-//   auto q = device.getOutputQueue("disparity", 4, false);
-
-//   while(true) {
-//       auto inDepth = q->get<dai::ImgFrame>();
-//       auto frame = inDepth->getFrame();
-//       // Normalization for better visualization
-//       frame.convertTo(frame, CV_8UC1, 255 / depth->getMaxDisparity());
-
-//       cv::imshow("disparity", frame);
-
-//       // Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
-//       cv::applyColorMap(frame, frame, cv::COLORMAP_JET);
-//       cv::imshow("disparity_color", frame);
-
-//       int key = cv::waitKey(1);
-//       if(key == 'q' || key == 'Q') {
-//           return 0;
-//       }
-//   }
-//   return 0;
-//   // END OF NONSENSE!
 
   av_log_set_level(AV_LOG_QUIET);
 
@@ -157,7 +95,10 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
     } else if (reader_type == "dummybody") {
       reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader());
 
-    } else if (reader_type == "video") {
+    } else if (reader_type == "oakd_xlink")
+      reader = std::unique_ptr<OakdXlinkReader>(new OakdXlinkReader());
+    
+     else if (reader_type == "video") {
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
               .as<std::string>();

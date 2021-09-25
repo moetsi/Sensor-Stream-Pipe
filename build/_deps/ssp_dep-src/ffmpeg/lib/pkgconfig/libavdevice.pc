@@ -1,0 +1,14 @@
+prefix=/home/adam/dev/Sensor-Stream-Pipe/3rdparty/tmp/local.ssp/ffmpeg
+exec_prefix=${prefix}
+libdir=/home/adam/dev/Sensor-Stream-Pipe/3rdparty/tmp/local.ssp/ffmpeg/lib
+includedir=/home/adam/dev/Sensor-Stream-Pipe/3rdparty/tmp/local.ssp/ffmpeg/include
+
+Name: libavdevice
+Description: FFmpeg device handling library
+Version: 58.10.100
+Requires: 
+Requires.private: libavfilter >= 7.85.100, libswscale >= 5.7.100, libavformat >= 58.45.100, libavcodec >= 58.91.100, libswresample >= 3.7.100, libavutil >= 56.51.100
+Conflicts:
+Libs: -L${libdir} -Wl,-rpath,/home/adam/dev/Sensor-Stream-Pipe/3rdparty/tmp/local.ssp/ffmpeg/lib -lavdevice 
+Libs.private: -lm -lxcb -lxcb-shm
+Cflags: -I${includedir}

@@ -38,8 +38,10 @@ elseif (WIN32)
 elseif (UNIX)
   FetchContent_Declare(
     ssp_dep
-    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202108241228__ssp_lindep.tar.gz
-    URL_HASH MD5=90ccba057cf14bfb05e4dacc3c3e8f72
+  #  URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202109221450__ssp_lindep.tar.gz
+  #  URL_HASH MD5=185cc907270fca543d789b8c78aaff72
+    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202109242040__ssp_lindep.tar.gz
+    URL_HASH MD5=5ef969687a6fdd37d258d5f84ff1e240
   )
 endif()
 
@@ -59,7 +61,8 @@ if (ssp_dep_POPULATED)
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/CMake CACHE PATH "yaml-cpp installation path")
     set(k4a_DIR ${ssp_dep_SOURCE_DIR}/k4a/lib/cmake/k4a CACHE PATH "k4a installation path")
   else()
-    set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV CACHE PATH "OpenCV installation path")
+    set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/lib/cmake/opencv4 CACHE PATH "OpenCV installation path")
+    set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "depthai installation path")
     set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/lib/cmake/ZeroMQ CACHE PATH "ZeroMQ installation path")
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
   endif()
@@ -236,6 +239,8 @@ set(SOURCE_FILES
     readers/image_reader.h
     readers/dummy_body_reader.cc
     readers/dummy_body_reader.h
+    readers/oakd_xlink_reader.cc
+    readers/oakd_xlink_reader.h
     readers/network_reader.cc
     readers/network_reader.h
 )
@@ -250,10 +255,9 @@ endif ()
 
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
-target_link_libraries(ssp PRIVATE depthai::core)
 
 if (SSP_WITH_DEPTHAI_SUPPORT)
-    target_link_libraries(ssp PRIVATE depthai::core)
+    target_link_libraries(ssp PRIVATE depthai::opencv)
 endif ()
 
 target_link_libraries(ssp PUBLIC
@@ -324,8 +328,8 @@ target_link_libraries(ssp_client_template ssp)
 add_executable(ssp_server servers/ssp_server.cc)
 target_link_libraries(ssp_server ssp)
 
-add_executable(ssp_tester testers/ssp_tester.cc)
-target_link_libraries(ssp_tester ssp)
+# add_executable(ssp_tester testers/ssp_tester.cc)
+# target_link_libraries(ssp_tester ssp)
 
 if (IOS)
     set_source_files_properties(servers/ssp_server.cc PROPERTIES

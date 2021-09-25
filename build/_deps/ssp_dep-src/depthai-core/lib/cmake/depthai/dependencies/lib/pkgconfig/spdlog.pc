@@ -1,0 +1,13 @@
+prefix=/home/adam/.hunter/_Base/062a19a/64dcd41/f3a139e/Build/spdlog/Install
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+Name: libspdlog
+Description: Fast C++ logging library.
+URL: https://github.com/gabime/spdlog
+Version: 1.8.2
+CFlags: -I${includedir} -DSPDLOG_COMPILED_LIB
+Libs: -L${libdir} -lspdlog -pthread
+Requires: 
+

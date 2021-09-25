@@ -101,7 +101,7 @@ void ZDepthEncoder::AddFrameStruct(std::shared_ptr<FrameStruct> &fs) {
       height_ = img.rows;
 
       if (frame_compressed_->frame_type == 0) {
-        cv::cvtColor(img, img, CV_BGR2BGRA);
+        cv::cvtColor(img, img, cv::COLOR_BGR2BGRA);
       }
 
       data = reinterpret_cast<uint16_t *>(img.data);

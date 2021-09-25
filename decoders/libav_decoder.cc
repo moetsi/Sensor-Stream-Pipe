@@ -51,7 +51,7 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
           AVFrameToMatGray(frame_av, img);
         } else if (codec_context_->pix_fmt == AV_PIX_FMT_YUV420P) {
           AVFrameToMatYUV(frame_av, img);
-          cv::cvtColor(img, img, CV_BGR2GRAY);
+          cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
           img.convertTo(img, CV_16UC1);
           img *= (MAX_DEPTH_VALUE_12_BITS / MAX_DEPTH_VALUE_8_BITS);
         }

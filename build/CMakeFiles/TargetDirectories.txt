@@ -1,0 +1,10 @@
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/ssp_client_k4a.dir
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/rebuild_cache.dir
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/ssp_server.dir
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/ssp_client_pointcloud.dir
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/ssp_client_template.dir
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/ssp_client_body_logger.dir
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/ssp_client_opencv.dir
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/edit_cache.dir
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/ssp_plugin.dir
+/home/adam/dev/Sensor-Stream-Pipe/build/CMakeFiles/ssp.dir

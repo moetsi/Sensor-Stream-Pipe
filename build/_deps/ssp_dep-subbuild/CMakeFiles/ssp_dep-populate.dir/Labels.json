@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/CMakeFiles/ssp_dep-populate"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/CMakeFiles/ssp_dep-populate.rule"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/CMakeFiles/ssp_dep-populate-complete.rule"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/ssp_dep-populate-prefix/src/ssp_dep-populate-stamp/ssp_dep-populate-install.rule"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/ssp_dep-populate-prefix/src/ssp_dep-populate-stamp/ssp_dep-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/ssp_dep-populate-prefix/src/ssp_dep-populate-stamp/ssp_dep-populate-download.rule"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/ssp_dep-populate-prefix/src/ssp_dep-populate-stamp/ssp_dep-populate-update.rule"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/ssp_dep-populate-prefix/src/ssp_dep-populate-stamp/ssp_dep-populate-patch.rule"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/ssp_dep-populate-prefix/src/ssp_dep-populate-stamp/ssp_dep-populate-configure.rule"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/ssp_dep-populate-prefix/src/ssp_dep-populate-stamp/ssp_dep-populate-build.rule"
+		},
+		{
+			"file" : "/home/adam/dev/Sensor-Stream-Pipe/build/_deps/ssp_dep-subbuild/ssp_dep-populate-prefix/src/ssp_dep-populate-stamp/ssp_dep-populate-test.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"ssp_dep-populate"
+		],
+		"name" : "ssp_dep-populate"
+	}
+}

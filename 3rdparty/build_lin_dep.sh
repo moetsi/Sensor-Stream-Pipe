@@ -46,16 +46,20 @@ function build_ffmpeg {
     popd
 }
 
-# Build minimal OpenCV : core imgproc imgcodecs highgui
+# --exclude-libs
+# core gapi highgui imgcodecs imgproc
+# Build minimal OpenCV : core imgproc imgcodecs highgui 
+# opencv/include/opencv4/opencv2/imgcodecs.hpp
 function build_opencv {
     echo "Building opencv"
-    git clone --depth 1 --branch 3.4.13 \
-        https://github.com/opencv/opencv.git
-    pushd opencv
+    wget -O opencv-4.5.3.tar.gz https://github.com/opencv/opencv/archive/refs/tags/4.5.3.tar.gz
+    tar -xf opencv-4.5.3.tar.gz
+    pushd opencv-4.5.3
     mkdir build && cd build
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
+        -DOPENCV_GENERATE_PKGCONFIG=YES \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_opencv_apps:BOOL=ON \
@@ -96,6 +100,23 @@ function build_opencv {
         -DENABLE_PIC=ON \
         ..
     cmake --build . -j 16 --config Release --target install
+    cd ..
+    popd
+}
+
+
+# https://github.com/luxonis/depthai-core/tree/main
+# attempts
+# opencv: -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \ depthai-core: OpenCV_DIR=${LOCAL_DIR}/opencv/lib/cmake/opencv4
+function build_depthai {
+    echo "Building Depthai-core"
+    echo ${LOCAL_DIR}
+    git clone --depth 1 --branch main \
+        https://github.com/luxonis/depthai-core.git
+    pushd depthai-core
+    git submodule update --init --recursive
+    cmake -H. -Bbuild -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core -D OpenCV_DIR=${LOCAL_DIR}/opencv/lib/cmake/opencv4
+    cmake --build build --target install
     cd ..
     popd
 }
@@ -237,19 +258,6 @@ function build_k4a {
     popd
 }
 
-# https://github.com/luxonis/depthai-core/tree/main
-function build_depthai {
-    echo "Building Depthai-core"
-    git clone --depth 1 --branch main \
-        https://github.com/luxonis/depthai-core.git
-    pushd depthai-core
-    git submodule update --init --recursive
-    cmake -H. -Bbuild -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core
-    cmake --build build
-    cmake --build build --target install
-    cd ..
-    popd
-}
 
 export SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd | sed -e 's,^/c/,c:/,')"
 
@@ -292,8 +300,8 @@ tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   opencv \
   spdlog \
   yaml-cpp \
+  zdepth \
   depthai-core \
-  zdepth
 
 echo "Compressing ${filename}.tar"
 gzip ${filename}.tar

@@ -247,7 +247,7 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
     cv::Mat img;
 
     if (f.frame_data_type == 0) {
-      img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
+      img = cv::imdecode(f.frame, cv::IMREAD_UNCHANGED);
     } else if (f.frame_data_type == 2) {
       int rows, cols;
       memcpy(&cols, &f.frame[0], sizeof(int));
