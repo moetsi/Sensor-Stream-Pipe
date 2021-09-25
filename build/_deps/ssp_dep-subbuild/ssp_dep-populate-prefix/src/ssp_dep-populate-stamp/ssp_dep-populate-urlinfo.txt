@@ -1,3 +1,0 @@
-repository='external project URL'
-module='https://moetsiblob.blob.core.windows.net/binaries-ssp/202109242040__ssp_lindep.tar.gz'
-tag='MD5=5ef969687a6fdd37d258d5f84ff1e240'
