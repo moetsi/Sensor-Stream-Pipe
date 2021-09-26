@@ -25,7 +25,7 @@ DummyBodyReader::~DummyBodyReader() {
 
 void DummyBodyReader::NextFrame() {
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(1024 / 10)); // 10 fps
+  std::this_thread::sleep_for(std::chrono::milliseconds(1024 / 100)); // 100 fps
   current_frame_.clear();
 
   uint64_t capture_timestamp = CurrentTimeMs();
@@ -304,7 +304,7 @@ void DummyBodyReader::NextFrame() {
   memcpy(&s->frame[4], &bodyStruct, sizeof(object_human_t));
   current_frame_.push_back(s);
 
-  if (counter_ ++ > 100) {
+  if (counter_ ++ > 1000) {
     has_next_ = false;
   }
 }
@@ -321,7 +321,7 @@ std::vector<std::shared_ptr<FrameStruct>> DummyBodyReader::GetCurrentFrame() {
 }
 
 unsigned int DummyBodyReader::GetFps() {
-  return 10;
+  return 100;
 }
 
 std::vector<FrameType> DummyBodyReader::GetType() {
