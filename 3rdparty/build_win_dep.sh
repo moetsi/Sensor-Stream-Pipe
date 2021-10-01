@@ -144,8 +144,8 @@ function build_spdlog {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/spdlog \
         -DSPDLOG_BUILD_SHARED=OFF \
         .. || exit -=1
-    cmake --build . --config Release --target install || exit -1
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install || exit -1
+    cmake --build . --config Release --target install
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
     cd ..
     popd
 }
@@ -165,8 +165,8 @@ function build_zdepth {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/zdepth \
         -DCMAKE_DEBUG_POSTFIX=d \
         .. || exit -1
-    cmake --build . --config Release --target install || exit -1
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install || exit -1
+    cmake --build . --config Release --target install
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
     cd ..
     popd
 }
@@ -187,8 +187,8 @@ function build_yaml_cpp {
         -DYAML_CPP_BUILD_TOOLS=OFF \
         -DYAML_CPP_INSTALL=ON \
         .. || exit -1
-    cmake --build . --config Release --target install || exit -1
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install || exit -1
+    cmake --build . --config Release --target install 
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install 
     cd ..
     popd
 }
@@ -208,8 +208,8 @@ function build_libzmq {
         -DWITH_LIBSODIUM=OFF \
         -DWITH_LIBSODIUM_STATIC=OFF \
         .. || exit -1
-    cmake --build . --config Release --target install || exit -1
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install || exit -1
+    cmake --build . --config Release --target install 
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install 
     cd ..
     popd
 }
@@ -227,7 +227,7 @@ function build_cppzmq {
         -DZeroMQ_DIR=${LOCAL_DIR}/libzmq/CMake \
         -DCPPZMQ_BUILD_TESTS=OFF \
         .. || exit -1
-    cmake --build . --config Release --target install || exit -1
+    cmake --build . --config Release --target install 
     cd ..
     popd
 }
