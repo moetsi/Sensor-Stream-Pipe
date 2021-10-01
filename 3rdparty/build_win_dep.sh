@@ -111,8 +111,8 @@ function build_opencv {
         -DWITH_EIGEN=OFF -DWITH_FFMPEG=OFF \
         -DWITH_QUIRC=OFF \
         .. || exit -1
-    cmake --build . --config Release --target install || exit -1
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install || exit -1
+    cmake --build . --config Release --target install
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
     cd ..
     popd
 }
