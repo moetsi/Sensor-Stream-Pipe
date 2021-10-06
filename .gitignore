@@ -34,3 +34,7 @@ bin/
 
 cmake-*/
 .idea/
+
+./vscode
+.vscode
+build/
