@@ -47,6 +47,14 @@ bool FrameStructToMat(FrameStruct &f, cv::Mat &img,
     img =
         cv::Mat(rows, cols, CV_8UC1, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
     img_changed = true;
+
+  } else if (f.frame_data_type == 9) {  // cv::mat from oakd
+    int rows, cols;
+    memcpy(&cols, &f.frame[0], sizeof(int));
+    memcpy(&rows, &f.frame[4], sizeof(int));
+    img = cv::Mat(rows, cols, CV_8UC3, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
+    img_changed = true;
+
   } else if (f.frame_data_type == 0 || f.frame_data_type == 1) {
 
     std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);

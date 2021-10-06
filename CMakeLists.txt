@@ -184,9 +184,12 @@ endif ()
 if (SSP_WITH_DEPTHAI_SUPPORT)
     set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "DepthAI installation path")
     find_package(depthai CONFIG)
-
     # If not found disable DepthAI support
     if (depthai_FOUND)
+        find_package(ngraph REQUIRED)
+        find_package(InferenceEngine CONFIG REQUIRED)
+        include_directories(${InferenceEngine_INCLUDE_DIRS})
+        include_directories(${InferenceEngine_INCLUDE_DIRS}/../samples/cpp/common/utils/include)
         add_definitions(-DSSP_WITH_DEPTHAI_SUPPORT=1)
         include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include)
         include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include/depthai-shared/3rdparty)
@@ -258,6 +261,7 @@ target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
 
 if (SSP_WITH_DEPTHAI_SUPPORT)
     target_link_libraries(ssp PRIVATE depthai::opencv)
+    target_link_libraries(ssp PRIVATE ${InferenceEngine_LIBRARIES} ${NGRAPH_LIBRARIES})
 endif ()
 
 target_link_libraries(ssp PUBLIC

@@ -1,5 +1,5 @@
 //
-// Created by amourao on 27-06-2019.
+// Created by adammpolak on 26-09-2021.
 //
 
 #pragma once
@@ -16,48 +16,67 @@
 
 #include "../structs/frame_struct.hpp"
 #include "../utils/image_decoder.h"
-// #include "../utils/kinect_utils.h"
 #include "../utils/video_utils.h"
 #include "ireader.h"
 
-extern std::atomic_bool exiting;
+//Depth AI header
+#include "depthai/depthai.hpp"
+//Done Depth AI header
 
-// call k4a_device_close on every failed CHECK
-#define CHECK(x, device)                                                       \
-  {                                                                            \
-    auto retval = (x);                                                         \
-    if (retval) {                                                              \
-      spdlog::error("\"Runtime error: {} returned {} ", #x, retval);           \
-      k4a_device_close(device);                                                \
-      exit(1);                                                                 \
-    }                                                                          \
-  }
+// OPENVINO HEADERS
+/**
+ * @brief Define names based depends on Unicode path support
+ */
+#if defined(ENABLE_UNICODE_PATH_SUPPORT) && defined(_WIN32)
+    #define tcout                  std::wcout
+    #define file_name_t            std::wstring
+    #define imread_t               imreadW
+    #define ClassificationResult_t ClassificationResultW
+#else
+    #define tcout                  std::cout
+    #define file_name_t            std::string
+    #define imread_t               cv::imread
+    #define ClassificationResult_t ClassificationResult
+#endif
+#include <samples/classification_results.h>
+#include <inference_engine.hpp>
+#include <iterator>
+#include <memory>
+#include <samples/common.hpp>
+#include <samples/ocv_common.hpp>
+#include <string>
+#include <vector>
+using namespace InferenceEngine;
+//DONE OPENVINO HEADERS
 
 class OakdXlinkReader : public IReader {
 private:
-  // std::vector<unsigned int> frame_counter_;
+  int current_frame_counter_;
 
-  // bool stream_color_;
-  // bool stream_depth_;
-  // bool stream_ir_;
+  FrameStruct frame_template_;
 
-  // std::string stream_id_;
+  std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
-  // uint8_t device_index_;
-  // k4a_device_configuration_t device_config_;
-  // bool record_imu_;
-  // int32_t absolute_exposure_value_;
-  // k4a_device_t device_;
-  // k4a_capture_t capture_;
-  // k4a_wait_result_t result_ = K4A_WAIT_RESULT_TIMEOUT;
-  // int32_t timeout_ms_;
+  //oakd info
+  dai::Pipeline pipeline;
+  std::shared_ptr<dai::DataOutputQueue> q;
+  std::shared_ptr<dai::DataOutputQueue> qRgb;
+  std::shared_ptr<dai::node::StereoDepth> depth;
+  std::shared_ptr<dai::node::ColorCamera> camRgb;
+  std::shared_ptr<dai::node::XLinkOut> xoutRgb;
+  std::shared_ptr<dai::Device> device;
 
-  // FrameStruct frame_template_;
-  // std::vector<std::shared_ptr<CodecParamsStruct>> codec_params_structs_;
-  // std::shared_ptr<CameraCalibrationStruct> camera_calibration_struct_;
-
-
-  // std::vector<std::shared_ptr<FrameStruct>> current_frame_;
+  //openvino info
+  const file_name_t input_model = "../models/human-pose-estimation-3d.xml";
+  // const file_name_t input_image_path;
+  const std::string device_name = "CPU";
+  Core ie;
+  CNNNetwork network;
+  InputInfo::Ptr input_info;
+  std::string input_name;
+  DataPtr output_info;
+  std::string output_name;
+  ExecutableNetwork executable_network;
 
 public:
   OakdXlinkReader();
