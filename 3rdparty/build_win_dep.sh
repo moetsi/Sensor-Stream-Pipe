@@ -21,9 +21,10 @@ function install_yasm {
 function build_ffmpeg {
     echo "Building ffmpeg"
     #https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared.zip
-    export FFMPEG_NAME=ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared
+    #https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-10-06-12-21/ffmpeg-N-104236-g21979cf98e-win64-lgpl-shared.zip
+    export FFMPEG_NAME=ffmpeg-N-104236-g21979cf98e-win64-lgpl-shared
     curl -L -O \
-      https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/${FFMPEG_NAME}.zip
+      https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-10-06-12-21/${FFMPEG_NAME}.zip
     pwd
     FFMPEG_ZIP=$PWD/$FFMPEG_NAME.zip
     pushd ${LOCAL_DIR}
@@ -204,9 +205,8 @@ function build_libzmq {
         -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
         -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
-        -DBUILD_TESTS=OFF -DWITH_TLS=OFF \
+        -DBUILD_TESTS=OFF \
         -DWITH_LIBSODIUM=OFF \
-        -DWITH_LIBSODIUM_STATIC=OFF \
         .. || exit -1
     cmake --build . --config Release --target install 
     [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install 
