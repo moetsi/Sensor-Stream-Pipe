@@ -41,10 +41,11 @@ function build_ffmpeg {
          --enable-asm \
          --enable-w32threads \
          --disable-programs \
-         --disable-ffserver \
-         --disable-ffmpeg \
-         --disable-ffplay \
-         --disable-ffprobe
+         --enable-cross-compile \
+        #  --disable-ffserver \
+        #  --disable-ffmpeg \
+        #  --disable-ffplay \
+        #  --disable-ffprobe
     make -j12
     make install
     popd
@@ -53,13 +54,17 @@ function build_ffmpeg {
 # Build minimal OpenCV : core imgproc
 function build_opencv {
     echo "Building opencv"
-    git clone --depth 1 --branch 3.4.13 \
-        https://github.com/opencv/opencv.git
-    pushd opencv
+    curl -L -O \
+      https://github.com/opencv/opencv/archive/refs/tags/4.5.4.zip
+    unzip 4.5.4.zip
+        mv opencv-4.5.4 opencv
+
+    pushd  opencv
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
         -G "Visual Studio 15 2017 Win64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
+        -DOPENCV_GENERATE_PKGCONFIG=YES \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_WITH_STATIC_CRT=OFF \
@@ -99,6 +104,22 @@ function build_opencv {
         ..
     cmake --build . --config Release --target install
     [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
+    cd ..
+    popd
+}
+
+# https://github.com/luxonis/depthai-core/tree/main
+# attempts
+# opencv: -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \ depthai-core: OpenCV_DIR=${LOCAL_DIR}/opencv/lib/cmake/opencv4
+function build_depthai {
+    echo "Building Depthai-core"
+    git clone --depth 1 --branch main \
+        https://github.com/luxonis/depthai-core.git
+    ls
+    pushd depthai-core
+    git submodule update --init --recursive
+    cmake -H. -Bbuild -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core -D OpenCV_DIR=${LOCAL_DIR}/opencv/x64/vc15/staticlib
+    cmake --build build --target install
     cd ..
     popd
 }
@@ -190,9 +211,10 @@ function build_libzmq {
         -G "Visual Studio 15 2017 Win64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
         -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
-        -DBUILD_TESTS=OFF -DWITH_TLS=OFF \
-        -DWITH_LIBSODIUM=OFF \
-        -DWITH_LIBSODIUM_STATIC=OFF \
+        -DBUILD_TESTS=OFF -DWITH_TLS=ON \
+        -DWITH_LIBSODIUM=ON \
+        -DWITH_LIBSODIUM_STATIC=ON \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
         ..
     cmake --build . --config Release --target install
     [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
@@ -222,8 +244,8 @@ function build_cppzmq {
 function build_k4a {
     echo "Building Azure Kinect Sensor SDK"
     git clone --depth 1 --branch v1.4.1 \
-        https://github.com/microsoft/Azure-Kinect-Sensor-SDK.git k4a
-    pushd k4a
+        https://github.com/microsoft/Azure-Kinect-Sensor-SDK.git
+    pushd Azure-Kinect-Sensor-SDK
 
     # Use our version of spdlog
     patch -p1 < $SOURCE_DIR/k4a.patch
@@ -237,7 +259,6 @@ function build_k4a {
         -DBUILD_TESTING=OFF \
         ..
     cmake --build . --config Release --target install
-    cmake --build . --target install
     cd ..
     popd
 }
@@ -261,32 +282,33 @@ mkdir -p ${LOCAL_DIR}
 
 [ ${BUILD_DEBUG} ] && echo "Build Release+Debug version" || echo "Build only Release version"
 
-install_yasm
-build_spdlog
-build_k4a
-build_ffmpeg
+#install_yasm
 build_opencv
+build_depthai
+build_ffmpeg
 build_cereal
+build_spdlog
 build_zdepth
 build_yaml_cpp
 build_libzmq
 build_cppzmq
+# build_k4a
 
-
+# version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
 prefix=`date +%Y%m%d%H%M`
 filename=${prefix}_ssp_windep
 
 echo "Packing ${LOCAL_DIR} to ${filename}.tar"
 tar -C ${LOCAL_DIR} -cf ${filename}.tar \
-  spdlog \
-  k4a \
+  opencv \
   cereal \
   cppzmq \
   ffmpeg \
   libzmq \
-  opencv \
+  spdlog \
   yaml-cpp \
-  zdepth
+  zdepth \
+  depthai-core \
 
 echo "Compressing ${filename}.tar"
 gzip ${filename}.tar

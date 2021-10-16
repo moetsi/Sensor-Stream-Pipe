@@ -8,6 +8,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 SET(XLINK_ENABLED FALSE CACHE BOOL "xlink enabled")
 message(STATUS "XLINK_ENABLED ${XLINK_ENABLED}")
 
+# Check if looking for k4a dependencies (for kinect_reader.cc)
+SET(K4A_ENABLED FALSE CACHE BOOL "kinect enabled")
+message(STATUS "K4A_ENABLED ${K4A_ENABLED}")
+
 # Set default build type to Release if none is defined
 set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -34,11 +38,25 @@ elseif (APPLE)
     URL_HASH MD5=8cdef0d14b1ef3be77f2a023fd399ee0
   )
 elseif (WIN32)
-  FetchContent_Declare(
-    ssp_dep
-    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103181613__ssp_windep.tar.gz
-    URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
+  if (XLINK_ENABLED)
+    message("Remember to compile with OpenVINO you will need to run [setupvars.sh] in opt/intel/openvino_2021/bin (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
+    FetchContent_Declare(
+      ssp_dep
+      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161452_ssp_windep_xlink_enabled.tar.gz
+      URL_HASH MD5=fe027d0a694c2c0447d8f29ea2812362
   )
+  else ()
+    FetchContent_Declare(
+      ssp_dep
+      # old
+      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103181613__ssp_windep.tar.gz
+      URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
+
+      # # new checking if works
+      # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161442_ssp_windep.tar.gz
+      # URL_HASH MD5=da1888c4d931ac15750afeabac6eb6ce
+  )
+  endif()
 elseif (UNIX)
   if (XLINK_ENABLED)
     message("Remember to compile with OpenVINO you will need to run [setupvars.sh] in opt/intel/openvino_2021/bin (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
@@ -53,7 +71,7 @@ elseif (UNIX)
       URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
       URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
     )
-  endif()
+    endif()
 endif()
 
 FetchContent_GetProperties(ssp_dep)
@@ -131,10 +149,15 @@ endif ()
 if (APPLE)
     option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" OFF)
     option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" OFF)
+    SET(K4A_ENABLED FALSE)
     option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
 else()
     option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" ON)
     option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" ON)
+    if (NOT K4A_ENABLED)
+      set(SSP_WITH_KINECT_SUPPORT OFF)
+      set(SSP_WITH_K4A_BODYTRACK OFF)
+    endif()
     option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" ON)
 endif()
 option(SSP_WITH_ZMQ_POLLING "Compile with ZeroMQ polling" OFF)
@@ -156,7 +179,6 @@ if (SSP_WITH_KINECT_SUPPORT)
 
     if (k4a_FOUND)
         add_definitions(-DSSP_WITH_KINECT_SUPPORT=1)
-
         if (WIN32)
             file(COPY ${k4a_DIR}/../../../bin/
                  DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
@@ -173,12 +195,12 @@ if (SSP_WITH_K4A_BODYTRACK)
 
     if (k4abt_FOUND)
         add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
-
         if (WIN32)
             message(STATUS "Found Kinect Body Tracking: ${k4abt_ROOT}")
             file(COPY ${k4abt_ROOT}/windows-desktop/amd64/release/bin/
                  DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
                  FILES_MATCHING PATTERN "*.dll")
+            include_directories(${k4abt_ROOT}/include)
         endif ()
     else()
         set(SSP_WITH_K4A_BODYTRACK OFF)
@@ -255,14 +277,19 @@ set(SOURCE_FILES
     readers/network_reader.h
 )
 
+# Checking for XLINK_ENABLED and if exists adding readers
 if (UNIX)
   if (XLINK_ENABLED)
-    set(SOURCE_FILES
-        readers/oakd_xlink_reader.cc
-        readers/oakd_xlink_reader.h
-    )
+    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.cc)
   endif ()
 endif ()
+
+if (WIN32)
+  if (XLINK_ENABLED)
+    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.cc)
+  endif ()
+endif ()
+# Done with adjusting for XLINK_ENABLED
 
 if (SSP_WITH_NVPIPE_SUPPORT)
     list(APPEND SOURCE_FILES encoders/nv_encoder.cc encoders/nv_encoder.h decoders/nv_decoder.cc decoders/nv_decoder.h)

@@ -8,13 +8,16 @@
 # sudo apt-get update
 # sudo apt-get install build-essential
 # sudo apt-get install nasm
-# sudo apt-get install libgtk2.0-dev libusb-1.0-0-dev
+# sudo apt-get install libgtk2.0-dev
 # sudo snap install --classic cmake
 
 # For k4a
 # - sudo apt-get install xorg-dev
 # - sudo apt-get install uuid-dev
 # - sudo apt-get install libudev-dev libusb-1.0-0-dev
+
+# For zmq+ssl
+# - sudo apt-get install libsodium-dev libsodium23
 
 function install_nasm {
     echo "Verify nasm"
@@ -25,14 +28,30 @@ function install_nasm {
     fi
 }
 
+function build_openh264 {
+    # https://github.com/AkillesAILimited/openh264
+    echo "building libopenh264"
+    git clone https://github.com/AkillesAILimited/openh264
+    pushd openh264
+    cp -fv ../../Makefile.libopenh264 Makefile
+    ( export PREFIX=${LOCAL_DIR}/openh264; make -j16 OS=linux )
+    mkdir ${LOCAL_DIR}/openh264
+    ( export PREFIX=${LOCAL_DIR}/openh264; make install )
+    popd
+}
+
+# https://kochuns.blogspot.com/2018/09/ffmpegffmpeg-build-with-openh264.html for openh264 build instructions
 function build_ffmpeg {
     echo "Building ffmpeg"
     git clone --depth 1 --branch release/4.3 \
          https://git.ffmpeg.org/ffmpeg.git ffmpeg
     pushd ffmpeg
-    ./configure --prefix=${LOCAL_DIR}/ffmpeg \
+    ( export PKG_CONFIG_PATH=${LOCAL_DIR}/openh264/lib/pkgconfig; ./configure --prefix=${LOCAL_DIR}/ffmpeg \
         --disable-gpl \
         --enable-asm \
+        --enable-libopenh264 \
+        --extra-cflags='-I${LOCAL_DIR}/openh264/include' \
+        --extra-ldflags='-L${LOCAL_DIR}/openh264/lib' \
         --disable-static \
         --enable-shared \
         --enable-rpath \
@@ -40,26 +59,22 @@ function build_ffmpeg {
         --disable-ffmpeg \
         --disable-ffplay \
         --disable-ffprobe \
-        --disable-securetransport
+        --disable-securetransport )
     make -j16
     make install
     popd
 }
 
-# --exclude-libs
-# core gapi highgui imgcodecs imgproc
-# Build minimal OpenCV : core imgproc imgcodecs highgui 
-# opencv/include/opencv4/opencv2/imgcodecs.hpp
+# Build minimal OpenCV : core imgproc imgcodecs highgui
 function build_opencv {
     echo "Building opencv"
-    wget -O opencv-4.5.3.tar.gz https://github.com/opencv/opencv/archive/refs/tags/4.5.3.tar.gz
-    tar -xf opencv-4.5.3.tar.gz
-    pushd opencv-4.5.3
+    git clone --depth 1 --branch 3.4.13 \
+        https://github.com/opencv/opencv.git
+    pushd opencv
     mkdir build && cd build
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
-        -DOPENCV_GENERATE_PKGCONFIG=YES \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_opencv_apps:BOOL=ON \
@@ -100,23 +115,6 @@ function build_opencv {
         -DENABLE_PIC=ON \
         ..
     cmake --build . -j 16 --config Release --target install
-    cd ..
-    popd
-}
-
-
-# https://github.com/luxonis/depthai-core/tree/main
-# attempts
-# opencv: -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \ depthai-core: OpenCV_DIR=${LOCAL_DIR}/opencv/lib/cmake/opencv4
-function build_depthai {
-    echo "Building Depthai-core"
-    echo ${LOCAL_DIR}
-    git clone --depth 1 --branch main \
-        https://github.com/luxonis/depthai-core.git
-    pushd depthai-core
-    git submodule update --init --recursive
-    cmake -H. -Bbuild -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core -D OpenCV_DIR=${LOCAL_DIR}/opencv/lib/cmake/opencv4
-    cmake --build build --target install
     cd ..
     popd
 }
@@ -208,9 +206,9 @@ function build_libzmq {
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
         -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
-        -DBUILD_TESTS=OFF -DWITH_TLS=OFF \
-        -DWITH_LIBSODIUM=OFF \
-        -DWITH_LIBSODIUM_STATIC=OFF \
+        -DBUILD_TESTS=OFF -DWITH_TLS=ON \
+        -DWITH_LIBSODIUM=ON \
+        -DWITH_LIBSODIUM_STATIC=ON \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
         ..
     cmake --build . -j 16 --config Release --target install
@@ -258,7 +256,6 @@ function build_k4a {
     popd
 }
 
-
 export SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd | sed -e 's,^/c/,c:/,')"
 
 echo "Cleaning tmp directory"
@@ -275,7 +272,9 @@ export LOCAL_DIR=`pwd`/local.ssp
 mkdir -p ${LOCAL_DIR}
 
 install_nasm
+build_openh264
 build_ffmpeg
+
 build_opencv
 build_cereal
 build_spdlog
@@ -284,12 +283,10 @@ build_yaml_cpp
 build_libzmq
 build_cppzmq
 #build_k4a
-build_depthai
 
-
-# version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
+version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
 prefix=`date +%Y%m%d%H%M`
-filename=${prefix}__ssp_lindep
+filename=${prefix}_${version}_ssp_lindep
 
 echo "Packing ${LOCAL_DIR} to ${filename}.tar"
 tar -C ${LOCAL_DIR} -cf ${filename}.tar \
@@ -300,8 +297,8 @@ tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   opencv \
   spdlog \
   yaml-cpp \
-  zdepth \
-  depthai-core \
+  openh264 \
+  zdepth
 
 echo "Compressing ${filename}.tar"
 gzip ${filename}.tar
