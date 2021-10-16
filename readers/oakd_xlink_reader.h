@@ -19,6 +19,9 @@
 #include "../utils/video_utils.h"
 #include "ireader.h"
 
+//Header for making dummy bodies
+#include "dummy_body_reader.h"
+
 //Depth AI header
 #include "depthai/depthai.hpp"
 //Done Depth AI header
@@ -68,7 +71,7 @@ private:
 
   //openvino info
   const file_name_t input_model = "../models/human-pose-estimation-3d.xml";
-  // const file_name_t input_image_path;
+  const file_name_t input_image_path= "fart.png";
   const std::string device_name = "CPU";
   Core ie;
   CNNNetwork network;

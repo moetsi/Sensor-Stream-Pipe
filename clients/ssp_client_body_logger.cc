@@ -69,16 +69,19 @@ extern "C" SSP_EXPORT int ssp_client_body_logger(int port)
       reader.NextFrame();
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
       for (FrameStruct f : f_list) {
-        std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
+        if (f.frame_data_type == 8)
+        {
+          std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
-        //First we grab the amount of bodies
-        memcpy(&bodyCount, &f.frame[0], sizeof(int));
+          //First we grab the amount of bodies
+          memcpy(&bodyCount, &f.frame[0], sizeof(int));
 
-        //Then we grab the body struct
-        // (in the future it will iterate and go over the body struct array)
-        memcpy(&bodyStruct, &f.frame[4], sizeof(_object_human_t));
+          //Then we grab the body struct
+          // (in the future it will iterate and go over the body struct array)
+          memcpy(&bodyStruct, &f.frame[4], sizeof(_object_human_t));
 
-        spdlog::debug("\t description: {} counter: {} bodyStruct's pelvis.x: {} number of bodies: {}", f.scene_desc, f.frame_id, bodyStruct.pelvis_x, bodyCount);
+          spdlog::debug("\t description: {} counter: {} bodyStruct's pelvis.x: {} number of bodies: {}", f.scene_desc, f.frame_id, bodyStruct.pelvis_x, bodyCount);
+        }
 
       }
     }
