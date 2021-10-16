@@ -4,6 +4,10 @@ project(ssp)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Check if looking for oakd+openvino dependencies (for oakd_xlink_reader.cc)
+SET(XLINK_ENABLED FALSE CACHE BOOL "xlink enabled")
+message(STATUS "XLINK_ENABLED ${XLINK_ENABLED}")
+
 # Set default build type to Release if none is defined
 set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -36,13 +40,20 @@ elseif (WIN32)
     URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
   )
 elseif (UNIX)
-  FetchContent_Declare(
-    ssp_dep
-  #  URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202109221450__ssp_lindep.tar.gz
-  #  URL_HASH MD5=185cc907270fca543d789b8c78aaff72
-    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202109242040__ssp_lindep.tar.gz
-    URL_HASH MD5=5ef969687a6fdd37d258d5f84ff1e240
-  )
+  if (XLINK_ENABLED)
+    message("Remember to compile with OpenVINO you will need to run [setupvars.sh] in opt/intel/openvino_2021/bin (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
+    FetchContent_Declare(
+      ssp_dep
+      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202109242040__ssp_lindep.tar.gz
+      URL_HASH MD5=5ef969687a6fdd37d258d5f84ff1e240
+    )
+  else ()
+    FetchContent_Declare(
+      ssp_dep
+      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
+      URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
+    )
+  endif()
 endif()
 
 FetchContent_GetProperties(ssp_dep)
@@ -62,9 +73,9 @@ if (ssp_dep_POPULATED)
     set(k4a_DIR ${ssp_dep_SOURCE_DIR}/k4a/lib/cmake/k4a CACHE PATH "k4a installation path")
   else()
     set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/lib/cmake/opencv4 CACHE PATH "OpenCV installation path")
-    set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "depthai installation path")
     set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/lib/cmake/ZeroMQ CACHE PATH "ZeroMQ installation path")
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
+    set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "depthai installation path")
   endif()
   set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog CACHE PATH "spdlog installation path")
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
@@ -128,8 +139,6 @@ else()
 endif()
 option(SSP_WITH_ZMQ_POLLING "Compile with ZeroMQ polling" OFF)
 
-option(SSP_WITH_DEPTHAI_SUPPORT "Compile with DepthAI support" ON)
-
 if (SSP_WITH_NVPIPE_SUPPORT)
     find_package(NvPipe CONFIG)
 
@@ -181,7 +190,7 @@ if (SSP_WITH_ZMQ_POLLING)
     add_definitions(-DSSP_WITH_ZMQ_POLLING=1)
 endif ()
 
-if (SSP_WITH_DEPTHAI_SUPPORT)
+if (XLINK_ENABLED)
     set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "DepthAI installation path")
     find_package(depthai CONFIG)
     # If not found disable DepthAI support
@@ -242,11 +251,18 @@ set(SOURCE_FILES
     readers/image_reader.h
     readers/dummy_body_reader.cc
     readers/dummy_body_reader.h
-    readers/oakd_xlink_reader.cc
-    readers/oakd_xlink_reader.h
     readers/network_reader.cc
     readers/network_reader.h
 )
+
+if (UNIX)
+  if (XLINK_ENABLED)
+    set(SOURCE_FILES
+        readers/oakd_xlink_reader.cc
+        readers/oakd_xlink_reader.h
+    )
+  endif ()
+endif ()
 
 if (SSP_WITH_NVPIPE_SUPPORT)
     list(APPEND SOURCE_FILES encoders/nv_encoder.cc encoders/nv_encoder.h decoders/nv_decoder.cc decoders/nv_decoder.h)

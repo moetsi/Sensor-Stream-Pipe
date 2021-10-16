@@ -38,7 +38,10 @@
 #include "../readers/video_file_reader.h"
 #include "../readers/multi_image_reader.h"
 #include "../readers/dummy_body_reader.h"
+
+#ifdef XLINK_ENABLED
 #include "../readers/oakd_xlink_reader.h"
+#endif
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../encoders/nv_encoder.h"
@@ -94,15 +97,16 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
 
     } else if (reader_type == "dummybody") {
       reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader());
-
-    } else if (reader_type == "oakd_xlink")
+    }
+#ifdef XLINK_ENABLED
+    else if (reader_type == "oakd_xlink") {
       reader = std::unique_ptr<OakdXlinkReader>(new OakdXlinkReader());
-    
+    }
+#endif
      else if (reader_type == "video") {
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
               .as<std::string>();
-
 #if TARGET_OS_IOS
       // Find the corresponding path in the application bundle
       NSString* file_path = [NSString stringWithCString:path.c_str()
