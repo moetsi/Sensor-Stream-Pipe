@@ -39,11 +39,20 @@ elseif (APPLE)
   )
 elseif (WIN32)
   if (XLINK_ENABLED)
-    message("Remember to compile with OpenVINO you will need to run [setupvars.sh] in opt/intel/openvino_2021/bin (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
+    message("Remember to compile with OpenVINO you will need to run 'C:/Program Files (x86)/Intel/openvino_2021/bin/setupvars.bat' (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
+    message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
     FetchContent_Declare(
       ssp_dep
-      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161452_ssp_windep_xlink_enabled.tar.gz
-      URL_HASH MD5=fe027d0a694c2c0447d8f29ea2812362
+      # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161452_ssp_windep_xlink_enabled.tar.gz
+      # URL_HASH MD5=fe027d0a694c2c0447d8f29ea2812362
+
+      # new with release config
+      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110181158_ssp_windep_xlink_enabled.tar.gz
+      URL_HASH MD5=f57eb06fd32d7ab47221854dbda0365e
+      
+      # rebuilding using Visual Studio 16 2019
+      # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110162220_ssp_windep_xlink_enabled.tar.gz
+      # URL_HASH MD5=dc804195928ac3f36d93d28664d024f1
   )
   else ()
     FetchContent_Declare(
@@ -60,6 +69,7 @@ elseif (WIN32)
 elseif (UNIX)
   if (XLINK_ENABLED)
     message("Remember to compile with OpenVINO you will need to run [setupvars.sh] in opt/intel/openvino_2021/bin (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
+    message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
     FetchContent_Declare(
       ssp_dep
       URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202109242040__ssp_lindep.tar.gz
@@ -217,6 +227,7 @@ if (XLINK_ENABLED)
     find_package(depthai CONFIG)
     # If not found disable DepthAI support
     if (depthai_FOUND)
+        message(STATUS "Setting SSP_WITH_DEPTHAI_SUPPORT to ON")
         find_package(ngraph REQUIRED)
         find_package(InferenceEngine CONFIG REQUIRED)
         include_directories(${InferenceEngine_INCLUDE_DIRS})
@@ -225,6 +236,11 @@ if (XLINK_ENABLED)
         include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include)
         include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include/depthai-shared/3rdparty)
         include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai/dependencies/include)
+        add_definitions(-D'DEPTHAI_TARGET_OPENCV')
+        add_definitions(-D'DEPTHAI_TARGET_CORE')
+        add_definitions(-D'JSON_USE_IMPLICIT_CONVERSIONS=1')
+        add_definitions(-D'__PC__')
+        add_definitions(-D'XLINK_USE_MX_ID_NAME=ON')
     else()
         set(SSP_WITH_DEPTHAI_SUPPORT OFF)
         message(STATUS "Setting SSP_WITH_DEPTHAI_SUPPORT to OFF")
@@ -280,13 +296,13 @@ set(SOURCE_FILES
 # Checking for XLINK_ENABLED and if exists adding readers
 if (UNIX)
   if (XLINK_ENABLED)
-    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.cc)
+    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h)
   endif ()
 endif ()
 
 if (WIN32)
   if (XLINK_ENABLED)
-    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.cc)
+    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h)
   endif ()
 endif ()
 # Done with adjusting for XLINK_ENABLED
@@ -302,38 +318,38 @@ endif ()
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
 
-if (SSP_WITH_DEPTHAI_SUPPORT)
-    target_link_libraries(ssp PRIVATE depthai::opencv)
-    target_link_libraries(ssp PRIVATE ${InferenceEngine_LIBRARIES} ${NGRAPH_LIBRARIES})
-endif ()
 
 target_link_libraries(ssp PUBLIC
-    cereal
-    ${OpenCV_LIBS}
-    spdlog::spdlog
-    libzmq-static
-    cppzmq-static
-    ${YAML_CPP_LIBRARIES}
-    zdepth::zdepth
+  cereal
+  ${OpenCV_LIBS}
+  spdlog::spdlog
+  libzmq-static
+  cppzmq-static
+  ${YAML_CPP_LIBRARIES}
+  zdepth::zdepth
 )
 
 if (IOS)
-    target_sources(ssp PRIVATE readers/iphone_reader.mm readers/iphone_reader.h)
-    target_link_libraries(ssp PRIVATE "-framework ARKit")
+target_sources(ssp PRIVATE readers/iphone_reader.mm readers/iphone_reader.h)
+target_link_libraries(ssp PRIVATE "-framework ARKit")
 endif ()
 
 if (SSP_WITH_NVPIPE_SUPPORT)
-    target_link_libraries(ssp PUBLIC NvPipe)
+target_link_libraries(ssp PUBLIC NvPipe)
 endif ()
 
 if (SSP_WITH_KINECT_SUPPORT)
-    target_link_libraries(ssp PUBLIC k4a::k4a)
+target_link_libraries(ssp PUBLIC k4a::k4a)
 endif ()
 
 if (SSP_WITH_K4A_BODYTRACK)
-    target_link_libraries(ssp PUBLIC k4a::k4abt)
+target_link_libraries(ssp PUBLIC k4a::k4abt)
 endif ()
 
+if (XLINK_ENABLED)
+  target_link_libraries(ssp PRIVATE depthai::opencv)
+  target_link_libraries(ssp PRIVATE ${InferenceEngine_LIBRARIES} ${NGRAPH_LIBRARIES})
+endif ()
 
 #############################
 ### Build the applications

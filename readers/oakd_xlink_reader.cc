@@ -76,7 +76,12 @@ OakdXlinkReader::OakdXlinkReader() {
 
     // Step 2. Read a model in OpenVINO Intermediate Representation (.xml and
     // .bin files) or ONNX (.onnx file) format
+#ifndef _WIN32    
     network = ie.ReadNetwork("../../models/human-pose-estimation-3d.xml");
+#endif
+#ifdef _WIN32    
+    network = ie.ReadNetwork("../../../models/human-pose-estimation-3d.xml");
+#endif
     // if (network.getOutputsInfo().size() != 1)
     //     throw std::logic_error("Sample supports topologies with 1 output only");
     if (network.getInputsInfo().size() != 1)
@@ -192,7 +197,7 @@ void OakdXlinkReader::NextFrame() {
   std::shared_ptr<FrameStruct> s =
         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
   s->frame_id = current_frame_counter_;
-  rgbFrame->frame_type = 4;
+  s->frame_type = 4;
   s->frame_data_type = 8;
   s->timestamps.push_back(capture_timestamp);
 
@@ -489,7 +494,7 @@ std::vector<unsigned int> OakdXlinkReader::GetType() {
 
   types.push_back(0);
   // types.push_back(1);
-  // types.push_back(4)
+  types.push_back(4);
 
   return types;
 }

@@ -1,8 +1,6 @@
 //
 // Created by amourao on 26-06-2019.
 //
-
-
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
@@ -39,8 +37,9 @@
 #include "../readers/multi_image_reader.h"
 #include "../readers/dummy_body_reader.h"
 
-#ifdef XLINK_ENABLED
+#ifdef SSP_WITH_DEPTHAI_SUPPORT
 #include "../readers/oakd_xlink_reader.h"
+#include "depthai/depthai.hpp"
 #endif
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
@@ -50,10 +49,6 @@
 #ifdef SSP_WITH_KINECT_SUPPORT
 #include "../readers/kinect_reader.h"
 #include "../utils/kinect_utils.h"
-#endif
-
-#ifdef SSP_WITH_DEPTHAI_SUPPORT
-#include "depthai/depthai.hpp"
 #endif
 
 extern "C" SSP_EXPORT int ssp_server(const char* filename)
@@ -98,7 +93,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
     } else if (reader_type == "dummybody") {
       reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader());
     }
-#ifdef XLINK_ENABLED
+#ifdef SSP_WITH_DEPTHAI_SUPPORT
     else if (reader_type == "oakd_xlink") {
       reader = std::unique_ptr<OakdXlinkReader>(new OakdXlinkReader());
     }

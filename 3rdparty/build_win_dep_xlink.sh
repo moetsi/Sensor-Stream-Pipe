@@ -113,13 +113,21 @@ function build_opencv {
 # opencv: -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \ depthai-core: OpenCV_DIR=${LOCAL_DIR}/opencv/lib/cmake/opencv4
 function build_depthai {
     echo "Building Depthai-core"
-    git clone --depth 1 --branch main \
+    # curl -L -O \
+    #   https://github.com/luxonis/depthai-core/archive/refs/tags/v2.11.0.zip
+    # unzip v2.11.0.zip
+    #     mv depthai-core-2.11.0 depthai-core
+
+    git clone --depth 1 --branch cmath_math_defines_vstudio \
         https://github.com/luxonis/depthai-core.git
-    ls
     pushd depthai-core
     git submodule update --init --recursive
-    cmake -H. -Bbuild -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core -D OpenCV_DIR=${LOCAL_DIR}/opencv/x64/vc15/staticlib
-    cmake --build build --target install
+    cmake -G "Visual Studio 15 2017 Win64"\
+        -H. \
+        -Bbuild \
+        -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core \
+        -D OpenCV_DIR=${LOCAL_DIR}/opencv/x64/vc15/staticlib
+    cmake --build build --config Release --target install
     cd ..
     popd
 }
