@@ -21,9 +21,11 @@ function install_yasm {
 function build_ffmpeg {
     echo "Building ffmpeg"
     #https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared.zip
-    export FFMPEG_NAME=ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared
-    curl -L -O \
-      https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/${FFMPEG_NAME}.zip
+    #export FFMPEG_NAME=ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared
+    #curl -L -O \
+    #  https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/${FFMPEG_NAME}.zip
+    export $FFMPEG_NAME=ffmpeg-n4.4-188-g404c9331dd-win64-lgpl-shared-4.4
+    cp ../$FFMPEG_NAME.zip .
     pwd
     FFMPEG_ZIP=$PWD/$FFMPEG_NAME.zip
     pushd ${LOCAL_DIR}
