@@ -30,6 +30,7 @@ function build_ffmpeg {
     FFMPEG_ZIP=$PWD/$FFMPEG_NAME.zip
     pushd ${LOCAL_DIR}
     pwd
+    rm -Rvf ffmpeg-n4.4-188-g404c9331dd-win64-lgpl-shared-4.4/
     jar xvf $FFMPEG_ZIP
     pwd
     ls 
