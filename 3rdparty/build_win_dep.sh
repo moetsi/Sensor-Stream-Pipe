@@ -35,7 +35,7 @@ function build_ffmpeg {
     pwd
     ls 
     popd
-    unzip -d ${LOCAL_DIR} ${FFMPEG_NAME}.zip 
+    unzip -uod ${LOCAL_DIR} ${FFMPEG_NAME}.zip 
     #unzip dll boom with cygwin libraries versions
     # /d/a/RaaSCL/RaaSCL/3rdparty/tmp/Sensor-Stream-Pipe/3rdparty
     # ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared/
