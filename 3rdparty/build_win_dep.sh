@@ -206,9 +206,8 @@ function build_libzmq {
         -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
         -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
-        -DBUILD_TESTS=OFF -DWITH_TLS=OFF \
+        -DBUILD_TESTS=OFF \
         -DWITH_LIBSODIUM=OFF \
-        -DWITH_LIBSODIUM_STATIC=OFF \
         .. || exit -1
     cmake --build . --config Release --target install 
     [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install 
