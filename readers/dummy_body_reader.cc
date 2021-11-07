@@ -299,7 +299,7 @@ void DummyBodyReader::NextFrame() {
   bodyStruct.ear_right_QW = 0.1;
   bodyStruct.ear_right_conf = 1;
   inplace_hton(bodyCount);
-  std::cerr << "dummy: bodyCount after hton " << bodyCount << std::endl << std::flush;
+  // std::cerr << "dummy: bodyCount after hton " << bodyCount << std::endl << std::flush;
   memcpy(&s->frame[0], &bodyCount, sizeof(int32_t));
   memcpy(&s->frame[4], &bodyStruct, sizeof(object_human_t));
   current_frame_.push_back(s);
