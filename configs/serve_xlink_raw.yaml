@@ -5,6 +5,8 @@ general:
   frame_source:
     type: "oakd_xlink"
     parameters:
+      ip: "192.168.10.24"
+      deviceid: 1
       stream_color_video: True
       stream_depth_video: True
       stream_body: True
@@ -12,7 +14,7 @@ general:
       streaming_color_resolution: "COLOR_RESOLUTION_720P"
       streaming_depth_mode: "STEREO_DISPARITY"
       streaming_depth_resolution: "STEREO_RESOLUTION_480P"
-      streaming_rate: "30"
+      streaming_rate: "10"
 video_encoder:
   0: #color
     type: "null"

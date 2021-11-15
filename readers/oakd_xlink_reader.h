@@ -67,6 +67,7 @@ private:
   std::shared_ptr<dai::node::StereoDepth> depth;
   std::shared_ptr<dai::node::ColorCamera> camRgb;
   std::shared_ptr<dai::node::XLinkOut> xoutRgb;
+  dai::DeviceInfo device_info;
   std::shared_ptr<dai::Device> device;
 
   //openvino info
@@ -82,7 +83,7 @@ private:
   ExecutableNetwork executable_network;
 
 public:
-  OakdXlinkReader();
+  OakdXlinkReader(YAML::Node config);
 
   ~OakdXlinkReader();
 

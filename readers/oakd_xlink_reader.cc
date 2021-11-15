@@ -14,14 +14,14 @@ using namespace std;
 
 using namespace InferenceEngine;
 
-OakdXlinkReader::OakdXlinkReader() {
+OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
 
     spdlog::debug("Starting to open");
     current_frame_counter_ = 0;
 
     frame_template_.sensor_id = 0;
     frame_template_.stream_id = RandomString(16);
-    frame_template_.device_id = 0;
+    frame_template_.device_id = config["deviceid"].as<unsigned int>();
     frame_template_.scene_desc = "oakd";
 
     frame_template_.frame_id = 0;
@@ -44,8 +44,20 @@ OakdXlinkReader::OakdXlinkReader() {
     // Linking
     camRgb->preview.link(xoutRgb->input);
 
+    // Changing the IP address to the correct depthai format (const char*)
+    char chText[48];
+    std::string ip_name = config["ip"].as<std::string>();
+    ip_name.copy(chText, ip_name.size(), 0);
+    chText[ip_name.size()] = '\0';
+    
+    //Which sensor
+    device_info = dai::DeviceInfo();
+    strcpy(device_info.desc.name, chText);
+    device_info.state = X_LINK_BOOTLOADER;
+    device_info.desc.protocol = X_LINK_TCP_IP;
+    device = std::make_shared<dai::Device>(pipeline, device_info);
+
     // Connect to device and start pipeline
-    device = std::make_shared<dai::Device>(pipeline);
     cout << "Connected cameras: ";
     for(const auto& cam : device->getConnectedCameras()) {
         cout << static_cast<int>(cam) << " ";
