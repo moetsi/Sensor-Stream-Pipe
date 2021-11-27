@@ -38,3 +38,4 @@ cmake-*/
 ./vscode
 .vscode
 build/
+build_release/

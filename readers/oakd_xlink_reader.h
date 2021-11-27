@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "../utils/logger.h"
-#include <k4a/k4a.h>
 
 #include <cereal/archives/binary.hpp>
 

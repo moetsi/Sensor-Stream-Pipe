@@ -16,7 +16,9 @@ using namespace InferenceEngine;
 
 OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
 
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Starting to open");
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     current_frame_counter_ = 0;
 
     frame_template_.sensor_id = 0;
@@ -27,11 +29,11 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     frame_template_.frame_id = 0;
     frame_template_.message_type = 0;
 
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Define source and output
     camRgb = pipeline.create<dai::node::ColorCamera>();
     xoutRgb = pipeline.create<dai::node::XLinkOut>();
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     xoutRgb->setStreamName("rgb");
 
     // Properties
@@ -40,40 +42,42 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
     camRgb->setInterleaved(false);
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Linking
     camRgb->preview.link(xoutRgb->input);
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Changing the IP address to the correct depthai format (const char*)
     char chText[48];
     std::string ip_name = config["ip"].as<std::string>();
     ip_name.copy(chText, ip_name.size(), 0);
     chText[ip_name.size()] = '\0';
-    
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //Which sensor
     device_info = dai::DeviceInfo();
     strcpy(device_info.desc.name, chText);
     device_info.state = X_LINK_BOOTLOADER;
     device_info.desc.protocol = X_LINK_TCP_IP;
-    device = std::make_shared<dai::Device>(pipeline, device_info);
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;    
+    device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Connect to device and start pipeline
     cout << "Connected cameras: ";
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     for(const auto& cam : device->getConnectedCameras()) {
         cout << static_cast<int>(cam) << " ";
         cout << cam << " ";
     }
     cout << endl;
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Print USB speed
     cout << "Usb speed: " << device->getUsbSpeed() << endl;
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Output queue will be used to get the rgb frames from the output defined above
     qRgb = device->getOutputQueue("rgb", 4, false);
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //Now setting up Body model
     // input_model = {"../models/human-pose-estimation-3d.xml"};
     // input_image_path = "../openvino/fart";
