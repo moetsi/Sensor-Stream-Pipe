@@ -1,7 +1,7 @@
-//
+/**
+ * \file video_utils.h @brief Video utilities
+ */
 // Created by amourao on 07/08/19.
-//
-
 #pragma once
 
 #include <ctime>
@@ -37,7 +37,7 @@ extern "C" {
 
 #include "../decoders/idecoder.h"
 #include "../decoders/zdepth_decoder.h"
-#include "../structs/frame_struct.hpp"
+#include "../structs/frame_struct.h"
 #include "../utils/libav_types.h"
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
@@ -51,10 +51,27 @@ extern "C" {
 #define MAX_DEPTH_VALUE_11_BITS 2048
 #define MAX_DEPTH_VALUE_8_BITS 256
 
+namespace moetsi::ssp {
+
+/**
+ * @brief Convert an AVFrame to YUV image
+ * \param frame AVFrame
+ * \param image dest opencv image
+ */
 void AVFrameToMatYUV(AVFrameSharedP &frame, cv::Mat &image);
 
+/**
+ * @brief Convert an AVFrame to grayscale image
+ * \param frame AVFrame
+ * \param image dest opencv image
+ */
 void AVFrameToMatGray(AVFrameSharedP &frame, cv::Mat &image);
 
+/**
+ * @brief Get AVCodec parameters from a FrameStruct 
+ * \param frame_struct frame struct
+ * \return AVCodec parameters 
+ */
 AVCodecParameters *getParams(FrameStruct& frame_struct);
 
 template <typename T>
@@ -71,3 +88,5 @@ void MinMaxFilter(cv::Mat &in_mat, cv::Mat &out_mat, double min, double max) {
     }
   }
 }
+
+} //namespace moetsi::ssp

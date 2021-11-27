@@ -1,8 +1,12 @@
-//
+/**
+ * \file zdepth_decoder.cc @brief ZDepth decoder
+ */
 // Created by amourao on 23-09-2019.
-//
 
 #include "zdepth_decoder.h"
+
+namespace moetsi::ssp {
+
 ZDepthDecoder::ZDepthDecoder() {}
 
 ZDepthDecoder::~ZDepthDecoder() {}
@@ -25,3 +29,5 @@ cv::Mat ZDepthDecoder::Decode(FrameStruct& frame) {
                  cv::Mat::AUTO_STEP);
   ;
 }
+
+} // namespace moetsi::ssp

@@ -1,6 +1,8 @@
-//
+/**
+ * Namespace libav_types.h @brief Types for libav support
+ */
 // Created by amourao on 28-10-2019.
-//
+#pragma once
 
 extern "C" {
 #ifdef FFMPEG_AS_FRAMEWORK
@@ -22,7 +24,7 @@ extern "C" {
 #endif
 }
 
-#pragma once
+namespace moetsi::ssp {
 
 struct AVCodecContextDeleter {
   void operator()(AVCodecContext *ptr) const {
@@ -103,3 +105,5 @@ typedef std::unique_ptr<AVFormatContext, AVFormatContextDeleter>
 typedef std::unique_ptr<AVCodec, AVCodecDeleter> AVCodecSafeP;
 
 typedef std::unique_ptr<AVIOContext, AVIOContextDeleter> AVIOContextSafeP;
+
+} // namespace moetsi::ssp

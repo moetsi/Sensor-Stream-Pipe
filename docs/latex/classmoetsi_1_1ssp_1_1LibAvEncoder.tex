@@ -1,0 +1,209 @@
+\hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder}{}\section{moetsi\+:\+:ssp\+:\+:Lib\+Av\+Encoder Class Reference}
+\label{classmoetsi_1_1ssp_1_1LibAvEncoder}\index{moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}}
+
+
+Lib\+AV encoder for Jpeg/\+Mpeg.  
+
+
+
+
+{\ttfamily \#include $<$libav\+\_\+encoder.\+h$>$}
+
+
+
+Inheritance diagram for moetsi\+:\+:ssp\+:\+:Lib\+Av\+Encoder\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=214pt]{classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for moetsi\+:\+:ssp\+:\+:Lib\+Av\+Encoder\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=214pt]{classmoetsi_1_1ssp_1_1LibAvEncoder__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_a92b5b4c1f7da0a5cbf30bbf4fe7c89d4}{Lib\+Av\+Encoder} (std\+::string codec\+\_\+parameters\+\_\+file, unsigned int fps)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_a2d5ec3b4a92f7b9378fd397624bd4ea4}{Lib\+Av\+Encoder} (Y\+A\+M\+L\+::\+Node \&\+\_\+codec\+\_\+parameters, unsigned int fps)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_aad54739bf358507ec23b25d44bb3ad4d}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_aad54739bf358507ec23b25d44bb3ad4d}} 
+virtual \hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_aad54739bf358507ec23b25d44bb3ad4d}{$\sim$\+Lib\+Av\+Encoder} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_a931327f154e0da63fdfed73cf317d688}{Add\+Frame\+Struct} (std\+::shared\+\_\+ptr$<$ \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} $>$ \&frame\+\_\+struct)
+\begin{DoxyCompactList}\small\item\em Add a frame struct. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_acf5e6e2f172d24778c7942c8cd37330b}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_acf5e6e2f172d24778c7942c8cd37330b}} 
+virtual void \hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_acf5e6e2f172d24778c7942c8cd37330b}{Next\+Packet} ()
+\begin{DoxyCompactList}\small\item\em Go to next packet. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_a306c0935fa37bd35ddfeb8290289e927}{Has\+Next\+Packet} ()
+\begin{DoxyCompactList}\small\item\em Check if there is a next packet. \end{DoxyCompactList}\item 
+virtual std\+::shared\+\_\+ptr$<$ \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} $>$ \hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_aedb37703d73b55f1389a122d2ecbe923}{Current\+Frame\+Encoded} ()
+\begin{DoxyCompactList}\small\item\em Get current encoded frame. \end{DoxyCompactList}\item 
+virtual std\+::shared\+\_\+ptr$<$ \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} $>$ \hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_a249c65ad557f438d6856e875f01a1947}{Current\+Frame\+Original} ()
+\begin{DoxyCompactList}\small\item\em Get current frame in its original format. \end{DoxyCompactList}\item 
+virtual std\+::shared\+\_\+ptr$<$ \hyperlink{structmoetsi_1_1ssp_1_1CodecParamsStruct}{Codec\+Params\+Struct} $>$ \hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_a2ff6afafbb5da48e900d34d70a46d00c}{Get\+Codec\+Params\+Struct} ()
+\begin{DoxyCompactList}\small\item\em Get codec parameters. \end{DoxyCompactList}\item 
+virtual unsigned int \hyperlink{classmoetsi_1_1ssp_1_1LibAvEncoder_ae21f81cb967359132183a29e04307933}{Get\+Fps} ()
+\begin{DoxyCompactList}\small\item\em Get F\+PS. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Lib\+AV encoder for Jpeg/\+Mpeg. 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_a92b5b4c1f7da0a5cbf30bbf4fe7c89d4}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_a92b5b4c1f7da0a5cbf30bbf4fe7c89d4}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}!Lib\+Av\+Encoder@{Lib\+Av\+Encoder}}
+\index{Lib\+Av\+Encoder@{Lib\+Av\+Encoder}!moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}}
+\subsubsection{\texorpdfstring{Lib\+Av\+Encoder()}{LibAvEncoder()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily moetsi\+::ssp\+::\+Lib\+Av\+Encoder\+::\+Lib\+Av\+Encoder (\begin{DoxyParamCaption}\item[{std\+::string}]{codec\+\_\+parameters\+\_\+file,  }\item[{unsigned int}]{fps }\end{DoxyParamCaption})}
+
+
+
+Constructor. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em codec\+\_\+parameters\+\_\+file} & File with codec parameters \\
+\hline
+{\em fps} & Frame per second \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_a2d5ec3b4a92f7b9378fd397624bd4ea4}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_a2d5ec3b4a92f7b9378fd397624bd4ea4}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}!Lib\+Av\+Encoder@{Lib\+Av\+Encoder}}
+\index{Lib\+Av\+Encoder@{Lib\+Av\+Encoder}!moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}}
+\subsubsection{\texorpdfstring{Lib\+Av\+Encoder()}{LibAvEncoder()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily moetsi\+::ssp\+::\+Lib\+Av\+Encoder\+::\+Lib\+Av\+Encoder (\begin{DoxyParamCaption}\item[{Y\+A\+M\+L\+::\+Node \&}]{\+\_\+codec\+\_\+parameters,  }\item[{unsigned int}]{fps }\end{DoxyParamCaption})}
+
+
+
+Constructor. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+codec\+\_\+parameters} & Yaml codec parameters \\
+\hline
+{\em fps} & Frame per second \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_a931327f154e0da63fdfed73cf317d688}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_a931327f154e0da63fdfed73cf317d688}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}!Add\+Frame\+Struct@{Add\+Frame\+Struct}}
+\index{Add\+Frame\+Struct@{Add\+Frame\+Struct}!moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}}
+\subsubsection{\texorpdfstring{Add\+Frame\+Struct()}{AddFrameStruct()}}
+{\footnotesize\ttfamily void moetsi\+::ssp\+::\+Lib\+Av\+Encoder\+::\+Add\+Frame\+Struct (\begin{DoxyParamCaption}\item[{std\+::shared\+\_\+ptr$<$ \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} $>$ \&}]{frame\+\_\+struct }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Add a frame struct. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em frame\+\_\+struct} & \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} to add \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IEncoder_a8c223ec82fdd30ee8ee75157306054ec}{moetsi\+::ssp\+::\+I\+Encoder}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_aedb37703d73b55f1389a122d2ecbe923}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_aedb37703d73b55f1389a122d2ecbe923}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}!Current\+Frame\+Encoded@{Current\+Frame\+Encoded}}
+\index{Current\+Frame\+Encoded@{Current\+Frame\+Encoded}!moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}}
+\subsubsection{\texorpdfstring{Current\+Frame\+Encoded()}{CurrentFrameEncoded()}}
+{\footnotesize\ttfamily std\+::shared\+\_\+ptr$<$ \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} $>$ moetsi\+::ssp\+::\+Lib\+Av\+Encoder\+::\+Current\+Frame\+Encoded (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Get current encoded frame. 
+
+\begin{DoxyReturn}{Returns}
+current encoded frame 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IEncoder_a178d117518e7c7007414ea9c82bd3ed6}{moetsi\+::ssp\+::\+I\+Encoder}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_a249c65ad557f438d6856e875f01a1947}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_a249c65ad557f438d6856e875f01a1947}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}!Current\+Frame\+Original@{Current\+Frame\+Original}}
+\index{Current\+Frame\+Original@{Current\+Frame\+Original}!moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}}
+\subsubsection{\texorpdfstring{Current\+Frame\+Original()}{CurrentFrameOriginal()}}
+{\footnotesize\ttfamily std\+::shared\+\_\+ptr$<$ \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} $>$ moetsi\+::ssp\+::\+Lib\+Av\+Encoder\+::\+Current\+Frame\+Original (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Get current frame in its original format. 
+
+\begin{DoxyReturn}{Returns}
+current frame in its original format 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IEncoder_ab60bdaae0a85289dfa31a12bab533dc0}{moetsi\+::ssp\+::\+I\+Encoder}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_a2ff6afafbb5da48e900d34d70a46d00c}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_a2ff6afafbb5da48e900d34d70a46d00c}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}!Get\+Codec\+Params\+Struct@{Get\+Codec\+Params\+Struct}}
+\index{Get\+Codec\+Params\+Struct@{Get\+Codec\+Params\+Struct}!moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}}
+\subsubsection{\texorpdfstring{Get\+Codec\+Params\+Struct()}{GetCodecParamsStruct()}}
+{\footnotesize\ttfamily std\+::shared\+\_\+ptr$<$ \hyperlink{structmoetsi_1_1ssp_1_1CodecParamsStruct}{Codec\+Params\+Struct} $>$ moetsi\+::ssp\+::\+Lib\+Av\+Encoder\+::\+Get\+Codec\+Params\+Struct (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Get codec parameters. 
+
+\begin{DoxyReturn}{Returns}
+codec parameters 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IEncoder_ad5179efaa4c74207766dd64f46f4059a}{moetsi\+::ssp\+::\+I\+Encoder}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_ae21f81cb967359132183a29e04307933}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_ae21f81cb967359132183a29e04307933}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}!Get\+Fps@{Get\+Fps}}
+\index{Get\+Fps@{Get\+Fps}!moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}}
+\subsubsection{\texorpdfstring{Get\+Fps()}{GetFps()}}
+{\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::\+Lib\+Av\+Encoder\+::\+Get\+Fps (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Get F\+PS. 
+
+\begin{DoxyReturn}{Returns}
+F\+PS in frame per second 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IEncoder_ae6a865aa52230d81aed1cb5232402f6c}{moetsi\+::ssp\+::\+I\+Encoder}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvEncoder_a306c0935fa37bd35ddfeb8290289e927}\label{classmoetsi_1_1ssp_1_1LibAvEncoder_a306c0935fa37bd35ddfeb8290289e927}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}!Has\+Next\+Packet@{Has\+Next\+Packet}}
+\index{Has\+Next\+Packet@{Has\+Next\+Packet}!moetsi\+::ssp\+::\+Lib\+Av\+Encoder@{moetsi\+::ssp\+::\+Lib\+Av\+Encoder}}
+\subsubsection{\texorpdfstring{Has\+Next\+Packet()}{HasNextPacket()}}
+{\footnotesize\ttfamily bool moetsi\+::ssp\+::\+Lib\+Av\+Encoder\+::\+Has\+Next\+Packet (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Check if there is a next packet. 
+
+\begin{DoxyReturn}{Returns}
+true if there is a next packet 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IEncoder_a2af8e23d841ef61f6ee4037e56a3694d}{moetsi\+::ssp\+::\+I\+Encoder}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{libav__encoder_8h}{libav\+\_\+encoder.\+h}\item 
+\hyperlink{libav__encoder_8cc}{libav\+\_\+encoder.\+cc}\end{DoxyCompactItemize}

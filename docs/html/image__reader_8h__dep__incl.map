@@ -1,0 +1,11 @@
+<map id="image_reader.h" name="image_reader.h">
+<area shape="rect" id="node2" href="$libav__encoder_8h.html" title="Jpeg/Mpeg encoder. " alt="" coords="413,80,527,107"/>
+<area shape="rect" id="node8" href="$multi__image__reader_8h.html" title="Multi image reader. " alt="" coords="242,80,389,107"/>
+<area shape="rect" id="node10" href="$image__reader_8cc.html" title="Image reader. " alt="" coords="551,80,669,107"/>
+<area shape="rect" id="node3" href="$iencoder_8cc.html" title="IEncoder factory. " alt="" coords="183,155,272,181"/>
+<area shape="rect" id="node4" href="$libav__encoder_8cc.html" title="Jpef/Mpeg encoder. " alt="" coords="653,155,773,181"/>
+<area shape="rect" id="node5" href="$ireader_8cc.html" title="IReader factory. " alt="" coords="296,155,375,181"/>
+<area shape="rect" id="node6" href="$ssp__server_8cc.html" title="SSP, server side. " alt="" coords="399,155,503,181"/>
+<area shape="rect" id="node7" href="$ssp__tester_8cc.html" title="SSP test program. " alt="" coords="527,155,629,181"/>
+<area shape="rect" id="node9" href="$multi__image__reader_8cc.html" title="Multi image reader. " alt="" coords="5,155,159,181"/>
+</map>

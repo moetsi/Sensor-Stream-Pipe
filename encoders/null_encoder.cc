@@ -1,7 +1,10 @@
-//
+/**
+ * \file null_encoder.cc @brief Straight pipe encoder
+ */
 // Created by amourao on 16/09/19.
-//
 #include "null_encoder.h"
+
+namespace moetsi::ssp {
 
 NullEncoder::NullEncoder(int _fps) { fps = _fps; }
 NullEncoder::~NullEncoder() {}
@@ -21,3 +24,5 @@ std::shared_ptr<CodecParamsStruct> NullEncoder::GetCodecParamsStruct() {
   return nullptr;
 }
 unsigned int NullEncoder::GetFps() { return fps; }
+
+} // namespace moetsi::ssp

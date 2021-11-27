@@ -1,0 +1,7 @@
+<map id="null_encoder.h" name="null_encoder.h">
+<area shape="rect" id="node2" href="$iencoder_8cc.html" title="IEncoder factory. " alt="" coords="5,80,95,107"/>
+<area shape="rect" id="node3" href="$null__encoder_8cc.html" title="Straight pipe encoder. " alt="" coords="119,80,232,107"/>
+<area shape="rect" id="node4" href="$ireader_8cc.html" title="IReader factory. " alt="" coords="256,80,335,107"/>
+<area shape="rect" id="node5" href="$ssp__server_8cc.html" title="SSP, server side. " alt="" coords="359,80,463,107"/>
+<area shape="rect" id="node6" href="$ssp__tester_8cc.html" title="SSP test program. " alt="" coords="487,80,589,107"/>
+</map>

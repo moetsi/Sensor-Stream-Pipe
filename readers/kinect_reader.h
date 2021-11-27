@@ -1,7 +1,7 @@
-//
+/**
+ * \file kinect_reader.h @brief Kinect driver
+ */
 // Created by amourao on 27-06-2019.
-//
-
 #pragma once
 
 #include <atomic>
@@ -14,11 +14,13 @@
 
 #include <cereal/archives/binary.hpp>
 
-#include "../structs/frame_struct.hpp"
+#include "../structs/frame_struct.h"
 #include "../utils/image_decoder.h"
 #include "../utils/kinect_utils.h"
 #include "../utils/video_utils.h"
 #include "ireader.h"
+
+namespace moetsi::ssp {
 
 extern std::atomic_bool exiting;
 
@@ -75,7 +77,6 @@ private:
   std::vector<std::shared_ptr<CodecParamsStruct>> codec_params_structs_;
   std::shared_ptr<CameraCalibrationStruct> camera_calibration_struct_;
 
-
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
 public:
@@ -83,19 +84,44 @@ public:
 
   ~KinectReader();
 
-  void Reset();
+  /** @brief Get current frame data */
+  virtual std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
 
-  bool HasNextFrame();
+  /** 
+   * @brief Get frame types
+   * \return a vector of FrameType, listing available data types 
+   */
+  virtual std::vector<FrameType> GetType();
 
-  void NextFrame();
+  /**
+   * @brief Check if there is a next frame
+   * \return true if there is a next frame
+   */
+  virtual bool HasNextFrame();
 
-  std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
+  /** @brief Go to next frame */
+  virtual void NextFrame();
 
-  unsigned int GetCurrentFrameId();
+  /** @brief Reset this reader */
+  virtual void Reset();
 
+  /** 
+   * @brief Go to a given frame
+   * \param frame_id target frame number
+   */
   virtual void GoToFrame(unsigned int frame_id);
 
-  unsigned int GetFps();
+  /**
+   * @brief Get current frame number
+   * \return current frame number.
+   */ 
+  virtual unsigned int GetCurrentFrameId();
 
-  std::vector<unsigned int> GetType();
+  /**
+   * @brief Get indicative FPS in frame per second.
+   * \return the FPS number
+   */ 
+  virtual unsigned int GetFps();
 };
+
+} // namespace moetsi::ssp

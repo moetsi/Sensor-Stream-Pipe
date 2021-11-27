@@ -1,0 +1,140 @@
+\hypertarget{classmoetsi_1_1ssp_1_1iPhoneReader}{}\section{moetsi\+:\+:ssp\+:\+:i\+Phone\+Reader Class Reference}
+\label{classmoetsi_1_1ssp_1_1iPhoneReader}\index{moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}}
+
+
+Inheritance diagram for moetsi\+:\+:ssp\+:\+:i\+Phone\+Reader\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=215pt]{classmoetsi_1_1ssp_1_1iPhoneReader__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for moetsi\+:\+:ssp\+:\+:i\+Phone\+Reader\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=215pt]{classmoetsi_1_1ssp_1_1iPhoneReader__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1iPhoneReader_a3d78eacce7d71483da93efde29f47241}\label{classmoetsi_1_1ssp_1_1iPhoneReader_a3d78eacce7d71483da93efde29f47241}} 
+void \hyperlink{classmoetsi_1_1ssp_1_1iPhoneReader_a3d78eacce7d71483da93efde29f47241}{Reset} () override
+\begin{DoxyCompactList}\small\item\em Reset this reader. \end{DoxyCompactList}\item 
+bool \hyperlink{classmoetsi_1_1ssp_1_1iPhoneReader_a35ca55a03a9fb7b559f9381b11f53bfe}{Has\+Next\+Frame} () override
+\begin{DoxyCompactList}\small\item\em Check if there is a next frame. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1iPhoneReader_abba4479843de3e7ab42a3116b9fa94c9}\label{classmoetsi_1_1ssp_1_1iPhoneReader_abba4479843de3e7ab42a3116b9fa94c9}} 
+void \hyperlink{classmoetsi_1_1ssp_1_1iPhoneReader_abba4479843de3e7ab42a3116b9fa94c9}{Next\+Frame} () override
+\begin{DoxyCompactList}\small\item\em Go to next frame. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1iPhoneReader_ad3b35cece8ba5b53edb110b5c1aa80bc}\label{classmoetsi_1_1ssp_1_1iPhoneReader_ad3b35cece8ba5b53edb110b5c1aa80bc}} 
+std\+::vector$<$ std\+::shared\+\_\+ptr$<$ \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} $>$ $>$ \hyperlink{classmoetsi_1_1ssp_1_1iPhoneReader_ad3b35cece8ba5b53edb110b5c1aa80bc}{Get\+Current\+Frame} () override
+\begin{DoxyCompactList}\small\item\em Get current frame data. \end{DoxyCompactList}\item 
+unsigned int \hyperlink{classmoetsi_1_1ssp_1_1iPhoneReader_a78792c6319743aed3ef2afc96fe16485}{Get\+Current\+Frame\+Id} () override
+\begin{DoxyCompactList}\small\item\em Get current frame number. \end{DoxyCompactList}\item 
+void \hyperlink{classmoetsi_1_1ssp_1_1iPhoneReader_a27b6dea97e4c4db8e4e749cc9e30e7ca}{Go\+To\+Frame} (unsigned int frame\+\_\+id) override
+\begin{DoxyCompactList}\small\item\em Go to a given frame. \end{DoxyCompactList}\item 
+unsigned int \hyperlink{classmoetsi_1_1ssp_1_1iPhoneReader_a4bb216847a6c2ed8eb5d31788a0b8477}{Get\+Fps} () override
+\begin{DoxyCompactList}\small\item\em Get indicative F\+PS in frame per second. \end{DoxyCompactList}\item 
+std\+::vector$<$ \hyperlink{namespacemoetsi_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}{Frame\+Type} $>$ \hyperlink{classmoetsi_1_1ssp_1_1iPhoneReader_a05d285ace85fc570bc2f453a0862ae56}{Get\+Type} () override
+\begin{DoxyCompactList}\small\item\em Get frame types. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1iPhoneReader_a78792c6319743aed3ef2afc96fe16485}\label{classmoetsi_1_1ssp_1_1iPhoneReader_a78792c6319743aed3ef2afc96fe16485}} 
+\index{moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}!Get\+Current\+Frame\+Id@{Get\+Current\+Frame\+Id}}
+\index{Get\+Current\+Frame\+Id@{Get\+Current\+Frame\+Id}!moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}}
+\subsubsection{\texorpdfstring{Get\+Current\+Frame\+Id()}{GetCurrentFrameId()}}
+{\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::i\+Phone\+Reader\+::\+Get\+Current\+Frame\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get current frame number. 
+
+\begin{DoxyReturn}{Returns}
+current frame number. 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IReader_ac292d83eb06dee277baaa06e281a562d}{moetsi\+::ssp\+::\+I\+Reader}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1iPhoneReader_a4bb216847a6c2ed8eb5d31788a0b8477}\label{classmoetsi_1_1ssp_1_1iPhoneReader_a4bb216847a6c2ed8eb5d31788a0b8477}} 
+\index{moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}!Get\+Fps@{Get\+Fps}}
+\index{Get\+Fps@{Get\+Fps}!moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}}
+\subsubsection{\texorpdfstring{Get\+Fps()}{GetFps()}}
+{\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::i\+Phone\+Reader\+::\+Get\+Fps (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get indicative F\+PS in frame per second. 
+
+\begin{DoxyReturn}{Returns}
+the F\+PS number 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IReader_a9f6a8650ca290b011b8e5451eeae9f32}{moetsi\+::ssp\+::\+I\+Reader}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1iPhoneReader_a05d285ace85fc570bc2f453a0862ae56}\label{classmoetsi_1_1ssp_1_1iPhoneReader_a05d285ace85fc570bc2f453a0862ae56}} 
+\index{moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}!Get\+Type@{Get\+Type}}
+\index{Get\+Type@{Get\+Type}!moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}}
+\subsubsection{\texorpdfstring{Get\+Type()}{GetType()}}
+{\footnotesize\ttfamily vector$<$ \hyperlink{namespacemoetsi_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}{Frame\+Type} $>$ moetsi\+::ssp\+::i\+Phone\+Reader\+::\+Get\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get frame types. 
+
+\begin{DoxyReturn}{Returns}
+a vector of Frame\+Type, listing available data types 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IReader_a4116c1931fde7bd66133934ffdca1cce}{moetsi\+::ssp\+::\+I\+Reader}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1iPhoneReader_a27b6dea97e4c4db8e4e749cc9e30e7ca}\label{classmoetsi_1_1ssp_1_1iPhoneReader_a27b6dea97e4c4db8e4e749cc9e30e7ca}} 
+\index{moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}!Go\+To\+Frame@{Go\+To\+Frame}}
+\index{Go\+To\+Frame@{Go\+To\+Frame}!moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}}
+\subsubsection{\texorpdfstring{Go\+To\+Frame()}{GoToFrame()}}
+{\footnotesize\ttfamily void moetsi\+::ssp\+::i\+Phone\+Reader\+::\+Go\+To\+Frame (\begin{DoxyParamCaption}\item[{unsigned int}]{frame\+\_\+id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Go to a given frame. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em frame\+\_\+id} & target frame number \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IReader_a6f1be3c06538992cca6d550bd9566681}{moetsi\+::ssp\+::\+I\+Reader}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1iPhoneReader_a35ca55a03a9fb7b559f9381b11f53bfe}\label{classmoetsi_1_1ssp_1_1iPhoneReader_a35ca55a03a9fb7b559f9381b11f53bfe}} 
+\index{moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}!Has\+Next\+Frame@{Has\+Next\+Frame}}
+\index{Has\+Next\+Frame@{Has\+Next\+Frame}!moetsi\+::ssp\+::i\+Phone\+Reader@{moetsi\+::ssp\+::i\+Phone\+Reader}}
+\subsubsection{\texorpdfstring{Has\+Next\+Frame()}{HasNextFrame()}}
+{\footnotesize\ttfamily bool moetsi\+::ssp\+::i\+Phone\+Reader\+::\+Has\+Next\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Check if there is a next frame. 
+
+\begin{DoxyReturn}{Returns}
+true if there is a next frame 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IReader_af9186ba41e136dc4ec3242b5dd55fa04}{moetsi\+::ssp\+::\+I\+Reader}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{iphone__reader_8h}{iphone\+\_\+reader.\+h}\item 
+\hyperlink{iphone__reader_8mm}{iphone\+\_\+reader.\+mm}\end{DoxyCompactItemize}

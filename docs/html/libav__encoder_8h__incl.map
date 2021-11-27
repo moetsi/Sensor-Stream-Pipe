@@ -1,0 +1,14 @@
+<map id="libav_encoder.h" name="libav_encoder.h">
+<area shape="rect" id="node14" href="$image__reader_8h.html" title="Image reader. " alt="" coords="604,80,775,107"/>
+<area shape="rect" id="node15" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="889,393,1052,420"/>
+<area shape="rect" id="node25" href="$logger_8h.html" title="Logger header. " alt="" coords="3054,550,3122,577"/>
+<area shape="rect" id="node28" href="$image__decoder_8h.html" title="AV Image decoder. " alt="" coords="486,155,647,181"/>
+<area shape="rect" id="node33" href="$video__utils_8h.html" title="Video utilities. " alt="" coords="1831,155,1966,181"/>
+<area shape="rect" id="node44" href="$encoders_2iencoder_8h_source.html" title="iencoder.h" alt="" coords="988,80,1071,107"/>
+<area shape="rect" id="node46" href="$libav__decoder_8h.html" title="Jpeg/Mpeg decoder. " alt="" coords="2510,80,2693,107"/>
+<area shape="rect" id="node32" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="776,155,848,181"/>
+<area shape="rect" id="node22" href="$utils_2utils_8h_source.html" title="../utils/utils.h" alt="" coords="497,468,594,495"/>
+<area shape="rect" id="node31" href="$libav__types_8h_source.html" title="libav_types.h" alt="" coords="2579,237,2677,263"/>
+<area shape="rect" id="node41" href="$decoders_2idecoder_8h_source.html" title="../decoders/idecoder.h" alt="" coords="1421,319,1571,345"/>
+<area shape="rect" id="node42" href="$zdepth__decoder_8h.html" title="ZDepth decoder. " alt="" coords="1277,229,1408,271"/>
+</map>

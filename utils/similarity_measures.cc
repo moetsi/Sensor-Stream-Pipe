@@ -1,9 +1,11 @@
-//
+/**
+ * \file similarity_measure.cc @brief Similarity measures
+ */
 // Created by amourao on 12-08-2019.
-//
-
 #include "similarity_measures.h"
 #include <opencv2/imgproc.hpp>
+
+namespace moetsi::ssp {
 
 double GetMSE(const Mat &I1, const Mat &I2) {
   cv::Mat power;
@@ -81,6 +83,8 @@ Scalar GetMSSIM(const Mat &i1, const Mat &i2) {
   Scalar mssim = mean(ssim_map); // mssim = average of ssim map
   return mssim;
 }
+
+} // namespace moetsi::ssp
 
 /*
 

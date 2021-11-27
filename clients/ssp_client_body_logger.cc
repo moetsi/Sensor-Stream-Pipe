@@ -39,6 +39,8 @@ extern "C" {
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
 
+using namespace moetsi::ssp;
+
 // imshow not available on iOS/iPhone Simulator
 #if __APPLE__
   #include <TargetConditionals.h>
@@ -63,13 +65,13 @@ extern "C" SSP_EXPORT int ssp_client_body_logger(int port)
     std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
     int bodyCount;
-    _object_human_t bodyStruct;
+    object_human_t bodyStruct;
 
     while (reader.HasNextFrame()) {
       reader.NextFrame();
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
       for (FrameStruct f : f_list) {
-        if (f.frame_data_type == 8)
+        if (f.frame_data_type == FrameDataType::FrameDataTypeObjectHumanData)
         {
           std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
@@ -78,7 +80,7 @@ extern "C" SSP_EXPORT int ssp_client_body_logger(int port)
 
           //Then we grab the body struct
           // (in the future it will iterate and go over the body struct array)
-          memcpy(&bodyStruct, &f.frame[4], sizeof(_object_human_t));
+          memcpy(&bodyStruct, &f.frame[4], sizeof(object_human_t));
 
           spdlog::debug("\t description: {} counter: {} bodyStruct's pelvis.x: {} number of bodies: {}", f.scene_desc, f.frame_id, bodyStruct.pelvis_x, bodyCount);
         }

@@ -1,0 +1,113 @@
+\hypertarget{classmoetsi_1_1ssp_1_1LibAvDecoder}{}\section{moetsi\+:\+:ssp\+:\+:Lib\+Av\+Decoder Class Reference}
+\label{classmoetsi_1_1ssp_1_1LibAvDecoder}\index{moetsi\+::ssp\+::\+Lib\+Av\+Decoder@{moetsi\+::ssp\+::\+Lib\+Av\+Decoder}}
+
+
+AV (Jpeg/\+Mpeg) decoder.  
+
+
+
+
+{\ttfamily \#include $<$libav\+\_\+decoder.\+h$>$}
+
+
+
+Inheritance diagram for moetsi\+:\+:ssp\+:\+:Lib\+Av\+Decoder\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=215pt]{classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for moetsi\+:\+:ssp\+:\+:Lib\+Av\+Decoder\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=215pt]{classmoetsi_1_1ssp_1_1LibAvDecoder__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvDecoder_a68174e3bd10e03eaabee437826399b64}\label{classmoetsi_1_1ssp_1_1LibAvDecoder_a68174e3bd10e03eaabee437826399b64}} 
+\hyperlink{classmoetsi_1_1ssp_1_1LibAvDecoder_a68174e3bd10e03eaabee437826399b64}{Lib\+Av\+Decoder} ()
+\begin{DoxyCompactList}\small\item\em constructor \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvDecoder_a1aafd7da5bdd011aae77075b71e52f51}\label{classmoetsi_1_1ssp_1_1LibAvDecoder_a1aafd7da5bdd011aae77075b71e52f51}} 
+\hyperlink{classmoetsi_1_1ssp_1_1LibAvDecoder_a1aafd7da5bdd011aae77075b71e52f51}{$\sim$\+Lib\+Av\+Decoder} ()
+\begin{DoxyCompactList}\small\item\em destructor \end{DoxyCompactList}\item 
+void \hyperlink{classmoetsi_1_1ssp_1_1LibAvDecoder_a631ce4158ab4f456a26951674f96a803}{Init} (A\+V\+Codec\+Parameters $\ast$codec\+\_\+parameters)
+\begin{DoxyCompactList}\small\item\em Initialize. \end{DoxyCompactList}\item 
+cv\+::\+Mat \hyperlink{classmoetsi_1_1ssp_1_1LibAvDecoder_a4206a4581de1b93d6c6a0835e8cf4ac8}{Decode} (\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \&frame\+\_\+struct)
+\begin{DoxyCompactList}\small\item\em Extract an opencv image from a \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}. \end{DoxyCompactList}\item 
+A\+V\+Frame\+SharedP \hyperlink{classmoetsi_1_1ssp_1_1LibAvDecoder_a41c94bd7fa9576902ea0a6e95e59d93e}{Decode\+Frame} (\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \&frame\+\_\+struct)
+\begin{DoxyCompactList}\small\item\em Decode frame to libav A\+V\+Frame structure. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+AV (Jpeg/\+Mpeg) decoder. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvDecoder_a4206a4581de1b93d6c6a0835e8cf4ac8}\label{classmoetsi_1_1ssp_1_1LibAvDecoder_a4206a4581de1b93d6c6a0835e8cf4ac8}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Decoder@{moetsi\+::ssp\+::\+Lib\+Av\+Decoder}!Decode@{Decode}}
+\index{Decode@{Decode}!moetsi\+::ssp\+::\+Lib\+Av\+Decoder@{moetsi\+::ssp\+::\+Lib\+Av\+Decoder}}
+\subsubsection{\texorpdfstring{Decode()}{Decode()}}
+{\footnotesize\ttfamily cv\+::\+Mat moetsi\+::ssp\+::\+Lib\+Av\+Decoder\+::\+Decode (\begin{DoxyParamCaption}\item[{\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \&}]{frame\+\_\+struct }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Extract an opencv image from a \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Open\+CV matrix/image 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classmoetsi_1_1ssp_1_1IDecoder_a1c06604dc4107d3668a4e791c13cc063}{moetsi\+::ssp\+::\+I\+Decoder}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvDecoder_a41c94bd7fa9576902ea0a6e95e59d93e}\label{classmoetsi_1_1ssp_1_1LibAvDecoder_a41c94bd7fa9576902ea0a6e95e59d93e}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Decoder@{moetsi\+::ssp\+::\+Lib\+Av\+Decoder}!Decode\+Frame@{Decode\+Frame}}
+\index{Decode\+Frame@{Decode\+Frame}!moetsi\+::ssp\+::\+Lib\+Av\+Decoder@{moetsi\+::ssp\+::\+Lib\+Av\+Decoder}}
+\subsubsection{\texorpdfstring{Decode\+Frame()}{DecodeFrame()}}
+{\footnotesize\ttfamily A\+V\+Frame\+SharedP moetsi\+::ssp\+::\+Lib\+Av\+Decoder\+::\+Decode\+Frame (\begin{DoxyParamCaption}\item[{\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \&}]{frame\+\_\+struct }\end{DoxyParamCaption})}
+
+
+
+Decode frame to libav A\+V\+Frame structure. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em frame\+\_\+struct} & S\+SP \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Libav A\+V\+Frame structure 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1LibAvDecoder_a631ce4158ab4f456a26951674f96a803}\label{classmoetsi_1_1ssp_1_1LibAvDecoder_a631ce4158ab4f456a26951674f96a803}} 
+\index{moetsi\+::ssp\+::\+Lib\+Av\+Decoder@{moetsi\+::ssp\+::\+Lib\+Av\+Decoder}!Init@{Init}}
+\index{Init@{Init}!moetsi\+::ssp\+::\+Lib\+Av\+Decoder@{moetsi\+::ssp\+::\+Lib\+Av\+Decoder}}
+\subsubsection{\texorpdfstring{Init()}{Init()}}
+{\footnotesize\ttfamily void moetsi\+::ssp\+::\+Lib\+Av\+Decoder\+::\+Init (\begin{DoxyParamCaption}\item[{A\+V\+Codec\+Parameters $\ast$}]{codec\+\_\+parameters }\end{DoxyParamCaption})}
+
+
+
+Initialize. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em codec\+\_\+parameters} & parameters \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{libav__decoder_8h}{libav\+\_\+decoder.\+h}\item 
+\hyperlink{libav__decoder_8cc}{libav\+\_\+decoder.\+cc}\end{DoxyCompactItemize}

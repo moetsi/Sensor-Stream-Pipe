@@ -1,7 +1,7 @@
-//
+/**
+ * \file video_file_reader.h @brief Video file reader support
+ */ 
 // Created by amourao on 27-06-2019.
-//
-
 #pragma once
 
 #include <fstream>
@@ -31,11 +31,13 @@ extern "C" {
 #endif
 }
 
-#include <cereal/archives/binary.hpp>
+// #include <cereal/archives/binary.hpp>
 
-#include "../structs/frame_struct.hpp"
+#include "../structs/frame_struct.h"
 #include "../utils/utils.h"
 #include "ireader.h"
+
+namespace moetsi::ssp {
 
 class VideoFileReader : public IReader {
 private:
@@ -74,19 +76,44 @@ public:
 
   ~VideoFileReader();
 
-  void Reset();
+  /** @brief Get current frame data */
+  virtual std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
 
-  void GoToFrame(unsigned int frame_id);
+  /** 
+   * @brief Get frame types
+   * \return a vector of FrameType, listing available data types 
+   */
+  virtual std::vector<FrameType> GetType();
 
-  bool HasNextFrame();
+  /**
+   * @brief Check if there is a next frame
+   * \return true if there is a next frame
+   */
+  virtual bool HasNextFrame();
 
-  void NextFrame();
+  /** @brief Go to next frame */
+  virtual void NextFrame();
 
-  std::vector<unsigned int> GetType();
+  /** @brief Reset this reader */
+  virtual void Reset();
 
-  std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
+  /** 
+   * @brief Go to a given frame
+   * \param frame_id target frame number
+   */
+  virtual void GoToFrame(unsigned int frame_id);
 
-  unsigned int GetCurrentFrameId();
+  /**
+   * @brief Get current frame number
+   * \return current frame number.
+   */ 
+  virtual unsigned int GetCurrentFrameId();
 
-  unsigned int GetFps();
+  /**
+   * @brief Get indicative FPS in frame per second.
+   * \return the FPS number
+   */ 
+  virtual unsigned int GetFps();
 };
+
+} // namespace moetsi::ssp

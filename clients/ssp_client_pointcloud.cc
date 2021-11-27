@@ -1,6 +1,7 @@
-//
+/**
+ *\file ssp_client_point_cloud.cc @brief Point cloud SSP client
+ */
 // Created by amourao on 26-06-2019.
-//
 
 #include <chrono>
 #include <iostream>
@@ -31,6 +32,8 @@ extern "C" {
 #include "../readers/network_reader.h"
 #include "../utils/image_converter.h"
 #include "../utils/kinect_utils.h"
+
+using namespace moetsi::ssp;
 
 struct color_point_t {
   int16_t xyz[3];
@@ -149,9 +152,10 @@ int main(int argc, char *argv[]) {
       reader.NextFrame();
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
       for (FrameStruct f : f_list) {
-        std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
+        std::string decoder_id = f.stream_id + std::to_string(uint64_t(f.sensor_id));
 
-        if (f.camera_calibration_data.type == 0 && calibration_set == false) {
+        //if (f.camera_calibration_data.type == 0 && calibration_set == false) {
+        if (f.camera_calibration_data.type == CameraCalibrationType::CameraCalibrationTypeKinect && calibration_set == false) {
 
           const k4a_depth_mode_t d = static_cast<const k4a_depth_mode_t>(
               f.camera_calibration_data.extra_data[0]);
@@ -166,7 +170,8 @@ int main(int argc, char *argv[]) {
           calibration_set = true;
         }
         if (write_to_disk) {
-          if (f_list.size() == 3 && f.frame_type == 0) {
+          // moetsi::ssp::FrameType::FrameTypeColor = 0
+          if (f_list.size() == 3 && f.frame_type == moetsi::ssp::FrameType::FrameTypeColor) {
             cv::Mat img;
             bool imgChanged = FrameStructToMat(f, img, decoders);
 
@@ -179,7 +184,8 @@ int main(int argc, char *argv[]) {
               cv::imwrite(output, img);
             }
           }
-          if (f_list.size() == 3 && f.frame_type == 1) {
+          // moetsi::ssp::FrameType::FrameTypeDepth = 1
+          if (f_list.size() == 3 && f.frame_type == moetsi::ssp::FrameType::FrameTypeDepth) {
             cv::Mat img;
             bool imgChanged = FrameStructToMat(f, img, decoders);
 

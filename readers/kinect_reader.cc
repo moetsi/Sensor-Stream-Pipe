@@ -1,8 +1,10 @@
-//
+/**
+ * \file kinect_reader.cc @brief Kinect driver
+ */
 // Created by amourao on 26-06-2019.
-//
-
 #include "kinect_reader.h"
+
+namespace moetsi::ssp {
 
 std::atomic_bool exiting(false);
 
@@ -122,7 +124,7 @@ KinectReader::KinectReader(uint8_t _device_index,
       std::shared_ptr<CameraCalibrationStruct>(new CameraCalibrationStruct());
 
   size_t buffer_size = 10000;
-  camera_calibration_struct_->type = 0;
+  camera_calibration_struct_->type = CameraCalibrationType::CameraCalibrationTypeKinect; // = 0;
   camera_calibration_struct_->data.resize(buffer_size);
   k4a_buffer_result_t output_buffer_size = k4a_device_get_raw_calibration(
       device_, (uint8_t *)camera_calibration_struct_->data.data(),
@@ -140,10 +142,8 @@ KinectReader::KinectReader(uint8_t _device_index,
 
   frame_template_.frame_id = 0;
   frame_template_.device_id = 0;
-
-  frame_template_.message_type = 0;
-
-  frame_template_.frame_data_type = 0;
+  frame_template_.message_type = SSPMessageType::MessageTypeDefault; // = 0;
+  frame_template_.frame_data_type = FrameDataType::FrameDataTypeImageFrame; // = 0;
   frame_template_.scene_desc = "kinect";
   frame_template_.stream_id = RandomString(16);
 
@@ -176,7 +176,7 @@ void KinectReader::NextFrame() {
           result_);
       break;
     }
-    uint64_t capture_timestamp = CurrentTimeMs();
+    uint64_t capture_timestamp = CurrentTimeNs();
     if (stream_color_ &&
         device_config_.color_resolution != K4A_COLOR_RESOLUTION_OFF) {
       k4a_image_t color_image = k4a_capture_get_color_image(capture_);
@@ -184,17 +184,17 @@ void KinectReader::NextFrame() {
         std::shared_ptr<FrameStruct> s =
             std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
         s->sensor_id = 0;
-        s->frame_type = 0;
+        s->frame_type = FrameType::FrameTypeColor; // = 0;
         s->frame_id = frame_counter_.at(0)++;
         s->timestamps.push_back(
-            k4a_image_get_device_timestamp_usec(color_image) / 1000);
+            k4a_image_get_device_timestamp_usec(color_image) * 1000ULL);
         s->timestamps.push_back(capture_timestamp);
 
         uint8_t *buffer = k4a_image_get_buffer(color_image);
         size_t size = k4a_image_get_size(color_image);
 
         if (k4a_image_get_format(color_image) == K4A_IMAGE_FORMAT_COLOR_MJPG) {
-          s->frame_data_type = 0;
+          s->frame_data_type = FrameDataType::FrameDataTypeImageFrame; // = 0;
           s->frame = std::vector<uchar>(buffer, buffer + size);
           if (codec_params_structs_.at(0) == nullptr) {
             ImageDecoder id;
@@ -209,7 +209,7 @@ void KinectReader::NextFrame() {
 
           s->codec_data = *codec_params_structs_.at(0);
         } else {
-          s->frame_data_type = 2;
+          s->frame_data_type = FrameDataType::FrameDataTypeRawRGBA; // = 2;
 
           int rows = k4a_image_get_height_pixels(color_image);
           int cols = k4a_image_get_width_pixels(color_image);
@@ -234,11 +234,11 @@ void KinectReader::NextFrame() {
         std::shared_ptr<FrameStruct> s =
             std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
         s->sensor_id = 1;
-        s->frame_type = 1;
-        s->frame_data_type = 3;
+        s->frame_type = FrameType::FrameTypeDepth; // =1;
+        s->frame_data_type = FrameDataType::FrameDataTypeGRAY16LE; // = 3;
         s->frame_id = frame_counter_.at(1)++;
         s->timestamps.push_back(
-            k4a_image_get_device_timestamp_usec(depth_image) / 1000);
+            k4a_image_get_device_timestamp_usec(depth_image) * 1000ULL);
         s->timestamps.push_back(capture_timestamp);
         s->camera_calibration_data = *camera_calibration_struct_;
         uint8_t *buffer = k4a_image_get_buffer(depth_image);
@@ -266,11 +266,10 @@ void KinectReader::NextFrame() {
         std::shared_ptr<FrameStruct> s =
             std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
         s->sensor_id = 2;
-        s->frame_type = 2;
+        s->frame_type = FrameType::FrameTypeIR; // = 2;
         s->frame_id = frame_counter_.at(2)++;
-        s->frame_data_type = 3;
-        s->timestamps.push_back(k4a_image_get_device_timestamp_usec(ir_image) /
-                                1000);
+        s->frame_data_type = FrameDataType::FrameDataTypeGRAY16LE; // = 3;
+        s->timestamps.push_back(k4a_image_get_device_timestamp_usec(ir_image) * 1000ULL);
         s->timestamps.push_back(capture_timestamp);
         s->camera_calibration_data = *camera_calibration_struct_;
         uint8_t *buffer = k4a_image_get_buffer(ir_image);
@@ -312,17 +311,17 @@ unsigned int KinectReader::GetFps() {
   return -1;
 }
 
-std::vector<unsigned int> KinectReader::GetType() {
-  std::vector<unsigned int> types;
+std::vector<FrameType> KinectReader::GetType() {
+  std::vector<FrameType> types;
 
   if (stream_color_) {
-    types.push_back(0);
+    types.push_back(FrameType::FrameTypeColor);
   }
   if (stream_depth_) {
-    types.push_back(1);
+    types.push_back(FrameType::FrameTypeDepth);
   }
   if (stream_ir_) {
-    types.push_back(2);
+    types.push_back(FrameType::FrameTypeIR);
   }
 
   return types;
@@ -330,3 +329,5 @@ std::vector<unsigned int> KinectReader::GetType() {
 
 void KinectReader::GoToFrame(unsigned int frame_id) {}
 unsigned int KinectReader::GetCurrentFrameId() { return frame_counter_.at(0); }
+
+} // namespace moetsi::ssp

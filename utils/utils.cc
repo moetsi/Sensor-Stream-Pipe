@@ -1,13 +1,31 @@
-//
+/**
+ * \file Utils.cc @brief Utilities
+ */
 // Created by amourao on 26-06-2019.
-//
-
 #include "utils.h"
+
+#include <random>
+#include <chrono>
+
+namespace moetsi::ssp {
+
+namespace {
+  thread_local std::mt19937_64 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+}
 
 uint64_t CurrentTimeMs() {
   using namespace std::chrono;
-  return duration_cast<milliseconds>(system_clock::now().time_since_epoch())
-      .count();
+  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+uint64_t CurrentTimeUs() {
+  using namespace std::chrono;
+  return duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+uint64_t CurrentTimeNs() {
+  using namespace std::chrono;
+  return duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
 }
 
 std::string RandomString(size_t length) {
@@ -16,7 +34,9 @@ std::string RandomString(size_t length) {
                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                            "abcdefghijklmnopqrstuvwxyz";
     const size_t max_index = (sizeof(charset) - 1);
-    return charset[rand() % max_index];
+    return charset[
+      // rand() 
+      rng() % max_index];
   };
   std::string str(length, 0);
   std::generate_n(str.begin(), length, randchar);
@@ -32,8 +52,10 @@ void SetupLogging(YAML::Node &general_parameters) {
         "basic_logger", general_parameters["log_file"].as<std::string>()));
 }
 
-void SetupLogging(std::string &level, std::string &file) {
+void SetupLogging(const std::string &level, const std::string &file) {
   spdlog::set_level(spdlog::level::from_str(level));
   if (!file.empty())
     spdlog::set_default_logger(spdlog::basic_logger_mt("basic_logger", file));
 }
+
+} // namespace moetsi::ssp
