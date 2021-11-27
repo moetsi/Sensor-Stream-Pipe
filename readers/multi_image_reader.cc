@@ -1,8 +1,10 @@
-//
+/**
+ * \file multi_image_reader.cc @brief Multi image reader
+ */
 // Created by amourao on 26-06-2019.
-//
-
 #include "multi_image_reader.h"
+
+namespace moetsi::ssp {
 
 MultiImageReader::MultiImageReader(std::vector<std::string> filenames) {
 
@@ -56,9 +58,11 @@ void MultiImageReader::Reset() {
 
 unsigned int MultiImageReader::GetFps() { return readers_.front()->GetFps(); }
 
-std::vector<unsigned int> MultiImageReader::GetType() {
-  std::vector<unsigned int> result;
+std::vector<FrameType> MultiImageReader::GetType() {
+  std::vector<FrameType> result;
   for(auto s: current_frame_internal_)
     result.push_back(s->frame_type);
   return result;
 }
+
+} // namespace moetsi::ssp

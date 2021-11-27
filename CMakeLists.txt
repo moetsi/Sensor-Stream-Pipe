@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11...3.19)
 project(ssp)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Check if looking for oakd+openvino dependencies (for oakd_xlink_reader.cc)
@@ -22,6 +22,15 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+option(LOCAL_DEP_BUILD_LINUX "Build deps locally on linux with some options" OFF)
+if (LOCAL_DEP_BUILD_LINUX)
+# add script here?
+endif()
+option(LOCAL_DEP_BUILD_WINDOWS "Build deps locally on windows with some options" OFF)
+if (LOCAL_DEP_BUILD_WINDOWS)
+# add script here?
+endif()
+
 # Download dependencies
 include(FetchContent)
 
@@ -38,50 +47,66 @@ elseif (APPLE)
     URL_HASH MD5=8cdef0d14b1ef3be77f2a023fd399ee0
   )
 elseif (WIN32)
-  if (XLINK_ENABLED)
-    message("Remember to compile with OpenVINO you will need to run 'C:/Program Files (x86)/Intel/openvino_2021/bin/setupvars.bat' (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
-    message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
-    FetchContent_Declare(
-      ssp_dep
-      # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161452_ssp_windep_xlink_enabled.tar.gz
-      # URL_HASH MD5=fe027d0a694c2c0447d8f29ea2812362
-
-      # new with release config
-      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110181158_ssp_windep_xlink_enabled.tar.gz
-      URL_HASH MD5=f57eb06fd32d7ab47221854dbda0365e
-      
-      # rebuilding using Visual Studio 16 2019
-      # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110162220_ssp_windep_xlink_enabled.tar.gz
-      # URL_HASH MD5=dc804195928ac3f36d93d28664d024f1
+  if (LOCAL_DEP_BUILD_WINDOWS)
+  message(STATUS "please make sure you have gone to 3rdpary and run build_win_dep.sh")
+  FetchContent_Declare(
+    ssp_dep
+    SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/tmp/local.ssp
   )
   else ()
-    FetchContent_Declare(
-      ssp_dep
-      # old
-      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103181613__ssp_windep.tar.gz
-      URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
+    if (XLINK_ENABLED)
+      message("Remember to compile with OpenVINO you will need to run 'C:/Program Files (x86)/Intel/openvino_2021/bin/setupvars.bat' (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
+      message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
+      FetchContent_Declare(
+        ssp_dep
+        # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161452_ssp_windep_xlink_enabled.tar.gz
+        # URL_HASH MD5=fe027d0a694c2c0447d8f29ea2812362
 
-      # # new checking if works
-      # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161442_ssp_windep.tar.gz
-      # URL_HASH MD5=da1888c4d931ac15750afeabac6eb6ce
-  )
-  endif()
-elseif (UNIX)
-  if (XLINK_ENABLED)
-    message("Remember to compile with OpenVINO you will need to run [setupvars.sh] in opt/intel/openvino_2021/bin (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
-    message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
-    FetchContent_Declare(
-      ssp_dep
-      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202109242040__ssp_lindep.tar.gz
-      URL_HASH MD5=5ef969687a6fdd37d258d5f84ff1e240
+        # new with release config
+        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110181158_ssp_windep_xlink_enabled.tar.gz
+        URL_HASH MD5=f57eb06fd32d7ab47221854dbda0365e
+        
+        # rebuilding using Visual Studio 16 2019
+        # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110162220_ssp_windep_xlink_enabled.tar.gz
+        # URL_HASH MD5=dc804195928ac3f36d93d28664d024f1
     )
-  else ()
-    FetchContent_Declare(
-      ssp_dep
-      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
-      URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
+    else ()
+      FetchContent_Declare(
+        ssp_dep
+        # old
+        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103181613__ssp_windep.tar.gz
+        URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
+
+        # # new checking if works
+        # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161442_ssp_windep.tar.gz
+        # URL_HASH MD5=da1888c4d931ac15750afeabac6eb6ce
     )
     endif()
+  endif()
+elseif (UNIX)
+  if (LOCAL_DEP_BUILD_LINUX)
+    message(STATUS "please make sure you have gone to 3rdpary and run build_lin_dep.sh")
+    FetchContent_Declare(
+      ssp_dep
+      SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/tmp/local.ssp
+    )
+  else ()
+    if (XLINK_ENABLED)
+      message("Remember to compile with OpenVINO you will need to run [setupvars.sh] in opt/intel/openvino_2021/bin (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
+      message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
+      FetchContent_Declare(
+        ssp_dep
+        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202109242040__ssp_lindep.tar.gz
+        URL_HASH MD5=5ef969687a6fdd37d258d5f84ff1e240
+      )
+    else ()
+      FetchContent_Declare(
+        ssp_dep
+        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
+        URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
+      )
+    endif()
+  endif()
 endif()
 
 FetchContent_GetProperties(ssp_dep)
@@ -109,12 +134,30 @@ if (ssp_dep_POPULATED)
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
+  if (LOCAL_DEP_BUILD_LINUX)
+    message(STATUS " searching for openh264 in " ${ssp_dep_SOURCE_DIR}/openh264/)
+    set(openh264_INCLUDE_DIR ${ssp_dep_SOURCE_DIR}/openh264/include)
+    set(openh264_DIR ${ssp_dep_SOURCE_DIR}/openh264)
+    set(openh264_LIBRARY ${ssp_dep_SOURCE_DIR}/openh264/lib/libopenh264.so.6) # yes this is linux for now
+  endif()
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Parallel build with VisualStudio
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+
+option(ASAN "Build with ASAN" OFF)
+if (ASAN)
+  add_compile_options("-fsanitize=address")
+  add_link_options("-fsanitize=address")
+endif(ASAN)
+
+option(TSAN "Build with TSAN" OFF)
+if (TSAN)
+  add_compile_options("-fsanitize=thread")
+  add_link_options("-fsanitize=thread")
+endif(TSAN)
 
 find_package(Threads REQUIRED)
 find_package(cereal REQUIRED)
@@ -123,6 +166,12 @@ find_package(yaml-cpp REQUIRED)
 find_package(ZeroMQ REQUIRED)
 find_package(cppzmq REQUIRED)
 find_package(zdepth REQUIRED)
+
+if (LOCAL_DEP_BUILD_LINUX)
+  find_package(openh264 REQUIRED)
+endif()
+
+option(SSP_WITH_DEPTHAI_SUPPORT "Compile with DepthAI support" OFF)
 
 if (IOS)
   add_definitions(-DFFMPEG_AS_FRAMEWORK)
@@ -140,8 +189,18 @@ if (IOS)
   set(OpenCV_LIBS ${ssp_dep_SOURCE_DIR}/lib/opencv2.framework)
 else()
   find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
-  find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
+  if (SSP_WITH_DEPTHAI_SUPPORT)
+    find_package(depthai CONFIG REQUIRED)
+  endif()
+  find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED PATHS ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV NO_DEFAULT_PATH)
 endif()
+
+if(OpenCV_FOUND)
+  message(STATUS "Found OpenCV")
+  message(STATUS "Includes: " ${OpenCV_INCLUDE_DIRS})
+else(OpenCV_FOUND)
+  message(STATUS "Cannot find OpenCV")
+endif(OpenCV_FOUND)
 
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBRARY_OUTPUT_PATH lib)
@@ -149,6 +208,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # TODO: modify FindFFmpeg to add this automatically
 include_directories(${FFMPEG_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
+message(STATUS "OpenCV_DIR = " ${OpenCV_DIR})
 
 if (WIN32)
     file(COPY ${FFMPEG_INCLUDE_DIRS}/../bin/
@@ -162,13 +223,14 @@ if (APPLE)
     SET(K4A_ENABLED FALSE)
     option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
 else()
-    option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" ON)
-    option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" ON)
+
+    option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" OFF)
+    option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" OFF)
     if (NOT K4A_ENABLED)
       set(SSP_WITH_KINECT_SUPPORT OFF)
       set(SSP_WITH_K4A_BODYTRACK OFF)
     endif()
-    option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" ON)
+    option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
 endif()
 option(SSP_WITH_ZMQ_POLLING "Compile with ZeroMQ polling" OFF)
 
@@ -256,8 +318,9 @@ set(SOURCE_FILES
     readers/image_reader.h
     readers/multi_image_reader.cc
     readers/multi_image_reader.h
-    structs/frame_struct.hpp
-    structs/body_struct.hpp
+    structs/frame_struct.h
+    structs/body_struct.h
+
     utils/image_converter.cc
     utils/image_converter.h
     utils/image_decoder.cc
@@ -271,11 +334,13 @@ set(SOURCE_FILES
     utils/video_utils.cc
     utils/video_utils.h
 
+    decoders/idecoder.cc
     decoders/libav_decoder.cc
     decoders/libav_decoder.h
     decoders/zdepth_decoder.cc
     decoders/zdepth_decoder.h
 
+    encoders/iencoder.cc
     encoders/zdepth_encoder.cc
     encoders/zdepth_encoder.h
     encoders/null_encoder.cc
@@ -283,6 +348,7 @@ set(SOURCE_FILES
     encoders/libav_encoder.cc
     encoders/libav_encoder.h
 
+    readers/ireader.cc
     readers/video_file_reader.cc
     readers/video_file_reader.h
     readers/image_reader.cc
@@ -318,7 +384,6 @@ endif ()
 add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
 
-
 target_link_libraries(ssp PUBLIC
   cereal
   ${OpenCV_LIBS}
@@ -328,6 +393,11 @@ target_link_libraries(ssp PUBLIC
   ${YAML_CPP_LIBRARIES}
   zdepth::zdepth
 )
+
+if (openh264_FOUND)
+    message(STATUS "adding openh264 to link libraries")
+    target_link_libraries(ssp PUBLIC openh264::openh264)
+endif()
 
 if (IOS)
 target_sources(ssp PRIVATE readers/iphone_reader.mm readers/iphone_reader.h)
@@ -429,3 +499,11 @@ if (SSP_WITH_K4A_BODYTRACK)
 
     target_sources(ssp_plugin PRIVATE clients/ssp_client_k4a.cc)
 endif ()
+
+if (LOCAL_DEP_BUILD_LINUX)
+  message(STATUS "in order to be able to run the server, some Linux machines require to export an LD_LIBRARY_PATH"
+          " that points to libswresample.so.3 and libopenh264.so.6"
+          " ex: export LD_LIBRARY_PATH=$ProjectDir/3rdparty/tmp/local.ssp/ffmpeg/lib:$ProjectDir/3rdparty/tmp/local.ssp/openh264/lib; ./ssp_server serve_video.yaml "
+          " ... "
+  )
+endif()

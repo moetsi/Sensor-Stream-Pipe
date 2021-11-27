@@ -1,16 +1,20 @@
-//
+/**
+ * \file network_reader.h @brief Network reader
+ */
 // Created by amourao on 27-09-2019.
-//
-
 #pragma once
 
 #include <zmq.hpp>
-
-#include "../structs/frame_struct.hpp"
+#include "../structs/frame_struct.h"
 #include "ireader.h"
 
 #define POLL_TIMEOUT_MS 500
 
+namespace moetsi::ssp {
+
+/**
+ * @brief Network reader
+ */
 class NetworkReader {
 
 private:
@@ -23,6 +27,9 @@ private:
 
   std::unordered_map<std::string, double> rec_mbytes_per_stream_;
   std::vector<FrameStruct> current_frame_internal_;
+
+  // void *context = nullptr;
+  // void *responder = nullptr;
 
   int port_;
   std::unique_ptr<zmq::context_t> context_;
@@ -47,3 +54,5 @@ public:
   unsigned int GetCurrentFrameId();
 
 };
+
+} // namespace moetsi::ssp

@@ -1,8 +1,11 @@
-//
+/**
+ * \file nv_decoder.cc @brief NvPipe decoder
+ */
 // Created by amourao on 12-09-2019.
-//
 
 #include "nv_decoder.h"
+
+namespace moetsi::ssp {
 
 NvDecoder::NvDecoder() {}
 
@@ -73,3 +76,5 @@ cv::Mat NvDecoder::Decode(FrameStruct& data) {
 
   return img;
 }
+
+} // namespace moetsi::ssp

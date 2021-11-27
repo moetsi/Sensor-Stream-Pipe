@@ -1,8 +1,10 @@
-//
+/**
+ * \file kinect_utils.cc @brief Utils for Kinect RT integration
+ */
 // Created by amourao on 02/09/19.
-//
-
 #include "kinect_utils.h"
+
+namespace moetsi::ssp {
 
 ExtendedAzureConfig BuildKinectConfigFromYAML(YAML::Node config) {
   ExtendedAzureConfig extended_azure_config;
@@ -222,11 +224,13 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
 
     if (decoders.find(decoder_id) == decoders.end()) {
       CodecParamsStruct data = f.codec_data;
-      if (data.type == 0) {
+
+      if (data.type == CodecParamsType::CodecParamsTypeAv) {
         std::shared_ptr<LibAvDecoder> fd = std::shared_ptr<LibAvDecoder>(new LibAvDecoder());
         fd->Init(getParams(f));
         decoders[decoder_id] = fd;
-      } else if (data.type == 1) {
+
+      } else if (data.type == CodecParamsType::CodecParamsTypeNvPipe) {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
         std::shared_ptr<NvDecoder> fd = std::shared_ptr<NvDecoder>(new NvDecoder());
         fd->Init(data.data);
@@ -236,31 +240,34 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
                     "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
       exit(1);
 #endif
-      } else if (data.type == 2) {
+
+      } else if (data.type == CodecParamsType::CodecParamsTypeZDepth) {
         std::shared_ptr<ZDepthDecoder> fd = std::shared_ptr<ZDepthDecoder>(new ZDepthDecoder());
         fd->Init(data.data);
         decoders[decoder_id] = fd;
       }
     }
 
-
     cv::Mat img;
 
-    if (f.frame_data_type == 0) {
-      img = cv::imdecode(f.frame, cv::IMREAD_UNCHANGED);
-    } else if (f.frame_data_type == 2) {
+    if (f.frame_data_type == FrameDataType::FrameDataTypeImageFrame) {
+      img = cv::imdecode(f.frame, CV_LOAD_IMAGE_UNCHANGED);
+
+    } else if (f.frame_data_type == FrameDataType::FrameDataTypeRawRGBA) {
       int rows, cols;
       memcpy(&cols, &f.frame[0], sizeof(int));
       memcpy(&rows, &f.frame[4], sizeof(int));
       img =
           cv::Mat(rows, cols, CV_8UC4, (void *)&f.frame[8], cv::Mat::AUTO_STEP);
-    } else if (f.frame_data_type == 3) {
+
+    } else if (f.frame_data_type == FrameDataType::FrameDataTypeGRAY16LE) {
       int rows, cols;
       memcpy(&cols, &f.frame[0], sizeof(int));
       memcpy(&rows, &f.frame[4], sizeof(int));
       img = cv::Mat(rows, cols, CV_16UC1, (void *)&f.frame[8],
                     cv::Mat::AUTO_STEP);
-    } else if (f.frame_data_type == 1) {
+
+    } else if (f.frame_data_type == FrameDataType::FrameDataTypeLibavPackets) {
 
       std::shared_ptr<IDecoder> decoder;
 
@@ -268,11 +275,13 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
 
       if (decoders.find(decoder_id) == decoders.end()) {
         CodecParamsStruct data = f.codec_data;
-        if (data.type == 0) {
+
+        if (data.type == CodecParamsType::CodecParamsTypeAv) {
           std::shared_ptr<LibAvDecoder> fd = std::shared_ptr<LibAvDecoder>(new LibAvDecoder());
           fd->Init(getParams(f));
           decoders[decoder_id] = fd;
-        } else if (data.type == 1) {
+
+        } else if (data.type == CodecParamsType::CodecParamsTypeNvPipe) {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
           std::shared_ptr<NvDecoder> fd = std::shared_ptr<NvDecoder>(new NvDecoder());
           fd->Init(data.data);
@@ -282,7 +291,8 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
                     "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
       exit(1);
 #endif
-        } else if (data.type == 2) {
+
+        } else if (data.type == CodecParamsType::CodecParamsTypeZDepth) {
           std::shared_ptr<ZDepthDecoder> fd = std::shared_ptr<ZDepthDecoder>(new ZDepthDecoder());
           fd->Init(data.data);
           decoders[decoder_id] = fd;
@@ -296,19 +306,22 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
       f.frame.clear();
     }
 
-    if (f.frame_type == 0) {
+
+    if (f.frame_type == FrameType::FrameTypeColor) {
       if (img.channels() == 3)
         cv::cvtColor(img, img, cv::COLOR_BGR2BGRA);
       k4a::image color = k4a::image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                             img.cols, img.rows, 4 * img.cols);
       memcpy(color.get_buffer(), img.datastart, img.total() * img.elemSize());
       sensor_capture.set_color_image(color);
-    } else if (f.frame_type == 1) {
+
+    } else if (f.frame_type == FrameType::FrameTypeDepth) {
       k4a::image depth = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16, img.cols,
                                             img.rows, 2 * img.cols);
       memcpy(depth.get_buffer(), img.datastart, img.total() * img.elemSize());
       sensor_capture.set_depth_image(depth);
-    } else if (f.frame_type == 2) {
+
+    } else if (f.frame_type == FrameType::FrameTypeIR) {
       k4a::image ir = k4a::image::create(K4A_IMAGE_FORMAT_IR16, img.cols,
                                          img.rows, 2 * img.cols);
       memcpy(ir.get_buffer(), img.datastart, img.total() * img.elemSize());
@@ -316,3 +329,5 @@ void FrameStructToK4A(std::vector<FrameStruct> &fs,
     }
   }
 }
+
+} // namespace moetsi::ssp

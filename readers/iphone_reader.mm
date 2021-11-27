@@ -1,3 +1,6 @@
+/**
+ * \file iphone_reader.mm @brief iPhone driver
+ */
 //
 // Created by David Geldreich on 1-06-2021.
 //
@@ -13,6 +16,7 @@
 #include <mach/task.h>
 
 using namespace std;
+using namespace moetsi::ssp;
 
 @interface SessionDelegate : NSObject<ARSessionDelegate>
 {
@@ -71,7 +75,7 @@ extern "C" void use_session(void* session)
   pthread_mutex_lock(&_mutex);
   CVPixelBufferRelease(_pixelBuffer);
   _pixelBuffer = CVPixelBufferRetain(frame.capturedImage);
-  _timestamp = CurrentTimeMs();
+  _timestamp = moetsi::ssp::CurrentTimeNs();
     
   if (@available(iOS 14.0, *))
   {
@@ -88,6 +92,8 @@ extern "C" void use_session(void* session)
   semaphore_signal(_semaphore);
 }
 @end
+
+namespace moetsi::ssp {
 
 class iPhoneReaderImpl
 {
@@ -107,32 +113,32 @@ iPhoneReader::iPhoneReader()
   frame_template_.frame_id = 0;
   frame_template_.device_id = 0;
   
-  frame_template_.message_type = 0;
+  frame_template_.message_type = SSPMessageType::MessageTypeDefault; // 0
   
-  frame_template_.frame_data_type = 0;
+  frame_template_.frame_data_type = FrameDataType:: FrameDataTypeImageFrame; // 0
   frame_template_.scene_desc = "iphone";
   frame_template_.stream_id = RandomString(16);
   
   pImpl->image = std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
   pImpl->image->sensor_id = 0;
-  pImpl->image->frame_type = 0;      // image
-  pImpl->image->frame_data_type = 6; // YUV
-  pImpl->image->timestamps.push_back(CurrentTimeMs());
-  pImpl->image->timestamps.push_back(CurrentTimeMs());
+  pImpl->image->frame_type = FrameType::FrameTypeColor;      // 0 image
+  pImpl->image->frame_data_type = FrameDataType::FrameDataTypeYUV; // 6 YUV
+  pImpl->image->timestamps.push_back(moetsi::ssp::CurrentTimeNs());
+  pImpl->image->timestamps.push_back(moetsi::ssp::CurrentTimeNs());
 
   pImpl->depth = std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
   pImpl->depth->sensor_id = 1;
-  pImpl->depth->frame_type = 1;      // depth
-  pImpl->depth->frame_data_type = 5; // float
-  pImpl->depth->timestamps.push_back(CurrentTimeMs());
-  pImpl->depth->timestamps.push_back(CurrentTimeMs());
+  pImpl->depth->frame_type = FrameType::FrameTypeDepth;      // 1 depth
+  pImpl->depth->frame_data_type = FrameDataType::FrameDataTypeRaw32FC1; // 5 float
+  pImpl->depth->timestamps.push_back(moetsi::ssp::CurrentTimeNs());
+  pImpl->depth->timestamps.push_back(moetsi::ssp::CurrentTimeNs());
   
   pImpl->confidence = std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
   pImpl->confidence->sensor_id = 2;
-  pImpl->confidence->frame_type = 3;      // confidence
-  pImpl->confidence->frame_data_type = 7; // U8C1
-  pImpl->confidence->timestamps.push_back(CurrentTimeMs());
-  pImpl->confidence->timestamps.push_back(CurrentTimeMs());
+  pImpl->confidence->frame_type = FrameType::FrameTypeConfidence;   // 3 confidence
+  pImpl->confidence->frame_data_type =  FrameDataType::FrameDataTypeU8C1; // 7 U8C1
+  pImpl->confidence->timestamps.push_back(moetsi::ssp::CurrentTimeNs());
+  pImpl->confidence->timestamps.push_back(moetsi::ssp::CurrentTimeNs());
 
   @autoreleasepool
   {
@@ -239,7 +245,7 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     s->frame.resize(len_y + len_uv + 2 * sizeof(int));
     
     s->timestamps[0] = pImpl->delegate->_timestamp;
-    s->timestamps[1] = CurrentTimeMs();
+    s->timestamps[1] = moetsi::ssp::CurrentTimeNs();
 
     memcpy(&s->frame[0], &cols, sizeof(int));
     memcpy(&s->frame[4], &rows, sizeof(int));
@@ -268,7 +274,7 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     s->frame.resize(size + 2 * sizeof(int));
 
     s->timestamps[0] = pImpl->delegate->_timestamp;
-    s->timestamps[1] = CurrentTimeMs();
+    s->timestamps[1] = moetsi::ssp::CurrentTimeNs();
     
     memcpy(&s->frame[0], &cols, sizeof(int));
     memcpy(&s->frame[4], &rows, sizeof(int));
@@ -293,7 +299,7 @@ vector<shared_ptr<FrameStruct>> iPhoneReader::GetCurrentFrame()
     s->frame.resize(size + 2 * sizeof(int));
 
     s->timestamps[0] = pImpl->delegate->_timestamp;
-    s->timestamps[1] = CurrentTimeMs();
+    s->timestamps[1] = moetsi::ssp::CurrentTimeNs();
     
     memcpy(&s->frame[0], &cols, sizeof(int));
     memcpy(&s->frame[4], &rows, sizeof(int));
@@ -325,18 +331,20 @@ unsigned int iPhoneReader::GetFps()
   return pImpl->fps;
 }
 
-vector<unsigned int> iPhoneReader::GetType()
+vector<FrameType> iPhoneReader::GetType()
 {
-  vector<unsigned int> res;
-  res.push_back(0);
+  vector<FrameType> res;
+  res.push_back(FrameType::FrameTypeColor);
   
   if (@available(iOS 14.0, *))
   {
     if ([ARWorldTrackingConfiguration supportsFrameSemantics:ARFrameSemanticSceneDepth])
     {
-      res.push_back(1); // Depth
-      res.push_back(3); // Confidence
+      res.push_back(FrameType::FrameTypeDepth); // 1:Depth
+      res.push_back(FrameType::FrameTypeConfidence); // 3:Confidence
     }
   }
   return res;
+}
+
 }

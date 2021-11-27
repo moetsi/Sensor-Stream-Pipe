@@ -1,0 +1,81 @@
+\hypertarget{kinect__reader_8h}{}\section{kinect\+\_\+reader.\+h File Reference}
+\label{kinect__reader_8h}\index{kinect\+\_\+reader.\+h@{kinect\+\_\+reader.\+h}}
+
+
+Kinect driver.  
+
+
+{\ttfamily \#include $<$atomic$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include \char`\"{}../utils/logger.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$k4a/k4a.\+h$>$}\newline
+{\ttfamily \#include $<$cereal/archives/binary.\+hpp$>$}\newline
+{\ttfamily \#include \char`\"{}../structs/frame\+\_\+struct.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}../utils/image\+\_\+decoder.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}../utils/kinect\+\_\+utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}../utils/video\+\_\+utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ireader.\+h\char`\"{}}\newline
+Include dependency graph for kinect\+\_\+reader.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{kinect__reader_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=169pt]{kinect__reader_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classmoetsi_1_1ssp_1_1KinectReader}{moetsi\+::ssp\+::\+Kinect\+Reader}
+\end{DoxyCompactItemize}
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \hyperlink{namespacemoetsi_1_1ssp}{moetsi\+::ssp}
+\begin{DoxyCompactList}\small\item\em Sensor Stream Pipe. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries C\+H\+E\+CK}(x,  device)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespacemoetsi_1_1ssp_a998f3ec3680c51d19383e0f6e38e48c2}\label{namespacemoetsi_1_1ssp_a998f3ec3680c51d19383e0f6e38e48c2}} 
+std\+::atomic\+\_\+bool {\bfseries moetsi\+::ssp\+::exiting}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Kinect driver. 
+
+
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{kinect__reader_8h_ab9654fa00110eac8271e1a7652997f6c}\label{kinect__reader_8h_ab9654fa00110eac8271e1a7652997f6c}} 
+\index{kinect\+\_\+reader.\+h@{kinect\+\_\+reader.\+h}!C\+H\+E\+CK@{C\+H\+E\+CK}}
+\index{C\+H\+E\+CK@{C\+H\+E\+CK}!kinect\+\_\+reader.\+h@{kinect\+\_\+reader.\+h}}
+\subsubsection{\texorpdfstring{C\+H\+E\+CK}{CHECK}}
+{\footnotesize\ttfamily \#define C\+H\+E\+CK(\begin{DoxyParamCaption}\item[{}]{x,  }\item[{}]{device }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}
+\{                                                                            \(\backslash\)
+    auto retval = (x);                                                         \(\backslash\)
+    if (retval) \{                                                              \(\backslash\)
+      spdlog::error(\textcolor{stringliteral}{"\(\backslash\)"Runtime error: \{\} returned \{\} "}, #x, retval);           \(\backslash\)
+      k4a\_device\_close(device);                                                \(\backslash\)
+      exit(1);                                                                 \(\backslash\)
+    \}                                                                          \(\backslash\)
+  \}
+\end{DoxyCode}

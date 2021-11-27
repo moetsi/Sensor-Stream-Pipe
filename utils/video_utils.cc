@@ -1,5 +1,10 @@
+/**
+ * Namespace video_utils.cc @brief Video utilities 
+ */
 #include "video_utils.h"
 #include "libav_types.h"
+
+namespace moetsi::ssp {
 
 void AVFrameToMatYUV(AVFrameSharedP& frame, cv::Mat &image) {
   int width = frame->width;
@@ -50,7 +55,7 @@ void AVFrameToMatGray(AVFrameSharedP& frame, cv::Mat &image) {
 }
 
 AVCodecParameters *getParams(FrameStruct &frame_struct) {
-  if (frame_struct.codec_data.type != 0)
+  if (frame_struct.codec_data.type != CodecParamsType::CodecParamsTypeAv) // 0)
     return NULL;
   AVCodecParameters *results = avcodec_parameters_alloc();
   results->extradata = NULL;
@@ -64,3 +69,5 @@ AVCodecParameters *getParams(FrameStruct &frame_struct) {
   results->extradata_size = frame_struct.codec_data.extra_data.size();
   return results;
 }
+
+} // namespace moetsi::ssp

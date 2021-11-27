@@ -1,18 +1,21 @@
-//
+/**
+ * \file libav_decoder.cc @brief Jpeg/Mpeg decoder
+ */ 
 // Created by amourao on 12-09-2019.
-//
 
 #include "libav_decoder.h"
+
+namespace moetsi::ssp {
 
 LibAvDecoder::LibAvDecoder() {}
 
 LibAvDecoder::~LibAvDecoder() {}
 
 void LibAvDecoder::Init(AVCodecParameters *codec_parameters) {
-  av_register_all();
+  //av_register_all();
 
   codec_ = std::unique_ptr<AVCodec, AVCodecDeleter>(
-      avcodec_find_decoder(codec_parameters->codec_id));
+      const_cast<AVCodec *>(avcodec_find_decoder(codec_parameters->codec_id)));
   codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(avcodec_alloc_context3(codec_.get()));
   if (!codec_context_) {
     spdlog::error("Failed to allocated memory for AVCodecContext.");
@@ -40,12 +43,18 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
   packet_av->size = frame_struct.frame.size();
 
   cv::Mat img;
+  //assert(!!codec_context_);
+  //assert(!!packet_av);
   int response = avcodec_send_packet(codec_context_.get(), packet_av.get());
   if (response >= 0) {
     // Return decoded output data (into a frame) from a decoder
     response = avcodec_receive_frame(codec_context_.get(), frame_av.get());
     if (response >= 0) {
-      if (frame_struct.frame_type == 1 || frame_struct.frame_type == 2) {
+      // FrameType::FrameTypeColor = 0
+      // FrameType::FrameTypeDepth = 1
+      // FrameType::FrameTypeIR = 2
+      //if (frame_struct.frame_type == 1 || frame_struct.frame_type == 2) {
+      if (frame_struct.frame_type == FrameType::FrameTypeDepth || frame_struct.frame_type == FrameType::FrameTypeIR) {        
         if (codec_context_->pix_fmt == AV_PIX_FMT_GRAY12LE ||
             codec_context_->pix_fmt == AV_PIX_FMT_GRAY16BE) {
           AVFrameToMatGray(frame_av, img);
@@ -65,7 +74,7 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
 }
 
 AVFrameSharedP LibAvDecoder::DecodeFrame(FrameStruct &frame_struct) {
-  AVPacketSharedP packet_av = std::shared_ptr<AVPacket>(av_packet_alloc());
+  AVPacketSharedP packet_av = std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket *p){ free(p); });
   AVFrameSharedP frame_av =
       std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 
@@ -82,3 +91,5 @@ AVFrameSharedP LibAvDecoder::DecodeFrame(FrameStruct &frame_struct) {
   }
   return frame_av;
 }
+
+} // namespace moetsi::ssp

@@ -13,7 +13,7 @@
 
 #include <cereal/archives/binary.hpp>
 
-#include "../structs/frame_struct.hpp"
+#include "../structs/frame_struct.h"
 #include "../utils/image_decoder.h"
 #include "../utils/video_utils.h"
 #include "ireader.h"
@@ -48,6 +48,9 @@
 #include <samples/ocv_common.hpp>
 #include <string>
 #include <vector>
+
+namespace moetsi::ssp { 
+
 using namespace InferenceEngine;
 //DONE OPENVINO HEADERS
 
@@ -100,5 +103,7 @@ public:
 
   unsigned int GetFps();
 
-  std::vector<unsigned int> GetType();
+  std::vector<FrameType> GetType();
 };
+
+} // namespace

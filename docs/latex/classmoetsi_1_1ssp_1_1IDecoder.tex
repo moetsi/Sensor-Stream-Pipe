@@ -1,0 +1,89 @@
+\hypertarget{classmoetsi_1_1ssp_1_1IDecoder}{}\section{moetsi\+:\+:ssp\+:\+:I\+Decoder Class Reference}
+\label{classmoetsi_1_1ssp_1_1IDecoder}\index{moetsi\+::ssp\+::\+I\+Decoder@{moetsi\+::ssp\+::\+I\+Decoder}}
+
+
+\hyperlink{classmoetsi_1_1ssp_1_1IDecoder}{I\+Decoder} abstract decoder interface.  
+
+
+
+
+{\ttfamily \#include $<$idecoder.\+h$>$}
+
+
+
+Inheritance diagram for moetsi\+:\+:ssp\+:\+:I\+Decoder\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classmoetsi_1_1ssp_1_1IDecoder__inherit__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1IDecoder_a26dc991c2434792f50ec5ae9b61a1653}\label{classmoetsi_1_1ssp_1_1IDecoder_a26dc991c2434792f50ec5ae9b61a1653}} 
+virtual \hyperlink{classmoetsi_1_1ssp_1_1IDecoder_a26dc991c2434792f50ec5ae9b61a1653}{$\sim$\+I\+Decoder} ()
+\begin{DoxyCompactList}\small\item\em Virtual destructor. \end{DoxyCompactList}\item 
+virtual cv\+::\+Mat \hyperlink{classmoetsi_1_1ssp_1_1IDecoder_a1c06604dc4107d3668a4e791c13cc063}{Decode} (\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \&data)=0
+\begin{DoxyCompactList}\small\item\em Extract an opencv image from a \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1IDecoder_a26dc991c2434792f50ec5ae9b61a1653}\label{classmoetsi_1_1ssp_1_1IDecoder_a26dc991c2434792f50ec5ae9b61a1653}} 
+virtual \hyperlink{classmoetsi_1_1ssp_1_1IDecoder_a26dc991c2434792f50ec5ae9b61a1653}{$\sim$\+I\+Decoder} ()
+\begin{DoxyCompactList}\small\item\em Virtual destructor. \end{DoxyCompactList}\item 
+virtual cv\+::\+Mat \hyperlink{classmoetsi_1_1ssp_1_1IDecoder_a1c06604dc4107d3668a4e791c13cc063}{Decode} (\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \&data)=0
+\begin{DoxyCompactList}\small\item\em Extract an opencv image from a \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{classmoetsi_1_1ssp_1_1IDecoder}{I\+Decoder} abstract decoder interface. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1IDecoder_a1c06604dc4107d3668a4e791c13cc063}\label{classmoetsi_1_1ssp_1_1IDecoder_a1c06604dc4107d3668a4e791c13cc063}} 
+\index{moetsi\+::ssp\+::\+I\+Decoder@{moetsi\+::ssp\+::\+I\+Decoder}!Decode@{Decode}}
+\index{Decode@{Decode}!moetsi\+::ssp\+::\+I\+Decoder@{moetsi\+::ssp\+::\+I\+Decoder}}
+\subsubsection{\texorpdfstring{Decode()}{Decode()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily virtual cv\+::\+Mat moetsi\+::ssp\+::\+I\+Decoder\+::\+Decode (\begin{DoxyParamCaption}\item[{\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Extract an opencv image from a \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Open\+CV matrix/image 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{classmoetsi_1_1ssp_1_1LibAvDecoder_a4206a4581de1b93d6c6a0835e8cf4ac8}{moetsi\+::ssp\+::\+Lib\+Av\+Decoder}, \hyperlink{classmoetsi_1_1ssp_1_1NvDecoder_a78eb894b6825ac5ec57f5a4f4ecd7e31}{moetsi\+::ssp\+::\+Nv\+Decoder}, and \hyperlink{classmoetsi_1_1ssp_1_1ZDepthDecoder_a43226095658d616f7e38df1d43c2f88a}{moetsi\+::ssp\+::\+Z\+Depth\+Decoder}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1IDecoder_a1c06604dc4107d3668a4e791c13cc063}\label{classmoetsi_1_1ssp_1_1IDecoder_a1c06604dc4107d3668a4e791c13cc063}} 
+\index{moetsi\+::ssp\+::\+I\+Decoder@{moetsi\+::ssp\+::\+I\+Decoder}!Decode@{Decode}}
+\index{Decode@{Decode}!moetsi\+::ssp\+::\+I\+Decoder@{moetsi\+::ssp\+::\+I\+Decoder}}
+\subsubsection{\texorpdfstring{Decode()}{Decode()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily virtual cv\+::\+Mat moetsi\+::ssp\+::\+I\+Decoder\+::\+Decode (\begin{DoxyParamCaption}\item[{\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Extract an opencv image from a \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Open\+CV matrix/image 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{classmoetsi_1_1ssp_1_1LibAvDecoder_a4206a4581de1b93d6c6a0835e8cf4ac8}{moetsi\+::ssp\+::\+Lib\+Av\+Decoder}, \hyperlink{classmoetsi_1_1ssp_1_1NvDecoder_a78eb894b6825ac5ec57f5a4f4ecd7e31}{moetsi\+::ssp\+::\+Nv\+Decoder}, and \hyperlink{classmoetsi_1_1ssp_1_1ZDepthDecoder_a43226095658d616f7e38df1d43c2f88a}{moetsi\+::ssp\+::\+Z\+Depth\+Decoder}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+decoders/idecoder.\+h\end{DoxyCompactItemize}

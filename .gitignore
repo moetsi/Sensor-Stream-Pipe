@@ -37,5 +37,7 @@ cmake-*/
 
 ./vscode
 .vscode
-build/
-build_release/
+build
+build_release
+build_release2
+build_asan

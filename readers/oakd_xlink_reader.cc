@@ -11,8 +11,9 @@
 // // Better handling for occlusions:
 // static std::atomic<bool> lr_check{false};
 using namespace std;
-
 using namespace InferenceEngine;
+
+namespace moetsi::ssp {
 
 OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
 
@@ -27,7 +28,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     frame_template_.scene_desc = "oakd";
 
     frame_template_.frame_id = 0;
-    frame_template_.message_type = 0;
+    frame_template_.message_type = SSPMessageType::MessageTypeDefault; // 0;
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Define source and output
@@ -155,8 +156,8 @@ void OakdXlinkReader::NextFrame() {
   //Color frame
   std::shared_ptr<FrameStruct> rgbFrame =
       std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-  rgbFrame->frame_type = 0;
-  rgbFrame->frame_data_type = 9;
+  rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
+  rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
   rgbFrame->frame_id = current_frame_counter_;
   rgbFrame->timestamps.push_back(capture_timestamp);
 
@@ -213,17 +214,17 @@ void OakdXlinkReader::NextFrame() {
   std::shared_ptr<FrameStruct> s =
         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
   s->frame_id = current_frame_counter_;
-  s->frame_type = 4;
-  s->frame_data_type = 8;
+  s->frame_type = FrameType::FrameTypeHumanPose; // 4;
+  s->frame_data_type = FrameDataType::FrameDataTypeObjectHumanData; // 8;
   s->timestamps.push_back(capture_timestamp);
 
   s->frame = std::vector<uchar>();
-  s->frame.resize(sizeof(_object_human_t) + sizeof(int));
+  s->frame.resize(sizeof(object_human_t) + sizeof(int32_t));
   
   //here we will say we detected 1 body
   // TODO :: Change bodyCount to number found from inference
-  int bodyCount = 1;
-  _object_human_t bodyStruct;
+  int32_t bodyCount = 1;
+  object_human_t bodyStruct;
 
   bodyStruct.Id = 1;
   bodyStruct.pelvis_x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -483,10 +484,10 @@ void OakdXlinkReader::NextFrame() {
   bodyStruct.ear_right_QZ = 0.1;
   bodyStruct.ear_right_QW = 0.1;
   bodyStruct.ear_right_conf = 1;
-
-
-  memcpy(&s->frame[0], &bodyCount, sizeof(int));
-  memcpy(&s->frame[4], &bodyStruct, sizeof(_object_human_t));
+  inplace_hton(bodyCount);
+  // std::cerr << "dummy: bodyCount after hton " << bodyCount << std::endl << std::flush;
+  memcpy(&s->frame[0], &bodyCount, sizeof(int32_t));
+  memcpy(&s->frame[4], &bodyStruct, sizeof(object_human_t));
 
 
   current_frame_.push_back(s);
@@ -505,15 +506,17 @@ unsigned int OakdXlinkReader::GetFps() {
   return 10;
 }
 
-std::vector<unsigned int> OakdXlinkReader::GetType() {
-  std::vector<unsigned int> types;
+std::vector<FrameType> OakdXlinkReader::GetType() {
+  std::vector<FrameType> types;
 
-  types.push_back(0);
-  // types.push_back(1);
-  types.push_back(4);
+  types.push_back(FrameType::FrameTypeColor);
+  // later => types.push_back(FrameType::FrameTypeDepth);
+  types.push_back(FrameType::FrameTypeHumanPose); // 4;
 
   return types;
 }
 
 void OakdXlinkReader::GoToFrame(unsigned int frame_id) {}
 unsigned int OakdXlinkReader::GetCurrentFrameId() {return current_frame_counter_;}
+
+}
