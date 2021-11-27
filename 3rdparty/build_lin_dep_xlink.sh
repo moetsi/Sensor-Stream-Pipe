@@ -135,7 +135,7 @@ function build_depthai {
         https://github.com/luxonis/depthai-core.git
     pushd depthai-core
     git submodule update --init --recursive
-    cmake \
+    CXXFLAGS=-fPIC CFLAG=-fPIC LDFLAGS=-fPIC cmake \
         -H. \
         -Bbuild \
         -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core \
