@@ -74,7 +74,7 @@ private:
 
   //openvino info
   const file_name_t input_model = "../models/human-pose-estimation-3d.xml";
-  const file_name_t input_image_path= "fart.png";
+  const file_name_t input_image_path= "dummy_value.png";
   const std::string device_name = "CPU";
   Core ie;
   CNNNetwork network;
