@@ -288,7 +288,6 @@ build_libzmq || exit -1
 build_cppzmq || exit -1
 ##build_k4a
 
-
 prefix=`date +%Y%m%d%H%M`
 filename=${prefix}_ssp_windep
 
@@ -306,7 +305,6 @@ echo "Packing ${LOCAL_DIR} to ${filename}.tar"
 
 tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   spdlog \
-  k4a \
   cereal \
   cppzmq \
   ffmpeg \
