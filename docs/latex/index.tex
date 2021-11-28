@@ -1,6 +1,10 @@
+source path-\/helpers-\/ubuntu20.\+sh
+
+\doxysection*{\href{https://moetsi.gitbook.io/sensor-stream-pipe/}{\texttt{ Checkout the Sensor Stream Pipe gitbook for full documentation}}}
 
 
-\section*{What is Sensor Stream Pipe?}
+
+\doxysection*{What is Sensor Stream Pipe?}
 
 Moetsi\textquotesingle{}s Sensor Stream Pipe (S\+SP) is the first open-\/source C++ modular kit-\/of-\/parts that compresses, streams, and processes sensor data (R\+G\+B-\/D). It does this by efficiently compressing raw data streams, allowing developers to send multiple video types over the network in real time. Frame data can be sent in its raw form (J\+P\+G/\+P\+NG frames), or compressed using a myriad of codecs, leveraged on F\+Fmpeg/\+Lib\+AV and NV Codec to considerably reduce bandwidth strain.
 
@@ -13,27 +17,27 @@ Currently, Moetsi’s Sensor Stream Pipe supports\+:
 
 \begin{DoxyItemize}
 \item .mkv (matroska) R\+G\+B-\/D recordings
-\item \href{https://azure.microsoft.com/en-us/services/kinect-dk/}{\tt Azure Kinect DK} R\+G\+B-\/D camera
-\item seminal computer vision/spatial computing datasets (e.\+g. \href{https://graphics.stanford.edu/projects/bundlefusion/}{\tt Bundle\+Fusion}, \href{https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/}{\tt MS R\+G\+B-\/D 7 scenes} and \href{http://graphics.stanford.edu/projects/vsfs/}{\tt V\+S\+FS})
-\item i\+OS A\+R\+Kit data (streams \href{https://developer.apple.com/documentation/arkit/arframe}{\tt A\+R\+Frame data})
+\item \href{https://azure.microsoft.com/en-us/services/kinect-dk/}{\texttt{ Azure Kinect DK}} R\+G\+B-\/D camera
+\item seminal computer vision/spatial computing datasets (e.\+g. \href{https://graphics.stanford.edu/projects/bundlefusion/}{\texttt{ Bundle\+Fusion}}, \href{https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/}{\texttt{ MS R\+G\+B-\/D 7 scenes}} and \href{http://graphics.stanford.edu/projects/vsfs/}{\texttt{ V\+S\+FS}})
+\item i\+OS A\+R\+Kit data (streams \href{https://developer.apple.com/documentation/arkit/arframe}{\texttt{ A\+R\+Frame data}})
 \end{DoxyItemize}
 
 We’re planning to support other cameras and devices (e.\+g. Kinect v2 and Structure Core) in the near future. At the same time, we’ve made the Moetsi S\+SP totally open source so that anyone can build out support for any device.
 
-\href{https://moetsi.gitbook.io/sensor-stream-pipe/}{\tt Checkout the Sensor Stream Pipe gitbook for full documentation}
+\href{https://moetsi.gitbook.io/sensor-stream-pipe/}{\texttt{ Checkout the Sensor Stream Pipe gitbook for full documentation}}
 
-{\bfseries Features include\+:}
+{\bfseries{Features include\+:}}
 
 
 \begin{DoxyItemize}
 \item Synchronized streaming of color, depth and IR frames
-\item Support for Azure Kinect DK (live and recorded video streaming) and image datasets (e.\+g. \href{https://graphics.stanford.edu/projects/bundlefusion/}{\tt Bundle\+Fusion}, \href{https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/}{\tt MS R\+G\+B-\/D 7 scenes} and \href{http://graphics.stanford.edu/projects/vsfs/}{\tt V\+S\+FS}) and .mkv (matroska) files
+\item Support for Azure Kinect DK (live and recorded video streaming) and image datasets (e.\+g. \href{https://graphics.stanford.edu/projects/bundlefusion/}{\texttt{ Bundle\+Fusion}}, \href{https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/}{\texttt{ MS R\+G\+B-\/D 7 scenes}} and \href{http://graphics.stanford.edu/projects/vsfs/}{\texttt{ V\+S\+FS}}) and .mkv (matroska) files
 \item Hardware-\/accelerated encoding (e.\+g. Nvidia codec), providing you with the lowest possible latency and bandwidth without compromising on quality
 \item Interoperability with Libav and F\+Fmpeg creates a hyperflexible framework for all the use cases you brilliant developers can come up with!
 \item Access to the calibration data for each of the sensors on the Kinect, enabling you to build a point cloud from the color and depth images, perform body tracking, etc.
 \end{DoxyItemize}
 
-\subsubsection*{But why though...?}
+\doxysubsubsection*{But why though...?}
 
 
 \begin{DoxyItemize}
@@ -47,11 +51,11 @@ You can use Sensor Stream Server to send compressed sensor data to reduce bandwi
 
 If you want to synthesize R\+G\+B-\/\+D+ data from multiple feeds in real-\/time, you will probably need something like Sensor Stream Pipe.
 
-\subsection*{Component parts}
+\doxysubsection*{Component parts}
 
-\href{https://moetsi.gitbook.io/sensor-stream-pipe/}{\tt Checkout the Sensor Stream Pipe gitbook for full documentation}
+\href{https://moetsi.gitbook.io/sensor-stream-pipe/}{\texttt{ Checkout the Sensor Stream Pipe gitbook for full documentation}}
 
-\subsubsection*{\href{https://moetsi.gitbook.io/sensor-stream-pipe/components-overview/sensor-stream-server}{\tt Sensor Stream Server}}
+\doxysubsubsection*{\href{https://moetsi.gitbook.io/sensor-stream-pipe/components-overview/sensor-stream-server}{\texttt{ Sensor Stream Server}}}
 
 The ssp\+\_\+server is the frame encoder and sender.
 
@@ -59,13 +63,13 @@ The ssp\+\_\+server is the frame encoder and sender.
 
 Sensor Stream Server reads its configurations from a yaml file (examples in /configs). The config file provides Sensor Stream Server\+: a destination for its frames, the frame source (video, Azure Kinect, or dataset), and how each frame type should be encoded.
 
-\subsubsection*{\href{https://moetsi.gitbook.io/sensor-stream-pipe/components-overview/sensor-stream-client}{\tt Sensor Stream Client}}
+\doxysubsubsection*{\href{https://moetsi.gitbook.io/sensor-stream-pipe/components-overview/sensor-stream-client}{\texttt{ Sensor Stream Client}}}
 
 The ssp\+\_\+clients are the frame receiver and decoder. They run on the remote processing server and receive the frames from the ssp\+\_\+server for further processing.
 
 There are a few templates for how you can use Sensor Stream Client in
 
-\paragraph*{Sensor Stream Client with Open\+CV processing}
+\doxyparagraph*{Sensor Stream Client with Open\+CV processing}
 
 If you run Sensor Stream Client with Open\+CV visualization\+:
 
@@ -75,27 +79,27 @@ You can see it’s receiving real-\/time data from a Kinect DK and rendering it 
 
 Sensor Stream Client is built so it can be an ingestion step for a spatial computing/computer vision pipeline.
 
-\subsubsection*{\href{https://moetsi.gitbook.io/sensor-stream-pipe/components-overview/sensor-stream-tester}{\tt Sensor Stream Tester}}
+\doxysubsubsection*{\href{https://moetsi.gitbook.io/sensor-stream-pipe/components-overview/sensor-stream-tester}{\texttt{ Sensor Stream Tester}}}
 
 A reproducible tester for measuring S\+SP compression and quality. You can use this to measure how different encodings and settings affect bandwidth/compression.
 
-\subsection*{Getting started}
+\doxysubsection*{Getting started}
 
-We recommend going through \href{https://moetsi.gitbook.io/sensor-stream-pipe/streaming-a-video}{\tt Streaming a Video from our Gitbook}
+We recommend going through \href{https://moetsi.gitbook.io/sensor-stream-pipe/streaming-a-video}{\texttt{ Streaming a Video from our Gitbook}}
 
 to get up to speed quickly. You will stream using Sensor Stream Server and receive on Sensor Stream Client a pre-\/recorded R\+G\+B-\/\+D+ stream to get a quick feel of what Sensor Stream Pipe does.
 
-\subsection*{Sensor Stream Pipe Development}
+\doxysubsection*{Sensor Stream Pipe Development}
 
-\subsubsection*{Feedback}
+\doxysubsubsection*{Feedback}
 
 Moetsi\textquotesingle{}s Sensor Stream Pipe is currently in alpha. Features will probably change, bugs will probably be found. It\textquotesingle{}s a work in progress after all! That said, we welcome both feedback and pull requests.
 
-We would also love to hear more about how you plan to use the Moetsi Sensor Stream Pipe! So if you have any problems, questions, feature requests, or ideas for improvement, please feel free to reach out at \href{mailto:olenka@moetsi.com}{\tt olenka@moetsi.\+com}.
+We would also love to hear more about how you plan to use the Moetsi Sensor Stream Pipe! So if you have any problems, questions, feature requests, or ideas for improvement, please feel free to reach out at \href{mailto:olenka@moetsi.com}{\texttt{ olenka@moetsi.\+com}}.
 
 The better we understand how you’re using the Moetsi S\+SP, the better we can plan future developments!
 
-\subsubsection*{About Moetsi}
+\doxysubsubsection*{About Moetsi}
 
 At Moetsi we are super excited about the idea of digitizing reality. Creating a seamless interface between the world as we know it, and a world augmented, improved and expressed through new technologies is plain cool. But we think there’s a problem. On-\/device computation is limited, platform-\/specific frameworks are restrictive, and sorting raw depth data is seriously challenging.
 
@@ -105,39 +109,39 @@ But it doesn’t end here.
 
 Our pipeline is just one of the first pieces of the puzzle. To develop a robust enough infrastructure to support a true digital twin of the physical world, a lot more needs to be done. This includes creating algorithms that can turn this raw depth data into real, usable applications.
 
-\subsubsection*{How to Contribute}
+\doxysubsubsection*{How to Contribute}
 
-We’re always excited to work with like-\/minded people, and invite you to experiment with our pipeline however you like! If you enjoy our work and think you can help take this project to the next level, feel free to drop us a message on \href{mailto:olenka@moetsi.com}{\tt olenka@moetsi.\+com} to get involved.
+We’re always excited to work with like-\/minded people, and invite you to experiment with our pipeline however you like! If you enjoy our work and think you can help take this project to the next level, feel free to drop us a message on \href{mailto:olenka@moetsi.com}{\texttt{ olenka@moetsi.\+com}} to get involved.
 
 If you happen to discover any bugs in our code, we’d really appreciate knowing about them. Please just create an issue here on Git\+Hub.
 
 In terms of related projects that fall outside of this repo’s scope, we’d be super excited to see, and think the community could benefit from development on\+:
 
-\paragraph*{$\ast$$\ast$\+More devices$\ast$$\ast$}
+\doxyparagraph*{$\ast$$\ast$\+More devices$\ast$$\ast$}
 
 Working with the Kinect v2, and other sensors such as the Structure Core sensor.
 
-\paragraph*{$\ast$$\ast$\+Integrations$\ast$$\ast$}
+\doxyparagraph*{$\ast$$\ast$\+Integrations$\ast$$\ast$}
 
 Any other sort of output that you can imagine!
 
-\paragraph*{$\ast$$\ast$\+Encoding$\ast$$\ast$}
+\doxyparagraph*{$\ast$$\ast$\+Encoding$\ast$$\ast$}
 
 Improve encoding performance on A\+M\+D/\+Intel graphic cards, by using the A\+MD Media Codec/\+Intel Quick Sync Video instead of relying on libav (V\+A\+A\+PI or Open\+CK) for hardware accelerated encoding. Feel free to do the same for Intel cards using Intel Quick Sync Video too!
 
-\subsubsection*{Moetsi’s Permissive License}
+\doxysubsubsection*{Moetsi’s Permissive License}
 
-Moetsi’s Sensor Stream Pipe is licensed under the M\+IT license. That means that we don’t require attribution, but we’d really like to know what cool things you’re using our pipe for. Drop us a message on \href{mailto:olenka@moetsi.com}{\tt olenka@moetsi.\+com} or post on our \href{https://moetsi.com/pages/community}{\tt forum} to tell us all about it!
+Moetsi’s Sensor Stream Pipe is licensed under the M\+IT license. That means that we don’t require attribution, but we’d really like to know what cool things you’re using our pipe for. Drop us a message on \href{mailto:olenka@moetsi.com}{\texttt{ olenka@moetsi.\+com}} or post on our \href{https://moetsi.com/pages/community}{\texttt{ forum}} to tell us all about it!
 
-\subsubsection*{Support Moetsi!}
+\doxysubsubsection*{Support Moetsi!}
 
-Our Sensor Stream Pipe is always going to be free, but it has taken a lot of blood, sweat and tears to get to this point. If you love what we’ve made, please consider reaching out to \href{mailto:olenka@moetsi.com}{\tt olenka@moetsi.\+com}.
+Our Sensor Stream Pipe is always going to be free, but it has taken a lot of blood, sweat and tears to get to this point. If you love what we’ve made, please consider reaching out to \href{mailto:olenka@moetsi.com}{\texttt{ olenka@moetsi.\+com}}.
 
-\subsubsection*{Authors}
+\doxysubsubsection*{Authors}
 
 
 \begin{DoxyItemize}
-\item {\bfseries André Mourão} -\/ \href{https://github.com/amourao}{\tt amourao}
-\item {\bfseries Olenka Polak} -\/ \href{https://github.com/olenkapolak}{\tt olenkapolak}
-\item {\bfseries Adam Polak} -\/ \href{https://github.com/adammpolak}{\tt adammpolak} 
+\item {\bfseries{André Mourão}} -\/ \href{https://github.com/amourao}{\texttt{ amourao}}
+\item {\bfseries{Olenka Polak}} -\/ \href{https://github.com/olenkapolak}{\texttt{ olenkapolak}}
+\item {\bfseries{Adam Polak}} -\/ \href{https://github.com/adammpolak}{\texttt{ adammpolak}} 
 \end{DoxyItemize}

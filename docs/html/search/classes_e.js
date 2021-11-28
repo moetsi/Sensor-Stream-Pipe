@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['unityxrnativesessionptr',['UnityXRNativeSessionPtr',['../structUnityXRNativeSessionPtr.html',1,'']]]
+  ['unityxrnativesessionptr_257',['UnityXRNativeSessionPtr',['../structUnityXRNativeSessionPtr.html',1,'']]]
 ];

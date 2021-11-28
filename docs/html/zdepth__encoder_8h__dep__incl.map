@@ -1,7 +1,0 @@
-<map id="zdepth_encoder.h" name="zdepth_encoder.h">
-<area shape="rect" id="node2" href="$iencoder_8cc.html" title="IEncoder factory. " alt="" coords="5,80,95,107"/>
-<area shape="rect" id="node3" href="$zdepth__encoder_8cc.html" title="ZDepth encoder. " alt="" coords="119,80,251,107"/>
-<area shape="rect" id="node4" href="$ireader_8cc.html" title="IReader factory. " alt="" coords="275,80,353,107"/>
-<area shape="rect" id="node5" href="$ssp__server_8cc.html" title="SSP, server side. " alt="" coords="378,80,482,107"/>
-<area shape="rect" id="node6" href="$ssp__tester_8cc.html" title="SSP test program. " alt="" coords="506,80,607,107"/>
-</map>

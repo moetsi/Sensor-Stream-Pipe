@@ -1,5 +1,5 @@
-\hypertarget{include_2encoders_2iencoder_8h}{}\section{iencoder.\+h File Reference}
-\label{include_2encoders_2iencoder_8h}\index{iencoder.\+h@{iencoder.\+h}}
+\hypertarget{include_2encoders_2iencoder_8h}{}\doxysection{iencoder.\+h File Reference}
+\label{include_2encoders_2iencoder_8h}\index{iencoder.h@{iencoder.h}}
 
 
 I\+Encoder factory.  
@@ -8,38 +8,29 @@ I\+Encoder factory.
 {\ttfamily \#include \char`\"{}../structs/frame\+\_\+struct.\+h\char`\"{}}\newline
 {\ttfamily \#include $<$unordered\+\_\+map$>$}\newline
 Include dependency graph for include/encoders/iencoder.h\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{include_2encoders_2iencoder_8h__incl}
-\end{center}
-\end{figure}
+% FIG 0
 This graph shows which files directly or indirectly include this file\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=142pt]{include_2encoders_2iencoder_8h__dep__incl}
-\end{center}
-\end{figure}
-\subsection*{Classes}
+% FIG 1
+\doxysubsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
-class \hyperlink{classmoetsi_1_1ssp_1_1IEncoder}{moetsi\+::ssp\+::\+I\+Encoder}
-\begin{DoxyCompactList}\small\item\em \hyperlink{classmoetsi_1_1ssp_1_1IEncoder}{I\+Encoder} abstract encoder class. \end{DoxyCompactList}\end{DoxyCompactItemize}
-\subsection*{Namespaces}
+class \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IEncoder}{moetsi\+::ssp\+::\+I\+Encoder}}
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IEncoder}{I\+Encoder}} abstract encoder class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Namespaces}
 \begin{DoxyCompactItemize}
 \item 
- \hyperlink{namespacemoetsi_1_1ssp}{moetsi\+::ssp}
+ \mbox{\hyperlink{namespacemoetsi}{moetsi}}
+\begin{DoxyCompactList}\small\item\em Moetsi creations. \end{DoxyCompactList}\item 
+ \mbox{\hyperlink{namespacemoetsi_1_1ssp}{moetsi\+::ssp}}
 \begin{DoxyCompactList}\small\item\em Sensor Stream Pipe. \end{DoxyCompactList}\end{DoxyCompactItemize}
-\subsection*{Functions}
+\doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-std\+::unordered\+\_\+map$<$ Frame\+Type, std\+::shared\+\_\+ptr$<$ I\+Encoder $>$ $>$ \hyperlink{namespacemoetsi_1_1ssp_ad7a44286de625366acc78a320113e09b}{moetsi\+::ssp\+::\+I\+Encoder\+Factory} (const std\+::string \&config, const std\+::vector$<$ Frame\+Type $>$ \&types)
-\begin{DoxyCompactList}\small\item\em \hyperlink{classmoetsi_1_1ssp_1_1IEncoder}{I\+Encoder} factory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+std\+::unordered\+\_\+map$<$ Frame\+Type, std\+::shared\+\_\+ptr$<$ I\+Encoder $>$ $>$ \mbox{\hyperlink{namespacemoetsi_1_1ssp_ad7a44286de625366acc78a320113e09b}{moetsi\+::ssp\+::\+I\+Encoder\+Factory}} (const std\+::string \&config, const std\+::vector$<$ Frame\+Type $>$ \&types)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IEncoder}{I\+Encoder}} factory. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
-\subsection{Detailed Description}
+\doxysubsection{Detailed Description}
 I\+Encoder factory. 
 
+I\+Encoder definition\+: frame encoder.

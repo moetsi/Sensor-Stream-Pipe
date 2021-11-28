@@ -1,0 +1,46 @@
+digraph "libav_decoder.h"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="libav_decoder.h",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Jpeg/Mpeg decoder."];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node2 [label="kinect_utils.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$kinect__utils_8h.html",tooltip="Utils for Kinect RT integration."];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node3 [label="ssp_client_k4a.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ssp__client__k4a_8cc.html",tooltip="SSP client with lib k4a."];
+  Node2 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node4 [label="kinect_reader.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$kinect__reader_8h.html",tooltip="Kinect driver."];
+  Node4 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node5 [label="kinect_reader.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$kinect__reader_8cc.html",tooltip="Kinect driver."];
+  Node2 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node6 [label="kinect_utils.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$kinect__utils_8cc.html",tooltip="Utils for Kinect RT integration."];
+  Node1 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node7 [label="libav_decoder.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$libav__decoder_8cc.html",tooltip="Jpeg/Mpeg decoder."];
+  Node1 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node8 [label="libav_encoder.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$libav__encoder_8h.html",tooltip="Jpeg/Mpeg encoder."];
+  Node8 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node9 [label="iencoder.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$iencoder_8cc.html",tooltip="IEncoder factory."];
+  Node8 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node10 [label="libav_encoder.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$libav__encoder_8cc.html",tooltip="Jpef/Mpeg encoder."];
+  Node8 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node11 [label="ireader.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ireader_8cc.html",tooltip="IReader factory."];
+  Node8 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node12 [label="ssp_server.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ssp__server_8cc.html",tooltip="SSP, server side."];
+  Node8 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node13 [label="ssp_tester.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ssp__tester_8cc.html",tooltip="SSP test program."];
+  Node1 -> Node14 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node14 [label="zdepth_encoder.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$zdepth__encoder_8h.html",tooltip="encoder"];
+  Node14 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node14 -> Node15 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node15 [label="zdepth_encoder.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$zdepth__encoder_8cc.html",tooltip="ZDepth encoder."];
+  Node14 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node14 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node14 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node1 -> Node16 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node16 [label="nv_encoder.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$nv__encoder_8h.html",tooltip="NvPipe encoder."];
+  Node16 -> Node17 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node17 [label="nv_encoder.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$nv__encoder_8cc.html",tooltip="NvPipe encoder."];
+  Node1 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node1 -> Node18 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node18 [label="image_converter.cc",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$image__converter_8cc.html",tooltip="Image converter from frame struct to opencv image."];
+}

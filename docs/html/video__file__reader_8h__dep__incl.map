@@ -1,7 +1,0 @@
-<map id="video_file_reader.h" name="video_file_reader.h">
-<area shape="rect" id="node2" href="$iencoder_8cc.html" title="IEncoder factory. " alt="" coords="5,80,95,107"/>
-<area shape="rect" id="node3" href="$ireader_8cc.html" title="IReader factory. " alt="" coords="119,80,197,107"/>
-<area shape="rect" id="node4" href="$video__file__reader_8cc.html" title="Video file reader. " alt="" coords="222,80,361,107"/>
-<area shape="rect" id="node5" href="$ssp__server_8cc.html" title="SSP, server side. " alt="" coords="385,80,489,107"/>
-<area shape="rect" id="node6" href="$ssp__tester_8cc.html" title="SSP test program. " alt="" coords="513,80,614,107"/>
-</map>

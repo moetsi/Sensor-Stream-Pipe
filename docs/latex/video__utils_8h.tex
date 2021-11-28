@@ -1,5 +1,5 @@
-\hypertarget{video__utils_8h}{}\section{video\+\_\+utils.\+h File Reference}
-\label{video__utils_8h}\index{video\+\_\+utils.\+h@{video\+\_\+utils.\+h}}
+\hypertarget{video__utils_8h}{}\doxysection{video\+\_\+utils.\+h File Reference}
+\label{video__utils_8h}\index{video\_utils.h@{video\_utils.h}}
 
 
 Video utilities.  
@@ -23,27 +23,17 @@ Video utilities.
 {\ttfamily \#include \char`\"{}../structs/frame\+\_\+struct.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}../utils/libav\+\_\+types.\+h\char`\"{}}\newline
 Include dependency graph for video\+\_\+utils.\+h\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{video__utils_8h__incl}
-\end{center}
-\end{figure}
+% FIG 0
 This graph shows which files directly or indirectly include this file\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{video__utils_8h__dep__incl}
-\end{center}
-\end{figure}
-\subsection*{Namespaces}
+% FIG 1
+\doxysubsection*{Namespaces}
 \begin{DoxyCompactItemize}
 \item 
- \hyperlink{namespacemoetsi_1_1ssp}{moetsi\+::ssp}
+ \mbox{\hyperlink{namespacemoetsi}{moetsi}}
+\begin{DoxyCompactList}\small\item\em Moetsi creations. \end{DoxyCompactList}\item 
+ \mbox{\hyperlink{namespacemoetsi_1_1ssp}{moetsi\+::ssp}}
 \begin{DoxyCompactList}\small\item\em Sensor Stream Pipe. \end{DoxyCompactList}\end{DoxyCompactItemize}
-\subsection*{Macros}
+\doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{video__utils_8h_a4d2664c774041b1972cb1c1a65d1ec5b}\label{video__utils_8h_a4d2664c774041b1972cb1c1a65d1ec5b}} 
@@ -64,20 +54,20 @@ This graph shows which files directly or indirectly include this file\+:
 \mbox{\Hypertarget{video__utils_8h_a1bc18be5f278a7d05f000c59340fa7ba}\label{video__utils_8h_a1bc18be5f278a7d05f000c59340fa7ba}} 
 \#define {\bfseries M\+A\+X\+\_\+\+D\+E\+P\+T\+H\+\_\+\+V\+A\+L\+U\+E\+\_\+8\+\_\+\+B\+I\+TS}~256
 \end{DoxyCompactItemize}
-\subsection*{Functions}
+\doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \hyperlink{namespacemoetsi_1_1ssp_a82e9b74b4a9a35255cc5d4ff66dc776f}{moetsi\+::ssp\+::\+A\+V\+Frame\+To\+Mat\+Y\+UV} (A\+V\+Frame\+SharedP \&frame, cv\+::\+Mat \&image)
+void \mbox{\hyperlink{namespacemoetsi_1_1ssp_a82e9b74b4a9a35255cc5d4ff66dc776f}{moetsi\+::ssp\+::\+A\+V\+Frame\+To\+Mat\+Y\+UV}} (A\+V\+Frame\+SharedP \&frame, cv\+::\+Mat \&image)
 \begin{DoxyCompactList}\small\item\em Convert an A\+V\+Frame to Y\+UV image. \end{DoxyCompactList}\item 
-void \hyperlink{namespacemoetsi_1_1ssp_a028ac1fd9c21f63f40dfa1131c589ad5}{moetsi\+::ssp\+::\+A\+V\+Frame\+To\+Mat\+Gray} (A\+V\+Frame\+SharedP \&frame, cv\+::\+Mat \&image)
+void \mbox{\hyperlink{namespacemoetsi_1_1ssp_a028ac1fd9c21f63f40dfa1131c589ad5}{moetsi\+::ssp\+::\+A\+V\+Frame\+To\+Mat\+Gray}} (A\+V\+Frame\+SharedP \&frame, cv\+::\+Mat \&image)
 \begin{DoxyCompactList}\small\item\em Convert an A\+V\+Frame to grayscale image. \end{DoxyCompactList}\item 
-A\+V\+Codec\+Parameters $\ast$ \hyperlink{namespacemoetsi_1_1ssp_a2d7925d2be7b96068b314ec08c673df6}{moetsi\+::ssp\+::get\+Params} (Frame\+Struct \&frame\+\_\+struct)
-\begin{DoxyCompactList}\small\item\em Get A\+V\+Codec parameters from a \hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}. \end{DoxyCompactList}\item 
+A\+V\+Codec\+Parameters $\ast$ \mbox{\hyperlink{namespacemoetsi_1_1ssp_a2d7925d2be7b96068b314ec08c673df6}{moetsi\+::ssp\+::get\+Params}} (Frame\+Struct \&frame\+\_\+struct)
+\begin{DoxyCompactList}\small\item\em Get A\+V\+Codec parameters from a \mbox{\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}}. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{namespacemoetsi_1_1ssp_ac6e1b3e0caadb02f6e5a8387e6fee988}\label{namespacemoetsi_1_1ssp_ac6e1b3e0caadb02f6e5a8387e6fee988}} 
 {\footnotesize template$<$typename T $>$ }\\void {\bfseries moetsi\+::ssp\+::\+Min\+Max\+Filter} (cv\+::\+Mat \&in\+\_\+mat, cv\+::\+Mat \&out\+\_\+mat, double min, double max)
 \end{DoxyCompactItemize}
 
 
-\subsection{Detailed Description}
+\doxysubsection{Detailed Description}
 Video utilities. 
 
