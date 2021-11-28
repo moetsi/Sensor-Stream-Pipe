@@ -135,11 +135,11 @@ function build_depthai {
         https://github.com/luxonis/depthai-core.git
     pushd depthai-core
     git submodule update --init --recursive
-    CXXFLAGS=-fPIC CFLAG=-fPIC LDFLAGS=-fPIC cmake \
+    CXXFLAGS=-fPIC CFLAGS=-fPIC LDFLAGS=-fPIC cmake \
         -H. \
         -Bbuild \
         -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core \
-        -D OpenCV_DIR=${LOCAL_DIR}/opencv/x64/vc15/staticlib
+        -D OpenCV_DIR=${LOCAL_DIR}/opencv/x64/vc16/staticlib
     cmake --build build --config Release --target install
     cd ..
     popd
