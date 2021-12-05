@@ -81,7 +81,7 @@ function build_opencv {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
         -DOPENCV_GENERATE_PKGCONFIG=YES \
         -DBUILD_EXAMPLES=OFF \
-        -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
         -DBUILD_opencv_apps:BOOL=ON \
         -DBUILD_opencv_calib3d:BOOL=OFF \
         -DBUILD_opencv_core:BOOL=ON \
@@ -135,12 +135,18 @@ function build_depthai {
         https://github.com/luxonis/depthai-core.git
     pushd depthai-core
     git submodule update --init --recursive
-    CXXFLAGS=-fPIC CFLAGS=-fPIC LDFLAGS=-fPIC cmake \
+    export HUNTER_ROOT=$PWD/evil_repo
+    export CXXFLAGS=-fPIC 
+    export CFLAGS=-fPIC 
+    export LDFLAGS=-fPIC 
+    cmake \
         -H. \
         -Bbuild \
+        -D BUILD_SHARED_LIBS=ON \
+        -D HUNTER_KEEP_PACKAGES_SOURCES=ON \
         -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core \
-        -D OpenCV_DIR=${LOCAL_DIR}/opencv/x64/vc16/staticlib
-    cmake --build build --config Release --target install
+        -D OpenCV_DIR=${LOCAL_DIR}/opencv/lib/cmake/opencv4
+    cmake --build build --config Release --target install --parallel 16
     cd ..
     popd
 }
