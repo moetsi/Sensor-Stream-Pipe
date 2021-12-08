@@ -73,14 +73,16 @@ private:
   std::shared_ptr<dai::Device> device;
 
   //openvino info
-  const file_name_t input_model = "../models/human-pose-estimation-3d.xml";
-  const file_name_t input_image_path= "dummy_value.png";
+  const file_name_t input_model = "../models/human-pose-estimation-3d-0001.xml";
+  const file_name_t input_image_path= "../models/pointing_middle_of_view.jpg";
   const std::string device_name = "CPU";
   Core ie;
   CNNNetwork network;
   InputInfo::Ptr input_info;
   std::string input_name;
-  DataPtr output_info;
+  DataPtr features_output_info;
+  DataPtr heatmaps_output_info;
+  DataPtr pafs_output_info;
   std::string output_name;
   ExecutableNetwork executable_network;
 

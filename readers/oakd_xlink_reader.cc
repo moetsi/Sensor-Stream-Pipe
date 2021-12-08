@@ -59,23 +59,23 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     device_info.state = X_LINK_BOOTLOADER;
     device_info.desc.protocol = X_LINK_TCP_IP;
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;    
-    device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode
+    // device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode   // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Connect to device and start pipeline
     cout << "Connected cameras: ";
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    for(const auto& cam : device->getConnectedCameras()) {
-        cout << static_cast<int>(cam) << " ";
-        cout << cam << " ";
-    }
-    cout << endl;
+// std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//     for(const auto& cam : device->getConnectedCameras()) {
+//         cout << static_cast<int>(cam) << " ";
+//         cout << cam << " ";
+//     }
+// cout << endl;
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Print USB speed
-    cout << "Usb speed: " << device->getUsbSpeed() << endl;
+    // cout << "Usb speed: " << device->getUsbSpeed() << endl;                              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Output queue will be used to get the rgb frames from the output defined above
-    qRgb = device->getOutputQueue("rgb", 4, false);
+    // qRgb = device->getOutputQueue("rgb", 4, false);                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -94,10 +94,10 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Step 2. Read a model in OpenVINO Intermediate Representation (.xml and
     // .bin files) or ONNX (.onnx file) format
 #ifndef _WIN32    
-    network = ie.ReadNetwork("../../models/human-pose-estimation-3d.xml");
+    network = ie.ReadNetwork("../../models/human-pose-estimation-3d-0001.xml");
 #endif
 #ifdef _WIN32    
-    network = ie.ReadNetwork("../../../models/human-pose-estimation-3d.xml");
+    network = ie.ReadNetwork("../../../models/human-pose-estimation-3d-0001.xml");
 #endif
     // if (network.getOutputsInfo().size() != 1)
     //     throw std::logic_error("Sample supports topologies with 1 output only");
@@ -125,10 +125,13 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         std::cerr << "Network outputs info is empty" << std::endl;
         return;
     }
-    output_info = network.getOutputsInfo().begin()->second;
-    output_name = network.getOutputsInfo().begin()->first;
+    features_output_info = network.getOutputsInfo()["features"];
+    heatmaps_output_info = network.getOutputsInfo()["heatmaps"];
+    pafs_output_info = network.getOutputsInfo()["pafs"];
 
-    output_info->setPrecision(Precision::FP32);
+    features_output_info->setPrecision(Precision::FP32);
+    heatmaps_output_info->setPrecision(Precision::FP32);
+    pafs_output_info->setPrecision(Precision::FP32);
     // -----------------------------------------------------------------------------------------------------
 
     // --------------------------- Step 4. Loading a model to the device
@@ -150,8 +153,8 @@ void OakdXlinkReader::NextFrame() {
   uint64_t capture_timestamp = CurrentTimeMs();
 
   //Color frame
-  auto frameFromOakD = qRgb->get<dai::ImgFrame>();
-  auto frameRgbOpenCv = frameFromOakD->getCvFrame();
+//   auto frameFromOakD = qRgb->get<dai::ImgFrame>();                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   auto frameRgbOpenCv = frameFromOakD->getCvFrame();                                     // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
   //Color frame
   std::shared_ptr<FrameStruct> rgbFrame =
@@ -162,17 +165,21 @@ void OakdXlinkReader::NextFrame() {
   rgbFrame->timestamps.push_back(capture_timestamp);
 
   // convert the raw buffer to cv::Mat
-  int cols = frameRgbOpenCv.cols;
-  int rows = frameRgbOpenCv.rows;
-  size_t size = cols*rows*3*sizeof(uchar); //This assumes that oakd always returns CV_8UC3
+//   int cols = frameRgbOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   int rows = frameRgbOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   size_t size = cols*rows*3*sizeof(uchar); //This assumes that oakd always returns CV_8UC3// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-  rgbFrame->frame.resize(size + 2 * sizeof(int));
+//   rgbFrame->frame.resize(size + 2 * sizeof(int));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-  memcpy(&rgbFrame->frame[0], &cols, sizeof(int));
-  memcpy(&rgbFrame->frame[4], &rows, sizeof(int));
-  memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), size);
+//   memcpy(&rgbFrame->frame[0], &cols, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   memcpy(&rgbFrame->frame[4], &rows, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), size);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
   current_frame_.push_back(rgbFrame);
+
+
+            
+
 
   // --------------------------- Step 5. Create an infer request
   // -------------------------------------------------
@@ -183,33 +190,66 @@ void OakdXlinkReader::NextFrame() {
   // --------------------------------------------------------
   /* Read input image to a blob and set it to an infer request without resize
     * and layout conversions. */
-  // cv::Mat image = imread_t(input_image_path);
-  Blob::Ptr imgBlob = wrapMat2Blob(frameRgbOpenCv);     // just wrap Mat data by Blob::Ptr
-                                                // without allocating of new memory
-  infer_request.SetBlob(input_name, imgBlob);  // infer_request accepts input blob of any size
+
+    cv::Mat image = cv::imread("../../../models/pointing_close_of_view.jpg"); //This is a hardwired image only to help Renaud with parsing
+    Blob::Ptr imgBlob = wrapMat2Blob(image);
+    infer_request.SetBlob(input_name, imgBlob);  // infer_request accepts input blob of any size
+
+
+//   Blob::Ptr imgBlob = wrapMat2Blob(frameRgbOpenCv);     // just wrap Mat data by Blob::Ptr// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
   // -----------------------------------------------------------------------------------------------------
 
   // --------------------------- Step 7. Do inference
   // --------------------------------------------------------
+
   /* Running the request synchronously */
-  infer_request.Infer();
+    infer_request.Infer();
   // -----------------------------------------------------------------------------------------------------
 
   // --------------------------- Step 8. Process output
   // ------------------------------------------------------
-  Blob::Ptr output = infer_request.GetBlob(output_name);
-  // Print classification results
-  ClassificationResult_t classificationResult(output, {{input_image_path}});
-  classificationResult.print();
 
-  //TODO :: Change open vino model to Human Pose
+    Blob::Ptr features_output = infer_request.GetBlob("features");
+    Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
+    Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
 
-  //TODO :: Take output of body detection inference and use utilities
-  //        to convert to array of human keypoints
+    const SizeVector features_output_shape = features_output_info->getTensorDesc().getDims();
+    const SizeVector heatmaps_output_shape = heatmaps_output_info->getTensorDesc().getDims();
+    const SizeVector pafs_output_shape = pafs_output_info->getTensorDesc().getDims();
 
-  //TODO :: Update the dummy creator below to change from a single body
-  //        to as many bodies that have been detected, will need to make integer
-  //        value dynamic to bodies, and add more arrays of bodies
+    auto dumpVec = [](const SizeVector& vec) -> std::string {
+        if (vec.empty())
+            return "[]";
+        std::stringstream oss;
+        oss << "[" << vec[0];
+        for (size_t i = 1; i < vec.size(); i++)
+            oss << "," << vec[i];
+        oss << "]";
+        return oss.str();
+    };
+    std::cerr << "Resulting output shape dumpVec(features_output_shape) = " << dumpVec(features_output_shape) << std::endl << std::flush;
+    std::cerr << "Resulting output shape dumpVec(heatmaps_output_shape) = " << dumpVec(heatmaps_output_shape) << std::endl << std::flush;
+    std::cerr << "Resulting output shape dumpVec(pafs_output_shape) = " << dumpVec(pafs_output_shape) << std::endl << std::flush;
+
+    InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);
+    InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);
+    InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);
+
+    InferenceEngine::LockedMemory<const void> features_outputMapped = features_moutput->rmap();
+    InferenceEngine::LockedMemory<const void> heatmaps_outputMapped = heatmaps_moutput->rmap();
+    InferenceEngine::LockedMemory<const void> pafs_outputMapped = pafs_moutput->rmap();
+
+    // --------------------------- RENAUD TO TAKE THE FEATURES, HEATMAPS, AND PAFS, AND CHECK THAT THE MULTI-DIMENSIONAL
+    // --------------------------- ARRAYS ARE THE SAME AS BEING OUTPUT BY THE PYTHON DEMO 
+
+    const float *features_result = features_outputMapped.as<float *>();
+    const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
+    const float *pafs_result = pafs_outputMapped.as<float *>();
+
+    std::cerr << "features_result[0] = " << features_result[0] << std::endl << std::flush;
+    std::cerr << "heatmaps_result[0] = " << heatmaps_result[0] << std::endl << std::flush;
+    std::cerr << "pafs_result[0] = " << pafs_result[0] << std::endl << std::flush;
+
 
   std::shared_ptr<FrameStruct> s =
         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));

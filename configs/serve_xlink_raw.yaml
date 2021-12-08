@@ -2,6 +2,7 @@
 general:
   host: "localhost"
   port: 9999
+  log_level: "debug"
   frame_source:
     type: "oakd_xlink"
     parameters:
