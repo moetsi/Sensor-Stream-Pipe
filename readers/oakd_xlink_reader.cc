@@ -3,7 +3,7 @@
 //
 
 #include "oakd_xlink_reader.h"
-
+#include "human_poses.h"
 // Closer-in minimum depth, disparity range is doubled (from 95 to 190):
 // static std::atomic<bool> extended_disparity{false};
 // // Better accuracy for longer distance, fractional disparity 32-levels:
@@ -14,6 +14,7 @@ using namespace std;
 using namespace InferenceEngine;
 
 namespace moetsi::ssp {
+using namespace human_pose_estimation;
 
 OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
 
@@ -132,13 +133,20 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     features_output_info->setPrecision(Precision::FP32);
     heatmaps_output_info->setPrecision(Precision::FP32);
     pafs_output_info->setPrecision(Precision::FP32);
+
+
+//ResponseDesc rd;
+// reshape {'data': (1, 3, 256, 384)}
+ICNNNetwork::InputShapes inputShape {{ "data", std::vector<size_t>{1,3,256,384} }};
+network.reshape(inputShape); //, &rd);
+
     // -----------------------------------------------------------------------------------------------------
 
     // --------------------------- Step 4. Loading a model to the device
     // ------------------------------------------
     executable_network = ie.LoadNetwork(network, "CPU");
     // -----------------------------------------------------------------------------------------------------
-
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 }
 
 OakdXlinkReader::~OakdXlinkReader() {
@@ -191,8 +199,56 @@ void OakdXlinkReader::NextFrame() {
   /* Read input image to a blob and set it to an infer request without resize
     * and layout conversions. */
 
+#ifndef _WIN32 
+    cv::Mat image = cv::imread("../../models/pointing_close_of_view.jpg"); //This is a hardwired image only to help Renaud with parsing
+#endif
+#ifdef _WIN32
     cv::Mat image = cv::imread("../../../models/pointing_close_of_view.jpg"); //This is a hardwired image only to help Renaud with parsing
-    Blob::Ptr imgBlob = wrapMat2Blob(image);
+#endif
+
+// python demo.py --model human-pose-estimation-3d-0001.xml --use-openvino -d CPU --images pointing_close_of_view.jpg 
+/*
+      input_scale = base_height / frame.shape[0]
+        scaled_img = cv2.resize(frame, dsize=None, fx=input_scale, fy=input_scale)
+        scaled_img = scaled_img[:, 0:scaled_img.shape[1] - (scaled_img.shape[1] % stride)] 
+*/
+
+    cv::Mat image2;
+    int stride = 8;
+    double input_scale = 256.0 / image.size[0];
+    std::cerr << "input_scale = " << input_scale << std::endl << std::flush;
+    cv::resize(image, image2, cv::Size(), input_scale, input_scale, cv::INTER_LINEAR);
+    std::cerr << image2.size[0] << std::endl << std::flush; 
+    std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
+
+    auto &m = image2;
+    auto roi = cv::Rect(0, 0, image2.size[0], image2.size[1] - (image2.size[1] % stride));
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    std::cerr << ((0 <= roi.x) ? 1:0) << std::endl << std::flush;
+    // && 
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    std::cerr << ((0 <= roi.width ) ? 1:0) << std::endl << std::flush;
+    //&& 
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    std::cerr << ((roi.x + roi.width <= m.cols) ? 1:0) << std::endl << std::flush;
+    // &&
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    std::cerr << ((0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows) ? 1:0) << std::endl << std::flush;
+
+std::cerr << ((0 <= roi.y) ? 1:0) << std::endl << std::flush;
+std::cerr << ((0 <= roi.height) ? 1:0) << std::endl << std::flush;
+std::cerr << ((roi.y + roi.height <= m.rows) ? 1:0) << std::endl << std::flush;
+std::cerr << roi.y << std::endl << std::flush;
+std::cerr << roi.height << std::endl << std::flush;
+std::cerr << m.rows << std::endl << std::flush;
+
+    cv::Mat image3 = cv::Mat(image2, cv::Rect(0, 0, 
+                                                    image2.size[1] - (image2.size[1] % stride),
+                                                    image2.size[0]));
+
+    Blob::Ptr imgBlob = wrapMat2Blob(image3);
+// reshape {'data': (1, 3, 256, 384)}
+// img shape (1, 3, 256, 384)
     infer_request.SetBlob(input_name, imgBlob);  // infer_request accepts input blob of any size
 
 
@@ -214,6 +270,9 @@ void OakdXlinkReader::NextFrame() {
     Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
 
     const SizeVector features_output_shape = features_output_info->getTensorDesc().getDims();
+    auto l = features_output_info->getTensorDesc().getLayout();
+    auto p = features_output_info->getTensorDesc().getPrecision(); 
+    std::cerr << "lp " << l << " " << p << std::endl << std::flush;
     const SizeVector heatmaps_output_shape = heatmaps_output_info->getTensorDesc().getDims();
     const SizeVector pafs_output_shape = pafs_output_info->getTensorDesc().getDims();
 
@@ -247,9 +306,127 @@ void OakdXlinkReader::NextFrame() {
     const float *pafs_result = pafs_outputMapped.as<float *>();
 
     std::cerr << "features_result[0] = " << features_result[0] << std::endl << std::flush;
+
+    for (int i=0;i<10;++i) {
+      std::cerr << "features_result[" << i << "] = " << features_result[i] << std::endl << std::flush;
+    }
+
+    auto dumpRes = [](const float *vec, size_t n) -> std::string {
+        if (n == 0)
+            return "[]";
+        std::stringstream oss;
+        oss << "[" << vec[0];
+        for (size_t i = 1; i < n; i++)
+            oss << "," << vec[i];
+        oss << "]";
+        return oss.str();
+    };
+
+    // grep FEATURES_RESULT_DUMP log | tail +2 | cut -d " " -f 2 > features.txt 
+    std::cerr << "FEATURES_RESULT_DUMP " << dumpRes(features_result, 57*32*48) << std::endl << std::flush; 
+    std::cerr << "HEATMAPS_RESULT_DUMP " << dumpRes(heatmaps_result, 19*32*48) << std::endl << std::flush; 
+    std::cerr << "PAFS_RESULT_DUMP " << dumpRes(pafs_result, 38*32*48) << std::endl << std::flush; 
+
     std::cerr << "heatmaps_result[0] = " << heatmaps_result[0] << std::endl << std::flush;
     std::cerr << "pafs_result[0] = " << pafs_result[0] << std::endl << std::flush;
 
+// todo this is a state!
+std::vector<Pose> previous_poses_2d;
+PoseCommon common;
+float fx = -1;
+    //inline poses parse_poses(std::vector<Pose> & previous_poses_2d, PoseCommon & common, // these two on the left are a state 
+    //    const matrix3x4 &R, 
+    //    const cv::Mat &features, const cv::Mat &heatmap, const cv::Mat &paf_map, float input_scale, int stride, 
+    //    float fx, float frame_shape_1,
+    //    bool is_video=false) {
+
+/*
+{
+    "R": [
+        [
+            0.1656794936,
+            0.0336560618,
+            -0.9856051821
+        ],
+        [
+            -0.09224101321,
+            0.9955650135,
+            0.01849052095
+        ],
+        [
+            0.9818563545,
+            0.08784972047,
+            0.1680491765
+        ]
+    ],
+    "t": [
+        [
+            0
+        ],
+        [
+            0
+        ],
+        [
+            0
+        ]
+    ]
+}
+*/
+  matrix3x4 R = matrix3x4{ { {     
+            0.1656794936,
+            0.0336560618,
+            -0.9856051821,
+            0.0
+  },
+        {
+            -0.09224101321,
+            0.9955650135,
+            0.01849052095,
+            0.0
+        },
+        {
+            0.9818563545,
+            0.08784972047,
+            0.1680491765,
+            0.0
+   } } };
+
+// (57, 32, 48) (19, 32, 48) (38, 32, 48)
+  int featureMapSize[] = { 57,32,48 };
+  cv::Mat featuresMat = cv::Mat(3, featureMapSize, CV_32FC1, const_cast<float*>(features_result));
+  int heatmapMatSize[] = { 19,32,48 };
+  cv::Mat heatmapMat = cv::Mat(3, heatmapMatSize, CV_32FC1, const_cast<float*>(heatmaps_result));
+  int paf_mapMatSize[] = {38,32,48};
+  cv::Mat paf_mapMat = cv::Mat(3, paf_mapMatSize, CV_32FC1, const_cast<float*>(pafs_result));
+   // float input_scale -> defined!
+   //, int stride, -> defined
+    //    float fx, float frame_shape_1,
+    //    bool is_video=false)
+// python demo.py --model human-pose-estimation-3d-0001.xml --use-openvino -d CPU --images pointing_close_of_view.jpg 
+// (57, 32, 48) (19, 32, 48) (38, 32, 48)
+
+  auto posesStruct = parse_poses(previous_poses_2d, common, // these two on the left are a state 
+    R, 
+    featuresMat, heatmapMat, paf_mapMat, input_scale, stride, 
+    fx, image3.size[1], true); //frame_shape_1,
+    //    bool is_video=false)
+
+std::cerr << "poses3d" << std::endl << std::flush;
+for (auto &l: posesStruct.poses_3d) {
+  std::cerr << "pose3d_line";
+  for (auto &x: l) {
+    std::cerr << ", " << x;
+  }
+  std::cerr << std::endl << std::flush;
+}
+std::cerr << "poses2d" << std::endl << std::flush;
+for (auto &l: posesStruct.poses_2d) {
+  std::cerr << "pose2d_line";
+  for (auto &x: l) {
+    std::cerr << ", " << x;
+  }
+  std::cerr << std::endl << std::flush;
+}
 
   std::shared_ptr<FrameStruct> s =
         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
