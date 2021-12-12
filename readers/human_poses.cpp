@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#define VERBOSE
+//#define VERBOSE
 
 #include <vector>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -391,9 +391,9 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
             position++;
             if (peakIdx >= 0) {
 
-std::cerr << "peakIdx = " << peakIdx << " " << candidates[peakIdx].pos.x << " " << candidates[peakIdx].pos.y << " " << candidates[peakIdx].score << std::endl << std::flush;
-
-
+#ifdef VERBOSE
+                std::cerr << "peakIdx = " << peakIdx << " " << candidates[peakIdx].pos.x << " " << candidates[peakIdx].pos.y << " " << candidates[peakIdx].score << std::endl << std::flush;
+#endif
                 pose.keypoints[position].x = candidates[peakIdx].pos.x + 0.5f; // TODO why + 0.5f ??
                 pose.keypoints[position].y = candidates[peakIdx].pos.y + 0.5f;
                 pose.keypoints[position].z = candidates[peakIdx].score;

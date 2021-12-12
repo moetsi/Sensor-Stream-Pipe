@@ -408,37 +408,30 @@ namespace human_pose_estimation {
         poses rv;
         rv.poses_2d = p.poses_2d_scaled;
 
-        int c = 0;
+        //int c = 0;
+        // ? mul by R ?
         for (auto &l: p.translated_poses_3d) {
+#ifdef VERBOSE
+          std::cerr << " final[ ";
+          for (auto &ll: l) {
+            std::cerr << ll << " ";
+          }
+          std::cerr << " ]" << std::endl << std::flush;
+#endif
 
-std::cerr << " final[ ";
-for (auto &ll: l) {
-  std::cerr << ll << " ";
-}
-std::cerr << " ]" << std::endl << std::flush;
+          std::vector<float> lf;
+          for (int i=0; i<l.size(); i+=4) {
 
-for (int i=0; i<l.size(); i+=4) {
-
-  auto x = l[i];
-  auto y = l[i+1];
-  auto z = l[i+2];
-std::vector<float> l2 { float(-z*0.01), float(x*0.01), float(-y*0.01) };
-rv.poses_3d.push_back(l2);
-
-}
-      /*    vector3 v;
-          v.x = l[0];
-          v.y = l[1];
-          v.z = l[2];
-
-          std::cerr << "before R " << l[0] << " " << l[1] << " " << l[2] << std::endl << std::flush; 
-          vector3 vr;
-          R.mul(vr, v);
-          // -z, x, -y
-          std::vector<float> l2 { -vr.z, vr.x, -vr.y };
-          rv.poses_3d.push_back(l2); */
-
-          if (++c > 0) break;
+            auto x = l[i];
+            auto y = l[i+1];
+            auto z = l[i+2];
+            std::vector<float> l2 { float(-z*0.01), float(x*0.01), float(-y*0.01), l[i+3] };
+            for (auto &ll2: l2) {
+              lf.push_back(ll2);
+            }
+          }
+          rv.poses_3d.push_back(lf);
+          //if (++c > 0) break;
         }
 
         return rv;
