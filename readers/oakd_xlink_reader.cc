@@ -117,6 +117,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
       * In this case we will be able to set an input blob of any shape to an
       * infer request. Resize and layout conversions are executed automatically
       * during inference */
+     // TODO keep?
     input_info->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
     input_info->setLayout(Layout::NHWC);
     input_info->setPrecision(Precision::U8);
@@ -216,8 +217,39 @@ void OakdXlinkReader::NextFrame() {
     cv::Mat image2;
     int stride = 8;
     double input_scale = 256.0 / image.size[0];
+    // input scale =  0.35555555555555557
     std::cerr << "input_scale = " << input_scale << std::endl << std::flush;
     cv::resize(image, image2, cv::Size(), input_scale, input_scale, cv::INTER_LINEAR);
+
+
+{
+// https://stackoverflow.com/questions/26681713/convert-mat-to-array-vector-in-opencv
+std::vector<uchar> array;
+auto &mat = image2;
+if (mat.isContinuous()) {
+  // array.assign(mat.datastart, mat.dataend); // <- has problems for sub-matrix like mat = big_mat.row(i)
+  array.assign(mat.data, mat.data + mat.total()*mat.channels());
+} else {
+  for (int i = 0; i < mat.rows; ++i) {
+    array.insert(array.end(), mat.ptr<uchar>(i), mat.ptr<uchar>(i)+mat.cols*mat.channels());
+  }
+}
+
+    auto dumpU8 = [](const uchar *vec, size_t n) -> std::string {
+        if (n == 0)
+            return "[]";
+        std::stringstream oss;
+        oss << "[" << int(vec[0]);
+        for (size_t i = 1; i < n; i++)
+            oss << "," << int(vec[i]);
+        oss << "]";
+        return oss.str();
+    };
+
+// XXXX std::cerr << "SCALED_IMAGE_DUMP " << dumpU8(&array[0], array.size()) << std::endl << std::flush;
+}
+
+
     std::cerr << image2.size[0] << std::endl << std::flush; 
     std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
 
@@ -246,10 +278,103 @@ std::cerr << m.rows << std::endl << std::flush;
                                                     image2.size[1] - (image2.size[1] % stride),
                                                     image2.size[0]));
 
-    Blob::Ptr imgBlob = wrapMat2Blob(image3);
+{
+// https://stackoverflow.com/questions/26681713/convert-mat-to-array-vector-in-opencv
+std::vector<uchar> array;
+auto &mat = image3;
+if (mat.isContinuous()) {
+
+  std::cerr << "is continuous" << std::endl << std::flush;
+//  exit(1);
+  // array.assign(mat.datastart, mat.dataend); // <- has problems for sub-matrix like mat = big_mat.row(i)
+  array.assign(mat.data, mat.data + mat.total()*mat.channels());
+} else {
+  for (int i = 0; i < mat.rows; ++i) {
+    array.insert(array.end(), mat.ptr<uchar>(i), mat.ptr<uchar>(i)+mat.cols*mat.channels());
+  }
+}
+
+    auto dumpU8 = [](const uchar *vec, size_t n) -> std::string {
+        if (n == 0)
+            return "[]";
+        std::stringstream oss;
+        oss << "[" << int(vec[0]);
+        for (size_t i = 1; i < n; i++)
+            oss << "," << int(vec[i]);
+        oss << "]";
+        return oss.str();
+    };
+
+// XXXX std::cerr << "IMAGE_DUMP " << dumpU8(&array[0], array.size()) << std::endl << std::flush;
+}
+
+
+        //        f1 = d[i][j][kk] # transpose ?
+        //        fq = d3[0][k][i][j]
+        //        f2 = d2[i*384*3 + j*3 + kk]
+
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
+cv::Mat image4(image3.size[0], image3.size[1], CV_8UC3);
+for (int i=0; i< image3.size[0]; ++i) {
+    for (int j=0; j< image3.size[1]; ++j) {
+        auto v = image3.at<cv::Vec3b>(i,j);
+        auto v2 = cv::Vec3b{ v[0], v[1], v[2] };
+        image4.at<cv::Vec3b>(i,j) = v2;
+    }
+}
+
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
+   Blob::Ptr imgBlobX = wrapMat2Blob(image4);
+
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
+    std::vector<uint8_t> image2_vector;
+    auto tgt_d2 = image2.size[1] - (image2.size[1] % stride);
+    auto tgt_d1 = image2.size[0];
+
+std::cerr << "tgt_d1 " << tgt_d1 << std::endl << std::flush; // 256
+std::cerr << "tgt_d2 " << tgt_d2 << std::endl << std::flush; // 384
+// 256 ? 384 ? 
+//exit(1);
+    image2_vector.resize(tgt_d1*tgt_d2*3);
+    for (int i; i<tgt_d1; ++i) {
+      for (int j=0; j<tgt_d2; ++j) {
+        for (int k=0; k<3; ++k) {
+          // Vec3b
+          image2_vector[i*tgt_d1 *3 + j*3 + k] = image2.at<cv::Vec3b>(i,j)[k];
+        }
+      }
+    }
+// height, width
+    InferenceEngine::TensorDesc tDesc(InferenceEngine::Precision::U8, {1,3,tgt_d2,tgt_d1}, InferenceEngine::Layout::NHWC);
+
+    Blob::Ptr imgBlobY = InferenceEngine::make_shared_blob<uint8_t>(tDesc, &image2_vector[0]); // Blob::CreateFromData(&image2_vector[0]);
+    // imgBlob.reset(&image2_vector[0]); // , std::function<void(uint8_t*)>([](uint8_t *){}));
+/*
+    template<class Y, class Deleter>
+    void reset(Y* ptr, Deleter d) { std::shared_ptr<T>::reset(ptr, d); }
+*/
+
+{
+      auto dumpU8 = [](const uchar *vec, size_t n) -> std::string {
+        if (n == 0)
+            return "[]";
+        std::stringstream oss;
+        oss << "[" << int(vec[0]);
+        for (size_t i = 1; i < n; i++)
+            oss << "," << int(vec[i]);
+        oss << "]";
+        return oss.str();
+    };
+
+// XXXX std::cerr << "IMAGE3_DUMP " << dumpU8(&image2_vector[0], image2_vector.size()) << std::endl << std::flush;
+}
+
 // reshape {'data': (1, 3, 256, 384)}
 // img shape (1, 3, 256, 384)
-    infer_request.SetBlob(input_name, imgBlob);  // infer_request accepts input blob of any size
+    infer_request.SetBlob(input_name, imgBlobX);  // infer_request accepts input blob of any size
 
 
 //   Blob::Ptr imgBlob = wrapMat2Blob(frameRgbOpenCv);     // just wrap Mat data by Blob::Ptr// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
@@ -257,11 +382,11 @@ std::cerr << m.rows << std::endl << std::flush;
 
   // --------------------------- Step 7. Do inference
   // --------------------------------------------------------
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   /* Running the request synchronously */
     infer_request.Infer();
   // -----------------------------------------------------------------------------------------------------
-
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   // --------------------------- Step 8. Process output
   // ------------------------------------------------------
 
@@ -323,9 +448,9 @@ std::cerr << m.rows << std::endl << std::flush;
     };
 
     // grep FEATURES_RESULT_DUMP log | tail +2 | cut -d " " -f 2 > features.txt 
-    std::cerr << "FEATURES_RESULT_DUMP " << dumpRes(features_result, 57*32*48) << std::endl << std::flush; 
-    std::cerr << "HEATMAPS_RESULT_DUMP " << dumpRes(heatmaps_result, 19*32*48) << std::endl << std::flush; 
-    std::cerr << "PAFS_RESULT_DUMP " << dumpRes(pafs_result, 38*32*48) << std::endl << std::flush; 
+//    std::cerr << "FEATURES_RESULT_DUMP " << dumpRes(features_result, 57*32*48) << std::endl << std::flush; 
+//    std::cerr << "HEATMAPS_RESULT_DUMP " << dumpRes(heatmaps_result, 19*32*48) << std::endl << std::flush; 
+//    std::cerr << "PAFS_RESULT_DUMP " << dumpRes(pafs_result, 38*32*48) << std::endl << std::flush; 
 
     std::cerr << "heatmaps_result[0] = " << heatmaps_result[0] << std::endl << std::flush;
     std::cerr << "pafs_result[0] = " << pafs_result[0] << std::endl << std::flush;
@@ -408,7 +533,9 @@ float fx = -1;
   auto posesStruct = parse_poses(previous_poses_2d, common, // these two on the left are a state 
     R, 
     featuresMat, heatmapMat, paf_mapMat, input_scale, stride, 
-    fx, image3.size[1], true); //frame_shape_1,
+    fx,// image3.size[1]
+    1080  //tgt_d2
+    , false); //true); //frame_shape_1,
     //    bool is_video=false)
 
 std::cerr << "poses3d" << std::endl << std::flush;

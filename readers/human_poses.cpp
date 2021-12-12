@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+#define VERBOSE
+
 #include <vector>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "human_poses.h"
@@ -388,13 +390,19 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
         for (const auto& peakIdx : subsetI.peaksIndices) {
             position++;
             if (peakIdx >= 0) {
-                pose.keypoints[position].x = candidates[peakIdx].pos.x + 0.5f;
+
+std::cerr << "peakIdx = " << peakIdx << " " << candidates[peakIdx].pos.x << " " << candidates[peakIdx].pos.y << " " << candidates[peakIdx].score << std::endl << std::flush;
+
+
+                pose.keypoints[position].x = candidates[peakIdx].pos.x + 0.5f; // TODO why + 0.5f ??
                 pose.keypoints[position].y = candidates[peakIdx].pos.y + 0.5f;
                 pose.keypoints[position].z = candidates[peakIdx].score;
             }
         }
         poses.push_back(pose);
     }
+
+//exit(-1);
     return poses;
 }
 } // namespace human_pose_estimation
