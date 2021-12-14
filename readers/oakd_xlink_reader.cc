@@ -520,6 +520,8 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //Grab the amount of COCO bodies detected in this rgb frame
     int32_t bodyCount = (int)posesStruct.poses_3d.size();
 
+    std::cerr << "bodyCount: " << bodyCount << std::endl << std::flush; 
+
     //Resize the frame to hold all the detected COCO bodies detected in this frame
     s->frame.resize(sizeof(coco_human_t)*bodyCount + sizeof(int32_t));
 
@@ -633,11 +635,11 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         bodyStruct.ear_right_y = posesStruct.poses_3d[i][18 * 4 + 1];
         bodyStruct.ear_right_z = posesStruct.poses_3d[i][18 * 4 + 2];
         bodyStruct.ear_right_conf = posesStruct.poses_3d[i][18 * 4 + 3];
-        inplace_hton(bodyCount);
 
         //Finally we copy the COCO body struct memory to the frame
         memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
     }
+    // inplace_hton(bodyCount);                                                         //  RENAUD I DIDN'T KNOW WHAT TO DO WITH THIS LINE SO I COMMENTED IT OUT
 
     //Now that we have copied all memory to the frame we can push it back
     current_frame_.push_back(s);
