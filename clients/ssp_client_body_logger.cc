@@ -65,7 +65,7 @@ extern "C" SSP_EXPORT int ssp_client_body_logger(int port)
     std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
     int bodyCount;
-    object_human_t bodyStruct;
+    coco_human_t bodyStruct;
 
     while (reader.HasNextFrame()) {
       reader.NextFrame();
@@ -80,7 +80,7 @@ extern "C" SSP_EXPORT int ssp_client_body_logger(int port)
 
           //Then we grab the body struct
           // (in the future it will iterate and go over the body struct array)
-          memcpy(&bodyStruct, &f.frame[4], sizeof(object_human_t));
+          memcpy(&bodyStruct, &f.frame[4], sizeof(coco_human_t));
 
           spdlog::debug("\t description: {} counter: {} bodyStruct's pelvis.x: {} number of bodies: {}", f.scene_desc, f.frame_id, bodyStruct.pelvis_x, bodyCount);
         }

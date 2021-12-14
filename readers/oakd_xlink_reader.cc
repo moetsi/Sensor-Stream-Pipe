@@ -42,7 +42,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     xoutRgb->setStreamName("rgb");
 
     // Properties
-    camRgb->setPreviewSize(300, 300);
+    camRgb->setPreviewSize(1280, 720);
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
     camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
     camRgb->setInterleaved(false);
@@ -213,10 +213,10 @@ void OakdXlinkReader::NextFrame() {
 #ifdef TEST_WITH_IMAGE
 
 #ifndef _WIN32 
-    cv::Mat image = cv::imread("../../models/pointing_close_of_view.jpg"); //This is a hardwired image only to help Renaud with parsing
+    cv::Mat image = cv::imread("../../models/two_bodies_in_middle.jpg"); //This is a hardwired image only to help Renaud with parsing
 #endif
 #ifdef _WIN32
-    cv::Mat image = cv::imread("../../../models/pointing_close_of_view.jpg"); //This is a hardwired image only to help Renaud with parsing
+    cv::Mat image = cv::imread("../../../models/two_bodies_in_middle.jpg"); //This is a hardwired image only to help Renaud with parsing
 #endif
 #else
     auto &image = frameRgbOpenCv;
@@ -507,286 +507,140 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 #endif
     /////////////////////////////////////////////
 
-  std::shared_ptr<FrameStruct> s =
+    //Prepare the bodies frame
+    std::shared_ptr<FrameStruct> s =
         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-  s->frame_id = current_frame_counter_;
-  s->frame_type = FrameType::FrameTypeHumanPose; // 4;
-  s->frame_data_type = FrameDataType::FrameDataTypeObjectHumanData; // 8;
-  s->timestamps.push_back(capture_timestamp);
+    s->frame_id = current_frame_counter_;
+    s->frame_type = FrameType::FrameTypeHumanPose; // 4;
+    s->frame_data_type = FrameDataType::FrameDataTypeObjectHumanData; // 8;
+    s->timestamps.push_back(capture_timestamp);
 
-  s->frame = std::vector<uchar>();
-  s->frame.resize(sizeof(object_human_t) + sizeof(int32_t));
-  
-  //here we will say we detected 1 body
-  // TODO :: Change bodyCount to number found from inference
-  int32_t bodyCount = 1;
-  object_human_t bodyStruct;
+    s->frame = std::vector<uchar>();
+    
+    //Grab the amount of COCO bodies detected in this rgb frame
+    int32_t bodyCount = (int)posesStruct.poses_3d.size();
 
-  bodyStruct.Id = 1;
-  bodyStruct.pelvis_x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-  // bodyStruct.pelvis_x = 1.4;
-  bodyStruct.pelvis_y = 0.1;
-  bodyStruct.pelvis_z = 0.1;
-  bodyStruct.pelvis_QX = 0.1;
-  bodyStruct.pelvis_QY = 0.1;
-  bodyStruct.pelvis_QZ = 0.1;
-  bodyStruct.pelvis_QW = 0.1;
-  bodyStruct.pelvis_conf = 1;
-  bodyStruct.spine_navel_x = 0.1;
-  bodyStruct.spine_navel_y = 0.1;
-  bodyStruct.spine_navel_z = 0.1;
-  bodyStruct.spine_navel_QX = 0.1;
-  bodyStruct.spine_navel_QY = 0.1;
-  bodyStruct.spine_navel_QZ = 0.1;
-  bodyStruct.spine_navel_QW = 0.1;
-  bodyStruct.spine_navel_conf = 1;
-  bodyStruct.spine_chest_x = 0.1;
-  bodyStruct.spine_chest_y = 0.1;
-  bodyStruct.spine_chest_z = 0.1;
-  bodyStruct.spine_chest_QX = 0.1;
-  bodyStruct.spine_chest_QY = 0.1;
-  bodyStruct.spine_chest_QZ = 0.1;
-  bodyStruct.spine_chest_QW = 0.1;
-  bodyStruct.spine_chest_conf = 1;
-  bodyStruct.neck_x = 0.1;
-  bodyStruct.neck_y = 0.1;
-  bodyStruct.neck_z = 0.1;
-  bodyStruct.neck_QX = 0.1;
-  bodyStruct.neck_QY = 0.1;
-  bodyStruct.neck_QZ = 0.1;
-  bodyStruct.neck_QW = 0.1;
-  bodyStruct.neck_conf = 1;
-  bodyStruct.clavicle_left_x = 0.1;
-  bodyStruct.clavicle_left_y = 0.1;
-  bodyStruct.clavicle_left_z = 0.1;
-  bodyStruct.clavicle_left_QX = 0.1;
-  bodyStruct.clavicle_left_QY = 0.1;
-  bodyStruct.clavicle_left_QZ = 0.1;
-  bodyStruct.clavicle_left_QW = 0.1;
-  bodyStruct.clavicle_left_conf = 1;
-  bodyStruct.shoulder_left_x = 0.1;
-  bodyStruct.shoulder_left_y = 0.1;
-  bodyStruct.shoulder_left_z = 0.1;
-  bodyStruct.shoulder_left_QX = 0.1;
-  bodyStruct.shoulder_left_QY = 0.1;
-  bodyStruct.shoulder_left_QZ = 0.1;
-  bodyStruct.shoulder_left_QW = 0.1;
-  bodyStruct.shoulder_left_conf = 1;
-  bodyStruct.elbow_left_x = 0.1;
-  bodyStruct.elbow_left_y = 0.1;
-  bodyStruct.elbow_left_z = 0.1;
-  bodyStruct.elbow_left_QX = 0.1;
-  bodyStruct.elbow_left_QY = 0.1;
-  bodyStruct.elbow_left_QZ = 0.1;
-  bodyStruct.elbow_left_QW = 0.1;
-  bodyStruct.elbow_left_conf = 1;
-  bodyStruct.wrist_left_x = 0.1;
-  bodyStruct.wrist_left_y = 0.1;
-  bodyStruct.wrist_left_z = 0.1;
-  bodyStruct.wrist_left_QX = 0.1;
-  bodyStruct.wrist_left_QY = 0.1;
-  bodyStruct.wrist_left_QZ = 0.1;
-  bodyStruct.wrist_left_QW = 0.1;
-  bodyStruct.wrist_left_conf = 1;
-  bodyStruct.hand_left_x = 0.1;
-  bodyStruct.hand_left_y = 0.1;
-  bodyStruct.hand_left_z = 0.1;
-  bodyStruct.hand_left_QX = 0.1;
-  bodyStruct.hand_left_QY = 0.1;
-  bodyStruct.hand_left_QZ = 0.1;
-  bodyStruct.hand_left_QW = 0.1;
-  bodyStruct.hand_left_conf = 1;
-  bodyStruct.handtip_left_x = 0.1;
-  bodyStruct.handtip_left_y = 0.1;
-  bodyStruct.handtip_left_z = 0.1;
-  bodyStruct.handtip_left_QX = 0.1;
-  bodyStruct.handtip_left_QY = 0.1;
-  bodyStruct.handtip_left_QZ = 0.1;
-  bodyStruct.handtip_left_QW = 0.1;
-  bodyStruct.handtip_left_conf = 1;
-  bodyStruct.thumb_left_x = 0.1;
-  bodyStruct.thumb_left_y = 0.1;
-  bodyStruct.thumb_left_z = 0.1;
-  bodyStruct.thumb_left_QX = 0.1;
-  bodyStruct.thumb_left_QY = 0.1;
-  bodyStruct.thumb_left_QZ = 0.1;
-  bodyStruct.thumb_left_QW = 0.1;
-  bodyStruct.thumb_left_conf = 1;
-  bodyStruct.clavicle_right_x = 0.1;
-  bodyStruct.clavicle_right_y = 0.1;
-  bodyStruct.clavicle_right_z = 0.1;
-  bodyStruct.clavicle_right_QX = 0.1;
-  bodyStruct.clavicle_right_QY = 0.1;
-  bodyStruct.clavicle_right_QZ = 0.1;
-  bodyStruct.clavicle_right_QW = 0.1;
-  bodyStruct.clavicle_right_conf = 1;
-  bodyStruct.shoulder_right_x = 0.1;
-  bodyStruct.shoulder_right_y = 0.1;
-  bodyStruct.shoulder_right_z = 0.1;
-  bodyStruct.shoulder_right_QX = 0.1;
-  bodyStruct.shoulder_right_QY = 0.1;
-  bodyStruct.shoulder_right_QZ = 0.1;
-  bodyStruct.shoulder_right_QW = 0.1;
-  bodyStruct.shoulder_right_conf = 1;
-  bodyStruct.elbow_right_x = 0.1;
-  bodyStruct.elbow_right_y = 0.1;
-  bodyStruct.elbow_right_z = 0.1;
-  bodyStruct.elbow_right_QX = 0.1;
-  bodyStruct.elbow_right_QY = 0.1;
-  bodyStruct.elbow_right_QZ = 0.1;
-  bodyStruct.elbow_right_QW = 0.1;
-  bodyStruct.elbow_right_conf = 1;
-  bodyStruct.wrist_right_x = 0.1;
-  bodyStruct.wrist_right_y = 0.1;
-  bodyStruct.wrist_right_z = 0.1;
-  bodyStruct.wrist_right_QX = 0.1;
-  bodyStruct.wrist_right_QY = 0.1;
-  bodyStruct.wrist_right_QZ = 0.1;
-  bodyStruct.wrist_right_QW = 0.1;
-  bodyStruct.wrist_right_conf = 1;
-  bodyStruct.hand_right_x = 0.1;
-  bodyStruct.hand_right_y = 0.1;
-  bodyStruct.hand_right_z = 0.1;
-  bodyStruct.hand_right_QX = 0.1;
-  bodyStruct.hand_right_QY = 0.1;
-  bodyStruct.hand_right_QZ = 0.1;
-  bodyStruct.hand_right_QW = 0.1;
-  bodyStruct.hand_right_conf = 1;
-  bodyStruct.handtip_right_x = 0.1;
-  bodyStruct.handtip_right_y = 0.1;
-  bodyStruct.handtip_right_z = 0.1;
-  bodyStruct.handtip_right_QX = 0.1;
-  bodyStruct.handtip_right_QY = 0.1;
-  bodyStruct.handtip_right_QZ = 0.1;
-  bodyStruct.handtip_right_QW = 0.1;
-  bodyStruct.handtip_right_conf = 1;
-  bodyStruct.thumb_right_x = 0.1;
-  bodyStruct.thumb_right_y = 0.1;
-  bodyStruct.thumb_right_z = 0.1;
-  bodyStruct.thumb_right_QX = 0.1;
-  bodyStruct.thumb_right_QY = 0.1;
-  bodyStruct.thumb_right_QZ = 0.1;
-  bodyStruct.thumb_right_QW = 0.1;
-  bodyStruct.thumb_right_conf = 1;
-  bodyStruct.hip_left_x = 0.1;
-  bodyStruct.hip_left_y = 0.1;
-  bodyStruct.hip_left_z = 0.1;
-  bodyStruct.hip_left_QX = 0.1;
-  bodyStruct.hip_left_QY = 0.1;
-  bodyStruct.hip_left_QZ = 0.1;
-  bodyStruct.hip_left_QW = 0.1;
-  bodyStruct.hip_left_conf = 1;
-  bodyStruct.knee_left_x = 0.1;
-  bodyStruct.knee_left_y = 0.1;
-  bodyStruct.knee_left_z = 0.1;
-  bodyStruct.knee_left_QX = 0.1;
-  bodyStruct.knee_left_QY = 0.1;
-  bodyStruct.knee_left_QZ = 0.1;
-  bodyStruct.knee_left_QW = 0.1;
-  bodyStruct.knee_left_conf = 1;
-  bodyStruct.ankle_left_x = 0.1;
-  bodyStruct.ankle_left_y = 0.1;
-  bodyStruct.ankle_left_z = 0.1;
-  bodyStruct.ankle_left_QX = 0.1;
-  bodyStruct.ankle_left_QY = 0.1;
-  bodyStruct.ankle_left_QZ = 0.1;
-  bodyStruct.ankle_left_QW = 0.1;
-  bodyStruct.ankle_left_conf = 1;
-  bodyStruct.foot_left_x = 0.1;
-  bodyStruct.foot_left_y = 0.1;
-  bodyStruct.foot_left_z = 0.1;
-  bodyStruct.foot_left_QX = 0.1;
-  bodyStruct.foot_left_QY = 0.1;
-  bodyStruct.foot_left_QZ = 0.1;
-  bodyStruct.foot_left_QW = 0.1;
-  bodyStruct.foot_left_conf = 1;
-  bodyStruct.hip_right_x = 0.1;
-  bodyStruct.hip_right_y = 0.1;
-  bodyStruct.hip_right_z = 0.1;
-  bodyStruct.hip_right_QX = 0.1;
-  bodyStruct.hip_right_QY = 0.1;
-  bodyStruct.hip_right_QZ = 0.1;
-  bodyStruct.hip_right_QW = 0.1;
-  bodyStruct.hip_right_conf = 1;
-  bodyStruct.knee_right_x = 0.1;
-  bodyStruct.knee_right_y = 0.1;
-  bodyStruct.knee_right_z = 0.1;
-  bodyStruct.knee_right_QX = 0.1;
-  bodyStruct.knee_right_QY = 0.1;
-  bodyStruct.knee_right_QZ = 0.1;
-  bodyStruct.knee_right_QW = 0.1;
-  bodyStruct.knee_right_conf = 1;
-  bodyStruct.ankle_right_x = 0.1;
-  bodyStruct.ankle_right_y = 0.1;
-  bodyStruct.ankle_right_z = 0.1;
-  bodyStruct.ankle_right_QX = 0.1;
-  bodyStruct.ankle_right_QY = 0.1;
-  bodyStruct.ankle_right_QZ = 0.1;
-  bodyStruct.ankle_right_QW = 0.1;
-  bodyStruct.ankle_right_conf = 1;
-  bodyStruct.foot_right_x = 0.1;
-  bodyStruct.foot_right_y = 0.1;
-  bodyStruct.foot_right_z = 0.1;
-  bodyStruct.foot_right_QX = 0.1;
-  bodyStruct.foot_right_QY = 0.1;
-  bodyStruct.foot_right_QZ = 0.1;
-  bodyStruct.foot_right_QW = 0.1;
-  bodyStruct.foot_right_conf = 1;
-  bodyStruct.head_x = 0.1;
-  bodyStruct.head_y = 0.1;
-  bodyStruct.head_z = 0.1;
-  bodyStruct.head_QX = 0.1;
-  bodyStruct.head_QY = 0.1;
-  bodyStruct.head_QZ = 0.1;
-  bodyStruct.head_QW = 0.1;
-  bodyStruct.head_conf = 1;
-  bodyStruct.nose_x = 0.1;
-  bodyStruct.nose_y = 0.1;
-  bodyStruct.nose_z = 0.1;
-  bodyStruct.nose_QX = 0.1;
-  bodyStruct.nose_QY = 0.1;
-  bodyStruct.nose_QZ = 0.1;
-  bodyStruct.nose_QW = 0.1;
-  bodyStruct.nose_conf = 1;
-  bodyStruct.eye_left_x = 0.1;
-  bodyStruct.eye_left_y = 0.1;
-  bodyStruct.eye_left_z = 0.1;
-  bodyStruct.eye_left_QX = 0.1;
-  bodyStruct.eye_left_QY = 0.1;
-  bodyStruct.eye_left_QZ = 0.1;
-  bodyStruct.eye_left_QW = 0.1;
-  bodyStruct.eye_left_conf = 1;
-  bodyStruct.ear_left_x = 0.1;
-  bodyStruct.ear_left_y = 0.1;
-  bodyStruct.ear_left_z = 0.1;
-  bodyStruct.ear_left_QX = 0.1;
-  bodyStruct.ear_left_QY = 0.1;
-  bodyStruct.ear_left_QZ = 0.1;
-  bodyStruct.ear_left_QW = 0.1;
-  bodyStruct.ear_left_conf = 1;
-  bodyStruct.eye_right_x = 0.1;
-  bodyStruct.eye_right_y = 0.1;
-  bodyStruct.eye_right_z = 0.1;
-  bodyStruct.eye_right_QX = 0.1;
-  bodyStruct.eye_right_QY = 0.1;
-  bodyStruct.eye_right_QZ = 0.1;
-  bodyStruct.eye_right_QW = 0.1;
-  bodyStruct.eye_right_conf = 1;
-  bodyStruct.ear_right_x = 0.1;
-  bodyStruct.ear_right_y = 0.1;
-  bodyStruct.ear_right_z = 0.1;
-  bodyStruct.ear_right_QX = 0.1;
-  bodyStruct.ear_right_QY = 0.1;
-  bodyStruct.ear_right_QZ = 0.1;
-  bodyStruct.ear_right_QW = 0.1;
-  bodyStruct.ear_right_conf = 1;
-  inplace_hton(bodyCount);
-  // std::cerr << "dummy: bodyCount after hton " << bodyCount << std::endl << std::flush;
-  memcpy(&s->frame[0], &bodyCount, sizeof(int32_t));
-  memcpy(&s->frame[4], &bodyStruct, sizeof(object_human_t));
+    //Resize the frame to hold all the detected COCO bodies detected in this frame
+    s->frame.resize(sizeof(coco_human_t)*bodyCount + sizeof(int32_t));
 
+    //Copy the number of COCO bodies detected into the first 4 bytes of the bodies frame
+    memcpy(&s->frame[0], &bodyCount, sizeof(int32_t));
 
-  current_frame_.push_back(s);
+    //Now we iterate through all detected bodies in poses_3d, create a coco_human_t, and then copy the data into the frame
+    for (size_t i = 0; i < bodyCount; i++) {
+        
+        //Create a COCO body Struct
+        coco_human_t bodyStruct;
+
+        // Map of joints to array index
+        // neck 0 
+        // nose 1 
+        // pelvis (can't use it!) 2 
+        // left shoulder 3 
+        // left elbow 4 
+        // left wrist 5 
+        // left hip 6 
+        // left knee 7 
+        // left ankle 8 
+        // right shoulder 9 
+        // right elbow 10 
+        // right wrist 11 
+        // right hip 12 
+        // right knee 13 
+        // right ankle 14 
+        // left eye 15
+        // left ear 16
+        // right eye 17
+        // right ear 18
+
+        //Now we set the data of the COCO body struct
+        // posesStruct.poses_3d [ {body number } ][ {body joint index}*4 + {0, 1, 2 ,3 for x, y, z, probability}]
+
+        // bodyStruct.Id = ; Currently id is not supported
+        bodyStruct.neck_x = posesStruct.poses_3d[i][0 * 4 + 0];
+        bodyStruct.neck_y = posesStruct.poses_3d[i][0 * 4 + 1];
+        bodyStruct.neck_z = posesStruct.poses_3d[i][0 * 4 + 2];
+        bodyStruct.neck_conf = posesStruct.poses_3d[i][0 * 4 + 3];
+        bodyStruct.nose_x = posesStruct.poses_3d[i][1 * 4 + 0];
+        bodyStruct.nose_y = posesStruct.poses_3d[i][1 * 4 + 1];
+        bodyStruct.nose_z = posesStruct.poses_3d[i][1 * 4 + 2];
+        bodyStruct.nose_conf = posesStruct.poses_3d[i][1 * 4 + 3];
+        // bodyStruct.pelvis_x = posesStruct.poses_3d[i][2 * 4 + 0];
+        // bodyStruct.pelvis_y = posesStruct.poses_3d[i][2 * 4 + 1];
+        // bodyStruct.pelvis_z = posesStruct.poses_3d[i][2 * 4 + 2];
+        // bodyStruct.pelvis_conf = posesStruct.poses_3d[i][2 * 4 + 3];
+        bodyStruct.shoulder_left_x = posesStruct.poses_3d[i][3 * 4 + 0];
+        bodyStruct.shoulder_left_y = posesStruct.poses_3d[i][3 * 4 + 1];
+        bodyStruct.shoulder_left_z = posesStruct.poses_3d[i][3 * 4 + 2];
+        bodyStruct.shoulder_left_conf = posesStruct.poses_3d[i][3 * 4 + 3];
+        bodyStruct.elbow_left_x = posesStruct.poses_3d[i][4 * 4 + 0];
+        bodyStruct.elbow_left_y = posesStruct.poses_3d[i][4 * 4 + 1];
+        bodyStruct.elbow_left_z = posesStruct.poses_3d[i][4 * 4 + 2];
+        bodyStruct.elbow_left_conf = posesStruct.poses_3d[i][4 * 4 + 3];
+        bodyStruct.wrist_left_x = posesStruct.poses_3d[i][5 * 4 + 0];
+        bodyStruct.wrist_left_y = posesStruct.poses_3d[i][5 * 4 + 1];
+        bodyStruct.wrist_left_z = posesStruct.poses_3d[i][5 * 4 + 2];
+        bodyStruct.wrist_left_conf = posesStruct.poses_3d[i][5 * 4 + 3];
+        bodyStruct.hip_left_x = posesStruct.poses_3d[i][6 * 4 + 0];
+        bodyStruct.hip_left_y = posesStruct.poses_3d[i][6 * 4 + 1];
+        bodyStruct.hip_left_z = posesStruct.poses_3d[i][6 * 4 + 2];
+        bodyStruct.hip_left_conf = posesStruct.poses_3d[i][6 * 4 + 3];
+        bodyStruct.knee_left_x = posesStruct.poses_3d[i][7 * 4 + 0];
+        bodyStruct.knee_left_y = posesStruct.poses_3d[i][7 * 4 + 1];
+        bodyStruct.knee_left_z = posesStruct.poses_3d[i][7 * 4 + 2];
+        bodyStruct.knee_left_conf = posesStruct.poses_3d[i][7 * 4 + 3];
+        bodyStruct.ankle_left_x = posesStruct.poses_3d[i][8 * 4 + 0];
+        bodyStruct.ankle_left_y = posesStruct.poses_3d[i][8 * 4 + 1];
+        bodyStruct.ankle_left_z = posesStruct.poses_3d[i][8 * 4 + 2];
+        bodyStruct.ankle_left_conf = posesStruct.poses_3d[i][8 * 4 + 3];
+        bodyStruct.shoulder_right_x = posesStruct.poses_3d[i][9 * 4 + 0];
+        bodyStruct.shoulder_right_y = posesStruct.poses_3d[i][9 * 4 + 1];
+        bodyStruct.shoulder_right_z = posesStruct.poses_3d[i][9 * 4 + 2];
+        bodyStruct.shoulder_right_conf = posesStruct.poses_3d[i][9 * 4 + 3];
+        bodyStruct.elbow_right_x = posesStruct.poses_3d[i][10 * 4 + 0];
+        bodyStruct.elbow_right_y = posesStruct.poses_3d[i][10 * 4 + 1];
+        bodyStruct.elbow_right_z = posesStruct.poses_3d[i][10 * 4 + 2];
+        bodyStruct.elbow_right_conf = posesStruct.poses_3d[i][10 * 4 + 3];
+        bodyStruct.wrist_right_x = posesStruct.poses_3d[i][11 * 4 + 0];
+        bodyStruct.wrist_right_y = posesStruct.poses_3d[i][11 * 4 + 1];
+        bodyStruct.wrist_right_z = posesStruct.poses_3d[i][11 * 4 + 2];
+        bodyStruct.wrist_right_conf = posesStruct.poses_3d[i][11 * 4 + 3];
+        bodyStruct.hip_right_x = posesStruct.poses_3d[i][12 * 4 + 0];
+        bodyStruct.hip_right_y = posesStruct.poses_3d[i][12 * 4 + 1];
+        bodyStruct.hip_right_z = posesStruct.poses_3d[i][12 * 4 + 2];
+        bodyStruct.hip_right_conf = posesStruct.poses_3d[i][12 * 4 + 3];
+        bodyStruct.knee_right_x = posesStruct.poses_3d[i][13 * 4 + 0];
+        bodyStruct.knee_right_y = posesStruct.poses_3d[i][13 * 4 + 1];
+        bodyStruct.knee_right_z = posesStruct.poses_3d[i][13 * 4 + 2];
+        bodyStruct.knee_right_conf = posesStruct.poses_3d[i][13 * 4 + 3];
+        bodyStruct.ankle_right_x = posesStruct.poses_3d[i][14 * 4 + 0];
+        bodyStruct.ankle_right_y = posesStruct.poses_3d[i][14 * 4 + 1];
+        bodyStruct.ankle_right_z = posesStruct.poses_3d[i][14 * 4 + 2];
+        bodyStruct.ankle_right_conf = posesStruct.poses_3d[i][14 * 4 + 3];
+        bodyStruct.eye_left_x = posesStruct.poses_3d[i][15 * 4 + 0];
+        bodyStruct.eye_left_y = posesStruct.poses_3d[i][15 * 4 + 1];
+        bodyStruct.eye_left_z = posesStruct.poses_3d[i][15 * 4 + 2];
+        bodyStruct.eye_left_conf = posesStruct.poses_3d[i][15 * 4 + 3];
+        bodyStruct.ear_left_x = posesStruct.poses_3d[i][16 * 4 + 0];
+        bodyStruct.ear_left_y = posesStruct.poses_3d[i][16 * 4 + 1];
+        bodyStruct.ear_left_z = posesStruct.poses_3d[i][16 * 4 + 2];
+        bodyStruct.ear_left_conf = posesStruct.poses_3d[i][16 * 4 + 3];
+        bodyStruct.eye_right_x = posesStruct.poses_3d[i][17 * 4 + 0];
+        bodyStruct.eye_right_y = posesStruct.poses_3d[i][17 * 4 + 1];
+        bodyStruct.eye_right_z = posesStruct.poses_3d[i][17 * 4 + 2];
+        bodyStruct.eye_right_conf = posesStruct.poses_3d[i][17 * 4 + 3];
+        bodyStruct.ear_right_x = posesStruct.poses_3d[i][18 * 4 + 0];
+        bodyStruct.ear_right_y = posesStruct.poses_3d[i][18 * 4 + 1];
+        bodyStruct.ear_right_z = posesStruct.poses_3d[i][18 * 4 + 2];
+        bodyStruct.ear_right_conf = posesStruct.poses_3d[i][18 * 4 + 3];
+        inplace_hton(bodyCount);
+
+        //Finally we copy the COCO body struct memory to the frame
+        memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
+    }
+
+    //Now that we have copied all memory to the frame we can push it back
+    current_frame_.push_back(s);
 
 }
 
