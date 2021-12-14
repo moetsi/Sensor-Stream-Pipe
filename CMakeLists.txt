@@ -368,7 +368,7 @@ endif ()
 
 if (WIN32)
   if (XLINK_ENABLED)
-    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h)
+    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h readers/human_poses.cpp readers/human_poses.h)
   endif ()
 endif ()
 # Done with adjusting for XLINK_ENABLED
