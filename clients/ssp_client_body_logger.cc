@@ -70,9 +70,12 @@ extern "C" SSP_EXPORT int ssp_client_body_logger(int port)
     while (reader.HasNextFrame()) {
       reader.NextFrame();
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
       for (FrameStruct f : f_list) {
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;        
         if (f.frame_data_type == FrameDataType::FrameDataTypeObjectHumanData)
         {
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
           std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
           //First we grab the amount of bodies
