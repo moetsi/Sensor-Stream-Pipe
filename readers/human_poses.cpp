@@ -801,7 +801,7 @@ namespace human_pose_estimation {
 
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
- std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
 
                             //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
                             pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
@@ -823,7 +823,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
- std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
 
                             //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
                             pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
@@ -845,7 +845,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
- std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
 
                             //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
                             pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
@@ -1206,7 +1206,11 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 #endif
 
         translated_poses_3d.push_back(flatp3d);
-
+        if (pose_id >= 0 && pose_id < int(current_poses_2d.size())) {
+            rv.ids.push_back(current_poses_2d[pose_id].id);
+        } else {
+            rv.ids.push_back(-1);
+        }
     }
 
     rv.poses_2d_scaled = poses_2d_scaled;

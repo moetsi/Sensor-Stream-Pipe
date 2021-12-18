@@ -21,6 +21,8 @@
 //Header for making dummy bodies
 #include "dummy_body_reader.h"
 
+#include "human_poses.h"
+
 //Depth AI header
 #include "depthai/depthai.hpp"
 //Done Depth AI header
@@ -48,6 +50,8 @@
 #include <samples/ocv_common.hpp>
 #include <string>
 #include <vector>
+
+
 
 namespace moetsi::ssp { 
 
@@ -86,6 +90,8 @@ private:
   std::string output_name;
   ExecutableNetwork executable_network;
 
+  std::vector<human_pose_estimation::Pose> previous_poses_2d;
+  human_pose_estimation::PoseCommon common;
 public:
   OakdXlinkReader(YAML::Node config);
 

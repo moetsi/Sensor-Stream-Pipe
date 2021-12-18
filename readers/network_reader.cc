@@ -62,7 +62,7 @@ void NetworkReader::NextFrame() {
 std::cerr << __FILE__ << ":" << __LINE__<< std::endl << std::flush;
   zmq::message_t request;
   socket_->recv(&request);
-
+ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
   //uint32_t l32 = 0;
   //auto rc = zmq_recv(responder, &l32, 4, 0);
   //std::cerr << "l32 = " << l32 << std::endl;

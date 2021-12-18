@@ -327,10 +327,9 @@ std::vector<HumanPose> groupPeaksToPoses(
 
 namespace human_pose_estimation {
     struct root_relative_poses {
-
         std::vector<std::vector<float>> poses_2d;
         std::vector<std::vector<float>> poses_3d;
-
+        
         int shape[3];
     };
 
@@ -340,6 +339,7 @@ namespace human_pose_estimation {
     struct parsed_poses {
          std::vector<std::vector<float>>  translated_poses_3d;
          std::vector<std::vector<float>>  poses_2d_scaled;
+         std::vector<int32_t> ids;
     };
 
     parsed_poses parse_poses(std::vector<Pose> & previous_poses_2d, PoseCommon & common, 
@@ -366,6 +366,7 @@ namespace human_pose_estimation {
 namespace human_pose_estimation {
     struct poses {
          std::vector<std::vector<float>>  poses_3d;
+         std::vector<int32_t> poses_id;
          std::vector<std::vector<float>>  poses_2d;      
     };
 
@@ -434,6 +435,7 @@ namespace human_pose_estimation {
           //if (++c > 0) break;
         }
 
+        rv.poses_id = p.ids;
         return rv;
     }
 }

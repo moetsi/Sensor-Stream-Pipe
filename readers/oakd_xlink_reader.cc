@@ -79,8 +79,10 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
       }
    cout << endl;
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    spdlog::debug(std::string(__FILE__) + ":" + std::to_string(__LINE__));
     // Print USB speed
- cout << "Usb speed: " << device->getUsbSpeed() << endl;                              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    cout << "Usb speed: " << device->getUsbSpeed() << endl;                              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    spdlog::debug(std::string(__FILE__) + ":" + std::to_string(__LINE__));
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Output queue will be used to get the rgb frames from the output defined above
@@ -393,8 +395,6 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     std::cerr << "heatmaps_result[0] = " << heatmaps_result[0] << std::endl << std::flush;
     std::cerr << "pafs_result[0] = " << pafs_result[0] << std::endl << std::flush;
 
-    std::vector<Pose> previous_poses_2d;
-    PoseCommon common;
     float fx = -1;
 
     // needed?
@@ -526,14 +526,16 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     s->frame.resize(sizeof(coco_human_t)*bodyCount + sizeof(int32_t));
 
     //Copy the number of COCO bodies detected into the first 4 bytes of the bodies frame
-    memcpy(&s->frame[0], &bodyCount, sizeof(int32_t));
+    auto nBodyCount = bodyCount;
+    inplace_hton(nBodyCount);  
+    memcpy(&s->frame[0], &nBodyCount, sizeof(int32_t));
 
     //Now we iterate through all detected bodies in poses_3d, create a coco_human_t, and then copy the data into the frame
     for (size_t i = 0; i < bodyCount; i++) {
         
         //Create a COCO body Struct
         coco_human_t bodyStruct;
-
+        bodyStruct.Id = posesStruct.poses_id[i];
         // Map of joints to array index
         // neck 0 
         // nose 1 
@@ -636,10 +638,10 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         bodyStruct.ear_right_z = posesStruct.poses_3d[i][18 * 4 + 2];
         bodyStruct.ear_right_conf = posesStruct.poses_3d[i][18 * 4 + 3];
 
+        bodyStruct.hton();
         //Finally we copy the COCO body struct memory to the frame
         memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
     }
-    // inplace_hton(bodyCount);                                                         //  RENAUD I DIDN'T KNOW WHAT TO DO WITH THIS LINE SO I COMMENTED IT OUT
 
     //Now that we have copied all memory to the frame we can push it back
     current_frame_.push_back(s);

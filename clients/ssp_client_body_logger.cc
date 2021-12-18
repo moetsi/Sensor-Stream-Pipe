@@ -64,7 +64,7 @@ extern "C" SSP_EXPORT int ssp_client_body_logger(int port)
 
     std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
-    int bodyCount;
+    int32_t bodyCount;
     coco_human_t bodyStruct;
 
     while (reader.HasNextFrame()) {
@@ -76,13 +76,16 @@ extern "C" SSP_EXPORT int ssp_client_body_logger(int port)
           std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
           //First we grab the amount of bodies
-          memcpy(&bodyCount, &f.frame[0], sizeof(int));
+          memcpy(&bodyCount, &f.frame[0], sizeof(int32_t));
+          inplace_ntoh(bodyCount);
 
-          //Then we grab the body struct
-          // (in the future it will iterate and go over the body struct array)
-          memcpy(&bodyStruct, &f.frame[4], sizeof(coco_human_t));
-
-          spdlog::debug("\t description: {} counter: {} bodyStruct's pelvis.x: {} number of bodies: {}", f.scene_desc, f.frame_id, bodyStruct.pelvis_x, bodyCount);
+          for (int32_t i=0; i<bodyCount; ++i) {
+            //Then we grab the body struct
+            // (in the future it will iterate and go over the body struct array)
+            memcpy(&bodyStruct, &f.frame[4] + sizeof(coco_human_t) * i, sizeof(coco_human_t));
+            bodyStruct.ntoh();
+            spdlog::debug("\t description: {} counter: {} bodyStruct's pelvis.x: {} id = {} number of bodies: {}", f.scene_desc, f.frame_id, bodyStruct.pelvis_x, bodyStruct.Id, bodyCount);
+          }
         }
 
       }
