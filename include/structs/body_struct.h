@@ -48,6 +48,7 @@ inline void inplace_ntoh(int32_t &h) {
 
 #endif
 
+
 struct coco_human_t
 {
   inline void ntoh() {

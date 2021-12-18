@@ -110,7 +110,12 @@ enum class FrameDataType: short {
     FrameDataTypeU8C1 = 7,
 
     // 8 for object-human data
-    FrameDataTypeObjectHumanData = 8
+
+    /** Human Data */
+    FrameDataTypeObjectHumanData = 8,
+
+    /** OAKD cv::Mat */
+    FrameDataTypeCvMat = 9
 }; 
 
 /**

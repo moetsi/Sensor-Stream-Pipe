@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['zdepthdecoder_259',['ZDepthDecoder',['../classmoetsi_1_1ssp_1_1ZDepthDecoder.html',1,'moetsi::ssp']]],
-  ['zdepthencoder_260',['ZDepthEncoder',['../classmoetsi_1_1ssp_1_1ZDepthEncoder.html',1,'moetsi::ssp']]]
+  ['sessiondelegate_281',['SessionDelegate',['../interfaceSessionDelegate.html',1,'']]],
+  ['swscontextdeleter_282',['SwsContextDeleter',['../structmoetsi_1_1ssp_1_1SwsContextDeleter.html',1,'moetsi::ssp']]]
 ];

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.11.28)  28 NOV 2021 20:10
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.11.28)  18 DEC 2021 23:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1005,121 +1005,177 @@ LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1CameraCalibrationStruct' on pa
 ge 13 undefined on input line 17.
 
 
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1coco__human__t' on page 13 und
+efined on input line 18.
+
+
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1CodecParamsStruct' on page 13 
-undefined on input line 18.
+undefined on input line 19.
 
 
 LaTeX Warning: Reference `structcolor__point__t' on page 13 undefined on input 
-line 19.
+line 20.
 
 
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1ExtendedAzureConfig' on page 1
-3 undefined on input line 20.
+3 undefined on input line 21.
 
 
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1FrameStruct' on page 13 undefi
-ned on input line 21.
+ned on input line 22.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Hum
+anPose' on page 13 undefined on input line 23.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Hum
+anPoseByPeaksIndices' on page 13 undefined on input line 24.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1IDecoder' on page 13 undefined 
-on input line 22.
+on input line 25.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1LibAvDecoder' on page 13 undefi
-ned on input line 24.
+ned on input line 27.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NvDecoder' on page 13 undefined
- on input line 25.
+ on input line 28.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1ZDepthDecoder' on page 13 undef
-ined on input line 26.
+ined on input line 29.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1IEncoder' on page 13 undefined 
-on input line 28.
+on input line 31.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1LibAvEncoder' on page 13 undefi
-ned on input line 30.
+ned on input line 33.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NullEncoder' on page 13 undefin
-ed on input line 31.
+ed on input line 34.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NvEncoder' on page 13 undefined
- on input line 32.
+ on input line 35.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1ZDepthEncoder' on page 13 undef
-ined on input line 33.
+ined on input line 36.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1ImageDecoder' on page 13 undefi
-ned on input line 35.
+ned on input line 38.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1iPhoneReaderImpl' on page 13 un
-defined on input line 36.
+defined on input line 39.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1IReader' on page 13 undefined o
-n input line 37.
+n input line 40.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1DummyBodyReader' on page 13 und
-efined on input line 39.
+efined on input line 42.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1ImageReader' on page 13 undefin
-ed on input line 40.
+ed on input line 43.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1iPhoneReader' on page 13 undefi
-ned on input line 41.
+ned on input line 44.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1KinectReader' on page 13 undefi
-ned on input line 42.
+ned on input line 45.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1MultiImageReader' on page 13 un
-defined on input line 43.
+defined on input line 46.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1OakdXlinkReader' on page 13 und
-efined on input line 44.
-
-
-LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1VideoFileReader' on page 13 und
-efined on input line 45.
-
-
-LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NetworkReader' on page 13 undef
-ined on input line 47.
+efined on input line 47.
 
 [13]
 
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1VideoFileReader' on page 14 und
+efined on input line 48.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Low
+PassFilter' on page 14 undefined on input line 50.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1mat
+rix3x4' on page 14 undefined on input line 51.
+
+
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NetworkReader' on page 14 undef
+ined on input line 52.
+
+
 LaTeX Warning: Reference `interfaceSessionDelegate' on page 14 undefined on inp
-ut line 49.
+ut line 54.
 
 
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1NVPipeDeleter' on page 14 unde
-fined on input line 51.
+fined on input line 56.
 
 
-LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1object__human__t' on page 14 u
-ndefined on input line 52.
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1One
+EuroFilter' on page 14 undefined on input line 57.
+
+
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1human__pose__estimation_1_1Find
+PeaksBody' on page 14 undefined on input line 59.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1par
+sed__poses' on page 14 undefined on input line 61.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Pea
+k' on page 14 undefined on input line 62.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Pos
+e' on page 14 undefined on input line 63.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Pos
+eCommon' on page 14 undefined on input line 64.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1pos
+es' on page 14 undefined on input line 65.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1roo
+t__relative__poses' on page 14 undefined on input line 66.
 
 
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1SwsContextDeleter' on page 14 
-undefined on input line 53.
+undefined on input line 67.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Two
+JointsConnection' on page 14 undefined on input line 68.
 
 
 LaTeX Warning: Reference `structUnityXRNativeSessionPtr' on page 14 undefined o
-n input line 54.
+n input line 69.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1vec
+tor3' on page 14 undefined on input line 70.
 
 ) [14]
 Chapter 5.
@@ -1173,123 +1229,179 @@ LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1CameraCalibrationStruct' on pa
 ge 15 undefined on input line 14.
 
 
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1coco__human__t' on page 15 und
+efined on input line 15.
+
+
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1CodecParamsStruct' on page 15 
-undefined on input line 15.
+undefined on input line 16.
 
 
 LaTeX Warning: Reference `structcolor__point__t' on page 15 undefined on input 
-line 16.
+line 17.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1DummyBodyReader' on page 15 und
-efined on input line 17.
+efined on input line 18.
 
 
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1ExtendedAzureConfig' on page 1
-5 undefined on input line 18.
+5 undefined on input line 19.
+
+
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1human__pose__estimation_1_1Find
+PeaksBody' on page 15 undefined on input line 20.
 
 
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1FrameStruct' on page 15 undefi
-ned on input line 19.
+ned on input line 21.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Hum
+anPose' on page 15 undefined on input line 22.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Hum
+anPoseByPeaksIndices' on page 15 undefined on input line 23.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1IDecoder' on page 15 undefined 
-on input line 20.
+on input line 24.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1IEncoder' on page 15 undefined 
-on input line 21.
+on input line 25.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1ImageDecoder' on page 15 undefi
-ned on input line 22.
+ned on input line 26.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1ImageReader' on page 15 undefin
-ed on input line 23.
+ed on input line 27.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1iPhoneReader' on page 15 undefi
-ned on input line 24.
-
-
-LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1iPhoneReaderImpl' on page 15 un
-defined on input line 25.
-
-
-LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1IReader' on page 15 undefined o
-n input line 26.
-
-
-LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1KinectReader' on page 15 undefi
-ned on input line 27.
-
-
-LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1LibAvDecoder' on page 15 undefi
 ned on input line 28.
 
 
-LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1LibAvEncoder' on page 15 undefi
-ned on input line 29.
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1iPhoneReaderImpl' on page 15 un
+defined on input line 29.
 
 
-LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1MultiImageReader' on page 15 un
-defined on input line 30.
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1IReader' on page 15 undefined o
+n input line 30.
 
 
-LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NetworkReader' on page 15 undef
-ined on input line 31.
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1KinectReader' on page 15 undefi
+ned on input line 31.
+
+
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1LibAvDecoder' on page 15 undefi
+ned on input line 32.
 
 [15
 
 ]
 
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1LibAvEncoder' on page 16 undefi
+ned on input line 33.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Low
+PassFilter' on page 16 undefined on input line 34.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1mat
+rix3x4' on page 16 undefined on input line 35.
+
+
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1MultiImageReader' on page 16 un
+defined on input line 36.
+
+
+LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NetworkReader' on page 16 undef
+ined on input line 37.
+
+
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NullEncoder' on page 16 undefin
-ed on input line 32.
+ed on input line 38.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NvDecoder' on page 16 undefined
- on input line 33.
+ on input line 39.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1NvEncoder' on page 16 undefined
- on input line 34.
+ on input line 40.
 
 
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1NVPipeDeleter' on page 16 unde
-fined on input line 35.
+fined on input line 41.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1OakdXlinkReader' on page 16 und
-efined on input line 36.
+efined on input line 42.
 
 
-LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1object__human__t' on page 16 u
-ndefined on input line 37.
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1One
+EuroFilter' on page 16 undefined on input line 43.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1par
+sed__poses' on page 16 undefined on input line 44.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Pea
+k' on page 16 undefined on input line 45.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Pos
+e' on page 16 undefined on input line 46.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Pos
+eCommon' on page 16 undefined on input line 47.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1pos
+es' on page 16 undefined on input line 48.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1roo
+t__relative__poses' on page 16 undefined on input line 49.
 
 
 LaTeX Warning: Reference `interfaceSessionDelegate' on page 16 undefined on inp
-ut line 38.
+ut line 50.
 
 
 LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1SwsContextDeleter' on page 16 
-undefined on input line 39.
+undefined on input line 51.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Two
+JointsConnection' on page 16 undefined on input line 52.
 
 
 LaTeX Warning: Reference `structUnityXRNativeSessionPtr' on page 16 undefined o
-n input line 40.
+n input line 53.
+
+
+LaTeX Warning: Reference `structmoetsi_1_1ssp_1_1human__pose__estimation_1_1vec
+tor3' on page 16 undefined on input line 54.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1VideoFileReader' on page 16 und
-efined on input line 41.
+efined on input line 55.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1ZDepthDecoder' on page 16 undef
-ined on input line 42.
+ined on input line 56.
 
 
 LaTeX Warning: Reference `classmoetsi_1_1ssp_1_1ZDepthEncoder' on page 16 undef
-ined on input line 43.
+ined on input line 57.
 
 ) [16]
 Chapter 6.
@@ -1319,234 +1431,235 @@ LaTeX Warning: Reference `structs_2frame__struct_8h' on page 17 undefined on in
 put line 8.
 
 
-LaTeX Warning: Reference `idecoder_8cc' on page 17 undefined on input line 9.
+LaTeX Warning: Reference `human__poses_8h' on page 17 undefined on input line 9
+.
+
+
+LaTeX Warning: Reference `idecoder_8cc' on page 17 undefined on input line 10.
 
 
 LaTeX Warning: Reference `decoders_2idecoder_8h' on page 17 undefined on input 
-line 10.
+line 11.
 
 
 LaTeX Warning: Reference `include_2decoders_2idecoder_8h' on page 17 undefined 
-on input line 11.
+on input line 12.
 
 
-LaTeX Warning: Reference `iencoder_8cc' on page 17 undefined on input line 12.
+LaTeX Warning: Reference `iencoder_8cc' on page 17 undefined on input line 13.
 
 
 LaTeX Warning: Reference `encoders_2iencoder_8h' on page 17 undefined on input 
-line 13.
+line 14.
 
 
 LaTeX Warning: Reference `include_2encoders_2iencoder_8h' on page 17 undefined 
-on input line 14.
+on input line 15.
 
 
 LaTeX Warning: Reference `image__converter_8cc' on page 17 undefined on input l
-ine 15.
+ine 16.
 
 
 LaTeX Warning: Reference `include_2utils_2image__converter_8h' on page 17 undef
-ined on input line 16.
+ined on input line 17.
 
 
 LaTeX Warning: Reference `utils_2image__converter_8h' on page 17 undefined on i
-nput line 17.
+nput line 18.
 
 
 LaTeX Warning: Reference `image__decoder_8cc' on page 17 undefined on input lin
-e 18.
+e 19.
 
 
 LaTeX Warning: Reference `image__decoder_8h' on page 17 undefined on input line
- 19.
-
-
-LaTeX Warning: Reference `image__reader_8cc' on page 17 undefined on input line
  20.
 
 
+LaTeX Warning: Reference `image__reader_8cc' on page 17 undefined on input line
+ 21.
+
+
 LaTeX Warning: Reference `image__reader_8h' on page 17 undefined on input line 
-21.
-
-
-LaTeX Warning: Reference `iphone__reader_8h' on page 17 undefined on input line
- 22.
+22.
 
 [17
 
 ]
 
+LaTeX Warning: Reference `iphone__reader_8h' on page 18 undefined on input line
+ 23.
+
+
 LaTeX Warning: Reference `iphone__reader_8mm' on page 18 undefined on input lin
-e 23.
+e 24.
 
 
-LaTeX Warning: Reference `ireader_8cc' on page 18 undefined on input line 24.
+LaTeX Warning: Reference `ireader_8cc' on page 18 undefined on input line 25.
 
 
 LaTeX Warning: Reference `include_2readers_2ireader_8h' on page 18 undefined on
- input line 25.
+ input line 26.
 
 
 LaTeX Warning: Reference `readers_2ireader_8h' on page 18 undefined on input li
-ne 26.
+ne 27.
 
 
 LaTeX Warning: Reference `kinect__reader_8cc' on page 18 undefined on input lin
-e 27.
+e 28.
 
 
 LaTeX Warning: Reference `kinect__reader_8h' on page 18 undefined on input line
- 28.
-
-
-LaTeX Warning: Reference `kinect__utils_8cc' on page 18 undefined on input line
  29.
 
 
+LaTeX Warning: Reference `kinect__utils_8cc' on page 18 undefined on input line
+ 30.
+
+
 LaTeX Warning: Reference `kinect__utils_8h' on page 18 undefined on input line 
-30.
+31.
 
 
 LaTeX Warning: Reference `libav__decoder_8cc' on page 18 undefined on input lin
-e 31.
+e 32.
 
 
 LaTeX Warning: Reference `libav__decoder_8h' on page 18 undefined on input line
- 32.
+ 33.
 
 
 LaTeX Warning: Reference `libav__encoder_8cc' on page 18 undefined on input lin
-e 33.
+e 34.
 
 
 LaTeX Warning: Reference `libav__encoder_8h' on page 18 undefined on input line
- 34.
+ 35.
 
 
 LaTeX Warning: Reference `libav__types_8h' on page 18 undefined on input line 3
-5.
+6.
 
 
-LaTeX Warning: Reference `logger_8h' on page 18 undefined on input line 36.
+LaTeX Warning: Reference `logger_8h' on page 18 undefined on input line 37.
 
 
 LaTeX Warning: Reference `multi__image__reader_8cc' on page 18 undefined on inp
-ut line 37.
+ut line 38.
 
 
 LaTeX Warning: Reference `multi__image__reader_8h' on page 18 undefined on inpu
-t line 38.
+t line 39.
 
 
 LaTeX Warning: Reference `network__reader_8cc' on page 18 undefined on input li
-ne 39.
+ne 40.
 
 
 LaTeX Warning: Reference `network__reader_8h' on page 18 undefined on input lin
-e 40.
+e 41.
 
 
 LaTeX Warning: Reference `null__encoder_8cc' on page 18 undefined on input line
- 41.
+ 42.
 
 
 LaTeX Warning: Reference `null__encoder_8h' on page 18 undefined on input line 
-42.
+43.
 
 
 LaTeX Warning: Reference `nv__decoder_8cc' on page 18 undefined on input line 4
-3.
+4.
 
 
-LaTeX Warning: Reference `nv__decoder_8h' on page 18 undefined on input line 44
+LaTeX Warning: Reference `nv__decoder_8h' on page 18 undefined on input line 45
 .
 
 
 LaTeX Warning: Reference `nv__encoder_8cc' on page 18 undefined on input line 4
-5.
+6.
 
 
-LaTeX Warning: Reference `nv__encoder_8h' on page 18 undefined on input line 46
+LaTeX Warning: Reference `nv__encoder_8h' on page 18 undefined on input line 47
 .
 
 
 LaTeX Warning: Reference `nvpipe__types_8h' on page 18 undefined on input line 
-47.
+48.
 
 
 LaTeX Warning: Reference `oakd__xlink__reader_8h' on page 18 undefined on input
- line 48.
+ line 49.
 
 
 LaTeX Warning: Reference `similarity__measures_8h' on page 18 undefined on inpu
-t line 49.
+t line 50.
 
 
 LaTeX Warning: Reference `include_2ssp_8h' on page 18 undefined on input line 5
-0.
-
-
-LaTeX Warning: Reference `ssp_8h' on page 18 undefined on input line 51.
-
-
-LaTeX Warning: Reference `ssp__client__k4a_8cc' on page 18 undefined on input l
-ine 52.
-
-
-Underfull \vbox (badness 4144) has occurred while \output is active []
-
- [18]
-
-LaTeX Warning: Reference `ssp__client__opencv_8cc' on page 19 undefined on inpu
-t line 53.
-
-
-LaTeX Warning: Reference `ssp__client__template_8cc' on page 19 undefined on in
-put line 54.
-
-
-LaTeX Warning: Reference `ssp__server_8cc' on page 19 undefined on input line 5
-5.
-
-
-LaTeX Warning: Reference `ssp__tester_8cc' on page 19 undefined on input line 5
-6.
-
-
-LaTeX Warning: Reference `include_2utils_2utils_8h' on page 19 undefined on inp
-ut line 57.
-
-
-LaTeX Warning: Reference `utils_2utils_8h' on page 19 undefined on input line 5
-8.
-
-
-LaTeX Warning: Reference `video__file__reader_8cc' on page 19 undefined on inpu
-t line 59.
-
-
-LaTeX Warning: Reference `video__file__reader_8h' on page 19 undefined on input
- line 60.
-
-
-LaTeX Warning: Reference `video__utils_8h' on page 19 undefined on input line 6
 1.
 
 
+LaTeX Warning: Reference `ssp_8h' on page 18 undefined on input line 52.
+
+[18]
+
+LaTeX Warning: Reference `ssp__client__k4a_8cc' on page 19 undefined on input l
+ine 53.
+
+
+LaTeX Warning: Reference `ssp__client__opencv_8cc' on page 19 undefined on inpu
+t line 54.
+
+
+LaTeX Warning: Reference `ssp__client__template_8cc' on page 19 undefined on in
+put line 55.
+
+
+LaTeX Warning: Reference `ssp__server_8cc' on page 19 undefined on input line 5
+6.
+
+
+LaTeX Warning: Reference `ssp__tester_8cc' on page 19 undefined on input line 5
+7.
+
+
+LaTeX Warning: Reference `include_2utils_2utils_8h' on page 19 undefined on inp
+ut line 58.
+
+
+LaTeX Warning: Reference `utils_2utils_8h' on page 19 undefined on input line 5
+9.
+
+
+LaTeX Warning: Reference `video__file__reader_8cc' on page 19 undefined on inpu
+t line 60.
+
+
+LaTeX Warning: Reference `video__file__reader_8h' on page 19 undefined on input
+ line 61.
+
+
+LaTeX Warning: Reference `video__utils_8h' on page 19 undefined on input line 6
+2.
+
+
 LaTeX Warning: Reference `zdepth__decoder_8cc' on page 19 undefined on input li
-ne 62.
+ne 63.
 
 
 LaTeX Warning: Reference `zdepth__decoder_8h' on page 19 undefined on input lin
-e 63.
+e 64.
 
 
 LaTeX Warning: Reference `zdepth__encoder_8cc' on page 19 undefined on input li
-ne 64.
+ne 65.
 
 
 LaTeX Warning: Reference `zdepth__encoder_8h' on page 19 undefined on input lin
-e 65.
+e 66.
 
 ) [19] [20
 
@@ -1590,134 +1703,132 @@ Overfull \hbox (44.79668pt too wide) in paragraph at lines 158--161
  []
 
 
-Underfull \hbox (badness 3354) in paragraph at lines 162--187
+Underfull \hbox (badness 3354) in paragraph at lines 162--188
 [] \T1/phv/m/n/10 = 0, [] = 1,
  []
 
 
-Underfull \hbox (badness 4454) in paragraph at lines 162--187
+Underfull \hbox (badness 4454) in paragraph at lines 162--188
 [] \T1/phv/m/n/10 = 4, [] = 5,
  []
 
 
-Overfull \hbox (118.85854pt too wide) in paragraph at lines 162--187
-\T1/phv/b/n/10 Frame[]Data[]Type[]Object[]Human[]Data \T1/phv/m/n/10 = 8, [] = 
-0, []
+Underfull \hbox (badness 4752) in paragraph at lines 162--188
+[] \T1/phv/m/n/10 = 8, [] = 9,
  []
 
 
-Underfull \hbox (badness 3690) in paragraph at lines 162--187
-[] \T1/phv/m/n/10 = 3, [] = 4,
+Underfull \hbox (badness 10000) in paragraph at lines 162--188
+[] \T1/phv/m/n/10 = 2, [] = 3,
  []
 
 
-Underfull \hbox (badness 6412) in paragraph at lines 162--187
-[] \T1/phv/m/n/10 = 7, [] = 8,
+Overfull \hbox (118.14735pt too wide) in paragraph at lines 162--188
+[] \T1/phv/m/n/10 = 6, [] = 7, []
  []
 
 
-Overfull \hbox (65.88332pt too wide) in paragraph at lines 200--210
+Overfull \hbox (65.88332pt too wide) in paragraph at lines 201--211
 []\T1/phv/m/n/10 , [], 
  []
 
 
-Overfull \hbox (35.88669pt too wide) in paragraph at lines 200--210
+Overfull \hbox (35.88669pt too wide) in paragraph at lines 201--211
 []\T1/phv/m/n/10 , []
  []
 
 
-Overfull \hbox (24.92462pt too wide) in paragraph at lines 210--221
+Overfull \hbox (24.92462pt too wide) in paragraph at lines 211--222
 []\T1/phv/m/n/10 , [], 
  []
 
 
-Overfull \hbox (24.92462pt too wide) in paragraph at lines 210--221
+Overfull \hbox (24.92462pt too wide) in paragraph at lines 211--222
 []\T1/phv/m/n/10 , [],
  []
 
 
-Underfull \hbox (badness 2205) in paragraph at lines 221--226
+Underfull \hbox (badness 2205) in paragraph at lines 222--227
 []\T1/phv/m/n/10 enum [] []: short { [] = -1,
  []
 
 
-Overfull \hbox (26.6615pt too wide) in paragraph at lines 221--226
+Overfull \hbox (26.6615pt too wide) in paragraph at lines 222--227
 [] \T1/phv/m/n/10 = 0, []
  []
 
 
-Underfull \hbox (badness 2237) in paragraph at lines 227--241
+Underfull \hbox (badness 2237) in paragraph at lines 228--242
 [] \T1/phv/m/n/10 = 0, [] = 1, [] = 2,
  []
 
 [23]
-Underfull \hbox (badness 10000) in paragraph at lines 242--253
+Underfull \hbox (badness 10000) in paragraph at lines 243--254
 [] \T1/phv/m/n/10 = -1, [] = 0,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 242--253
+Underfull \hbox (badness 10000) in paragraph at lines 243--254
 [] \T1/phv/m/n/10 = -1, [] = 0,
  []
 
 
-Overfull \hbox (44.79668pt too wide) in paragraph at lines 254--257
+Overfull \hbox (44.79668pt too wide) in paragraph at lines 255--258
 []\T1/phv/m/n/10 enum [] []: short { [] = 0, []
  []
 
 
-Underfull \hbox (badness 3354) in paragraph at lines 258--283
+Underfull \hbox (badness 3354) in paragraph at lines 259--285
 [] \T1/phv/m/n/10 = 0, [] = 1,
  []
 
 
-Underfull \hbox (badness 4454) in paragraph at lines 258--283
+Underfull \hbox (badness 4454) in paragraph at lines 259--285
 [] \T1/phv/m/n/10 = 4, [] = 5,
  []
 
 
-Overfull \hbox (118.85854pt too wide) in paragraph at lines 258--283
-\T1/phv/b/n/10 Frame[]Data[]Type[]Object[]Human[]Data \T1/phv/m/n/10 = 8, [] = 
-0, []
+Underfull \hbox (badness 4752) in paragraph at lines 259--285
+[] \T1/phv/m/n/10 = 8, [] = 9,
  []
 
 
-Underfull \hbox (badness 3690) in paragraph at lines 258--283
-[] \T1/phv/m/n/10 = 3, [] = 4,
+Underfull \hbox (badness 10000) in paragraph at lines 259--285
+[] \T1/phv/m/n/10 = 2, [] = 3,
  []
 
 
-Underfull \hbox (badness 6412) in paragraph at lines 258--283
-[] \T1/phv/m/n/10 = 7, [] = 8,
+Overfull \hbox (118.14735pt too wide) in paragraph at lines 259--285
+[] \T1/phv/m/n/10 = 6, [] = 7, []
  []
 
 [24]
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <9> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 349.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 351.
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <7> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 349.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 351.
 
-Underfull \hbox (badness 2903) in paragraph at lines 349--349
+Underfull \hbox (badness 2903) in paragraph at lines 351--351
 []\T1/phv/m/sl/9 Get Struc-tural Sim-i-lar-ity be-tween 2 im-ages cf. for in-st
 ance [][] \T1/pcr/m/sl/9 http[]://amroamroamro.[]github.[]
  []
 
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.19995pt on input line 357.
+(Font)              scaled to size 7.19995pt on input line 359.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 7.19995pt on input line 384.
+(Font)              scaled to size 7.19995pt on input line 386.
 [25]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.1 on input line 410.
+(longtable)                in table 7.1 on input line 412.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.2 on input line 440.
+(longtable)                in table 7.2 on input line 442.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.3 on input line 484.
+(longtable)                in table 7.3 on input line 486.
 
 [26pdfTeX warning (ext4): destination with the same identifier (name{namespacem
 oetsi_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8ac32f0bb1b309\ETC.}) has been alr
@@ -1725,7 +1836,7 @@ eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.484 \end{DoxyEnumFields}
+l.486 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8a662285f55328\ETC.}) has been alread
@@ -1733,7 +1844,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.484 \end{DoxyEnumFields}
+l.486 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8}) has been already used, duplicate 
@@ -1741,7 +1852,7 @@ ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.484 \end{DoxyEnumFields}
+l.486 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8ac32f0bb1b309\ETC.}) has been alread
@@ -1749,7 +1860,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.484 \end{DoxyEnumFields}
+l.486 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8a662285f55328\ETC.}) has been alread
@@ -1757,7 +1868,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.484 \end{DoxyEnumFields}
+l.486 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8ac32f0bb1b309\ETC.}) has been alread
@@ -1765,7 +1876,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.484 \end{DoxyEnumFields}
+l.486 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8a662285f55328\ETC.}) has been alread
@@ -1773,105 +1884,105 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.484 \end{DoxyEnumFields}
+l.486 \end{DoxyEnumFields}
                           
 ]pdfTeX warning (ext4): destination with the same identifier (name{namespacemoe
 tsi_1_1ssp_a6d638ba0bd38e9daded08f633d893563}) has been already used, duplicate
  ignored
 <to be read again> 
                    \relax 
-l.485 ..._1ssp_a6d638ba0bd38e9daded08f633d893563}}
+l.487 ..._1ssp_a6d638ba0bd38e9daded08f633d893563}}
                                                   pdfTeX warning (ext4): destin
 ation with the same identifier (name{namespacemoetsi_1_1ssp_a6d638ba0bd38e9dade
 d08f633d893563a1ffd3a6c0664\ETC.}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.528 \end{DoxyEnumFields}
+l.530 \end{DoxyEnumFields}
                           
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.4 on input line 528.
+(longtable)                in table 7.4 on input line 530.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.5 on input line 618.
+(longtable)                in table 7.5 on input line 628.
 
 [27pdfTeX warning (ext4): destination with the same identifier (name{namespacem
 oetsi_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alr
@@ -1879,7 +1990,7 @@ eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.618 \end{DoxyEnumFields}
+l.628 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
@@ -1887,7 +1998,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.618 \end{DoxyEnumFields}
+l.628 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563ac818f912b0dd\ETC.}) has been alread
@@ -1895,7 +2006,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.618 \end{DoxyEnumFields}
+l.628 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a4e738f8ec62e\ETC.}) has been alread
@@ -1903,7 +2014,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.618 \end{DoxyEnumFields}
+l.628 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563ac818f912b0dd\ETC.}) has been alread
@@ -1911,7 +2022,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.618 \end{DoxyEnumFields}
+l.628 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a4e738f8ec62e\ETC.}) has been alread
@@ -1919,7 +2030,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.618 \end{DoxyEnumFields}
+l.628 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563ac818f912b0dd\ETC.}) has been alread
@@ -1927,7 +2038,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.618 \end{DoxyEnumFields}
+l.628 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a4e738f8ec62e\ETC.}) has been alread
@@ -1935,427 +2046,460 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.618 \end{DoxyEnumFields}
+l.628 \end{DoxyEnumFields}
                           
 ]pdfTeX warning (ext4): destination with the same identifier (name{namespacemoe
 tsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4}) has been already used, duplicate
  ignored
 <to be read again> 
                    \relax 
-l.619 ..._1ssp_aa9b059f0bc7a91855545ee887f2d56c4}}
+l.629 ..._1ssp_aa9b059f0bc7a91855545ee887f2d56c4}}
                                                   pdfTeX warning (ext4): destin
 ation with the same identifier (name{namespacemoetsi_1_1ssp_aa9b059f0bc7a918555
 45ee887f2d56c4a6f466822a5d2\ETC.}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.708 \end{DoxyEnumFields}
+l.726 \end{DoxyEnumFields}
                           
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.6 on input line 708.
+(longtable)                in table 7.6 on input line 726.
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [28pdfTeX warning (ext4): destination with the same identifier (name{namespace
-moetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been al
-ready used, duplicate ignored
+[28pdfTeX warning (ext4): destination with the same identifier (name{namespacem
+oetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alr
+eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13\ETC.}) has been alread
 y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
-pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
-si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13\ETC.}) has been alread
-y used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
-pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
-si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13\ETC.}) has been alread
-y used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4aac4d3e85a637\ETC.}) has been alread
 y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a3a47cafb8152\ETC.}) has been alread
 y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.712 \doxysubsubsection
-                        {\texorpdfstring{FrameType}{FrameType}\hspace{0.1cm}...
+l.726 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.726 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4aac4d3e85a637\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.726 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a3a47cafb8152\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.726 \end{DoxyEnumFields}
+                          
 ]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.7 on input line 760.
+(longtable)                in table 7.7 on input line 778.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.8 on input line 812.
+(longtable)                in table 7.8 on input line 830.
+
+
+Overfull \vbox (17.54898pt too high) has occurred while \output is active []
+
 
 [29pdfTeX warning (ext4): destination with the same identifier (name{namespacem
-oetsi_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87ad039a5ecd350\ETC.}) has been alr
+oetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13\ETC.}) has been alr
 eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4aac4d3e85a637\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.830 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a3a47cafb8152\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.830 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87ad039a5ecd350\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a59cea6d94577\ETC.}) has been alread
@@ -2363,7 +2507,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a2c799f741688\ETC.}) has been alread
@@ -2371,7 +2515,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a1b85b2c60b85\ETC.}) has been alread
@@ -2379,7 +2523,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87aa4b26dd8fd8d\ETC.}) has been alread
@@ -2387,7 +2531,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}) has been already used, duplicate 
@@ -2395,7 +2539,7 @@ ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87ad039a5ecd350\ETC.}) has been alread
@@ -2403,7 +2547,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a59cea6d94577\ETC.}) has been alread
@@ -2411,7 +2555,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a2c799f741688\ETC.}) has been alread
@@ -2419,7 +2563,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a1b85b2c60b85\ETC.}) has been alread
@@ -2427,7 +2571,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87aa4b26dd8fd8d\ETC.}) has been alread
@@ -2435,7 +2579,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87ad039a5ecd350\ETC.}) has been alread
@@ -2443,7 +2587,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a59cea6d94577\ETC.}) has been alread
@@ -2451,7 +2595,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a2c799f741688\ETC.}) has been alread
@@ -2459,7 +2603,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a1b85b2c60b85\ETC.}) has been alread
@@ -2467,7 +2611,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87aa4b26dd8fd8d\ETC.}) has been alread
@@ -2475,256 +2619,237 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.856 \end{DoxyEnumFields}
+l.830 \end{DoxyEnumFields}
                           
-] [30]
+]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.9 on input line 856.
+(longtable)                in table 7.9 on input line 874.
 
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.10 on input line 918.
+
+[30pdfTeX warning (ext4): destination with the same identifier (name{namespacem
+oetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea896d4c904dda\ETC.}) has been alr
+eady used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea38c56a32340e\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474de}) has been already used, duplicate 
 ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea896d4c904dda\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea38c56a32340e\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea896d4c904dda\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea38c56a32340e\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.938 \end{DoxyEnumFields}
+                          
+]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.11 on input line 938.
+
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546}) has been already used, duplicate 
+ignored
 <to be read again> 
                    \relax 
-l.857 ..._1ssp_abd5a57e44ab71b73d2e32a59887474de}}
+l.939 ..._1ssp_a8948545ffe48a5b3507fd10a1e56d546}}
                                                   
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.10 on input line 900.
+(longtable)                in table 7.12 on input line 958.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.11 on input line 920.
-
-
-Underfull \vbox (badness 2150) has occurred while \output is active []
-
- [31pdfTeX warning (ext4): destination with the same identifier (name{namespace
-moetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea896d4c904dda\ETC.}) has been al
-ready used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea38c56a3234
-0e\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea06604c7f56
-c3\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea8fc6ffe530
-7d\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea896d4c904d
-da\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea38c56a3234
-0e\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea06604c7f56
-c3\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea8fc6ffe530
-7d\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea896d4c904d
-da\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea38c56a3234
-0e\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea06604c7f56
-c3\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea8fc6ffe530
-7d\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1a
-e1\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.pdfTeX warning (ext4): destination with the same ident
-ifier (name{namespacemoetsi_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546}) has been
- already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.929 S
-       \+SP Message type.]pdfTeX warning (ext4): destination with the same iden
-tifier (name{namespacemoetsi_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1
-ae1\ETC.}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.940 \end{DoxyEnumFields}
-                          
-pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
-si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alread
-y used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.940 \end{DoxyEnumFields}
-                          
-pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
-si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alread
-y used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.940 \end{DoxyEnumFields}
-                          
-pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
-si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alread
-y used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.940 \end{DoxyEnumFields}
-                          
-pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
-si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alread
-y used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.940 \end{DoxyEnumFields}
-                          
-pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
-si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alread
-y used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.940 \end{DoxyEnumFields}
-                          
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 7.12 on input line 940.
+(longtable)                in table 7.13 on input line 996.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.13 on input line 978.
+(longtable)                in table 7.14 on input line 1028.
 
+[31pdfTeX warning (ext4): destination with the same identifier (name{namespacem
+oetsi_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alr
+eady used, duplicate ignored
 
-Package longtable Warning: Column widths have changed
-(longtable)                in table 7.14 on input line 1010.
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.1028 \end{DoxyEnumFields}
+                           
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alread
+y used, duplicate ignored
 
-[32]
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.1028 \end{DoxyEnumFields}
+                           
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.1028 \end{DoxyEnumFields}
+                           
+]
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <8> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 1018.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 1036.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.15 on input line 1030.
+(longtable)                in table 7.15 on input line 1048.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.16 on input line 1047.
+(longtable)                in table 7.16 on input line 1065.
 
+
+Underfull \vbox (badness 3009) has occurred while \output is active []
+
+ [32]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.17 on input line 1062.
+(longtable)                in table 7.17 on input line 1080.
+
+
+Underfull \hbox (badness 10000) detected at line 1081
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 1094
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 1107
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 1120
+[][][]
+ []
 
 [33]
-Underfull \hbox (badness 10000) detected at line 1063
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.18 on input line 1141.
+
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.19 on input line 1160.
+
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.20 on input line 1177.
+
+
+Underfull \hbox (badness 10000) detected at line 1178
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 1076
-[][][]
- []
-
-
-Underfull \hbox (badness 10000) detected at line 1089
-[][][]
- []
-
-
-Underfull \hbox (badness 10000) detected at line 1102
-[][][]
+Underfull \hbox (badness 1983) in paragraph at lines 1189--1190
+[]\T1/phv/m/n/10 Get Struc-tural Sim-i-lar-ity be-tween 2 im-ages cf. for in-st
+ance [][] \T1/pcr/m/n/10 http[]://amroamroamro.[]github.[]
  []
 
 [34]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.18 on input line 1123.
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 7.19 on input line 1142.
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 7.20 on input line 1159.
-
-
-Underfull \hbox (badness 10000) detected at line 1160
-[][][]
- []
-
-
-Underfull \hbox (badness 1983) in paragraph at lines 1171--1172
-[]\T1/phv/m/n/10 Get Struc-tural Sim-i-lar-ity be-tween 2 im-ages cf. for in-st
-ance [][] \T1/pcr/m/n/10 http[]://amroamroamro.[]github.[]
- []
-
-[35]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 7.21 on input line 1179.
-
-
-Underfull \hbox (badness 10000) detected at line 1180
-[][][]
- []
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 7.22 on input line 1197.
+(longtable)                in table 7.21 on input line 1197.
 
 
 Underfull \hbox (badness 10000) detected at line 1198
@@ -2733,69 +2858,78 @@ Underfull \hbox (badness 10000) detected at line 1198
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.23 on input line 1219.
+(longtable)                in table 7.22 on input line 1215.
 
-[36]
-Underfull \hbox (badness 10000) detected at line 1220
+
+Underfull \hbox (badness 10000) detected at line 1216
 [][][]
  []
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.24 on input line 1237.
+(longtable)                in table 7.23 on input line 1237.
 
-
+[35]
 Underfull \hbox (badness 10000) detected at line 1238
 [][][]
  []
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.25 on input line 1257.
+(longtable)                in table 7.24 on input line 1255.
 
 
-Underfull \hbox (badness 10000) detected at line 1258
+Underfull \hbox (badness 10000) detected at line 1256
 [][][]
  []
 
-[37]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.26 on input line 1275.
+(longtable)                in table 7.25 on input line 1275.
 
 
 Underfull \hbox (badness 10000) detected at line 1276
 [][][]
  []
 
+[36]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.27 on input line 1295.
+(longtable)                in table 7.26 on input line 1293.
+
+
+Underfull \hbox (badness 10000) detected at line 1294
+[][][]
+ []
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.28 on input line 1312.
+(longtable)                in table 7.27 on input line 1313.
 
-[38]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.29 on input line 1327.
+(longtable)                in table 7.28 on input line 1330.
 
-) [39] [40
+[37]
 
-]
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.29 on input line 1345.
+
+) [38]
 Chapter 8.
-(./struct__custom__k4abt__body__t.tex [41] [42] [43] [44] [45])
+(./struct__custom__k4abt__body__t.tex [39
+
+] [40] [41] [42] [43])
 (./structmoetsi_1_1ssp_1_1AVCodecContextDeleter.tex)
 (./structmoetsi_1_1ssp_1_1AVCodecDeleter.tex)
 (./structmoetsi_1_1ssp_1_1AVCodecParametersDeleter.tex)
 (./structmoetsi_1_1ssp_1_1AVCodecParametersNullDeleter.tex)
-(./structmoetsi_1_1ssp_1_1AVFormatContextDeleter.tex [46])
+(./structmoetsi_1_1ssp_1_1AVFormatContextDeleter.tex [44])
 (./structmoetsi_1_1ssp_1_1AVFrameDeleter.tex)
 (./structmoetsi_1_1ssp_1_1AVIOContextDeleter.tex)
-(./structmoetsi_1_1ssp_1_1AVPacketDeleter.tex) (./classBodyTracker.tex [47])
+(./structmoetsi_1_1ssp_1_1AVPacketDeleter.tex) (./classBodyTracker.tex [45])
 (./structmoetsi_1_1ssp_1_1buffer__data.tex)
-(./structmoetsi_1_1ssp_1_1CameraCalibrationStruct.tex [48]
+(./structmoetsi_1_1ssp_1_1CameraCalibrationStruct.tex [46]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.1 on input line 64.
@@ -2803,7 +2937,7 @@ Package longtable Warning: Column widths have changed
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [49pdfTeX warning (ext4): destination with the same identifier (name{structmoe
+ [47pdfTeX warning (ext4): destination with the same identifier (name{structmoe
 tsi_1_1ssp_1_1CameraCalibrationStruct_aec1417ffc77fb72c19a40\ETC.}) has been al
 ready used, duplicate ignored
 
@@ -2827,22 +2961,48 @@ Overfull \hbox (111.15625pt too wide) in paragraph at lines 105--106
 [] \T1/pcr/m/n/8 moetsi[]::ssp[]::[]Camera[]Calibration[]Struct[]::type = [] 
  []
 
-) (./structmoetsi_1_1ssp_1_1CodecParamsStruct.tex [50pdfTeX warning (ext4): des
-tination with the same identifier (name{structmoetsi_1_1ssp_1_1CameraCalibratio
-nStruct_a5571f80a7f6136c795fde\ETC.}) has been already used, duplicate ignored
+) (./structmoetsi_1_1ssp_1_1coco__human__t.tex [48pdfTeX warning (ext4): destin
+ation with the same identifier (name{structmoetsi_1_1ssp_1_1CameraCalibrationSt
+ruct_a5571f80a7f6136c795fde\ETC.}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.12 \doxysubsection
-                    *{Public Member Functions}] [51pdfTeX warning (ext4): desti
-nation with the same identifier (name{structmoetsi_1_1ssp_1_1CodecParamsStruct_
-a5cc4146e3f530a895ca13f37165\ETC.}) has been already used, duplicate ignored
+l.9 \mbox
+         {\Hypertarget{structmoetsi_1_1ssp_1_1coco__human__t_a169a163290266d...
+] [49pdfTeX warning (ext4): destination with the same identifier (name{structmo
+etsi_1_1ssp_1_1coco__human__t_a40be9c6af03dc7200ed95ed421a7fc\ETC.}) has been a
+lready used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.159 \mbox
+           {\Hypertarget{structmoetsi_1_1ssp_1_1coco__human__t_a56bed2349e68...
+pdfTeX warning (ext4): destination with the same identifier (name{structmoetsi_
+1_1ssp_1_1coco__human__t_a169a163290266d81e947e3594db244\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.159 \mbox
+           {\Hypertarget{structmoetsi_1_1ssp_1_1coco__human__t_a56bed2349e68...
+pdfTeX warning (ext4): destination with the same identifier (name{structmoetsi_
+1_1ssp_1_1coco__human__t_a278b75c459df9a2638e73a2e2c83f4\ETC.}) has been alread
+y used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.159 \mbox
+           {\Hypertarget{structmoetsi_1_1ssp_1_1coco__human__t_a56bed2349e68...
+] [50] [51]) (./structmoetsi_1_1ssp_1_1CodecParamsStruct.tex [52pdfTeX warning 
+(ext4): destination with the same identifier (name{structmoetsi_1_1ssp_1_1Codec
+ParamsStruct_a5cc4146e3f530a895ca13f37165\ETC.}) has been already used, duplica
+te ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
 l.64 \end{DoxyParams}
                      
-]
+] [53]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.3 on input line 64.
@@ -2864,8 +3024,8 @@ l.71 ...Struct_a51ed920bba6aef88b4d70bcf9b2647de}}
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.4 on input line 85.
 
-[52]) (./structcolor__point__t.tex)
-(./classmoetsi_1_1ssp_1_1DummyBodyReader.tex [53]
+[54]) (./structcolor__point__t.tex)
+(./classmoetsi_1_1ssp_1_1DummyBodyReader.tex [55]
 Underfull \hbox (badness 10000) detected at line 46
 [][][]
  []
@@ -2880,7 +3040,7 @@ Underfull \hbox (badness 10000) detected at line 80
 [][][]
  []
 
-[54]
+[56]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.5 on input line 101.
@@ -2890,23 +3050,34 @@ Underfull \hbox (badness 10000) detected at line 116
 [][][]
  []
 
-) (./structmoetsi_1_1ssp_1_1ExtendedAzureConfig.tex [55])
-(./structmoetsi_1_1ssp_1_1FrameStruct.tex [56pdfTeX warning (ext4): destination
- with the same identifier (name{structmoetsi_1_1ssp_1_1FrameStruct_af53f4e76978
-e2a4575b7cd661d30e01f}) has been already used, duplicate ignored
+) (./structmoetsi_1_1ssp_1_1ExtendedAzureConfig.tex [57])
+(./classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody.tex)
+(./structmoetsi_1_1ssp_1_1FrameStruct.tex [58] [59pdfTeX warning (ext4): destin
+ation with the same identifier (name{structmoetsi_1_1ssp_1_1FrameStruct_af53f4e
+76978e2a4575b7cd661d30e01f}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.48 u
-      nsigned int \mbox{\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct_aebc84...
-] [57]) (./classmoetsi_1_1ssp_1_1IDecoder.tex [58] [59pdfTeX warning (ext4): de
-stination with the same identifier (name{classmoetsi_1_1ssp_1_1IDecoder_a26dc99
-1c2434792f50ec5ae9b61a1653}) has been already used, duplicate ignored
+l.73 \doxysubsubsection
+                       {\texorpdfstring{device\_id}{device\_id}}] [60])
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1HumanPose.tex
+Underfull \hbox (badness 1331) in paragraph at lines 6--8
+[][] \T1/phv/b/n/10 Human[]Pose \T1/phv/m/n/10 (const std[]::vector$\OML/cmm/m/
+it/10 <$ \T1/phv/m/n/10 cv[]::[]Point3f $\OML/cmm/m/it/10 >$ \T1/phv/m/n/10 &ke
+ypoints=std[]::vector$\OML/cmm/m/it/10 <$ \T1/phv/m/n/10 cv[]::[]Point3f $\OML/
+cmm/m/it/10 >$\T1/phv/m/n/10 (), const float
+ []
+
+)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1HumanPoseByPeaksIndices.te
+x [61]) (./classmoetsi_1_1ssp_1_1IDecoder.tex [62pdfTeX warning (ext4): destina
+tion with the same identifier (name{classmoetsi_1_1ssp_1_1IDecoder_a26dc991c243
+4792f50ec5ae9b61a1653}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.49 \end{DoxyParams}
-                     
+l.43 E
+      xtract an opencv image from a \mbox{\hyperlink{structmoetsi_1_1ssp_1_1...
 ]
 
 Package longtable Warning: Column widths have changed
@@ -2917,13 +3088,6 @@ Underfull \hbox (badness 10000) detected at line 50
 [][][]
  []
 
-pdfTeX warning (ext4): destination with the same identifier (name{classmoetsi_1
-_1ssp_1_1IDecoder_a1c06604dc4107d3668a4e791c13cc063}) has been already used, du
-plicate ignored
-<to be read again> 
-                   \relax 
-l.57 ...ecoder_a1c06604dc4107d3668a4e791c13cc063}}
-                                                  
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.7 on input line 71.
@@ -2933,9 +3097,16 @@ Underfull \hbox (badness 10000) detected at line 72
 [][][]
  []
 
-) (./classmoetsi_1_1ssp_1_1IEncoder.tex [60] [61pdfTeX warning (ext4): destinat
-ion with the same identifier (name{classmoetsi_1_1ssp_1_1IEncoder_a6c19808ebe6a
-05dbce630c45188b9346}) has been already used, duplicate ignored
+) (./classmoetsi_1_1ssp_1_1IEncoder.tex [63pdfTeX warning (ext4): destination w
+ith the same identifier (name{classmoetsi_1_1ssp_1_1IDecoder_a1c06604dc4107d366
+8a4e791c13cc063}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.10 {\ttfamily \#
+                  include $<$iencoder.\+h$>$}] [64pdfTeX warning (ext4): destin
+ation with the same identifier (name{classmoetsi_1_1ssp_1_1IEncoder_a6c19808ebe
+6a05dbce630c45188b9346}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
@@ -2959,13 +3130,6 @@ Overfull \hbox (54.88048pt too wide) in paragraph at lines 78--79
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
  []
 
-pdfTeX warning (ext4): destination with the same identifier (name{classmoetsi_1
-_1ssp_1_1IEncoder_a8c223ec82fdd30ee8ee75157306054ec}) has been already used, du
-plicate ignored
-<to be read again> 
-                   \relax 
-l.80 ...ncoder_a8c223ec82fdd30ee8ee75157306054ec}}
-                                                  
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.9 on input line 94.
@@ -2997,7 +3161,21 @@ Underfull \hbox (badness 10000) in paragraph at lines 120--121
 /8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Encoded ( ) [pure
  []
 
+[65pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+i_1_1ssp_1_1IEncoder_a8c223ec82fdd30ee8ee75157306054ec}) has been already used,
+ duplicate ignored
 
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.126 \begin{DoxyReturn}{Returns}
+                                 pdfTeX warning (ext4): destination with the sa
+me identifier (name{classmoetsi_1_1ssp_1_1IEncoder_a178d117518e7c7007414ea9c82b
+d3ed6}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.126 \begin{DoxyReturn}{Returns}
+                                 ]
 Underfull \hbox (badness 10000) detected at line 126
 [][][]
  []
@@ -3013,14 +3191,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 137--138
 /8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Original ( ) [pure
  []
 
-[62pdfTeX warning (ext4): destination with the same identifier (name{classmoets
-i_1_1ssp_1_1IEncoder_a178d117518e7c7007414ea9c82bd3ed6}) has been already used,
- duplicate ignored
 
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.143 \begin{DoxyReturn}{Returns}
-                                 ]
 Underfull \hbox (badness 10000) detected at line 143
 [][][]
  []
@@ -3030,13 +3201,7 @@ Overfull \hbox (54.88048pt too wide) in paragraph at lines 148--149
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
  []
 
-pdfTeX warning (ext4): destination with the same identifier (name{classmoetsi_1
-_1ssp_1_1IEncoder_ab60bdaae0a85289dfa31a12bab533dc0}) has been already used, du
-plicate ignored
-<to be read again> 
-                   \relax 
-l.150 ...coder_ab60bdaae0a85289dfa31a12bab533dc0}}
-                                                  
+
 Underfull \hbox (badness 10000) in paragraph at lines 154--155
 \T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
 /8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Original ( ) [pure
@@ -3074,7 +3239,14 @@ Underfull \hbox (badness 10000) in paragraph at lines 188--189
 /8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Get[]Codec[]Params[]Struct ( )
  []
 
+[66pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+i_1_1ssp_1_1IEncoder_ab60bdaae0a85289dfa31a12bab533dc0}) has been already used,
+ duplicate ignored
 
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.194 \begin{DoxyReturn}{Returns}
+                                 ]
 Underfull \hbox (badness 10000) detected at line 194
 [][][]
  []
@@ -3084,14 +3256,7 @@ Overfull \hbox (54.88048pt too wide) in paragraph at lines 199--200
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
  []
 
-[63pdfTeX warning (ext4): destination with the same identifier (name{classmoets
-i_1_1ssp_1_1IEncoder_ad5179efaa4c74207766dd64f46f4059a}) has been already used,
- duplicate ignored
 
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.211 \begin{DoxyReturn}{Returns}
-                                 ]
 Underfull \hbox (badness 10000) detected at line 211
 [][][]
  []
@@ -3121,7 +3286,27 @@ Overfull \hbox (54.88048pt too wide) in paragraph at lines 250--251
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
  []
 
+[67pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+i_1_1ssp_1_1IEncoder_ad5179efaa4c74207766dd64f46f4059a}) has been already used,
+ duplicate ignored
 
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.252 ...coder_a2af8e23d841ef61f6ee4037e56a3694d}}
+                                                  pdfTeX warning (ext4): destin
+ation with the same identifier (name{classmoetsi_1_1ssp_1_1IEncoder_ae6a865aa52
+230d81aed1cb5232402f6c}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.252 ...coder_a2af8e23d841ef61f6ee4037e56a3694d}}
+                                                  ]pdfTeX warning (ext4): desti
+nation with the same identifier (name{classmoetsi_1_1ssp_1_1IEncoder_a2af8e23d8
+41ef61f6ee4037e56a3694d}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.252 ...coder_a2af8e23d841ef61f6ee4037e56a3694d}}
+                                                  
 Underfull \hbox (badness 10000) detected at line 262
 [][][]
  []
@@ -3131,23 +3316,7 @@ Overfull \hbox (54.88048pt too wide) in paragraph at lines 267--268
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
  []
 
-[64pdfTeX warning (ext4): destination with the same identifier (name{classmoets
-i_1_1ssp_1_1IEncoder_ae6a865aa52230d81aed1cb5232402f6c}) has been already used,
- duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.273 \mbox
-           {\hyperlink{encoders_2iencoder_8h}{encoders/iencoder.\+h}}\end{Do...
-pdfTeX warning (ext4): destination with the same identifier (name{classmoetsi_1
-_1ssp_1_1IEncoder_a2af8e23d841ef61f6ee4037e56a3694d}) has been already used, du
-plicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.273 \mbox
-           {\hyperlink{encoders_2iencoder_8h}{encoders/iencoder.\+h}}\end{Do...
-]) (./classmoetsi_1_1ssp_1_1ImageDecoder.tex [65]
+) (./classmoetsi_1_1ssp_1_1ImageDecoder.tex [68]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.10 on input line 45.
@@ -3157,7 +3326,7 @@ Underfull \hbox (badness 10000) detected at line 49
 [][][]
  []
 
-[66]
+[69]
 Underfull \hbox (badness 10000) detected at line 66
 [][][]
  []
@@ -3171,7 +3340,7 @@ Underfull \hbox (badness 10000) detected at line 83
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.11 on input line 104.
 
-[67]
+[70]
 Underfull \hbox (badness 10000) detected at line 119
 [][][]
  []
@@ -3181,7 +3350,7 @@ Underfull \hbox (badness 10000) detected at line 46
 [][][]
  []
 
-[68]
+[71]
 Underfull \hbox (badness 10000) detected at line 63
 [][][]
  []
@@ -3195,13 +3364,13 @@ Underfull \hbox (badness 10000) detected at line 80
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.12 on input line 101.
 
-[69]
+[72]
 Underfull \hbox (badness 10000) detected at line 116
 [][][]
  []
 
 ) (./classmoetsi_1_1ssp_1_1iPhoneReaderImpl.tex)
-(./classmoetsi_1_1ssp_1_1IReader.tex [70] [71pdfTeX warning (ext4): destination
+(./classmoetsi_1_1ssp_1_1IReader.tex [73] [74pdfTeX warning (ext4): destination
  with the same identifier (name{classmoetsi_1_1ssp_1_1IReader_ae1332862a7d81d99
 563f111ae36e142f}) has been already used, duplicate ignored
 
@@ -3282,7 +3451,7 @@ Overfull \hbox (75.33687pt too wide) in paragraph at lines 141--142
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
-[72pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+[75pdfTeX warning (ext4): destination with the same identifier (name{classmoets
 i_1_1ssp_1_1IReader_a9f6a8650ca290b011b8e5451eeae9f32}) has been already used, 
 duplicate ignored
 
@@ -3309,7 +3478,7 @@ Overfull \hbox (75.33687pt too wide) in paragraph at lines 175--176
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
-[73pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+[76pdfTeX warning (ext4): destination with the same identifier (name{classmoets
 i_1_1ssp_1_1IReader_a4116c1931fde7bd66133934ffdca1cce}) has been already used, 
 duplicate ignored
 
@@ -3363,7 +3532,7 @@ Overfull \hbox (75.33687pt too wide) in paragraph at lines 247--248
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
-) (./classmoetsi_1_1ssp_1_1KinectReader.tex [74pdfTeX warning (ext4): destinati
+) (./classmoetsi_1_1ssp_1_1KinectReader.tex [77pdfTeX warning (ext4): destinati
 on with the same identifier (name{classmoetsi_1_1ssp_1_1IReader_af9186ba41e136d
 c4ec3242b5dd55fa04}) has been already used, duplicate ignored
 
@@ -3380,7 +3549,7 @@ Underfull \hbox (badness 10000) detected at line 66
 [][][]
  []
 
-[75]
+[78]
 Underfull \hbox (badness 10000) detected at line 83
 [][][]
  []
@@ -3389,12 +3558,12 @@ Underfull \hbox (badness 10000) detected at line 83
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.15 on input line 104.
 
-[76]
+[79]
 Underfull \hbox (badness 10000) detected at line 119
 [][][]
  []
 
-) (./classmoetsi_1_1ssp_1_1LibAvDecoder.tex [77]
+) (./classmoetsi_1_1ssp_1_1LibAvDecoder.tex [80]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.16 on input line 55.
@@ -3417,7 +3586,7 @@ Underfull \hbox (badness 10000) detected at line 78
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.18 on input line 95.
 
-) (./classmoetsi_1_1ssp_1_1LibAvEncoder.tex [78]
+) (./classmoetsi_1_1ssp_1_1LibAvEncoder.tex [81]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.19 on input line 67.
@@ -3426,7 +3595,7 @@ Package longtable Warning: Column widths have changed
 Overfull \vbox (19.95427pt too high) has occurred while \output is active []
 
 
-[79]
+[82]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.20 on input line 84.
@@ -3440,7 +3609,7 @@ Underfull \hbox (badness 10000) detected at line 117
 [][][]
  []
 
-[80]
+[83]
 Underfull \hbox (badness 10000) detected at line 134
 [][][]
  []
@@ -3466,37 +3635,39 @@ Underfull \hbox (badness 10000) detected at line 185
 [][][]
  []
 
-) (./classmoetsi_1_1ssp_1_1MultiImageReader.tex [81]
+) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1LowPassFilter.tex
+[84]) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1matrix3x4.tex)
+(./classmoetsi_1_1ssp_1_1MultiImageReader.tex [85]
 Underfull \hbox (badness 10000) detected at line 49
 [][][]
  []
 
-[82]
+
 Underfull \hbox (badness 10000) detected at line 66
 [][][]
  []
 
-
+[86]
 Underfull \hbox (badness 10000) detected at line 83
 [][][]
  []
 
-[83]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.22 on input line 104.
 
-
+[87]
 Underfull \hbox (badness 10000) detected at line 119
 [][][]
  []
 
 ) (./classmoetsi_1_1ssp_1_1NetworkReader.tex)
-(./classmoetsi_1_1ssp_1_1NullEncoder.tex [84] [85]
+(./classmoetsi_1_1ssp_1_1NullEncoder.tex [88]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.23 on input line 63.
 
+[89]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.24 on input line 81.
@@ -3517,12 +3688,12 @@ Overfull \hbox (17.7145pt too wide) in paragraph at lines 124--125
 tsi[]::ssp[]::[]Null[]Encoder[]::[]Get[]Codec[]Params[]Struct ( ) [virtual] 
  []
 
-[86]
+
 Underfull \hbox (badness 10000) detected at line 130
 [][][]
  []
 
-
+[90]
 Underfull \hbox (badness 10000) detected at line 147
 [][][]
  []
@@ -3532,7 +3703,7 @@ Underfull \hbox (badness 10000) detected at line 164
 [][][]
  []
 
-) (./classmoetsi_1_1ssp_1_1NvDecoder.tex [87]
+) (./classmoetsi_1_1ssp_1_1NvDecoder.tex [91]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.25 on input line 53.
@@ -3542,21 +3713,24 @@ Underfull \hbox (badness 10000) detected at line 54
 [][][]
  []
 
-[88]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.26 on input line 75.
 
-) (./classmoetsi_1_1ssp_1_1NvEncoder.tex [89]
+) (./classmoetsi_1_1ssp_1_1NvEncoder.tex [92]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.27 on input line 65.
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [93]
+
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.28 on input line 83.
 
-[90]
+
 Underfull \hbox (badness 10000) detected at line 98
 [][][]
  []
@@ -3571,7 +3745,7 @@ Underfull \hbox (badness 10000) detected at line 132
 [][][]
  []
 
-
+[94]
 Underfull \hbox (badness 10000) detected at line 149
 [][][]
  []
@@ -3581,13 +3755,13 @@ Underfull \hbox (badness 10000) detected at line 166
 [][][]
  []
 
-) (./structmoetsi_1_1ssp_1_1NVPipeDeleter.tex [91])
-(./classmoetsi_1_1ssp_1_1OakdXlinkReader.tex [92]
+) (./structmoetsi_1_1ssp_1_1NVPipeDeleter.tex)
+(./classmoetsi_1_1ssp_1_1OakdXlinkReader.tex [95]
 Underfull \hbox (badness 10000) detected at line 49
 [][][]
  []
 
-
+[96]
 Underfull \hbox (badness 10000) detected at line 66
 [][][]
  []
@@ -3597,7 +3771,7 @@ Underfull \hbox (badness 10000) detected at line 83
 [][][]
  []
 
-[93]
+[97]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.29 on input line 104.
@@ -3607,34 +3781,19 @@ Underfull \hbox (badness 10000) detected at line 119
 [][][]
  []
 
-) (./structmoetsi_1_1ssp_1_1object__human__t.tex [94pdfTeX warning (ext4): dest
-ination with the same identifier (name{structmoetsi_1_1ssp_1_1object__human__t_
-a632ac93d295ec9eb610b9823667d\ETC.}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.87 \mbox
-          {\Hypertarget{structmoetsi_1_1ssp_1_1object__human__t_ab60453b20e2...
-pdfTeX warning (ext4): destination with the same identifier (name{structmoetsi_
-1_1ssp_1_1object__human__t_ae698148d40aa80fb8b977ef32461\ETC.}) has been alread
-y used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.87 \mbox
-          {\Hypertarget{structmoetsi_1_1ssp_1_1object__human__t_ab60453b20e2...
-pdfTeX warning (ext4): destination with the same identifier (name{structmoetsi_
-1_1ssp_1_1object__human__t_a74cbe99bed62452a496fdd1fd5cc\ETC.}) has been alread
-y used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.87 \mbox
-          {\Hypertarget{structmoetsi_1_1ssp_1_1object__human__t_ab60453b20e2...
-] [95] [96] [97] [98]) (./interfaceSessionDelegate.tex [99])
+) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneEuroFilter.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1parsed__poses.tex [98])
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Peak.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Pose.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1PoseCommon.tex [99])
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1poses.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1root__relative__poses.tex)
+(./interfaceSessionDelegate.tex [100])
 (./structmoetsi_1_1ssp_1_1SwsContextDeleter.tex)
-(./structUnityXRNativeSessionPtr.tex)
-(./classmoetsi_1_1ssp_1_1VideoFileReader.tex [100]
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1TwoJointsConnection.tex
+[101]) (./structUnityXRNativeSessionPtr.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1vector3.tex)
+(./classmoetsi_1_1ssp_1_1VideoFileReader.tex [102]
 Underfull \hbox (badness 10000) detected at line 52
 [][][]
  []
@@ -3644,7 +3803,7 @@ Underfull \hbox (badness 10000) detected at line 69
 [][][]
  []
 
-[101]
+[103]
 Underfull \hbox (badness 10000) detected at line 86
 [][][]
  []
@@ -3653,12 +3812,12 @@ Underfull \hbox (badness 10000) detected at line 86
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.30 on input line 107.
 
-
+[104]
 Underfull \hbox (badness 10000) detected at line 122
 [][][]
  []
 
-) (./classmoetsi_1_1ssp_1_1ZDepthDecoder.tex [102]
+) (./classmoetsi_1_1ssp_1_1ZDepthDecoder.tex [105]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.31 on input line 53.
@@ -3668,21 +3827,21 @@ Underfull \hbox (badness 10000) detected at line 54
 [][][]
  []
 
-[103]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.32 on input line 75.
 
-) (./classmoetsi_1_1ssp_1_1ZDepthEncoder.tex [104]
+) (./classmoetsi_1_1ssp_1_1ZDepthEncoder.tex [106]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.33 on input line 65.
 
+[107]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.34 on input line 83.
 
-[105]
+
 Underfull \hbox (badness 10000) detected at line 98
 [][][]
  []
@@ -3708,12 +3867,14 @@ Underfull \hbox (badness 10000) detected at line 149
 [][][]
  []
 
-
+[108]
 Underfull \hbox (badness 10000) detected at line 166
 [][][]
  []
 
-) [106]
+) [109] [110
+
+]
 Chapter 9.
 (./include_2structs_2body__struct_8h.tex) (./structs_2body__struct_8h.texpdfTeX
  warning (ext4): destination with the same identifier (name{namespacemoetsi_1_1
@@ -3722,11 +3883,9 @@ d
 <to be read again> 
                    \relax 
 l.35 ...1_1ssp_a847e1a4429b781f120e04becebbe66a0}}
-                                                   [107
-
-]pdfTeX warning (ext4): destination with the same identifier (name{namespacemoe
-tsi_1_1ssp_a9fafd59fa54249bb95a66105f66c4c7d}) has been already used, duplicate
- ignored
+                                                   [111]pdfTeX warning (ext4): 
+destination with the same identifier (name{namespacemoetsi_1_1ssp_a9fafd59fa542
+49bb95a66105f66c4c7d}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.38 ...1_1ssp_a9fafd59fa54249bb95a66105f66c4c7d}}
@@ -3743,7 +3902,7 @@ ation with the same identifier (name{namespacemoetsi_1_1ssp_af27a97cef0ab519ed1
                    \relax 
 l.44 ...1_1ssp_af27a97cef0ab519ed119c1d5786af84e}}
                                                   )
-(./dummy__body__reader_8cc.tex) (./dummy__body__reader_8h.tex [108])
+(./dummy__body__reader_8cc.tex) (./dummy__body__reader_8h.tex [112])
 (./include_2structs_2frame__struct_8h.tex
 Overfull \hbox (44.03798pt too wide) in paragraph at lines 39--44
 []\T1/phv/m/n/10 enum [] []: short { []
@@ -3764,7 +3923,7 @@ Underfull \hbox (badness 7344) in paragraph at lines 45--59
 [] \T1/phv/m/n/10 = 4, [] = 0,
  []
 
-[109]
+[113]
 Overfull \hbox (42.74498pt too wide) in paragraph at lines 60--71
 [] \T1/phv/m/n/10 = -1, []
  []
@@ -3785,51 +3944,56 @@ Overfull \hbox (76.57716pt too wide) in paragraph at lines 60--71
  []
 
 
-Overfull \hbox (56.29842pt too wide) in paragraph at lines 76--101
+Overfull \hbox (56.29842pt too wide) in paragraph at lines 76--102
 [] \T1/phv/m/n/10 = 0, []
  []
 
 
-Overfull \hbox (59.7019pt too wide) in paragraph at lines 76--101
+Overfull \hbox (59.7019pt too wide) in paragraph at lines 76--102
 \T1/phv/m/n/10 = 1, [] = 2, []
  []
 
 
-Overfull \hbox (53.78755pt too wide) in paragraph at lines 76--101
+Overfull \hbox (53.78755pt too wide) in paragraph at lines 76--102
 [] \T1/phv/m/n/10 = 4, []
  []
 
 
-Overfull \hbox (49.10762pt too wide) in paragraph at lines 76--101
-[] \T1/phv/m/n/10 = 1, []
+Overfull \hbox (53.1842pt too wide) in paragraph at lines 76--102
+[] \T1/phv/m/n/10 = 8, []
  []
 
 
-Overfull \hbox (55.47932pt too wide) in paragraph at lines 76--101
-[] \T1/phv/m/n/10 = 3, []
+Overfull \hbox (72.99487pt too wide) in paragraph at lines 76--102
+\T1/phv/m/n/10 = 9, [] = 0, []
  []
 
 
-Overfull \hbox (33.18848pt too wide) in paragraph at lines 76--101
-\T1/phv/m/n/10 = 4, [] = 5, []
+Overfull \hbox (43.00545pt too wide) in paragraph at lines 76--102
+[] \T1/phv/m/n/10 = 2, []
  []
 
 
-Overfull \hbox (50.18727pt too wide) in paragraph at lines 76--101
-[] \T1/phv/m/n/10 = 7, []
+Overfull \hbox (70.48401pt too wide) in paragraph at lines 76--102
+\T1/phv/m/n/10 = 3, [] = 4, []
  []
 
 
-Overfull \hbox (112.66562pt too wide) in paragraph at lines 102--113
+Overfull \hbox (69.88066pt too wide) in paragraph at lines 76--102
+\T1/phv/m/n/10 = 7, [] = 8, []
+ []
+
+
+Overfull \hbox (112.66562pt too wide) in paragraph at lines 103--114
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Overfull \hbox (112.66562pt too wide) in paragraph at lines 102--113
+Overfull \hbox (112.66562pt too wide) in paragraph at lines 103--114
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
-) (./structs_2frame__struct_8h.tex [110]
+) (./structs_2frame__struct_8h.tex [114]
 Overfull \hbox (44.03798pt too wide) in paragraph at lines 39--44
 []\T1/phv/m/n/10 enum [] []: short { []
  []
@@ -3870,116 +4034,121 @@ Overfull \hbox (76.57716pt too wide) in paragraph at lines 60--71
  []
 
 
-Overfull \hbox (56.29842pt too wide) in paragraph at lines 76--101
+Overfull \hbox (56.29842pt too wide) in paragraph at lines 76--102
 [] \T1/phv/m/n/10 = 0, []
  []
 
 
-Overfull \hbox (59.7019pt too wide) in paragraph at lines 76--101
+Overfull \hbox (59.7019pt too wide) in paragraph at lines 76--102
 \T1/phv/m/n/10 = 1, [] = 2, []
  []
 
 
-Overfull \hbox (53.78755pt too wide) in paragraph at lines 76--101
+Overfull \hbox (53.78755pt too wide) in paragraph at lines 76--102
 [] \T1/phv/m/n/10 = 4, []
  []
 
 
-Overfull \hbox (49.10762pt too wide) in paragraph at lines 76--101
-[] \T1/phv/m/n/10 = 1, []
+Overfull \hbox (53.1842pt too wide) in paragraph at lines 76--102
+[] \T1/phv/m/n/10 = 8, []
  []
 
 
-Overfull \hbox (55.47932pt too wide) in paragraph at lines 76--101
-[] \T1/phv/m/n/10 = 3, []
+Overfull \hbox (72.99487pt too wide) in paragraph at lines 76--102
+\T1/phv/m/n/10 = 9, [] = 0, []
  []
 
 
-Overfull \hbox (33.18848pt too wide) in paragraph at lines 76--101
-\T1/phv/m/n/10 = 4, [] = 5, []
+Overfull \hbox (43.00545pt too wide) in paragraph at lines 76--102
+[] \T1/phv/m/n/10 = 2, []
  []
 
 
-Overfull \hbox (50.18727pt too wide) in paragraph at lines 76--101
-[] \T1/phv/m/n/10 = 7, []
+Overfull \hbox (70.48401pt too wide) in paragraph at lines 76--102
+\T1/phv/m/n/10 = 3, [] = 4, []
  []
 
-[111]
-Overfull \hbox (112.66562pt too wide) in paragraph at lines 102--113
+
+Overfull \hbox (69.88066pt too wide) in paragraph at lines 76--102
+\T1/phv/m/n/10 = 7, [] = 8, []
+ []
+
+[115]
+Overfull \hbox (112.66562pt too wide) in paragraph at lines 103--114
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Overfull \hbox (112.66562pt too wide) in paragraph at lines 102--113
+Overfull \hbox (112.66562pt too wide) in paragraph at lines 103--114
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
-) (./idecoder_8cc.tex) (./decoders_2idecoder_8h.tex [112])
-(./include_2decoders_2idecoder_8h.tex [113]) (./iencoder_8cc.tex)
-(./encoders_2iencoder_8h.tex [114]) (./include_2encoders_2iencoder_8h.tex
-[115]) (./image__converter_8cc.tex) (./include_2utils_2image__converter_8h.tex
-[116]) (./utils_2image__converter_8h.tex [117]) (./image__decoder_8cc.tex)
-(./image__decoder_8h.tex [118]) (./image__reader_8cc.tex)
-(./image__reader_8h.tex [119]) (./iphone__reader_8h.tex [120])
-(./iphone__reader_8mm.tex) (./ireader_8cc.tex [121])
-(./include_2readers_2ireader_8h.tex [122]) (./readers_2ireader_8h.tex)
-(./kinect__reader_8cc.tex [123]pdfTeX warning (ext4): destination with the same
+) (./idecoder_8cc.tex) (./decoders_2idecoder_8h.tex [116])
+(./include_2decoders_2idecoder_8h.tex [117]) (./iencoder_8cc.tex)
+(./encoders_2iencoder_8h.tex [118]) (./include_2encoders_2iencoder_8h.tex
+[119]) (./image__converter_8cc.tex) (./include_2utils_2image__converter_8h.tex
+[120]) (./utils_2image__converter_8h.tex [121]) (./image__decoder_8cc.tex)
+(./image__decoder_8h.tex [122]) (./image__reader_8cc.tex)
+(./image__reader_8h.tex [123]) (./iphone__reader_8h.tex [124])
+(./iphone__reader_8mm.tex) (./ireader_8cc.tex [125])
+(./include_2readers_2ireader_8h.tex [126]) (./readers_2ireader_8h.tex)
+(./kinect__reader_8cc.tex [127]pdfTeX warning (ext4): destination with the same
  identifier (name{namespacemoetsi_1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}) ha
 s been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.21 ...1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}}
                                                   ) (./kinect__reader_8h.tex
-[124]pdfTeX warning (ext4): destination with the same identifier (name{namespac
+[128]pdfTeX warning (ext4): destination with the same identifier (name{namespac
 emoetsi_1_1ssp_a998f3ec3680c51d19383e0f6e38e48c2}) has been already used, dupli
 cate ignored
 <to be read again> 
                    \relax 
 l.44 ...1_1ssp_a998f3ec3680c51d19383e0f6e38e48c2}}
                                                   ) (./kinect__utils_8cc.tex
-[125]) (./kinect__utils_8h.tex) (./libav__decoder_8cc.tex [126])
-(./libav__decoder_8h.tex [127]) (./libav__encoder_8cc.tex)
-(./libav__encoder_8h.tex [128]) (./logger_8h.tex)
-(./multi__image__reader_8cc.tex [129]) (./multi__image__reader_8h.tex)
-(./network__reader_8cc.tex [130]pdfTeX warning (ext4): destination with the sam
+[129]) (./kinect__utils_8h.tex) (./libav__decoder_8cc.tex [130])
+(./libav__decoder_8h.tex [131]) (./libav__encoder_8cc.tex)
+(./libav__encoder_8h.tex [132]) (./logger_8h.tex)
+(./multi__image__reader_8cc.tex [133]) (./multi__image__reader_8h.tex)
+(./network__reader_8cc.tex [134]pdfTeX warning (ext4): destination with the sam
 e identifier (name{namespacemoetsi_1_1ssp_a884aae59668e7913051f2875b047688e}) h
 as been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.22 ...1_1ssp_a884aae59668e7913051f2875b047688e}}
                                                   ) (./network__reader_8h.tex)
-(./null__encoder_8cc.tex [131]) (./null__encoder_8h.tex) (./nv__decoder_8cc.tex
-[132]) (./nv__decoder_8h.tex) (./nv__encoder_8cc.tex [133])
-(./nv__encoder_8h.tex [134]) (./nvpipe__types_8h.texpdfTeX warning (ext4): dest
+(./null__encoder_8cc.tex [135]) (./null__encoder_8h.tex) (./nv__decoder_8cc.tex
+[136]) (./nv__decoder_8h.tex) (./nv__encoder_8cc.tex [137])
+(./nv__encoder_8h.tex [138]) (./nvpipe__types_8h.texpdfTeX warning (ext4): dest
 ination with the same identifier (name{namespacemoetsi_1_1ssp_a9113dc526e642001
 a9213326b2c5539f}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.29 ...1_1ssp_a9113dc526e642001a9213326b2c5539f}}
                                                   )
-(./similarity__measures_8h.tex [135]
+(./similarity__measures_8h.tex [139]
 Underfull \hbox (badness 2903) in paragraph at lines 29--29
 []\T1/phv/m/sl/9 Get Struc-tural Sim-i-lar-ity be-tween 2 im-ages cf. for in-st
 ance [][] \T1/pcr/m/sl/9 http[]://amroamroamro.[]github.[]
  []
 
-) (./include_2ssp_8h.tex) (./ssp_8h.tex [136]) (./ssp__client__k4a_8cc.tex
-[137]) (./ssp__client__opencv_8cc.tex [138]) (./ssp__client__template_8cc.tex)
-(./ssp__server_8cc.tex [139]) (./ssp__tester_8cc.tex [140])
+) (./include_2ssp_8h.tex) (./ssp_8h.tex [140]) (./ssp__client__k4a_8cc.tex
+[141]) (./ssp__client__opencv_8cc.tex [142]) (./ssp__client__template_8cc.tex)
+(./ssp__server_8cc.tex [143]) (./ssp__tester_8cc.tex [144])
 (./include_2utils_2utils_8h.texpdfTeX warning (ext4): destination with the same
  identifier (name{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}) ha
 s been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.41 ...1_1ssp_ac615e71e018ead7a1598be1b67079f93}}
-                                                   [141])
+                                                   [145])
 (./utils_2utils_8h.texpdfTeX warning (ext4): destination with the same identifi
 er (name{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}) has been al
 ready used, duplicate ignored
 <to be read again> 
                    \relax 
 l.41 ...1_1ssp_ac615e71e018ead7a1598be1b67079f93}}
-                                                   [142])
+                                                   [146])
 (./video__file__reader_8cc.tex
 Overfull \hbox (105.9142pt too wide) in paragraph at lines 21--31
 []\T1/phv/m/n/10 , [],
@@ -4010,26 +4179,26 @@ Overfull \hbox (125.95651pt too wide) in paragraph at lines 31--41
 []\T1/phv/m/n/10 , [],
  []
 
-[143]) (./video__file__reader_8h.tex) (./video__utils_8h.tex [144]pdfTeX warnin
+[147]) (./video__file__reader_8h.tex) (./video__utils_8h.tex [148]pdfTeX warnin
 g (ext4): destination with the same identifier (name{namespacemoetsi_1_1ssp_ac6
 e1b3e0caadb02f6e5a8387e6fee988}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.66 ...1_1ssp_ac6e1b3e0caadb02f6e5a8387e6fee988}}
                                                   ) (./zdepth__decoder_8cc.tex
-[145]) (./zdepth__decoder_8h.tex) (./zdepth__encoder_8cc.tex [146])
-(./zdepth__encoder_8h.tex) [147] [148
+[149]) (./zdepth__decoder_8h.tex) (./zdepth__encoder_8cc.tex [150])
+(./zdepth__encoder_8h.tex) [151] [152
 
 ]
 No file refman.ind.
 
 Package longtable Warning: Table widths have changed. Rerun LaTeX.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 305.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 305.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 319.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 319.
 (./refman.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 305.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 305.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 319.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 319.
 
 
 Package rerunfilecheck Warning: File `refman.out' has changed.
@@ -4038,7 +4207,7 @@ Package rerunfilecheck Warning: File `refman.out' has changed.
 
 Package rerunfilecheck Info: Checksums for `refman.out':
 (rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  E52B3F928E429590FCFA341ABFF05FD6;87482.
+(rerunfilecheck)             After:  9C14EDD66443BFBF69E6298176D18128;93749.
 
 LaTeX Warning: There were undefined references.
 
@@ -4047,13 +4216,13 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 19580 strings out of 483140
- 380821 string characters out of 5965150
- 558674 words of memory out of 5000000
- 32296 multiletter control sequences out of 15000+600000
+ 19607 strings out of 483140
+ 381193 string characters out of 5965150
+ 562137 words of memory out of 5000000
+ 32284 multiletter control sequences out of 15000+600000
  596971 words of font info for 104 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 55i,16n,96p,984b,996s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,16n,96p,984b,965s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{libav__types_8h_source} has been referenced but d
 oes not exist, replaced by a fixed one
 
@@ -4076,10 +4245,10 @@ hare/texlive/texmf-dist/fonts/type1/urw/courier/ucrro8a.pfb></usr/share/texlive
 fonts/type1/urw/helvetic/uhvb8ac.pfb></usr/share/texlive/texmf-dist/fonts/type1
 /urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helveti
 c/uhvro8a.pfb>
-Output written on refman.pdf (150 pages, 425338 bytes).
+Output written on refman.pdf (154 pages, 432616 bytes).
 PDF statistics:
- 4027 PDF objects out of 4296 (max. 8388607)
- 3800 compressed objects within 38 object streams
- 1775 named destinations out of 2073 (max. 500000)
+ 4083 PDF objects out of 4296 (max. 8388607)
+ 3851 compressed objects within 39 object streams
+ 1786 named destinations out of 2073 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

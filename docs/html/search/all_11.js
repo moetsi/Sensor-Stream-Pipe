@@ -1,6 +1,29 @@
 var searchData=
 [
-  ['this_20branch_178',['THIS BRANCH',['../index.html',1,'']]],
-  ['timestamps_179',['timestamps',['../structmoetsi_1_1ssp_1_1FrameStruct.html#aa445729218d4963e527377d760ac8015',1,'moetsi::ssp::FrameStruct']]],
-  ['type_180',['type',['../structmoetsi_1_1ssp_1_1CameraCalibrationStruct.html#a1ca6c9353a0523a437fe2318d560f39a',1,'moetsi::ssp::CameraCalibrationStruct::type()'],['../structmoetsi_1_1ssp_1_1CodecParamsStruct.html#a94a427a8907bb5a23c4f6ee2117a4803',1,'moetsi::ssp::CodecParamsStruct::type()']]]
+  ['body_5fstruct_2eh_164',['body_struct.h',['../structs_2body__struct_8h.html',1,'']]],
+  ['frame_5fstruct_2eh_165',['frame_struct.h',['../structs_2frame__struct_8h.html',1,'']]],
+  ['sensor_20stream_20pipe_20instalation_166',['Sensor Stream Pipe Instalation',['../md_INSTALL.html',1,'']]],
+  ['scene_5fdesc_167',['scene_desc',['../structmoetsi_1_1ssp_1_1FrameStruct.html#a7e717ab7290ddbb430c3c5a8858ddac6',1,'moetsi::ssp::FrameStruct']]],
+  ['sensor_5fid_168',['sensor_id',['../structmoetsi_1_1ssp_1_1FrameStruct.html#ae585f1be534924a69c8617b2f5f83568',1,'moetsi::ssp::FrameStruct']]],
+  ['sensortype_169',['SensorType',['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474de',1,'moetsi::ssp::SensorType()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474de',1,'moetsi::ssp::SensorType()']]],
+  ['sensortypecolor_170',['SensorTypeColor',['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea896d4c904dda3d40337f16257ad819c9',1,'moetsi::ssp::SensorTypeColor()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea896d4c904dda3d40337f16257ad819c9',1,'moetsi::ssp::SensorTypeColor()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea896d4c904dda3d40337f16257ad819c9',1,'moetsi::ssp::SensorTypeColor()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea896d4c904dda3d40337f16257ad819c9',1,'moetsi::ssp::SensorTypeColor()']]],
+  ['sensortypeconfidence_171',['SensorTypeConfidence',['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d7e91425ea4a160a45fa2',1,'moetsi::ssp::SensorTypeConfidence()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d7e91425ea4a160a45fa2',1,'moetsi::ssp::SensorTypeConfidence()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d7e91425ea4a160a45fa2',1,'moetsi::ssp::SensorTypeConfidence()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d7e91425ea4a160a45fa2',1,'moetsi::ssp::SensorTypeConfidence()']]],
+  ['sensortypedepth_172',['SensorTypeDepth',['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea38c56a32340ea03dd83b817cdbc15dd9',1,'moetsi::ssp::SensorTypeDepth()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea38c56a32340ea03dd83b817cdbc15dd9',1,'moetsi::ssp::SensorTypeDepth()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea38c56a32340ea03dd83b817cdbc15dd9',1,'moetsi::ssp::SensorTypeDepth()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea38c56a32340ea03dd83b817cdbc15dd9',1,'moetsi::ssp::SensorTypeDepth()']]],
+  ['sensortypeir_173',['SensorTypeIR',['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3ee7bcc422afac6239543',1,'moetsi::ssp::SensorTypeIR()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3ee7bcc422afac6239543',1,'moetsi::ssp::SensorTypeIR()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3ee7bcc422afac6239543',1,'moetsi::ssp::SensorTypeIR()'],['../namespacemoetsi_1_1ssp.html#abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3ee7bcc422afac6239543',1,'moetsi::ssp::SensorTypeIR()']]],
+  ['sessiondelegate_174',['SessionDelegate',['../interfaceSessionDelegate.html',1,'']]],
+  ['setuplogging_175',['SetupLogging',['../namespacemoetsi_1_1ssp.html#a67a600c84b18e25713a78f85283c7fa9',1,'moetsi::ssp::SetupLogging(const std::string &amp;level, const std::string &amp;file)'],['../namespacemoetsi_1_1ssp.html#a732d178071710fdceab189671f2d7c25',1,'moetsi::ssp::SetupLogging(YAML::Node &amp;general_parameters)'],['../namespacemoetsi_1_1ssp.html#a0af356ab87e92f92c49e7118b9cb1ba2',1,'moetsi::ssp::SetupLogging(std::string &amp;level, std::string &amp;file)']]],
+  ['similarity_5fmeasures_2eh_176',['similarity_measures.h',['../similarity__measures_8h.html',1,'']]],
+  ['size_177',['size',['../structmoetsi_1_1ssp_1_1buffer__data.html#acd14a543f9ab4ccb7d5c9f8312861892',1,'moetsi::ssp::buffer_data']]],
+  ['ssp_2eh_178',['ssp.h',['../ssp_8h.html',1,'']]],
+  ['ssp_5fclient_5fk4a_2ecc_179',['ssp_client_k4a.cc',['../ssp__client__k4a_8cc.html',1,'']]],
+  ['ssp_5fclient_5fopencv_2ecc_180',['ssp_client_opencv.cc',['../ssp__client__opencv_8cc.html',1,'']]],
+  ['ssp_5fclient_5ftemplate_2ecc_181',['ssp_client_template.cc',['../ssp__client__template_8cc.html',1,'']]],
+  ['ssp_5fserver_2ecc_182',['ssp_server.cc',['../ssp__server_8cc.html',1,'']]],
+  ['ssp_5ftester_2ecc_183',['ssp_tester.cc',['../ssp__tester_8cc.html',1,'']]],
+  ['sspmessagetype_184',['SSPMessageType',['../namespacemoetsi_1_1ssp.html#a8948545ffe48a5b3507fd10a1e56d546',1,'moetsi::ssp::SSPMessageType()'],['../namespacemoetsi_1_1ssp.html#a8948545ffe48a5b3507fd10a1e56d546',1,'moetsi::ssp::SSPMessageType()']]],
+  ['stream_5fcolor_185',['stream_color',['../structmoetsi_1_1ssp_1_1ExtendedAzureConfig.html#a602b49142877ef3f88972153cb1478d1',1,'moetsi::ssp::ExtendedAzureConfig']]],
+  ['stream_5fdepth_186',['stream_depth',['../structmoetsi_1_1ssp_1_1ExtendedAzureConfig.html#ae189c45e7f654e635d802713814cda3e',1,'moetsi::ssp::ExtendedAzureConfig']]],
+  ['stream_5fid_187',['stream_id',['../structmoetsi_1_1ssp_1_1FrameStruct.html#a14a7976abfb26a9ca42e17555f8b1a8c',1,'moetsi::ssp::FrameStruct']]],
+  ['stream_5fir_188',['stream_ir',['../structmoetsi_1_1ssp_1_1ExtendedAzureConfig.html#ab4c4fd8a25fe1a5c97aace78bc6d987c',1,'moetsi::ssp::ExtendedAzureConfig']]],
+  ['swscontextdeleter_189',['SwsContextDeleter',['../structmoetsi_1_1ssp_1_1SwsContextDeleter.html',1,'moetsi::ssp']]]
 ];
