@@ -65,18 +65,22 @@ function build_ffmpeg {
     popd
 }
 
-# Build minimal OpenCV : core imgproc imgcodecs highgui
+# --exclude-libs
+# core gapi highgui imgcodecs imgproc
+# Build minimal OpenCV : core imgproc imgcodecs highgui 
+# opencv/include/opencv4/opencv2/imgcodecs.hpp
 function build_opencv {
     echo "Building opencv"
-    git clone --depth 1 --branch 3.4.13 \
-        https://github.com/opencv/opencv.git || exit -1
-    pushd opencv
+    wget -O opencv-4.5.3.tar.gz https://github.com/opencv/opencv/archive/refs/tags/4.5.3.tar.gz
+    tar -xf opencv-4.5.3.tar.gz
+    pushd opencv-4.5.3
     mkdir build && cd build
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
+        -DOPENCV_GENERATE_PKGCONFIG=YES \
         -DBUILD_EXAMPLES=OFF \
-        -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
         -DBUILD_opencv_apps:BOOL=ON \
         -DBUILD_opencv_calib3d:BOOL=OFF \
         -DBUILD_opencv_core:BOOL=ON \
@@ -113,8 +117,8 @@ function build_opencv {
         -DWITH_QUIRC=OFF \
         -DWITH_LAPACK=NO \
         -DENABLE_PIC=ON \
-        .. || exit -1
-    cmake --build . -j 16 --config Release --target install || exit -1
+        ..
+    cmake --build . -j 16 --config Release --target install
     cd ..
     popd
 }
