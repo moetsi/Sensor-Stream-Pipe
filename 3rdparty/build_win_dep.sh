@@ -65,18 +65,21 @@ function build_ffmpeg {
     popd
 }
 
+
 # Build minimal OpenCV : core imgproc
 function build_opencv {
     echo "Building opencv"
-    git clone --depth 1 --branch 3.4.13 \
-        https://github.com/opencv/opencv.git || exit -1
-    pushd opencv
-    mkdir build && cd build
+    curl -L -O \
+      https://github.com/opencv/opencv/archive/refs/tags/4.5.4.zip
+    unzip 4.5.4.zip
+        mv opencv-4.5.4 opencv
 
-    cmake --help
+    pushd  opencv
+    mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -A x64 \
+        -G "Visual Studio 16 2019" -A x64  \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
+        -DOPENCV_GENERATE_PKGCONFIG=YES \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_WITH_STATIC_CRT=OFF \
@@ -113,7 +116,7 @@ function build_opencv {
         -DBUILD_TESTS=OFF \
         -DWITH_EIGEN=OFF -DWITH_FFMPEG=OFF \
         -DWITH_QUIRC=OFF \
-        .. || exit -1
+        ..
     cmake --build . --config Release --target install
     [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
     cd ..
