@@ -229,6 +229,63 @@ function build_k4a {
     popd
 }
 
+# --exclude-libs
+# core gapi highgui imgcodecs imgproc
+# Build minimal OpenCV : core imgproc imgcodecs highgui 
+# opencv/include/opencv4/opencv2/imgcodecs.hpp
+function build_opencv {
+    echo "Building opencv"
+    wget -O opencv-4.5.3.tar.gz https://github.com/opencv/opencv/archive/refs/tags/4.5.3.tar.gz
+    tar -xf opencv-4.5.3.tar.gz
+    pushd opencv-4.5.3
+    mkdir build && cd build
+    cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
+        -DOPENCV_GENERATE_PKGCONFIG=YES \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_opencv_apps:BOOL=ON \
+        -DBUILD_opencv_calib3d:BOOL=OFF \
+        -DBUILD_opencv_core:BOOL=ON \
+        -DBUILD_opencv_dnn:BOOL=OFF \
+        -DBUILD_opencv_features2d:BOOL=OFF \
+        -DBUILD_opencv_flann:BOOL=OFF \
+        -DBUILD_opencv_highgui:BOOL=ON \
+        -DBUILD_opencv_imgcodecs:BOOL=ON \
+        -DBUILD_opencv_imgproc:BOOL=ON \
+        -DBUILD_opencv_java_bindings_generator:BOOL=OFF \
+        -DBUILD_opencv_js:BOOL=OFF \
+        -DBUILD_opencv_js_bindings_generator:BOOL=OFF \
+        -DBUILD_opencv_ml:BOOL=OFF \
+        -DBUILD_opencv_objdetect:BOOL=OFF \
+        -DBUILD_opencv_photo:BOOL=OFF \
+        -DBUILD_opencv_python2:BOOL=OFF \
+        -DBUILD_opencv_python_bindings_generator:BOOL=OFF \
+        -DBUILD_opencv_python_tests:BOOL=OFF \
+        -DBUILD_opencv_shape:BOOL=OFF \
+        -DBUILD_opencv_stitching:BOOL=OFF \
+        -DBUILD_opencv_superres:BOOL=OFF \
+        -DBUILD_opencv_ts:BOOL=OFF \
+        -DBUILD_opencv_video:BOOL=OFF \
+        -DBUILD_opencv_videoio:BOOL=OFF \
+        -DBUILD_opencv_videostab:BOOL=OFF \
+        -DBUILD_opencv_world:BOOL=OFF \
+        -DBUILD_JAVA=OFF \
+        -DBUILD_PACKAGE=OFF \
+        -DBUILD_PERF_TESTS=OFF \
+        -DBUILD_PROTOBUF=OFF \
+        -DBUILD_TESTS=OFF \
+        -DBUILD_JPEG=ON -DBUILD_PNG=ON -DBUILD_ZLIB=ON \
+        -DWITH_EIGEN=OFF -DWITH_FFMPEG=OFF \
+        -DWITH_QUIRC=OFF \
+        -DWITH_LAPACK=NO \
+        -DENABLE_PIC=ON \
+        ..
+    cmake --build . -j 16 --config Release --target install
+    cd ..
+    popd
+}
 
 export SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd | sed -e 's,^/c/,c:/,')"
 
