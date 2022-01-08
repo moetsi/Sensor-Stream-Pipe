@@ -37,6 +37,79 @@
 
 namespace moetsi::ssp {
 
+/**
+ * @brief Magic string interpolation
+ * \param env environment
+ * \param str input
+ */
+std::string StringInterpolation(const std::map<std::string, std::string> &env, const std::string &s) {
+    bool had_subst = false;
+    auto rv = s;
+    do {
+        had_subst = false;
+        // find @{
+        std::vector<unsigned> begins;
+        bool last_is_at = false;
+        std::stringstream ss;
+        unsigned cursor = 0;
+
+        auto advance_cursor = [&](unsigned nc) {
+            ss << rv.substr(cursor, nc - cursor);
+            //std::cerr << "advanced: " << ss.str() << " " << cursor << " " << nc << std::endl << std::flush;
+            cursor = nc; 
+        };
+
+        for (unsigned i=0; i< rv.size(); ++i) {
+            if (rv[i] == '{' && last_is_at) {
+                begins.push_back(i);
+                // std::cerr << "@{ ... " << std::to_string(i) << std::endl << std::flush;
+            }
+            if (rv[i] == '}') {
+                if (begins.size() > 0) {
+                    auto x = begins.back();
+                    begins.pop_back();
+
+                    auto key = rv.substr(x+1, i-x-1);
+                    // std::cerr << "key = " << key << " " << i << " " << x << std::endl << std::flush;
+                    advance_cursor(std::max(cursor, x-1));
+
+                    auto e = std::getenv(key.c_str());
+                    if (e != nullptr) {
+                        auto ee = std::string(e);
+                        //std::cerr << "env: " << ee << std::endl << std::flush;
+                        if (ee.size() > 0) {
+                            ss << ee;
+                            had_subst = true;
+                            cursor = i+1;
+                        }
+                    } else {
+                        auto it = env.find(key);
+                        if (it != env.end()) {
+                            ss << it->second;
+                            had_subst = true;
+                            cursor = i+1;
+                        } else {
+
+                        }
+                    }
+                }
+            }
+
+            last_is_at = rv[i] == '@';
+        }
+        advance_cursor(rv.size()+1);
+        rv = ss.str();
+    } while(had_subst);
+
+    std::cerr << "string interpolation = " << rv << std::endl << std::flush;
+    return rv;
+}
+
+std::string StringInterpolation(const std::string &s) {
+    std::map<std::string, std::string> env;
+    return StringInterpolation(env, s);
+}
+
 // N.B. this is a copy'n'paste from ssp_server.cc
 std::shared_ptr<IReader> IReaderFactory(const std::string & config) {
     std::string codec_parameters_file = std::string(config);

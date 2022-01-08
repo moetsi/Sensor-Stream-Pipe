@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.11.28)  18 DEC 2021 23:14
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.11.28)  9 JAN 2022 00:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1804,31 +1804,32 @@ Overfull \hbox (118.14735pt too wide) in paragraph at lines 259--285
 
 [24]
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <9> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 351.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 355.
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <7> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 351.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 355.
 
-Underfull \hbox (badness 2903) in paragraph at lines 351--351
+Underfull \hbox (badness 2903) in paragraph at lines 355--355
 []\T1/phv/m/sl/9 Get Struc-tural Sim-i-lar-ity be-tween 2 im-ages cf. for in-st
 ance [][] \T1/pcr/m/sl/9 http[]://amroamroamro.[]github.[]
  []
 
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 7.19995pt on input line 359.
-LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 7.19995pt on input line 386.
+(Font)              scaled to size 7.19995pt on input line 363.
 [25]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 7.1 on input line 412.
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 7.2 on input line 442.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 7.19995pt on input line 390.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.3 on input line 486.
+(longtable)                in table 7.1 on input line 416.
+
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.2 on input line 446.
+
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.3 on input line 490.
 
 [26pdfTeX warning (ext4): destination with the same identifier (name{namespacem
 oetsi_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8ac32f0bb1b309\ETC.}) has been alr
@@ -1836,7 +1837,7 @@ eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.486 \end{DoxyEnumFields}
+l.490 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8a662285f55328\ETC.}) has been alread
@@ -1844,7 +1845,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.486 \end{DoxyEnumFields}
+l.490 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8}) has been already used, duplicate 
@@ -1852,7 +1853,7 @@ ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.486 \end{DoxyEnumFields}
+l.490 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8ac32f0bb1b309\ETC.}) has been alread
@@ -1860,7 +1861,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.486 \end{DoxyEnumFields}
+l.490 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8a662285f55328\ETC.}) has been alread
@@ -1868,7 +1869,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.486 \end{DoxyEnumFields}
+l.490 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8ac32f0bb1b309\ETC.}) has been alread
@@ -1876,7 +1877,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.486 \end{DoxyEnumFields}
+l.490 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a1f51291db51233dc5865d42e6ee36ef8a662285f55328\ETC.}) has been alread
@@ -1884,105 +1885,105 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.486 \end{DoxyEnumFields}
+l.490 \end{DoxyEnumFields}
                           
 ]pdfTeX warning (ext4): destination with the same identifier (name{namespacemoe
 tsi_1_1ssp_a6d638ba0bd38e9daded08f633d893563}) has been already used, duplicate
  ignored
 <to be read again> 
                    \relax 
-l.487 ..._1ssp_a6d638ba0bd38e9daded08f633d893563}}
+l.491 ..._1ssp_a6d638ba0bd38e9daded08f633d893563}}
                                                   pdfTeX warning (ext4): destin
 ation with the same identifier (name{namespacemoetsi_1_1ssp_a6d638ba0bd38e9dade
 d08f633d893563a1ffd3a6c0664\ETC.}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.530 \end{DoxyEnumFields}
+l.534 \end{DoxyEnumFields}
                           
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.4 on input line 530.
+(longtable)                in table 7.4 on input line 534.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.5 on input line 628.
+(longtable)                in table 7.5 on input line 632.
 
 [27pdfTeX warning (ext4): destination with the same identifier (name{namespacem
 oetsi_1_1ssp_a6d638ba0bd38e9daded08f633d893563a1ffd3a6c0664\ETC.}) has been alr
@@ -1990,7 +1991,7 @@ eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.628 \end{DoxyEnumFields}
+l.632 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a55e78e5ce82b\ETC.}) has been alread
@@ -1998,7 +1999,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.628 \end{DoxyEnumFields}
+l.632 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563ac818f912b0dd\ETC.}) has been alread
@@ -2006,7 +2007,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.628 \end{DoxyEnumFields}
+l.632 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a4e738f8ec62e\ETC.}) has been alread
@@ -2014,7 +2015,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.628 \end{DoxyEnumFields}
+l.632 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563ac818f912b0dd\ETC.}) has been alread
@@ -2022,7 +2023,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.628 \end{DoxyEnumFields}
+l.632 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a4e738f8ec62e\ETC.}) has been alread
@@ -2030,7 +2031,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.628 \end{DoxyEnumFields}
+l.632 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563ac818f912b0dd\ETC.}) has been alread
@@ -2038,7 +2039,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.628 \end{DoxyEnumFields}
+l.632 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a6d638ba0bd38e9daded08f633d893563a4e738f8ec62e\ETC.}) has been alread
@@ -2046,311 +2047,311 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.628 \end{DoxyEnumFields}
+l.632 \end{DoxyEnumFields}
                           
 ]pdfTeX warning (ext4): destination with the same identifier (name{namespacemoe
 tsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4}) has been already used, duplicate
  ignored
 <to be read again> 
                    \relax 
-l.629 ..._1ssp_aa9b059f0bc7a91855545ee887f2d56c4}}
+l.633 ..._1ssp_aa9b059f0bc7a91855545ee887f2d56c4}}
                                                   pdfTeX warning (ext4): destin
 ation with the same identifier (name{namespacemoetsi_1_1ssp_aa9b059f0bc7a918555
 45ee887f2d56c4a6f466822a5d2\ETC.}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
 y used, duplicate ignored
 <to be read again> 
                    \relax 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.6 on input line 726.
+(longtable)                in table 7.6 on input line 730.
 
 [28pdfTeX warning (ext4): destination with the same identifier (name{namespacem
 oetsi_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6f466822a5d2\ETC.}) has been alr
@@ -2358,7 +2359,7 @@ eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a234b11a09d69\ETC.}) has been alread
@@ -2366,7 +2367,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4ac2cdf8554455\ETC.}) has been alread
@@ -2374,7 +2375,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a44d909233498\ETC.}) has been alread
@@ -2382,7 +2383,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a1628ff13722a\ETC.}) has been alread
@@ -2390,7 +2391,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4abb6735708adc\ETC.}) has been alread
@@ -2398,7 +2399,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a6191c61c70f4\ETC.}) has been alread
@@ -2406,7 +2407,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13\ETC.}) has been alread
@@ -2414,7 +2415,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4aac4d3e85a637\ETC.}) has been alread
@@ -2422,7 +2423,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a3a47cafb8152\ETC.}) has been alread
@@ -2430,7 +2431,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4acd5fc2d48d13\ETC.}) has been alread
@@ -2438,7 +2439,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4aac4d3e85a637\ETC.}) has been alread
@@ -2446,7 +2447,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a3a47cafb8152\ETC.}) has been alread
@@ -2454,16 +2455,16 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.726 \end{DoxyEnumFields}
+l.730 \end{DoxyEnumFields}
                           
 ]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.7 on input line 778.
+(longtable)                in table 7.7 on input line 782.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.8 on input line 830.
+(longtable)                in table 7.8 on input line 834.
 
 
 Overfull \vbox (17.54898pt too high) has occurred while \output is active []
@@ -2475,7 +2476,7 @@ eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4aac4d3e85a637\ETC.}) has been alread
@@ -2483,7 +2484,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_aa9b059f0bc7a91855545ee887f2d56c4a3a47cafb8152\ETC.}) has been alread
@@ -2491,7 +2492,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87ad039a5ecd350\ETC.}) has been alread
@@ -2499,7 +2500,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a59cea6d94577\ETC.}) has been alread
@@ -2507,7 +2508,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a2c799f741688\ETC.}) has been alread
@@ -2515,7 +2516,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a1b85b2c60b85\ETC.}) has been alread
@@ -2523,7 +2524,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87aa4b26dd8fd8d\ETC.}) has been alread
@@ -2531,7 +2532,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}) has been already used, duplicate 
@@ -2539,7 +2540,7 @@ ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87ad039a5ecd350\ETC.}) has been alread
@@ -2547,7 +2548,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a59cea6d94577\ETC.}) has been alread
@@ -2555,7 +2556,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a2c799f741688\ETC.}) has been alread
@@ -2563,7 +2564,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a1b85b2c60b85\ETC.}) has been alread
@@ -2571,7 +2572,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87aa4b26dd8fd8d\ETC.}) has been alread
@@ -2579,7 +2580,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87ad039a5ecd350\ETC.}) has been alread
@@ -2587,7 +2588,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a59cea6d94577\ETC.}) has been alread
@@ -2595,7 +2596,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a2c799f741688\ETC.}) has been alread
@@ -2603,7 +2604,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87a1b85b2c60b85\ETC.}) has been alread
@@ -2611,7 +2612,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87aa4b26dd8fd8d\ETC.}) has been alread
@@ -2619,16 +2620,16 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.830 \end{DoxyEnumFields}
+l.834 \end{DoxyEnumFields}
                           
 ]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.9 on input line 874.
+(longtable)                in table 7.9 on input line 878.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.10 on input line 918.
+(longtable)                in table 7.10 on input line 922.
 
 [30pdfTeX warning (ext4): destination with the same identifier (name{namespacem
 oetsi_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea896d4c904dda\ETC.}) has been alr
@@ -2636,7 +2637,7 @@ eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea38c56a32340e\ETC.}) has been alread
@@ -2644,7 +2645,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3\ETC.}) has been alread
@@ -2652,7 +2653,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d\ETC.}) has been alread
@@ -2660,7 +2661,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474de}) has been already used, duplicate 
@@ -2668,7 +2669,7 @@ ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea896d4c904dda\ETC.}) has been alread
@@ -2676,7 +2677,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea38c56a32340e\ETC.}) has been alread
@@ -2684,7 +2685,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3\ETC.}) has been alread
@@ -2692,7 +2693,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d\ETC.}) has been alread
@@ -2700,7 +2701,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea896d4c904dda\ETC.}) has been alread
@@ -2708,7 +2709,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea38c56a32340e\ETC.}) has been alread
@@ -2716,7 +2717,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea06604c7f56c3\ETC.}) has been alread
@@ -2724,7 +2725,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_abd5a57e44ab71b73d2e32a59887474dea8fc6ffe5307d\ETC.}) has been alread
@@ -2732,31 +2733,31 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.938 \end{DoxyEnumFields}
+l.942 \end{DoxyEnumFields}
                           
 ]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.11 on input line 938.
+(longtable)                in table 7.11 on input line 942.
 
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546}) has been already used, duplicate 
 ignored
 <to be read again> 
                    \relax 
-l.939 ..._1ssp_a8948545ffe48a5b3507fd10a1e56d546}}
+l.943 ..._1ssp_a8948545ffe48a5b3507fd10a1e56d546}}
                                                   
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.12 on input line 958.
+(longtable)                in table 7.12 on input line 962.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.13 on input line 996.
+(longtable)                in table 7.13 on input line 1000.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.14 on input line 1028.
+(longtable)                in table 7.14 on input line 1032.
 
 [31pdfTeX warning (ext4): destination with the same identifier (name{namespacem
 oetsi_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alr
@@ -2764,7 +2765,7 @@ eady used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.1028 \end{DoxyEnumFields}
+l.1032 \end{DoxyEnumFields}
                            
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alread
@@ -2772,7 +2773,7 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.1028 \end{DoxyEnumFields}
+l.1032 \end{DoxyEnumFields}
                            
 pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
 si_1_1ssp_a8948545ffe48a5b3507fd10a1e56d546a16d065ca1ae1\ETC.}) has been alread
@@ -2780,19 +2781,19 @@ y used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.1028 \end{DoxyEnumFields}
+l.1032 \end{DoxyEnumFields}
                            
 ]
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <8> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 1036.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 1040.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.15 on input line 1048.
+(longtable)                in table 7.15 on input line 1052.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.16 on input line 1065.
+(longtable)                in table 7.16 on input line 1069.
 
 
 Underfull \vbox (badness 3009) has occurred while \output is active []
@@ -2800,48 +2801,48 @@ Underfull \vbox (badness 3009) has occurred while \output is active []
  [32]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.17 on input line 1080.
+(longtable)                in table 7.17 on input line 1084.
 
 
-Underfull \hbox (badness 10000) detected at line 1081
+Underfull \hbox (badness 10000) detected at line 1085
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 1094
+Underfull \hbox (badness 10000) detected at line 1098
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 1107
+Underfull \hbox (badness 10000) detected at line 1111
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 1120
+Underfull \hbox (badness 10000) detected at line 1124
 [][][]
  []
 
 [33]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.18 on input line 1141.
+(longtable)                in table 7.18 on input line 1145.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.19 on input line 1160.
+(longtable)                in table 7.19 on input line 1164.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.20 on input line 1177.
+(longtable)                in table 7.20 on input line 1181.
 
 
-Underfull \hbox (badness 10000) detected at line 1178
+Underfull \hbox (badness 10000) detected at line 1182
 [][][]
  []
 
 
-Underfull \hbox (badness 1983) in paragraph at lines 1189--1190
+Underfull \hbox (badness 1983) in paragraph at lines 1193--1194
 []\T1/phv/m/n/10 Get Struc-tural Sim-i-lar-ity be-tween 2 im-ages cf. for in-st
 ance [][] \T1/pcr/m/n/10 http[]://amroamroamro.[]github.[]
  []
@@ -2849,71 +2850,79 @@ ance [][] \T1/pcr/m/n/10 http[]://amroamroamro.[]github.[]
 [34]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.21 on input line 1197.
+(longtable)                in table 7.21 on input line 1201.
 
 
-Underfull \hbox (badness 10000) detected at line 1198
+Underfull \hbox (badness 10000) detected at line 1202
 [][][]
  []
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.22 on input line 1215.
+(longtable)                in table 7.22 on input line 1219.
 
 
-Underfull \hbox (badness 10000) detected at line 1216
+Underfull \hbox (badness 10000) detected at line 1220
 [][][]
  []
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.23 on input line 1237.
+(longtable)                in table 7.23 on input line 1241.
 
 [35]
-Underfull \hbox (badness 10000) detected at line 1238
+Underfull \hbox (badness 10000) detected at line 1242
 [][][]
  []
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.24 on input line 1255.
+(longtable)                in table 7.24 on input line 1259.
 
 
-Underfull \hbox (badness 10000) detected at line 1256
+Underfull \hbox (badness 10000) detected at line 1260
 [][][]
  []
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.25 on input line 1275.
+(longtable)                in table 7.25 on input line 1279.
 
 
-Underfull \hbox (badness 10000) detected at line 1276
+Underfull \hbox (badness 10000) detected at line 1280
 [][][]
  []
 
 [36]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.26 on input line 1293.
+(longtable)                in table 7.26 on input line 1297.
 
 
-Underfull \hbox (badness 10000) detected at line 1294
+Underfull \hbox (badness 10000) detected at line 1298
 [][][]
  []
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.27 on input line 1313.
+(longtable)                in table 7.27 on input line 1317.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.28 on input line 1330.
+(longtable)                in table 7.28 on input line 1334.
 
 [37]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 7.29 on input line 1345.
+(longtable)                in table 7.29 on input line 1349.
+
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.30 on input line 1366.
+
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 7.31 on input line 1381.
 
 ) [38]
 Chapter 8.
@@ -3025,42 +3034,112 @@ Package longtable Warning: Column widths have changed
 (longtable)                in table 8.4 on input line 85.
 
 [54]) (./structcolor__point__t.tex)
-(./classmoetsi_1_1ssp_1_1DummyBodyReader.tex [55]
-Underfull \hbox (badness 10000) detected at line 46
+(./classmoetsi_1_1ssp_1_1DummyBodyReader.tex <./classmoetsi_1_1ssp_1_1DummyBody
+Reader__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1DummyBodyReader__inherit
+__graph.pdf): PDF inclusion: multiple pdfs with page group included in a single
+ page
+>
+<classmoetsi_1_1ssp_1_1DummyBodyReader__inherit__graph.pdf, id=1564, 257.96375p
+t x 156.585pt>
+File: classmoetsi_1_1ssp_1_1DummyBodyReader__inherit__graph.pdf Graphic file (t
+ype pdf)
+<use classmoetsi_1_1ssp_1_1DummyBodyReader__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1DummyBodyReader__inherit__graph.
+pdf  used on input line 10.
+(pdftex.def)             Requested size: 257.0pt x 156.01357pt.
+ <./classmoetsi_1_1ssp_1_1DummyBodyReader__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1DummyBodyReader__coll__g
+raph.pdf): PDF inclusion: multiple pdfs with page group included in a single pa
+ge
+>
+<classmoetsi_1_1ssp_1_1DummyBodyReader__coll__graph.pdf, id=1572, 257.96375pt x
+ 156.585pt>
+File: classmoetsi_1_1ssp_1_1DummyBodyReader__coll__graph.pdf Graphic file (type
+ pdf)
+<use classmoetsi_1_1ssp_1_1DummyBodyReader__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1DummyBodyReader__coll__graph.pdf
+  used on input line 20.
+(pdftex.def)             Requested size: 257.0pt x 156.01357pt.
+ [55]
+Underfull \hbox (badness 10000) detected at line 58
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 63
+Underfull \hbox (badness 10000) detected at line 75
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 80
+Underfull \hbox (badness 10000) detected at line 92
 [][][]
  []
 
 [56]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.5 on input line 101.
+(longtable)                in table 8.5 on input line 113.
 
 
-Underfull \hbox (badness 10000) detected at line 116
+Underfull \hbox (badness 10000) detected at line 128
 [][][]
  []
 
 ) (./structmoetsi_1_1ssp_1_1ExtendedAzureConfig.tex [57])
-(./classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody.tex)
-(./structmoetsi_1_1ssp_1_1FrameStruct.tex [58] [59pdfTeX warning (ext4): destin
-ation with the same identifier (name{structmoetsi_1_1ssp_1_1FrameStruct_af53f4e
-76978e2a4575b7cd661d30e01f}) has been already used, duplicate ignored
+(./classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody.tex <./classm
+oetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1human__pose__estimation_
+1_1FindPeaksBody__inherit__graph.pdf): PDF inclusion: multiple pdfs with page g
+roup included in a single page
+>
+<classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody__inherit__graph
+.pdf, id=1647, 263.98625pt x 167.62625pt>
+File: classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody__inherit__
+graph.pdf Graphic file (type pdf)
+<use classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody__inherit__g
+raph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindP
+eaksBody__inherit__graph.pdf  used on input line 10.
+(pdftex.def)             Requested size: 263.0pt x 167.0094pt.
+ [58] <./classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody__coll__
+graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1human__pose__estimation_
+1_1FindPeaksBody__coll__graph.pdf): PDF inclusion: multiple pdfs with page grou
+p included in a single page
+>
+<classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody__coll__graph.pd
+f, id=1672, 263.98625pt x 167.62625pt>
+File: classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody__coll__gra
+ph.pdf Graphic file (type pdf)
+<use classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindPeaksBody__coll__grap
+h.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1human__pose__estimation_1_1FindP
+eaksBody__coll__graph.pdf  used on input line 20.
+(pdftex.def)             Requested size: 263.0pt x 167.0094pt.
+) (./structmoetsi_1_1ssp_1_1FrameStruct.tex [59] <./structmoetsi_1_1ssp_1_1Fram
+eStruct__coll__graph.pdf>
+<structmoetsi_1_1ssp_1_1FrameStruct__coll__graph.pdf, id=1691, 415.5525pt x 178
+.6675pt>
+File: structmoetsi_1_1ssp_1_1FrameStruct__coll__graph.pdf Graphic file (type pd
+f)
+<use structmoetsi_1_1ssp_1_1FrameStruct__coll__graph.pdf>
+Package pdftex.def Info: structmoetsi_1_1ssp_1_1FrameStruct__coll__graph.pdf  u
+sed on input line 19.
+(pdftex.def)             Requested size: 350.0pt x 150.4886pt.
+ [60pdfTeX warning (ext4): destination with the same identifier (name{structmoe
+tsi_1_1ssp_1_1FrameStruct_af53f4e76978e2a4575b7cd661d30e01f}) has been already 
+used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.73 \doxysubsubsection
-                       {\texorpdfstring{device\_id}{device\_id}}] [60])
-(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1HumanPose.tex
+l.67 \doxysubsubsection
+                       {\texorpdfstring{camera\_calibration\_data}{camera\_c...
+] [61]) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1HumanPose.tex
 Underfull \hbox (badness 1331) in paragraph at lines 6--8
 [][] \T1/phv/b/n/10 Human[]Pose \T1/phv/m/n/10 (const std[]::vector$\OML/cmm/m/
 it/10 <$ \T1/phv/m/n/10 cv[]::[]Point3f $\OML/cmm/m/it/10 >$ \T1/phv/m/n/10 &ke
@@ -3070,348 +3149,461 @@ cmm/m/it/10 >$\T1/phv/m/n/10 (), const float
 
 )
 (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1HumanPoseByPeaksIndices.te
-x [61]) (./classmoetsi_1_1ssp_1_1IDecoder.tex [62pdfTeX warning (ext4): destina
-tion with the same identifier (name{classmoetsi_1_1ssp_1_1IDecoder_a26dc991c243
-4792f50ec5ae9b61a1653}) has been already used, duplicate ignored
+x [62]) (./classmoetsi_1_1ssp_1_1IDecoder.tex <./classmoetsi_1_1ssp_1_1IDecoder
+__inherit__graph.pdf
 
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.43 E
-      xtract an opencv image from a \mbox{\hyperlink{structmoetsi_1_1ssp_1_1...
-]
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1IDecoder__inherit__graph
+.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1IDecoder__inherit__graph.pdf, id=1774, 553.06625pt x 156
+.585pt>
+File: classmoetsi_1_1ssp_1_1IDecoder__inherit__graph.pdf Graphic file (type pdf
+)
+<use classmoetsi_1_1ssp_1_1IDecoder__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1IDecoder__inherit__graph.pdf  us
+ed on input line 19.
+(pdftex.def)             Requested size: 350.0pt x 99.09108pt.
+ [63]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.6 on input line 49.
+(longtable)                in table 8.6 on input line 55.
 
 
-Underfull \hbox (badness 10000) detected at line 50
+Underfull \hbox (badness 10000) detected at line 56
 [][][]
  []
 
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.7 on input line 71.
-
-
-Underfull \hbox (badness 10000) detected at line 72
-[][][]
- []
-
-) (./classmoetsi_1_1ssp_1_1IEncoder.tex [63pdfTeX warning (ext4): destination w
-ith the same identifier (name{classmoetsi_1_1ssp_1_1IDecoder_a1c06604dc4107d366
-8a4e791c13cc063}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.10 {\ttfamily \#
-                  include $<$iencoder.\+h$>$}] [64pdfTeX warning (ext4): destin
-ation with the same identifier (name{classmoetsi_1_1ssp_1_1IEncoder_a6c19808ebe
-6a05dbce630c45188b9346}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.75 \end{DoxyParams}
-                     
-pdfTeX warning (ext4): destination with the same identifier (name{classmoetsi_1
-_1ssp_1_1IEncoder_afac3ddcf2f49be16020c83cb9e0fb274}) has been already used, du
-plicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.75 \end{DoxyParams}
-                     
-]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.8 on input line 75.
-
-
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 78--79
-[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
- []
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.9 on input line 94.
-
-
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 97--98
-[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 103--104
-\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
-/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Encoded ( ) [pure
- []
-
-
-Underfull \hbox (badness 10000) detected at line 109
-[][][]
- []
-
-
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 114--115
-[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 120--121
-\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
-/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Encoded ( ) [pure
- []
-
-[65pdfTeX warning (ext4): destination with the same identifier (name{classmoets
-i_1_1ssp_1_1IEncoder_a8c223ec82fdd30ee8ee75157306054ec}) has been already used,
+[64pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+i_1_1ssp_1_1IDecoder_a26dc991c2434792f50ec5ae9b61a1653}) has been already used,
  duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.126 \begin{DoxyReturn}{Returns}
-                                 pdfTeX warning (ext4): destination with the sa
-me identifier (name{classmoetsi_1_1ssp_1_1IEncoder_a178d117518e7c7007414ea9c82b
-d3ed6}) has been already used, duplicate ignored
+l.77 \end{DoxyParams}
+                     
+pdfTeX warning (ext4): destination with the same identifier (name{classmoetsi_1
+_1ssp_1_1IDecoder_a1c06604dc4107d3668a4e791c13cc063}) has been already used, du
+plicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.126 \begin{DoxyReturn}{Returns}
-                                 ]
-Underfull \hbox (badness 10000) detected at line 126
+l.77 \end{DoxyParams}
+                     
+]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.7 on input line 77.
+
+
+Underfull \hbox (badness 10000) detected at line 78
 [][][]
  []
 
+) (./classmoetsi_1_1ssp_1_1IEncoder.tex <./classmoetsi_1_1ssp_1_1IEncoder__inhe
+rit__graph.pdf
 
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 131--132
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1IEncoder__inherit__graph
+.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1IEncoder__inherit__graph.pdf, id=1841, 392.46625pt x 214
+.8025pt>
+File: classmoetsi_1_1ssp_1_1IEncoder__inherit__graph.pdf Graphic file (type pdf
+)
+<use classmoetsi_1_1ssp_1_1IEncoder__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1IEncoder__inherit__graph.pdf  us
+ed on input line 19.
+(pdftex.def)             Requested size: 350.0pt x 191.57349pt.
+ [65]pdfTeX warning (ext4): destination with the same identifier (name{classmoe
+tsi_1_1ssp_1_1IEncoder_afac3ddcf2f49be16020c83cb9e0fb274}) has been already use
+d, duplicate ignored
+<to be read again> 
+                   \relax 
+l.48 ...ncoder_afac3ddcf2f49be16020c83cb9e0fb274}}
+                                                  
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.8 on input line 81.
+
+
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 84--85
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 137--138
-\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
-/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Original ( ) [pure
- []
-
-
-Underfull \hbox (badness 10000) detected at line 143
-[][][]
- []
-
-
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 148--149
-[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 154--155
-\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
-/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Original ( ) [pure
- []
-
-
-Underfull \hbox (badness 10000) detected at line 160
-[][][]
- []
-
-
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 165--166
-[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 171--172
-\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
-/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Get[]Codec[]Params[]Struct ( )
- []
-
-
-Underfull \hbox (badness 10000) detected at line 177
-[][][]
- []
-
-
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 182--183
-[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 188--189
-\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
-/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Get[]Codec[]Params[]Struct ( )
  []
 
 [66pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+i_1_1ssp_1_1IEncoder_a6c19808ebe6a05dbce630c45188b9346}) has been already used,
+ duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.91 
+     pdfTeX warning (ext4): destination with the same identifier (name{classmoe
+tsi_1_1ssp_1_1IEncoder_a8c223ec82fdd30ee8ee75157306054ec}) has been already use
+d, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.91 
+     ]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.9 on input line 100.
+
+
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 103--104
+[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 109--110
+\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
+/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Encoded ( ) [pure
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 115
+[][][]
+ []
+
+
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 120--121
+[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 126--127
+\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
+/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Encoded ( ) [pure
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 132
+[][][]
+ []
+
+
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 137--138
+[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 143--144
+\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
+/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Original ( ) [pure
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 149
+[][][]
+ []
+
+
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 154--155
+[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 160--161
+\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
+/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Current[]Frame[]Original ( ) [pure
+ []
+
+[67pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+i_1_1ssp_1_1IEncoder_a178d117518e7c7007414ea9c82bd3ed6}) has been already used,
+ duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.166 \begin{DoxyReturn}{Returns}
+                                 ]
+Underfull \hbox (badness 10000) detected at line 166
+[][][]
+ []
+
+
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 171--172
+[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 177--178
+\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
+/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Get[]Codec[]Params[]Struct ( )
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 183
+[][][]
+ []
+
+
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 188--189
+[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 194--195
+\T1/pcr/m/n/8 virtual std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$[]$>$ \T1/pcr/m/n
+/8 moetsi[]::ssp[]::[]I[]Encoder[]::[]Get[]Codec[]Params[]Struct ( )
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 200
+[][][]
+ []
+
+
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 205--206
+[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
+ []
+
+[68pdfTeX warning (ext4): destination with the same identifier (name{classmoets
 i_1_1ssp_1_1IEncoder_ab60bdaae0a85289dfa31a12bab533dc0}) has been already used,
  duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.194 \begin{DoxyReturn}{Returns}
+l.217 \begin{DoxyReturn}{Returns}
+                                 pdfTeX warning (ext4): destination with the sa
+me identifier (name{classmoetsi_1_1ssp_1_1IEncoder_ad5179efaa4c74207766dd64f46f
+4059a}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.217 \begin{DoxyReturn}{Returns}
                                  ]
-Underfull \hbox (badness 10000) detected at line 194
+Underfull \hbox (badness 10000) detected at line 217
 [][][]
  []
 
 
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 199--200
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 222--223
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
  []
 
 
-Underfull \hbox (badness 10000) detected at line 211
+Underfull \hbox (badness 10000) detected at line 234
 [][][]
  []
 
 
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 216--217
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 239--240
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
  []
 
 
-Underfull \hbox (badness 10000) detected at line 228
+Underfull \hbox (badness 10000) detected at line 251
 [][][]
  []
 
 
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 233--234
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 256--257
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
  []
 
 
-Underfull \hbox (badness 10000) detected at line 245
+Underfull \hbox (badness 10000) detected at line 268
 [][][]
  []
 
 
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 250--251
+Overfull \hbox (54.88048pt too wide) in paragraph at lines 273--274
 []\T1/phv/m/n/10 Implemented in [], [], [], and []. 
  []
 
-[67pdfTeX warning (ext4): destination with the same identifier (name{classmoets
-i_1_1ssp_1_1IEncoder_ad5179efaa4c74207766dd64f46f4059a}) has been already used,
+[69pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+i_1_1ssp_1_1IEncoder_ae6a865aa52230d81aed1cb5232402f6c}) has been already used,
  duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.252 ...coder_a2af8e23d841ef61f6ee4037e56a3694d}}
-                                                  pdfTeX warning (ext4): destin
-ation with the same identifier (name{classmoetsi_1_1ssp_1_1IEncoder_ae6a865aa52
-230d81aed1cb5232402f6c}) has been already used, duplicate ignored
+l.279 \mbox
+           {\hyperlink{encoders_2iencoder_8h}{encoders/iencoder.\+h}}\end{Do...
+pdfTeX warning (ext4): destination with the same identifier (name{classmoetsi_1
+_1ssp_1_1IEncoder_a2af8e23d841ef61f6ee4037e56a3694d}) has been already used, du
+plicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.252 ...coder_a2af8e23d841ef61f6ee4037e56a3694d}}
-                                                  ]pdfTeX warning (ext4): desti
-nation with the same identifier (name{classmoetsi_1_1ssp_1_1IEncoder_a2af8e23d8
-41ef61f6ee4037e56a3694d}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.252 ...coder_a2af8e23d841ef61f6ee4037e56a3694d}}
-                                                  
-Underfull \hbox (badness 10000) detected at line 262
-[][][]
- []
-
-
-Overfull \hbox (54.88048pt too wide) in paragraph at lines 267--268
-[]\T1/phv/m/n/10 Implemented in [], [], [], and []. 
- []
-
-) (./classmoetsi_1_1ssp_1_1ImageDecoder.tex [68]
+l.279 \mbox
+           {\hyperlink{encoders_2iencoder_8h}{encoders/iencoder.\+h}}\end{Do...
+]) (./classmoetsi_1_1ssp_1_1ImageDecoder.tex [70]
 
 Package longtable Warning: Column widths have changed
 (longtable)                in table 8.10 on input line 45.
 
-) (./classmoetsi_1_1ssp_1_1ImageReader.tex
-Underfull \hbox (badness 10000) detected at line 49
-[][][]
- []
+) (./classmoetsi_1_1ssp_1_1ImageReader.tex <./classmoetsi_1_1ssp_1_1ImageReader
+__inherit__graph.pdf
 
-[69]
-Underfull \hbox (badness 10000) detected at line 66
-[][][]
- []
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1ImageReader__inherit__gr
+aph.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
+>
+<classmoetsi_1_1ssp_1_1ImageReader__inherit__graph.pdf, id=2032, 224.84pt x 156
+.585pt>
+File: classmoetsi_1_1ssp_1_1ImageReader__inherit__graph.pdf Graphic file (type 
+pdf)
+<use classmoetsi_1_1ssp_1_1ImageReader__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1ImageReader__inherit__graph.pdf 
+ used on input line 10.
+(pdftex.def)             Requested size: 224.0pt x 156.0064pt.
+ <./classmoetsi_1_1ssp_1_1ImageReader__coll__graph.pdf
 
-
-Underfull \hbox (badness 10000) detected at line 83
-[][][]
- []
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.11 on input line 104.
-
-[70]
-Underfull \hbox (badness 10000) detected at line 119
-[][][]
- []
-
-) (./classmoetsi_1_1ssp_1_1iPhoneReader.tex
-Underfull \hbox (badness 10000) detected at line 46
-[][][]
- []
-
-[71]
-Underfull \hbox (badness 10000) detected at line 63
-[][][]
- []
-
-
-Underfull \hbox (badness 10000) detected at line 80
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1ImageReader__coll__graph
+.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1ImageReader__coll__graph.pdf, id=2040, 224.84pt x 156.58
+5pt>
+File: classmoetsi_1_1ssp_1_1ImageReader__coll__graph.pdf Graphic file (type pdf
+)
+<use classmoetsi_1_1ssp_1_1ImageReader__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1ImageReader__coll__graph.pdf  us
+ed on input line 20.
+(pdftex.def)             Requested size: 224.0pt x 156.0064pt.
+ [71]
+Underfull \hbox (badness 10000) detected at line 61
 [][][]
  []
 
 
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.12 on input line 101.
+Underfull \hbox (badness 10000) detected at line 78
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 95
+[][][]
+ []
 
 [72]
-Underfull \hbox (badness 10000) detected at line 116
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.11 on input line 116.
+
+
+Underfull \hbox (badness 10000) detected at line 131
 [][][]
  []
 
-) (./classmoetsi_1_1ssp_1_1iPhoneReaderImpl.tex)
-(./classmoetsi_1_1ssp_1_1IReader.tex [73] [74pdfTeX warning (ext4): destination
- with the same identifier (name{classmoetsi_1_1ssp_1_1IReader_ae1332862a7d81d99
-563f111ae36e142f}) has been already used, duplicate ignored
+) (./classmoetsi_1_1ssp_1_1iPhoneReader.tex <./classmoetsi_1_1ssp_1_1iPhoneRead
+er__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1iPhoneReader__inherit__g
+raph.pdf): PDF inclusion: multiple pdfs with page group included in a single pa
+ge
+>
+<classmoetsi_1_1ssp_1_1iPhoneReader__inherit__graph.pdf, id=2093, 226.8475pt x 
+156.585pt>
+File: classmoetsi_1_1ssp_1_1iPhoneReader__inherit__graph.pdf Graphic file (type
+ pdf)
+<use classmoetsi_1_1ssp_1_1iPhoneReader__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1iPhoneReader__inherit__graph.pdf
+  used on input line 10.
+(pdftex.def)             Requested size: 226.0pt x 156.00162pt.
+ [73] <./classmoetsi_1_1ssp_1_1iPhoneReader__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1iPhoneReader__coll__grap
+h.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1iPhoneReader__coll__graph.pdf, id=2110, 226.8475pt x 156
+.585pt>
+File: classmoetsi_1_1ssp_1_1iPhoneReader__coll__graph.pdf Graphic file (type pd
+f)
+<use classmoetsi_1_1ssp_1_1iPhoneReader__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1iPhoneReader__coll__graph.pdf  u
+sed on input line 20.
+(pdftex.def)             Requested size: 226.0pt x 156.00162pt.
+ [74]
+Underfull \hbox (badness 10000) detected at line 58
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 75
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 92
+[][][]
+ []
+
+[75]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.12 on input line 113.
+
+
+Underfull \hbox (badness 10000) detected at line 128
+[][][]
+ []
+
+) (./classmoetsi_1_1ssp_1_1iPhoneReaderImpl.tex <./classmoetsi_1_1ssp_1_1iPhone
+ReaderImpl__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1iPhoneReaderImpl__coll__
+graph.pdf): PDF inclusion: multiple pdfs with page group included in a single p
+age
+>
+<classmoetsi_1_1ssp_1_1iPhoneReaderImpl__coll__graph.pdf, id=2162, 289.08pt x 2
+24.84pt>
+File: classmoetsi_1_1ssp_1_1iPhoneReaderImpl__coll__graph.pdf Graphic file (typ
+e pdf)
+<use classmoetsi_1_1ssp_1_1iPhoneReaderImpl__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1iPhoneReaderImpl__coll__graph.pd
+f  used on input line 10.
+(pdftex.def)             Requested size: 288.0pt x 224.01262pt.
+ [76]) (./classmoetsi_1_1ssp_1_1IReader.tex <./classmoetsi_1_1ssp_1_1IReader__i
+nherit__graph.pdf>
+<classmoetsi_1_1ssp_1_1IReader__inherit__graph.pdf, id=2184, 410.53375pt x 329.
+23pt>
+File: classmoetsi_1_1ssp_1_1IReader__inherit__graph.pdf Graphic file (type pdf)
+
+<use classmoetsi_1_1ssp_1_1IReader__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1IReader__inherit__graph.pdf  use
+d on input line 19.
+(pdftex.def)             Requested size: 350.0pt x 280.68074pt.
+ [77] [78pdfTeX warning (ext4): destination with the same identifier (name{clas
+smoetsi_1_1ssp_1_1IReader_ae1332862a7d81d99563f111ae36e142f}) has been already 
+used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.85 \begin{DoxyReturn}{Returns}
+l.91 \begin{DoxyReturn}{Returns}
                                 pdfTeX warning (ext4): destination with the sam
 e identifier (name{classmoetsi_1_1ssp_1_1IReader_a357439182128e3911d77335c13603
 5c0}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.85 \begin{DoxyReturn}{Returns}
+l.91 \begin{DoxyReturn}{Returns}
                                 pdfTeX warning (ext4): destination with the sam
 e identifier (name{classmoetsi_1_1ssp_1_1IReader_a304ee5995522eff86ae0102d4d734
 2f8}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.85 \begin{DoxyReturn}{Returns}
+l.91 \begin{DoxyReturn}{Returns}
                                 pdfTeX warning (ext4): destination with the sam
 e identifier (name{classmoetsi_1_1ssp_1_1IReader_a49e82a786cca55248e27e7fac8f97
 a17}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.85 \begin{DoxyReturn}{Returns}
+l.91 \begin{DoxyReturn}{Returns}
                                 pdfTeX warning (ext4): destination with the sam
 e identifier (name{classmoetsi_1_1ssp_1_1IReader_ad6e2ef78fc2466884aa877ecef548
 89d}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.85 \begin{DoxyReturn}{Returns}
+l.91 \begin{DoxyReturn}{Returns}
                                 ]
-Underfull \hbox (badness 10000) detected at line 85
+Underfull \hbox (badness 10000) detected at line 91
 [][][]
  []
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 90--91
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 96--97
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
@@ -3420,79 +3612,79 @@ _1ssp_1_1IReader_ac292d83eb06dee277baaa06e281a562d}) has been already used, dup
 licate ignored
 <to be read again> 
                    \relax 
-l.92 ...Reader_ac292d83eb06dee277baaa06e281a562d}}
+l.98 ...Reader_ac292d83eb06dee277baaa06e281a562d}}
                                                   
-Underfull \hbox (badness 10000) detected at line 102
+Underfull \hbox (badness 10000) detected at line 108
 [][][]
  []
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 107--108
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 113--114
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
 
-Underfull \hbox (badness 10000) detected at line 119
+Underfull \hbox (badness 10000) detected at line 125
 [][][]
  []
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 124--125
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 130--131
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
 
-Underfull \hbox (badness 10000) detected at line 136
+Underfull \hbox (badness 10000) detected at line 142
 [][][]
  []
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 141--142
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 147--148
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
-[75pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+[79pdfTeX warning (ext4): destination with the same identifier (name{classmoets
 i_1_1ssp_1_1IReader_a9f6a8650ca290b011b8e5451eeae9f32}) has been already used, 
 duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.153 \begin{DoxyReturn}{Returns}
+l.159 \begin{DoxyReturn}{Returns}
                                  ]
-Underfull \hbox (badness 10000) detected at line 153
+Underfull \hbox (badness 10000) detected at line 159
 [][][]
  []
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 158--159
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 164--165
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
 
-Underfull \hbox (badness 10000) detected at line 170
+Underfull \hbox (badness 10000) detected at line 176
 [][][]
  []
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 175--176
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 181--182
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
-[76pdfTeX warning (ext4): destination with the same identifier (name{classmoets
+[80pdfTeX warning (ext4): destination with the same identifier (name{classmoets
 i_1_1ssp_1_1IReader_a4116c1931fde7bd66133934ffdca1cce}) has been already used, 
 duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.191 \end{DoxyParams}
+l.197 \end{DoxyParams}
                       
 ]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.13 on input line 191.
+(longtable)                in table 8.13 on input line 197.
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 194--195
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 200--201
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
@@ -3501,81 +3693,76 @@ _1ssp_1_1IReader_a6f1be3c06538992cca6d550bd9566681}) has been already used, dup
 licate ignored
 <to be read again> 
                    \relax 
-l.196 ...eader_a6f1be3c06538992cca6d550bd9566681}}
+l.202 ...eader_a6f1be3c06538992cca6d550bd9566681}}
                                                   
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.14 on input line 210.
+(longtable)                in table 8.14 on input line 216.
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 213--214
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 219--220
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
 
-Underfull \hbox (badness 10000) detected at line 225
+Underfull \hbox (badness 10000) detected at line 231
 [][][]
  []
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 230--231
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 236--237
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
 
-Underfull \hbox (badness 10000) detected at line 242
+Underfull \hbox (badness 10000) detected at line 248
 [][][]
  []
 
 
-Overfull \hbox (75.33687pt too wide) in paragraph at lines 247--248
+Overfull \hbox (75.33687pt too wide) in paragraph at lines 253--254
 []\T1/phv/m/n/10 Implemented in [], [], [], [],
  []
 
-) (./classmoetsi_1_1ssp_1_1KinectReader.tex [77pdfTeX warning (ext4): destinati
-on with the same identifier (name{classmoetsi_1_1ssp_1_1IReader_af9186ba41e136d
-c4ec3242b5dd55fa04}) has been already used, duplicate ignored
+) (./classmoetsi_1_1ssp_1_1KinectReader.tex <./classmoetsi_1_1ssp_1_1KinectRead
+er__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1KinectReader__inherit__g
+raph.pdf): PDF inclusion: multiple pdfs with page group included in a single pa
+ge
+>
+<classmoetsi_1_1ssp_1_1KinectReader__inherit__graph.pdf, id=2344, 224.84pt x 15
+6.585pt>
+File: classmoetsi_1_1ssp_1_1KinectReader__inherit__graph.pdf Graphic file (type
+ pdf)
+<use classmoetsi_1_1ssp_1_1KinectReader__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1KinectReader__inherit__graph.pdf
+  used on input line 10.
+(pdftex.def)             Requested size: 224.0pt x 156.0064pt.
+ [81pdfTeX warning (ext4): destination with the same identifier (name{classmoet
+si_1_1ssp_1_1IReader_af9186ba41e136dc4ec3242b5dd55fa04}) has been already used,
+ duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.9 C
-     ollaboration diagram for moetsi\+::ssp\+::Kinect\+Reader\+:]
-Underfull \hbox (badness 10000) detected at line 49
+l.13 
+     ] <./classmoetsi_1_1ssp_1_1KinectReader__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1KinectReader__coll__grap
+h.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1KinectReader__coll__graph.pdf, id=2370, 224.84pt x 156.5
+85pt>
+File: classmoetsi_1_1ssp_1_1KinectReader__coll__graph.pdf Graphic file (type pd
+f)
+<use classmoetsi_1_1ssp_1_1KinectReader__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1KinectReader__coll__graph.pdf  u
+sed on input line 20.
+(pdftex.def)             Requested size: 224.0pt x 156.0064pt.
+ [82]
+Underfull \hbox (badness 10000) detected at line 61
 [][][]
  []
-
-
-Underfull \hbox (badness 10000) detected at line 66
-[][][]
- []
-
-[78]
-Underfull \hbox (badness 10000) detected at line 83
-[][][]
- []
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.15 on input line 104.
-
-[79]
-Underfull \hbox (badness 10000) detected at line 119
-[][][]
- []
-
-) (./classmoetsi_1_1ssp_1_1LibAvDecoder.tex [80]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.16 on input line 55.
-
-
-Underfull \hbox (badness 10000) detected at line 56
-[][][]
- []
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.17 on input line 77.
 
 
 Underfull \hbox (badness 10000) detected at line 78
@@ -3583,263 +3770,501 @@ Underfull \hbox (badness 10000) detected at line 78
  []
 
 
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.18 on input line 95.
-
-) (./classmoetsi_1_1ssp_1_1LibAvEncoder.tex [81]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.19 on input line 67.
-
-
-Overfull \vbox (19.95427pt too high) has occurred while \output is active []
-
-
-[82]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.20 on input line 84.
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.21 on input line 102.
-
-
-Underfull \hbox (badness 10000) detected at line 117
+Underfull \hbox (badness 10000) detected at line 95
 [][][]
  []
 
 [83]
-Underfull \hbox (badness 10000) detected at line 134
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.15 on input line 116.
+
+
+Underfull \hbox (badness 10000) detected at line 131
+[][][]
+ []
+
+) (./classmoetsi_1_1ssp_1_1LibAvDecoder.tex <./classmoetsi_1_1ssp_1_1LibAvDecod
+er__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__g
+raph.pdf): PDF inclusion: multiple pdfs with page group included in a single pa
+ge
+>
+<classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph.pdf, id=2420, 226.8475pt x 
+156.585pt>
+File: classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph.pdf Graphic file (type
+ pdf)
+<use classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1LibAvDecoder__inherit__graph.pdf
+  used on input line 19.
+(pdftex.def)             Requested size: 226.0pt x 156.00162pt.
+ <./classmoetsi_1_1ssp_1_1LibAvDecoder__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1LibAvDecoder__coll__grap
+h.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1LibAvDecoder__coll__graph.pdf, id=2428, 226.8475pt x 156
+.585pt>
+File: classmoetsi_1_1ssp_1_1LibAvDecoder__coll__graph.pdf Graphic file (type pd
+f)
+<use classmoetsi_1_1ssp_1_1LibAvDecoder__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1LibAvDecoder__coll__graph.pdf  u
+sed on input line 29.
+(pdftex.def)             Requested size: 226.0pt x 156.00162pt.
+ [84]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.16 on input line 67.
+
+[85]
+Underfull \hbox (badness 10000) detected at line 68
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 145--146
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.17 on input line 89.
+
+
+Underfull \hbox (badness 10000) detected at line 90
+[][][]
+ []
+
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.18 on input line 107.
+
+) (./classmoetsi_1_1ssp_1_1LibAvEncoder.tex <./classmoetsi_1_1ssp_1_1LibAvEncod
+er__inherit__graph.pdf>
+<classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph.pdf, id=2481, 224.84pt x 15
+6.585pt>
+File: classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph.pdf Graphic file (type
+ pdf)
+<use classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1LibAvEncoder__inherit__graph.pdf
+  used on input line 19.
+(pdftex.def)             Requested size: 224.0pt x 156.0064pt.
+ [86] <./classmoetsi_1_1ssp_1_1LibAvEncoder__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1LibAvEncoder__coll__grap
+h.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1LibAvEncoder__coll__graph.pdf, id=2498, 224.84pt x 156.5
+85pt>
+File: classmoetsi_1_1ssp_1_1LibAvEncoder__coll__graph.pdf Graphic file (type pd
+f)
+<use classmoetsi_1_1ssp_1_1LibAvEncoder__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1LibAvEncoder__coll__graph.pdf  u
+sed on input line 29.
+(pdftex.def)             Requested size: 224.0pt x 156.0064pt.
+ [87]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.19 on input line 79.
+
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.20 on input line 96.
+
+[88]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.21 on input line 114.
+
+
+Underfull \hbox (badness 10000) detected at line 129
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 146
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 157--158
 \T1/pcr/m/n/8 std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$ [] $>$ \T1/pcr/m/n/8 moe
 tsi[]::ssp[]::[]Lib[]Av[]Encoder[]::[]Get[]Codec[]Params[]Struct ( )
  []
 
 
-Underfull \hbox (badness 10000) detected at line 151
+Underfull \hbox (badness 10000) detected at line 163
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 168
+Underfull \hbox (badness 10000) detected at line 180
 [][][]
  []
-
-
-Underfull \hbox (badness 10000) detected at line 185
-[][][]
- []
-
-) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1LowPassFilter.tex
-[84]) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1matrix3x4.tex)
-(./classmoetsi_1_1ssp_1_1MultiImageReader.tex [85]
-Underfull \hbox (badness 10000) detected at line 49
-[][][]
- []
-
-
-Underfull \hbox (badness 10000) detected at line 66
-[][][]
- []
-
-[86]
-Underfull \hbox (badness 10000) detected at line 83
-[][][]
- []
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.22 on input line 104.
-
-[87]
-Underfull \hbox (badness 10000) detected at line 119
-[][][]
- []
-
-) (./classmoetsi_1_1ssp_1_1NetworkReader.tex)
-(./classmoetsi_1_1ssp_1_1NullEncoder.tex [88]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.23 on input line 63.
 
 [89]
+Underfull \hbox (badness 10000) detected at line 197
+[][][]
+ []
+
+) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1LowPassFilter.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1matrix3x4.tex)
+(./classmoetsi_1_1ssp_1_1MultiImageReader.tex <./classmoetsi_1_1ssp_1_1MultiIma
+geReader__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1MultiImageReader__inheri
+t__graph.pdf): PDF inclusion: multiple pdfs with page group included in a singl
+e page
+>
+<classmoetsi_1_1ssp_1_1MultiImageReader__inherit__graph.pdf, id=2571, 249.93375
+pt x 156.585pt>
+File: classmoetsi_1_1ssp_1_1MultiImageReader__inherit__graph.pdf Graphic file (
+type pdf)
+<use classmoetsi_1_1ssp_1_1MultiImageReader__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1MultiImageReader__inherit__graph
+.pdf  used on input line 10.
+(pdftex.def)             Requested size: 249.0pt x 156.0064pt.
+ [90] <./classmoetsi_1_1ssp_1_1MultiImageReader__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1MultiImageReader__coll__
+graph.pdf): PDF inclusion: multiple pdfs with page group included in a single p
+age
+>
+<classmoetsi_1_1ssp_1_1MultiImageReader__coll__graph.pdf, id=2591, 249.93375pt 
+x 156.585pt>
+File: classmoetsi_1_1ssp_1_1MultiImageReader__coll__graph.pdf Graphic file (typ
+e pdf)
+<use classmoetsi_1_1ssp_1_1MultiImageReader__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1MultiImageReader__coll__graph.pd
+f  used on input line 20.
+(pdftex.def)             Requested size: 249.0pt x 156.0064pt.
+ [91]
+Underfull \hbox (badness 10000) detected at line 61
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 78
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 95
+[][][]
+ []
+
+[92]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.24 on input line 81.
+(longtable)                in table 8.22 on input line 116.
 
 
-Underfull \hbox (badness 10000) detected at line 96
+Underfull \hbox (badness 10000) detected at line 131
+[][][]
+ []
+
+) (./classmoetsi_1_1ssp_1_1NetworkReader.tex [93])
+(./classmoetsi_1_1ssp_1_1NullEncoder.tex <./classmoetsi_1_1ssp_1_1NullEncoder__
+inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1NullEncoder__inherit__gr
+aph.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
+>
+<classmoetsi_1_1ssp_1_1NullEncoder__inherit__graph.pdf, id=2653, 217.81375pt x 
+156.585pt>
+File: classmoetsi_1_1ssp_1_1NullEncoder__inherit__graph.pdf Graphic file (type 
+pdf)
+<use classmoetsi_1_1ssp_1_1NullEncoder__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1NullEncoder__inherit__graph.pdf 
+ used on input line 19.
+(pdftex.def)             Requested size: 217.0pt x 155.99922pt.
+ <./classmoetsi_1_1ssp_1_1NullEncoder__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1NullEncoder__coll__graph
+.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1NullEncoder__coll__graph.pdf, id=2662, 217.81375pt x 156
+.585pt>
+File: classmoetsi_1_1ssp_1_1NullEncoder__coll__graph.pdf Graphic file (type pdf
+)
+<use classmoetsi_1_1ssp_1_1NullEncoder__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1NullEncoder__coll__graph.pdf  us
+ed on input line 29.
+(pdftex.def)             Requested size: 217.0pt x 155.99922pt.
+ [94] [95]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.23 on input line 75.
+
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.24 on input line 93.
+
+
+Underfull \hbox (badness 10000) detected at line 108
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 113
+Underfull \hbox (badness 10000) detected at line 125
 [][][]
  []
 
 
-Overfull \hbox (17.7145pt too wide) in paragraph at lines 124--125
+Overfull \hbox (17.7145pt too wide) in paragraph at lines 136--137
 \T1/pcr/m/n/8 std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$ [] $>$ \T1/pcr/m/n/8 moe
 tsi[]::ssp[]::[]Null[]Encoder[]::[]Get[]Codec[]Params[]Struct ( ) [virtual] 
  []
 
-
-Underfull \hbox (badness 10000) detected at line 130
-[][][]
- []
-
-[90]
-Underfull \hbox (badness 10000) detected at line 147
-[][][]
- []
-
-
-Underfull \hbox (badness 10000) detected at line 164
-[][][]
- []
-
-) (./classmoetsi_1_1ssp_1_1NvDecoder.tex [91]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.25 on input line 53.
-
-
-Underfull \hbox (badness 10000) detected at line 54
-[][][]
- []
-
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.26 on input line 75.
-
-) (./classmoetsi_1_1ssp_1_1NvEncoder.tex [92]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.27 on input line 65.
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [93]
-
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.28 on input line 83.
-
-
-Underfull \hbox (badness 10000) detected at line 98
-[][][]
- []
-
-
-Underfull \hbox (badness 10000) detected at line 115
-[][][]
- []
-
-
-Underfull \hbox (badness 10000) detected at line 132
-[][][]
- []
-
-[94]
-Underfull \hbox (badness 10000) detected at line 149
-[][][]
- []
-
-
-Underfull \hbox (badness 10000) detected at line 166
-[][][]
- []
-
-) (./structmoetsi_1_1ssp_1_1NVPipeDeleter.tex)
-(./classmoetsi_1_1ssp_1_1OakdXlinkReader.tex [95]
-Underfull \hbox (badness 10000) detected at line 49
-[][][]
- []
-
 [96]
+Underfull \hbox (badness 10000) detected at line 142
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 159
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 176
+[][][]
+ []
+
+) (./classmoetsi_1_1ssp_1_1NvDecoder.tex <./classmoetsi_1_1ssp_1_1NvDecoder__in
+herit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1NvDecoder__inherit__grap
+h.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1NvDecoder__inherit__graph.pdf, id=2738, 213.79875pt x 15
+6.585pt>
+File: classmoetsi_1_1ssp_1_1NvDecoder__inherit__graph.pdf Graphic file (type pd
+f)
+<use classmoetsi_1_1ssp_1_1NvDecoder__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1NvDecoder__inherit__graph.pdf  u
+sed on input line 19.
+(pdftex.def)             Requested size: 213.0pt x 155.99922pt.
+ [97] <./classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.p
+df): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.pdf, id=2753, 213.79875pt x 156.5
+85pt>
+File: classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.pdf Graphic file (type pdf)
+<use classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1NvDecoder__coll__graph.pdf  used
+ on input line 29.
+(pdftex.def)             Requested size: 213.0pt x 155.99922pt.
+ [98]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.25 on input line 65.
+
+
 Underfull \hbox (badness 10000) detected at line 66
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 83
-[][][]
- []
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.26 on input line 87.
 
-[97]
+) (./classmoetsi_1_1ssp_1_1NvEncoder.tex <./classmoetsi_1_1ssp_1_1NvEncoder__in
+herit__graph.pdf>
+<classmoetsi_1_1ssp_1_1NvEncoder__inherit__graph.pdf, id=2789, 211.79124pt x 15
+6.585pt>
+File: classmoetsi_1_1ssp_1_1NvEncoder__inherit__graph.pdf Graphic file (type pd
+f)
+<use classmoetsi_1_1ssp_1_1NvEncoder__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1NvEncoder__inherit__graph.pdf  u
+sed on input line 19.
+(pdftex.def)             Requested size: 211.0pt x 156.0064pt.
+ [99] <./classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.p
+df): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.pdf, id=2807, 211.79124pt x 156.5
+85pt>
+File: classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.pdf Graphic file (type pdf)
+<use classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1NvEncoder__coll__graph.pdf  used
+ on input line 29.
+(pdftex.def)             Requested size: 211.0pt x 156.0064pt.
+ [100]
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.29 on input line 104.
-
-
-Underfull \hbox (badness 10000) detected at line 119
-[][][]
- []
-
-) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneEuroFilter.tex)
-(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1parsed__poses.tex [98])
-(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Peak.tex)
-(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Pose.tex)
-(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1PoseCommon.tex [99])
-(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1poses.tex)
-(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1root__relative__poses.tex)
-(./interfaceSessionDelegate.tex [100])
-(./structmoetsi_1_1ssp_1_1SwsContextDeleter.tex)
-(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1TwoJointsConnection.tex
-[101]) (./structUnityXRNativeSessionPtr.tex)
-(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1vector3.tex)
-(./classmoetsi_1_1ssp_1_1VideoFileReader.tex [102]
-Underfull \hbox (badness 10000) detected at line 52
-[][][]
- []
-
-
-Underfull \hbox (badness 10000) detected at line 69
-[][][]
- []
-
-[103]
-Underfull \hbox (badness 10000) detected at line 86
-[][][]
- []
+(longtable)                in table 8.27 on input line 77.
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.30 on input line 107.
+(longtable)                in table 8.28 on input line 95.
+
+[101]
+Underfull \hbox (badness 10000) detected at line 110
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 127
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 144
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 161
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 178
+[][][]
+ []
+
+) (./structmoetsi_1_1ssp_1_1NVPipeDeleter.tex [102])
+(./classmoetsi_1_1ssp_1_1OakdXlinkReader.tex <./classmoetsi_1_1ssp_1_1OakdXlink
+Reader__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1OakdXlinkReader__inherit
+__graph.pdf): PDF inclusion: multiple pdfs with page group included in a single
+ page
+>
+<classmoetsi_1_1ssp_1_1OakdXlinkReader__inherit__graph.pdf, id=2875, 244.915pt 
+x 156.585pt>
+File: classmoetsi_1_1ssp_1_1OakdXlinkReader__inherit__graph.pdf Graphic file (t
+ype pdf)
+<use classmoetsi_1_1ssp_1_1OakdXlinkReader__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1OakdXlinkReader__inherit__graph.
+pdf  used on input line 10.
+(pdftex.def)             Requested size: 244.0pt x 156.004pt.
+ <./classmoetsi_1_1ssp_1_1OakdXlinkReader__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1OakdXlinkReader__coll__g
+raph.pdf): PDF inclusion: multiple pdfs with page group included in a single pa
+ge
+>
+<classmoetsi_1_1ssp_1_1OakdXlinkReader__coll__graph.pdf, id=2884, 244.915pt x 1
+56.585pt>
+File: classmoetsi_1_1ssp_1_1OakdXlinkReader__coll__graph.pdf Graphic file (type
+ pdf)
+<use classmoetsi_1_1ssp_1_1OakdXlinkReader__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1OakdXlinkReader__coll__graph.pdf
+  used on input line 20.
+(pdftex.def)             Requested size: 244.0pt x 156.004pt.
+ [103]
+Underfull \hbox (badness 10000) detected at line 61
+[][][]
+ []
 
 [104]
-Underfull \hbox (badness 10000) detected at line 122
+Underfull \hbox (badness 10000) detected at line 78
 [][][]
  []
 
-) (./classmoetsi_1_1ssp_1_1ZDepthDecoder.tex [105]
 
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.31 on input line 53.
-
-
-Underfull \hbox (badness 10000) detected at line 54
+Underfull \hbox (badness 10000) detected at line 95
 [][][]
  []
 
 
 Package longtable Warning: Column widths have changed
-(longtable)                in table 8.32 on input line 75.
+(longtable)                in table 8.29 on input line 116.
 
-) (./classmoetsi_1_1ssp_1_1ZDepthEncoder.tex [106]
+[105]
+Underfull \hbox (badness 10000) detected at line 131
+[][][]
+ []
 
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.33 on input line 65.
+) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneEuroFilter.tex <./str
+uctmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneEuroFilter__coll__graph.pdf
 
-[107]
+pdfTeX warning: pdflatex (file ./structmoetsi_1_1ssp_1_1human__pose__estimation
+_1_1OneEuroFilter__coll__graph.pdf): PDF inclusion: multiple pdfs with page gro
+up included in a single page
+>
+<structmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneEuroFilter__coll__graph.p
+df, id=2941, 255.95625pt x 200.75pt>
+File: structmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneEuroFilter__coll__gr
+aph.pdf Graphic file (type pdf)
+<use structmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneEuroFilter__coll__gra
+ph.pdf>
+Package pdftex.def Info: structmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneE
+uroFilter__coll__graph.pdf  used on input line 10.
+(pdftex.def)             Requested size: 255.0pt x 199.99901pt.
+) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1parsed__poses.tex
+[106]) (./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Peak.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1Pose.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1PoseCommon.tex [107])
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1poses.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1root__relative__poses.tex)
+(./interfaceSessionDelegate.tex <./interfaceSessionDelegate__inherit__graph.pdf
 
-Package longtable Warning: Column widths have changed
-(longtable)                in table 8.34 on input line 83.
+
+pdfTeX warning: pdflatex (file ./interfaceSessionDelegate__inherit__graph.pdf):
+ PDF inclusion: multiple pdfs with page group included in a single page
+>
+<interfaceSessionDelegate__inherit__graph.pdf, id=3009, 289.08pt x 156.585pt>
+File: interfaceSessionDelegate__inherit__graph.pdf Graphic file (type pdf)
+<use interfaceSessionDelegate__inherit__graph.pdf>
+Package pdftex.def Info: interfaceSessionDelegate__inherit__graph.pdf  used on 
+input line 10.
+(pdftex.def)             Requested size: 288.0pt x 156.00879pt.
+ [108] <./interfaceSessionDelegate__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./interfaceSessionDelegate__coll__graph.pdf): PD
+F inclusion: multiple pdfs with page group included in a single page
+>
+<interfaceSessionDelegate__coll__graph.pdf, id=3036, 289.08pt x 156.585pt>
+File: interfaceSessionDelegate__coll__graph.pdf Graphic file (type pdf)
+<use interfaceSessionDelegate__coll__graph.pdf>
+Package pdftex.def Info: interfaceSessionDelegate__coll__graph.pdf  used on inp
+ut line 20.
+(pdftex.def)             Requested size: 288.0pt x 156.00879pt.
+ [109]) (./structmoetsi_1_1ssp_1_1SwsContextDeleter.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1TwoJointsConnection.tex)
+(./structUnityXRNativeSessionPtr.tex)
+(./structmoetsi_1_1ssp_1_1human__pose__estimation_1_1vector3.tex [110])
+(./classmoetsi_1_1ssp_1_1VideoFileReader.tex <./classmoetsi_1_1ssp_1_1VideoFile
+Reader__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1VideoFileReader__inherit
+__graph.pdf): PDF inclusion: multiple pdfs with page group included in a single
+ page
+>
+<classmoetsi_1_1ssp_1_1VideoFileReader__inherit__graph.pdf, id=3080, 238.8925pt
+ x 156.585pt>
+File: classmoetsi_1_1ssp_1_1VideoFileReader__inherit__graph.pdf Graphic file (t
+ype pdf)
+<use classmoetsi_1_1ssp_1_1VideoFileReader__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1VideoFileReader__inherit__graph.
+pdf  used on input line 10.
+(pdftex.def)             Requested size: 238.0pt x 155.99922pt.
+ <./classmoetsi_1_1ssp_1_1VideoFileReader__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1VideoFileReader__coll__g
+raph.pdf): PDF inclusion: multiple pdfs with page group included in a single pa
+ge
+>
+<classmoetsi_1_1ssp_1_1VideoFileReader__coll__graph.pdf, id=3088, 238.8925pt x 
+156.585pt>
+File: classmoetsi_1_1ssp_1_1VideoFileReader__coll__graph.pdf Graphic file (type
+ pdf)
+<use classmoetsi_1_1ssp_1_1VideoFileReader__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1VideoFileReader__coll__graph.pdf
+  used on input line 20.
+(pdftex.def)             Requested size: 238.0pt x 155.99922pt.
+ [111]
+Underfull \hbox (badness 10000) detected at line 64
+[][][]
+ []
+
+[112]
+Underfull \hbox (badness 10000) detected at line 81
+[][][]
+ []
 
 
 Underfull \hbox (badness 10000) detected at line 98
@@ -3847,347 +4272,1272 @@ Underfull \hbox (badness 10000) detected at line 98
  []
 
 
-Underfull \hbox (badness 10000) detected at line 115
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.30 on input line 119.
+
+[113]
+Underfull \hbox (badness 10000) detected at line 134
+[][][]
+ []
+
+) (./classmoetsi_1_1ssp_1_1ZDepthDecoder.tex <./classmoetsi_1_1ssp_1_1ZDepthDec
+oder__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1ZDepthDecoder__inherit__
+graph.pdf): PDF inclusion: multiple pdfs with page group included in a single p
+age
+>
+<classmoetsi_1_1ssp_1_1ZDepthDecoder__inherit__graph.pdf, id=3156, 235.88126pt 
+x 156.585pt>
+File: classmoetsi_1_1ssp_1_1ZDepthDecoder__inherit__graph.pdf Graphic file (typ
+e pdf)
+<use classmoetsi_1_1ssp_1_1ZDepthDecoder__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1ZDepthDecoder__inherit__graph.pd
+f  used on input line 19.
+(pdftex.def)             Requested size: 235.0pt x 156.00162pt.
+ <./classmoetsi_1_1ssp_1_1ZDepthDecoder__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1ZDepthDecoder__coll__gra
+ph.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+
+>
+<classmoetsi_1_1ssp_1_1ZDepthDecoder__coll__graph.pdf, id=3164, 235.88126pt x 1
+56.585pt>
+File: classmoetsi_1_1ssp_1_1ZDepthDecoder__coll__graph.pdf Graphic file (type p
+df)
+<use classmoetsi_1_1ssp_1_1ZDepthDecoder__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1ZDepthDecoder__coll__graph.pdf  
+used on input line 29.
+(pdftex.def)             Requested size: 235.0pt x 156.00162pt.
+ [114]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.31 on input line 65.
+
+
+Underfull \hbox (badness 10000) detected at line 66
+[][][]
+ []
+
+[115]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.32 on input line 87.
+
+) (./classmoetsi_1_1ssp_1_1ZDepthEncoder.tex <./classmoetsi_1_1ssp_1_1ZDepthEnc
+oder__inherit__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1ZDepthEncoder__inherit__
+graph.pdf): PDF inclusion: multiple pdfs with page group included in a single p
+age
+>
+<classmoetsi_1_1ssp_1_1ZDepthEncoder__inherit__graph.pdf, id=3209, 234.8775pt x
+ 156.585pt>
+File: classmoetsi_1_1ssp_1_1ZDepthEncoder__inherit__graph.pdf Graphic file (typ
+e pdf)
+<use classmoetsi_1_1ssp_1_1ZDepthEncoder__inherit__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1ZDepthEncoder__inherit__graph.pd
+f  used on input line 19.
+(pdftex.def)             Requested size: 234.0pt x 155.99922pt.
+ <./classmoetsi_1_1ssp_1_1ZDepthEncoder__coll__graph.pdf
+
+pdfTeX warning: pdflatex (file ./classmoetsi_1_1ssp_1_1ZDepthEncoder__coll__gra
+ph.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+
+>
+<classmoetsi_1_1ssp_1_1ZDepthEncoder__coll__graph.pdf, id=3217, 234.8775pt x 15
+6.585pt>
+File: classmoetsi_1_1ssp_1_1ZDepthEncoder__coll__graph.pdf Graphic file (type p
+df)
+<use classmoetsi_1_1ssp_1_1ZDepthEncoder__coll__graph.pdf>
+Package pdftex.def Info: classmoetsi_1_1ssp_1_1ZDepthEncoder__coll__graph.pdf  
+used on input line 29.
+(pdftex.def)             Requested size: 234.0pt x 155.99922pt.
+ [116]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.33 on input line 77.
+
+[117]
+
+Package longtable Warning: Column widths have changed
+(longtable)                in table 8.34 on input line 95.
+
+
+Underfull \hbox (badness 10000) detected at line 110
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 126--127
+Underfull \hbox (badness 10000) detected at line 127
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 138--139
 \T1/pcr/m/n/8 std[]::shared[]_[]ptr$\OML/cmm/m/it/8 <$ [] $>$ \T1/pcr/m/n/8 moe
 tsi[]::ssp[]::[]Z[]Depth[]Encoder[]::[]Get[]Codec[]Params[]Struct ( )
  []
 
 
-Underfull \hbox (badness 10000) detected at line 132
+Underfull \hbox (badness 10000) detected at line 144
+[][][]
+ []
+
+[118]
+Underfull \hbox (badness 10000) detected at line 161
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) detected at line 149
+Underfull \hbox (badness 10000) detected at line 178
 [][][]
  []
 
-[108]
-Underfull \hbox (badness 10000) detected at line 166
-[][][]
- []
-
-) [109] [110
+) [119] [120
 
 ]
 Chapter 9.
-(./include_2structs_2body__struct_8h.tex) (./structs_2body__struct_8h.texpdfTeX
- warning (ext4): destination with the same identifier (name{namespacemoetsi_1_1
-ssp_a847e1a4429b781f120e04becebbe66a0}) has been already used, duplicate ignore
-d
+(./include_2structs_2body__struct_8h.tex <./include_2structs_2body__struct_8h__
+incl.pdf
+
+pdfTeX warning: pdflatex (file ./include_2structs_2body__struct_8h__incl.pdf): 
+PDF inclusion: multiple pdfs with page group included in a single page
+>
+<include_2structs_2body__struct_8h__incl.pdf, id=3295, 1031.855pt x 156.585pt>
+File: include_2structs_2body__struct_8h__incl.pdf Graphic file (type pdf)
+<use include_2structs_2body__struct_8h__incl.pdf>
+Package pdftex.def Info: include_2structs_2body__struct_8h__incl.pdf  used on i
+nput line 21.
+(pdftex.def)             Requested size: 350.0pt x 53.11156pt.
+ <./include_2structs_2body__struct_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./include_2structs_2body__struct_8h__dep__incl.p
+df): PDF inclusion: multiple pdfs with page group included in a single page
+>
+<include_2structs_2body__struct_8h__dep__incl.pdf, id=3303, 216.81pt x 212.795p
+t>
+File: include_2structs_2body__struct_8h__dep__incl.pdf Graphic file (type pdf)
+<use include_2structs_2body__struct_8h__dep__incl.pdf>
+Package pdftex.def Info: include_2structs_2body__struct_8h__dep__incl.pdf  used
+ on input line 29.
+(pdftex.def)             Requested size: 216.0pt x 212.01193pt.
+ [121]pdfTeX warning (ext4): destination with the same identifier (name{namespa
+cemoetsi_1_1ssp_a847e1a4429b781f120e04becebbe66a0}) has been already used, dupl
+icate ignored
 <to be read again> 
                    \relax 
-l.35 ...1_1ssp_a847e1a4429b781f120e04becebbe66a0}}
-                                                   [111]pdfTeX warning (ext4): 
-destination with the same identifier (name{namespacemoetsi_1_1ssp_a9fafd59fa542
-49bb95a66105f66c4c7d}) has been already used, duplicate ignored
+l.47 ...1_1ssp_a847e1a4429b781f120e04becebbe66a0}}
+                                                  pdfTeX warning (ext4): destin
+ation with the same identifier (name{namespacemoetsi_1_1ssp_a9fafd59fa54249bb95
+a66105f66c4c7d}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.38 ...1_1ssp_a9fafd59fa54249bb95a66105f66c4c7d}}
+l.50 ...1_1ssp_a9fafd59fa54249bb95a66105f66c4c7d}}
                                                   pdfTeX warning (ext4): destin
 ation with the same identifier (name{namespacemoetsi_1_1ssp_a01d4a0ba876f5c5f60
 2a9087dcb0c06d}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.41 ...1_1ssp_a01d4a0ba876f5c5f602a9087dcb0c06d}}
+l.53 ...1_1ssp_a01d4a0ba876f5c5f602a9087dcb0c06d}}
                                                   pdfTeX warning (ext4): destin
 ation with the same identifier (name{namespacemoetsi_1_1ssp_af27a97cef0ab519ed1
 19c1d5786af84e}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.44 ...1_1ssp_af27a97cef0ab519ed119c1d5786af84e}}
+l.56 ...1_1ssp_af27a97cef0ab519ed119c1d5786af84e}}
                                                   )
-(./dummy__body__reader_8cc.tex) (./dummy__body__reader_8h.tex [112])
-(./include_2structs_2frame__struct_8h.tex
-Overfull \hbox (44.03798pt too wide) in paragraph at lines 39--44
+(./structs_2body__struct_8h.tex <./structs_2body__struct_8h__incl.pdf>
+<structs_2body__struct_8h__incl.pdf, id=3324, 1031.855pt x 156.585pt>
+File: structs_2body__struct_8h__incl.pdf Graphic file (type pdf)
+<use structs_2body__struct_8h__incl.pdf>
+Package pdftex.def Info: structs_2body__struct_8h__incl.pdf  used on input line
+ 21.
+(pdftex.def)             Requested size: 350.0pt x 53.11156pt.
+ <./structs_2body__struct_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./structs_2body__struct_8h__dep__incl.pdf): PDF 
+inclusion: multiple pdfs with page group included in a single page
+>
+<structs_2body__struct_8h__dep__incl.pdf, id=3332, 1106.1325pt x 212.795pt>
+File: structs_2body__struct_8h__dep__incl.pdf Graphic file (type pdf)
+<use structs_2body__struct_8h__dep__incl.pdf>
+Package pdftex.def Info: structs_2body__struct_8h__dep__incl.pdf  used on input
+ line 29.
+(pdftex.def)             Requested size: 350.0pt x 67.3295pt.
+ [122]pdfTeX warning (ext4): destination with the same identifier (name{namespa
+cemoetsi_1_1ssp_a847e1a4429b781f120e04becebbe66a0}) has been already used, dupl
+icate ignored
+<to be read again> 
+                   \relax 
+l.47 ...1_1ssp_a847e1a4429b781f120e04becebbe66a0}}
+                                                  pdfTeX warning (ext4): destin
+ation with the same identifier (name{namespacemoetsi_1_1ssp_a9fafd59fa54249bb95
+a66105f66c4c7d}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.50 ...1_1ssp_a9fafd59fa54249bb95a66105f66c4c7d}}
+                                                  pdfTeX warning (ext4): destin
+ation with the same identifier (name{namespacemoetsi_1_1ssp_a01d4a0ba876f5c5f60
+2a9087dcb0c06d}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.53 ...1_1ssp_a01d4a0ba876f5c5f602a9087dcb0c06d}}
+                                                  pdfTeX warning (ext4): destin
+ation with the same identifier (name{namespacemoetsi_1_1ssp_af27a97cef0ab519ed1
+19c1d5786af84e}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.56 ...1_1ssp_af27a97cef0ab519ed119c1d5786af84e}}
+                                                  )
+(./dummy__body__reader_8cc.tex <./dummy__body__reader_8cc__incl.pdf>
+<dummy__body__reader_8cc__incl.pdf, id=3355, 2562.57375pt x 572.1375pt>
+File: dummy__body__reader_8cc__incl.pdf Graphic file (type pdf)
+<use dummy__body__reader_8cc__incl.pdf>
+Package pdftex.def Info: dummy__body__reader_8cc__incl.pdf  used on input line 
+14.
+(pdftex.def)             Requested size: 350.0pt x 78.14316pt.
+)
+(./dummy__body__reader_8h.tex <./dummy__body__reader_8h__incl.pdf
+
+pdfTeX warning: pdflatex (file ./dummy__body__reader_8h__incl.pdf): PDF inclusi
+on: multiple pdfs with page group included in a single page
+>
+<dummy__body__reader_8h__incl.pdf, id=3372, 2562.57375pt x 515.9275pt>
+File: dummy__body__reader_8h__incl.pdf Graphic file (type pdf)
+<use dummy__body__reader_8h__incl.pdf>
+Package pdftex.def Info: dummy__body__reader_8h__incl.pdf  used on input line 2
+3.
+(pdftex.def)             Requested size: 350.0pt x 70.46593pt.
+ [123] <./dummy__body__reader_8h__dep__incl.pdf>
+<dummy__body__reader_8h__dep__incl.pdf, id=3400, 531.9875pt x 156.585pt>
+File: dummy__body__reader_8h__dep__incl.pdf Graphic file (type pdf)
+<use dummy__body__reader_8h__dep__incl.pdf>
+Package pdftex.def Info: dummy__body__reader_8h__dep__incl.pdf  used on input l
+ine 31.
+(pdftex.def)             Requested size: 350.0pt x 103.02147pt.
+)
+(./include_2structs_2frame__struct_8h.tex <./include_2structs_2frame__struct_8h
+__incl.pdf
+
+pdfTeX warning: pdflatex (file ./include_2structs_2frame__struct_8h__incl.pdf):
+ PDF inclusion: multiple pdfs with page group included in a single page
+>
+<include_2structs_2frame__struct_8h__incl.pdf, id=3411, 1317.92375pt x 280.0462
+5pt>
+File: include_2structs_2frame__struct_8h__incl.pdf Graphic file (type pdf)
+<use include_2structs_2frame__struct_8h__incl.pdf>
+Package pdftex.def Info: include_2structs_2frame__struct_8h__incl.pdf  used on 
+input line 21.
+(pdftex.def)             Requested size: 350.0pt x 74.37pt.
+ [124] <./include_2structs_2frame__struct_8h__dep__incl.pdf>
+<include_2structs_2frame__struct_8h__dep__incl.pdf, id=3437, 375.4025pt x 269.0
+05pt>
+File: include_2structs_2frame__struct_8h__dep__incl.pdf Graphic file (type pdf)
+
+<use include_2structs_2frame__struct_8h__dep__incl.pdf>
+Package pdftex.def Info: include_2structs_2frame__struct_8h__dep__incl.pdf  use
+d on input line 29.
+(pdftex.def)             Requested size: 350.0pt x 250.81648pt.
+ [125]
+Overfull \hbox (44.03798pt too wide) in paragraph at lines 51--56
 []\T1/phv/m/n/10 enum [] []: short { []
  []
 
 
-Overfull \hbox (147.38678pt too wide) in paragraph at lines 39--44
+Overfull \hbox (147.38678pt too wide) in paragraph at lines 51--56
 \T1/phv/m/n/10 = -1, [] = 0, []
  []
 
 
-Overfull \hbox (94.63037pt too wide) in paragraph at lines 45--59
+Overfull \hbox (94.63037pt too wide) in paragraph at lines 57--71
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Underfull \hbox (badness 7344) in paragraph at lines 45--59
+Underfull \hbox (badness 7344) in paragraph at lines 57--71
 [] \T1/phv/m/n/10 = 4, [] = 0,
  []
 
-[113]
-Overfull \hbox (42.74498pt too wide) in paragraph at lines 60--71
+
+Overfull \hbox (42.74498pt too wide) in paragraph at lines 72--83
 [] \T1/phv/m/n/10 = -1, []
  []
 
 
-Overfull \hbox (76.57716pt too wide) in paragraph at lines 60--71
+Overfull \hbox (76.57716pt too wide) in paragraph at lines 72--83
 \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Overfull \hbox (42.74498pt too wide) in paragraph at lines 60--71
+Overfull \hbox (42.74498pt too wide) in paragraph at lines 72--83
 [] \T1/phv/m/n/10 = -1, []
  []
 
 
-Overfull \hbox (76.57716pt too wide) in paragraph at lines 60--71
+Overfull \hbox (76.57716pt too wide) in paragraph at lines 72--83
 \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Overfull \hbox (56.29842pt too wide) in paragraph at lines 76--102
+Overfull \hbox (56.29842pt too wide) in paragraph at lines 88--114
 [] \T1/phv/m/n/10 = 0, []
  []
 
 
-Overfull \hbox (59.7019pt too wide) in paragraph at lines 76--102
+Overfull \hbox (59.7019pt too wide) in paragraph at lines 88--114
 \T1/phv/m/n/10 = 1, [] = 2, []
  []
 
 
-Overfull \hbox (53.78755pt too wide) in paragraph at lines 76--102
+Overfull \hbox (53.78755pt too wide) in paragraph at lines 88--114
 [] \T1/phv/m/n/10 = 4, []
  []
 
 
-Overfull \hbox (53.1842pt too wide) in paragraph at lines 76--102
+Overfull \hbox (53.1842pt too wide) in paragraph at lines 88--114
 [] \T1/phv/m/n/10 = 8, []
  []
 
 
-Overfull \hbox (72.99487pt too wide) in paragraph at lines 76--102
+Overfull \hbox (72.99487pt too wide) in paragraph at lines 88--114
 \T1/phv/m/n/10 = 9, [] = 0, []
  []
 
 
-Overfull \hbox (43.00545pt too wide) in paragraph at lines 76--102
+Overfull \hbox (43.00545pt too wide) in paragraph at lines 88--114
 [] \T1/phv/m/n/10 = 2, []
  []
 
 
-Overfull \hbox (70.48401pt too wide) in paragraph at lines 76--102
+Overfull \hbox (70.48401pt too wide) in paragraph at lines 88--114
 \T1/phv/m/n/10 = 3, [] = 4, []
  []
 
 
-Overfull \hbox (69.88066pt too wide) in paragraph at lines 76--102
+Overfull \hbox (69.88066pt too wide) in paragraph at lines 88--114
 \T1/phv/m/n/10 = 7, [] = 8, []
  []
 
 
-Overfull \hbox (112.66562pt too wide) in paragraph at lines 103--114
+Overfull \hbox (112.66562pt too wide) in paragraph at lines 115--126
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Overfull \hbox (112.66562pt too wide) in paragraph at lines 103--114
+Overfull \hbox (112.66562pt too wide) in paragraph at lines 115--126
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
-) (./structs_2frame__struct_8h.tex [114]
-Overfull \hbox (44.03798pt too wide) in paragraph at lines 39--44
+) (./structs_2frame__struct_8h.tex [126] <./structs_2frame__struct_8h__incl.pdf
+
+
+pdfTeX warning: pdflatex (file ./structs_2frame__struct_8h__incl.pdf): PDF incl
+usion: multiple pdfs with page group included in a single page
+>
+<structs_2frame__struct_8h__incl.pdf, id=3525, 1317.92375pt x 280.04625pt>
+File: structs_2frame__struct_8h__incl.pdf Graphic file (type pdf)
+<use structs_2frame__struct_8h__incl.pdf>
+Package pdftex.def Info: structs_2frame__struct_8h__incl.pdf  used on input lin
+e 21.
+(pdftex.def)             Requested size: 350.0pt x 74.37pt.
+ <./structs_2frame__struct_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./structs_2frame__struct_8h__dep__incl.pdf): PDF
+ inclusion: multiple pdfs with page group included in a single page
+>
+<structs_2frame__struct_8h__dep__incl.pdf, id=3540, 2747.26375pt x 493.845pt>
+File: structs_2frame__struct_8h__dep__incl.pdf Graphic file (type pdf)
+<use structs_2frame__struct_8h__dep__incl.pdf>
+Package pdftex.def Info: structs_2frame__struct_8h__dep__incl.pdf  used on inpu
+t line 29.
+(pdftex.def)             Requested size: 350.0pt x 62.91353pt.
+
+Overfull \hbox (44.03798pt too wide) in paragraph at lines 51--56
 []\T1/phv/m/n/10 enum [] []: short { []
  []
 
 
-Overfull \hbox (147.38678pt too wide) in paragraph at lines 39--44
+Overfull \hbox (147.38678pt too wide) in paragraph at lines 51--56
 \T1/phv/m/n/10 = -1, [] = 0, []
  []
 
-
-Overfull \hbox (94.63037pt too wide) in paragraph at lines 45--59
+[127]
+Overfull \hbox (94.63037pt too wide) in paragraph at lines 57--71
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Underfull \hbox (badness 7344) in paragraph at lines 45--59
+Underfull \hbox (badness 7344) in paragraph at lines 57--71
 [] \T1/phv/m/n/10 = 4, [] = 0,
  []
 
 
-Overfull \hbox (42.74498pt too wide) in paragraph at lines 60--71
+Overfull \hbox (42.74498pt too wide) in paragraph at lines 72--83
 [] \T1/phv/m/n/10 = -1, []
  []
 
 
-Overfull \hbox (76.57716pt too wide) in paragraph at lines 60--71
+Overfull \hbox (76.57716pt too wide) in paragraph at lines 72--83
 \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Overfull \hbox (42.74498pt too wide) in paragraph at lines 60--71
+Overfull \hbox (42.74498pt too wide) in paragraph at lines 72--83
 [] \T1/phv/m/n/10 = -1, []
  []
 
 
-Overfull \hbox (76.57716pt too wide) in paragraph at lines 60--71
+Overfull \hbox (76.57716pt too wide) in paragraph at lines 72--83
 \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Overfull \hbox (56.29842pt too wide) in paragraph at lines 76--102
+Overfull \hbox (56.29842pt too wide) in paragraph at lines 88--114
 [] \T1/phv/m/n/10 = 0, []
  []
 
 
-Overfull \hbox (59.7019pt too wide) in paragraph at lines 76--102
+Overfull \hbox (59.7019pt too wide) in paragraph at lines 88--114
 \T1/phv/m/n/10 = 1, [] = 2, []
  []
 
 
-Overfull \hbox (53.78755pt too wide) in paragraph at lines 76--102
+Overfull \hbox (53.78755pt too wide) in paragraph at lines 88--114
 [] \T1/phv/m/n/10 = 4, []
  []
 
 
-Overfull \hbox (53.1842pt too wide) in paragraph at lines 76--102
+Overfull \hbox (53.1842pt too wide) in paragraph at lines 88--114
 [] \T1/phv/m/n/10 = 8, []
  []
 
 
-Overfull \hbox (72.99487pt too wide) in paragraph at lines 76--102
+Overfull \hbox (72.99487pt too wide) in paragraph at lines 88--114
 \T1/phv/m/n/10 = 9, [] = 0, []
  []
 
 
-Overfull \hbox (43.00545pt too wide) in paragraph at lines 76--102
+Overfull \hbox (43.00545pt too wide) in paragraph at lines 88--114
 [] \T1/phv/m/n/10 = 2, []
  []
 
 
-Overfull \hbox (70.48401pt too wide) in paragraph at lines 76--102
+Overfull \hbox (70.48401pt too wide) in paragraph at lines 88--114
 \T1/phv/m/n/10 = 3, [] = 4, []
  []
 
 
-Overfull \hbox (69.88066pt too wide) in paragraph at lines 76--102
+Overfull \hbox (69.88066pt too wide) in paragraph at lines 88--114
 \T1/phv/m/n/10 = 7, [] = 8, []
  []
 
-[115]
-Overfull \hbox (112.66562pt too wide) in paragraph at lines 103--114
+
+Overfull \hbox (112.66562pt too wide) in paragraph at lines 115--126
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
 
-Overfull \hbox (112.66562pt too wide) in paragraph at lines 103--114
+Overfull \hbox (112.66562pt too wide) in paragraph at lines 115--126
 [] \T1/phv/m/n/10 = 0, [] = 1, []
  []
 
-) (./idecoder_8cc.tex) (./decoders_2idecoder_8h.tex [116])
-(./include_2decoders_2idecoder_8h.tex [117]) (./iencoder_8cc.tex)
-(./encoders_2iencoder_8h.tex [118]) (./include_2encoders_2iencoder_8h.tex
-[119]) (./image__converter_8cc.tex) (./include_2utils_2image__converter_8h.tex
-[120]) (./utils_2image__converter_8h.tex [121]) (./image__decoder_8cc.tex)
-(./image__decoder_8h.tex [122]) (./image__reader_8cc.tex)
-(./image__reader_8h.tex [123]) (./iphone__reader_8h.tex [124])
-(./iphone__reader_8mm.tex) (./ireader_8cc.tex [125])
-(./include_2readers_2ireader_8h.tex [126]) (./readers_2ireader_8h.tex)
-(./kinect__reader_8cc.tex [127]pdfTeX warning (ext4): destination with the same
- identifier (name{namespacemoetsi_1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}) ha
-s been already used, duplicate ignored
+) (./idecoder_8cc.tex <./idecoder_8cc__incl.pdf>
+<idecoder_8cc__incl.pdf, id=3630, 1317.92375pt x 392.46625pt>
+File: idecoder_8cc__incl.pdf Graphic file (type pdf)
+<use idecoder_8cc__incl.pdf>
+Package pdftex.def Info: idecoder_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 104.22462pt.
+ [128])
+(./decoders_2idecoder_8h.tex <./decoders_2idecoder_8h__incl.pdf
+
+pdfTeX warning: pdflatex (file ./decoders_2idecoder_8h__incl.pdf): PDF inclusio
+n: multiple pdfs with page group included in a single page
+>
+<decoders_2idecoder_8h__incl.pdf, id=3655, 1317.92375pt x 336.25626pt>
+File: decoders_2idecoder_8h__incl.pdf Graphic file (type pdf)
+<use decoders_2idecoder_8h__incl.pdf>
+Package pdftex.def Info: decoders_2idecoder_8h__incl.pdf  used on input line 15
+.
+(pdftex.def)             Requested size: 350.0pt x 89.29732pt.
+ <./decoders_2idecoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./decoders_2idecoder_8h__dep__incl.pdf): PDF inc
+lusion: multiple pdfs with page group included in a single page
+>
+<decoders_2idecoder_8h__dep__incl.pdf, id=3670, 1886.04625pt x 437.635pt>
+File: decoders_2idecoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use decoders_2idecoder_8h__dep__incl.pdf>
+Package pdftex.def Info: decoders_2idecoder_8h__dep__incl.pdf  used on input li
+ne 23.
+(pdftex.def)             Requested size: 350.0pt x 81.20828pt.
+ [129]) (./include_2decoders_2idecoder_8h.tex <./include_2decoders_2idecoder_8h
+__incl.pdf>
+<include_2decoders_2idecoder_8h__incl.pdf, id=3697, 1317.92375pt x 336.25626pt>
+
+File: include_2decoders_2idecoder_8h__incl.pdf Graphic file (type pdf)
+<use include_2decoders_2idecoder_8h__incl.pdf>
+Package pdftex.def Info: include_2decoders_2idecoder_8h__incl.pdf  used on inpu
+t line 15.
+(pdftex.def)             Requested size: 350.0pt x 89.29732pt.
+ <./include_2decoders_2idecoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./include_2decoders_2idecoder_8h__dep__incl.pdf)
+: PDF inclusion: multiple pdfs with page group included in a single page
+>
+<include_2decoders_2idecoder_8h__dep__incl.pdf, id=3712, 208.78pt x 212.795pt>
+File: include_2decoders_2idecoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use include_2decoders_2idecoder_8h__dep__incl.pdf>
+Package pdftex.def Info: include_2decoders_2idecoder_8h__dep__incl.pdf  used on
+ input line 23.
+(pdftex.def)             Requested size: 208.0pt x 212.01193pt.
+ [130]) (./iencoder_8cc.tex <./iencoder_8cc__incl.pdf>
+<iencoder_8cc__incl.pdf, id=3738, 3174.86125pt x 628.3475pt>
+File: iencoder_8cc__incl.pdf Graphic file (type pdf)
+<use iencoder_8cc__incl.pdf>
+Package pdftex.def Info: iencoder_8cc__incl.pdf  used on input line 27.
+(pdftex.def)             Requested size: 350.0pt x 69.26225pt.
+ [131])
+(./encoders_2iencoder_8h.tex <./encoders_2iencoder_8h__incl.pdf>
+<encoders_2iencoder_8h__incl.pdf, id=3768, 1317.92375pt x 336.25626pt>
+File: encoders_2iencoder_8h__incl.pdf Graphic file (type pdf)
+<use encoders_2iencoder_8h__incl.pdf>
+Package pdftex.def Info: encoders_2iencoder_8h__incl.pdf  used on input line 15
+.
+(pdftex.def)             Requested size: 350.0pt x 89.29732pt.
+ [132] <./encoders_2iencoder_8h__dep__incl.pdf>
+<encoders_2iencoder_8h__dep__incl.pdf, id=3793, 891.33pt x 212.795pt>
+File: encoders_2iencoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use encoders_2iencoder_8h__dep__incl.pdf>
+Package pdftex.def Info: encoders_2iencoder_8h__dep__incl.pdf  used on input li
+ne 23.
+(pdftex.def)             Requested size: 350.0pt x 83.55792pt.
+) (./include_2encoders_2iencoder_8h.tex <./include_2encoders_2iencoder_8h__incl
+.pdf
+
+pdfTeX warning: pdflatex (file ./include_2encoders_2iencoder_8h__incl.pdf): PDF
+ inclusion: multiple pdfs with page group included in a single page
+>
+<include_2encoders_2iencoder_8h__incl.pdf, id=3808, 1317.92375pt x 336.25626pt>
+
+File: include_2encoders_2iencoder_8h__incl.pdf Graphic file (type pdf)
+<use include_2encoders_2iencoder_8h__incl.pdf>
+Package pdftex.def Info: include_2encoders_2iencoder_8h__incl.pdf  used on inpu
+t line 15.
+(pdftex.def)             Requested size: 350.0pt x 89.29732pt.
+ [133] <./include_2encoders_2iencoder_8h__dep__incl.pdf>
+<include_2encoders_2iencoder_8h__dep__incl.pdf, id=3835, 147.55125pt x 156.585p
+t>
+File: include_2encoders_2iencoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use include_2encoders_2iencoder_8h__dep__incl.pdf>
+Package pdftex.def Info: include_2encoders_2iencoder_8h__dep__incl.pdf  used on
+ input line 23.
+(pdftex.def)             Requested size: 147.0pt x 156.004pt.
+)
+(./image__converter_8cc.tex [134] <./image__converter_8cc__incl.pdf>
+<image__converter_8cc__incl.pdf, id=3860, 2238.3625pt x 572.1375pt>
+File: image__converter_8cc__incl.pdf Graphic file (type pdf)
+<use image__converter_8cc__incl.pdf>
+Package pdftex.def Info: image__converter_8cc__incl.pdf  used on input line 17.
+
+(pdftex.def)             Requested size: 350.0pt x 89.45737pt.
+)
+(./include_2utils_2image__converter_8h.tex <./include_2utils_2image__converter_
+8h__incl.pdf
+
+pdfTeX warning: pdflatex (file ./include_2utils_2image__converter_8h__incl.pdf)
+: PDF inclusion: multiple pdfs with page group included in a single page
+>
+<include_2utils_2image__converter_8h__incl.pdf, id=3878, 1441.385pt x 392.46625
+pt>
+File: include_2utils_2image__converter_8h__incl.pdf Graphic file (type pdf)
+<use include_2utils_2image__converter_8h__incl.pdf>
+Package pdftex.def Info: include_2utils_2image__converter_8h__incl.pdf  used on
+ input line 17.
+(pdftex.def)             Requested size: 350.0pt x 95.2957pt.
+ [135] <./include_2utils_2image__converter_8h__dep__incl.pdf>
+<include_2utils_2image__converter_8h__dep__incl.pdf, id=3904, 187.70125pt x 156
+.585pt>
+File: include_2utils_2image__converter_8h__dep__incl.pdf Graphic file (type pdf
+)
+<use include_2utils_2image__converter_8h__dep__incl.pdf>
+Package pdftex.def Info: include_2utils_2image__converter_8h__dep__incl.pdf  us
+ed on input line 25.
+(pdftex.def)             Requested size: 187.0pt x 156.00879pt.
+)
+(./utils_2image__converter_8h.tex [136] <./utils_2image__converter_8h__incl.pdf
+>
+<utils_2image__converter_8h__incl.pdf, id=3927, 1441.385pt x 392.46625pt>
+File: utils_2image__converter_8h__incl.pdf Graphic file (type pdf)
+<use utils_2image__converter_8h__incl.pdf>
+Package pdftex.def Info: utils_2image__converter_8h__incl.pdf  used on input li
+ne 17.
+(pdftex.def)             Requested size: 350.0pt x 95.2957pt.
+ <./utils_2image__converter_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./utils_2image__converter_8h__dep__incl.pdf): PD
+F inclusion: multiple pdfs with page group included in a single page
+>
+<utils_2image__converter_8h__dep__incl.pdf, id=3942, 636.3775pt x 156.585pt>
+File: utils_2image__converter_8h__dep__incl.pdf Graphic file (type pdf)
+<use utils_2image__converter_8h__dep__incl.pdf>
+Package pdftex.def Info: utils_2image__converter_8h__dep__incl.pdf  used on inp
+ut line 25.
+(pdftex.def)             Requested size: 350.0pt x 86.11961pt.
+) (./image__decoder_8cc.tex <./image__decoder_8cc__incl.pdf
+
+pdfTeX warning: pdflatex (file ./image__decoder_8cc__incl.pdf): PDF inclusion: 
+multiple pdfs with page group included in a single page
+>
+<image__decoder_8cc__incl.pdf, id=3953, 2184.16pt x 392.46625pt>
+File: image__decoder_8cc__incl.pdf Graphic file (type pdf)
+<use image__decoder_8cc__incl.pdf>
+Package pdftex.def Info: image__decoder_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 62.8857pt.
+ [137]) (./image__decoder_8h.tex <./image__decoder_8h__incl.pdf>
+<image__decoder_8h__incl.pdf, id=3983, 2184.16pt x 336.25626pt>
+File: image__decoder_8h__incl.pdf Graphic file (type pdf)
+<use image__decoder_8h__incl.pdf>
+Package pdftex.def Info: image__decoder_8h__incl.pdf  used on input line 23.
+(pdftex.def)             Requested size: 350.0pt x 53.87906pt.
+ <./image__decoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./image__decoder_8h__dep__incl.pdf): PDF inclusi
+on: multiple pdfs with page group included in a single page
+>
+<image__decoder_8h__dep__incl.pdf, id=3998, 1213.53375pt x 269.005pt>
+File: image__decoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use image__decoder_8h__dep__incl.pdf>
+Package pdftex.def Info: image__decoder_8h__dep__incl.pdf  used on input line 3
+1.
+(pdftex.def)             Requested size: 350.0pt x 77.58665pt.
+ [138]) (./image__reader_8cc.tex <./image__reader_8cc__incl.pdf>
+<image__reader_8cc__incl.pdf, id=4021, 2048.65375pt x 448.67625pt>
+File: image__reader_8cc__incl.pdf Graphic file (type pdf)
+<use image__reader_8cc__incl.pdf>
+Package pdftex.def Info: image__reader_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 76.6505pt.
+)
+(./image__reader_8h.tex [139] <./image__reader_8h__incl.pdf>
+<image__reader_8h__incl.pdf, id=4051, 2048.65375pt x 392.46625pt>
+File: image__reader_8h__incl.pdf Graphic file (type pdf)
+<use image__reader_8h__incl.pdf>
+Package pdftex.def Info: image__reader_8h__incl.pdf  used on input line 19.
+(pdftex.def)             Requested size: 350.0pt x 67.04774pt.
+ <./image__reader_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./image__reader_8h__dep__incl.pdf): PDF inclusio
+n: multiple pdfs with page group included in a single page
+>
+<image__reader_8h__dep__incl.pdf, id=4066, 696.6025pt x 212.795pt>
+File: image__reader_8h__dep__incl.pdf Graphic file (type pdf)
+<use image__reader_8h__dep__incl.pdf>
+Package pdftex.def Info: image__reader_8h__dep__incl.pdf  used on input line 27
+.
+(pdftex.def)             Requested size: 350.0pt x 106.91675pt.
+) (./iphone__reader_8h.tex <./iphone__reader_8h__incl.pdf
+
+pdfTeX warning: pdflatex (file ./iphone__reader_8h__incl.pdf): PDF inclusion: m
+ultiple pdfs with page group included in a single page
+>
+<iphone__reader_8h__incl.pdf, id=4077, 1356.06625pt x 392.46625pt>
+File: iphone__reader_8h__incl.pdf Graphic file (type pdf)
+<use iphone__reader_8h__incl.pdf>
+Package pdftex.def Info: iphone__reader_8h__incl.pdf  used on input line 16.
+(pdftex.def)             Requested size: 350.0pt x 101.29024pt.
+ [140] <./iphone__reader_8h__dep__incl.pdf>
+<iphone__reader_8h__dep__incl.pdf, id=4104, 188.705pt x 156.585pt>
+File: iphone__reader_8h__dep__incl.pdf Graphic file (type pdf)
+<use iphone__reader_8h__dep__incl.pdf>
+Package pdftex.def Info: iphone__reader_8h__dep__incl.pdf  used on input line 2
+4.
+(pdftex.def)             Requested size: 188.0pt x 155.99922pt.
+) (./iphone__reader_8mm.tex <./iphone__reader_8mm__incl.pdf
+
+pdfTeX warning: pdflatex (file ./iphone__reader_8mm__incl.pdf): PDF inclusion: 
+multiple pdfs with page group included in a single page
+>
+<iphone__reader_8mm__incl.pdf, id=4115, 1356.06625pt x 448.67625pt>
+File: iphone__reader_8mm__incl.pdf Graphic file (type pdf)
+<use iphone__reader_8mm__incl.pdf>
+Package pdftex.def Info: iphone__reader_8mm__incl.pdf  used on input line 20.
+(pdftex.def)             Requested size: 350.0pt x 115.79729pt.
+ [141]) (./ireader_8cc.tex <./ireader_8cc__incl.pdf>
+<ireader_8cc__incl.pdf, id=4146, 3934.7pt x 515.9275pt>
+File: ireader_8cc__incl.pdf Graphic file (type pdf)
+<use ireader_8cc__incl.pdf>
+Package pdftex.def Info: ireader_8cc__incl.pdf  used on input line 28.
+(pdftex.def)             Requested size: 350.0pt x 45.88828pt.
+ [142])
+(./include_2readers_2ireader_8h.tex <./include_2readers_2ireader_8h__incl.pdf>
+<include_2readers_2ireader_8h__incl.pdf, id=4179, 1317.92375pt x 336.25626pt>
+File: include_2readers_2ireader_8h__incl.pdf Graphic file (type pdf)
+<use include_2readers_2ireader_8h__incl.pdf>
+Package pdftex.def Info: include_2readers_2ireader_8h__incl.pdf  used on input 
+line 14.
+(pdftex.def)             Requested size: 350.0pt x 89.29732pt.
+
+[143] <./include_2readers_2ireader_8h__dep__incl.pdf>
+<include_2readers_2ireader_8h__dep__incl.pdf, id=4206, 139.52126pt x 156.585pt>
+
+File: include_2readers_2ireader_8h__dep__incl.pdf Graphic file (type pdf)
+<use include_2readers_2ireader_8h__dep__incl.pdf>
+Package pdftex.def Info: include_2readers_2ireader_8h__dep__incl.pdf  used on i
+nput line 22.
+(pdftex.def)             Requested size: 139.0pt x 156.004pt.
+)
+(./readers_2ireader_8h.tex [144] <./readers_2ireader_8h__incl.pdf>
+<readers_2ireader_8h__incl.pdf, id=4231, 1317.92375pt x 336.25626pt>
+File: readers_2ireader_8h__incl.pdf Graphic file (type pdf)
+<use readers_2ireader_8h__incl.pdf>
+Package pdftex.def Info: readers_2ireader_8h__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 89.29732pt.
+ <./readers_2ireader_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./readers_2ireader_8h__dep__incl.pdf): PDF inclu
+sion: multiple pdfs with page group included in a single page
+>
+<readers_2ireader_8h__dep__incl.pdf, id=4246, 1730.465pt x 269.005pt>
+File: readers_2ireader_8h__dep__incl.pdf Graphic file (type pdf)
+<use readers_2ireader_8h__dep__incl.pdf>
+Package pdftex.def Info: readers_2ireader_8h__dep__incl.pdf  used on input line
+ 22.
+(pdftex.def)             Requested size: 350.0pt x 54.40753pt.
+) (./kinect__reader_8cc.tex [145] <./kinect__reader_8cc__incl.pdf>
+<kinect__reader_8cc__incl.pdf, id=4281, 2458.18375pt x 684.5575pt>
+File: kinect__reader_8cc__incl.pdf Graphic file (type pdf)
+<use kinect__reader_8cc__incl.pdf>
+Package pdftex.def Info: kinect__reader_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 97.46689pt.
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}) has been already used, duplicate 
+ignored
 <to be read again> 
                    \relax 
-l.21 ...1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}}
-                                                  ) (./kinect__reader_8h.tex
-[128]pdfTeX warning (ext4): destination with the same identifier (name{namespac
-emoetsi_1_1ssp_a998f3ec3680c51d19383e0f6e38e48c2}) has been already used, dupli
-cate ignored
+l.27 ...1_1ssp_a316383e8c51e6cb5f67a013bd0311bb8}}
+                                                  ) (./kinect__reader_8h.tex <.
+/kinect__reader_8h__incl.pdf
+
+pdfTeX warning: pdflatex (file ./kinect__reader_8h__incl.pdf): PDF inclusion: m
+ultiple pdfs with page group included in a single page
+>
+<kinect__reader_8h__incl.pdf, id=4298, 2458.18375pt x 628.3475pt>
+File: kinect__reader_8h__incl.pdf Graphic file (type pdf)
+<use kinect__reader_8h__incl.pdf>
+Package pdftex.def Info: kinect__reader_8h__incl.pdf  used on input line 25.
+(pdftex.def)             Requested size: 350.0pt x 89.46375pt.
+ [146] <./kinect__reader_8h__dep__incl.pdf>
+<kinect__reader_8h__dep__incl.pdf, id=4325, 176.66pt x 156.585pt>
+File: kinect__reader_8h__dep__incl.pdf Graphic file (type pdf)
+<use kinect__reader_8h__dep__incl.pdf>
+Package pdftex.def Info: kinect__reader_8h__dep__incl.pdf  used on input line 3
+3.
+(pdftex.def)             Requested size: 176.0pt x 156.00162pt.
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_a998f3ec3680c51d19383e0f6e38e48c2}) has been already used, duplicate 
+ignored
 <to be read again> 
                    \relax 
-l.44 ...1_1ssp_a998f3ec3680c51d19383e0f6e38e48c2}}
-                                                  ) (./kinect__utils_8cc.tex
-[129]) (./kinect__utils_8h.tex) (./libav__decoder_8cc.tex [130])
-(./libav__decoder_8h.tex [131]) (./libav__encoder_8cc.tex)
-(./libav__encoder_8h.tex [132]) (./logger_8h.tex)
-(./multi__image__reader_8cc.tex [133]) (./multi__image__reader_8h.tex)
-(./network__reader_8cc.tex [134]pdfTeX warning (ext4): destination with the sam
-e identifier (name{namespacemoetsi_1_1ssp_a884aae59668e7913051f2875b047688e}) h
-as been already used, duplicate ignored
+l.56 ...1_1ssp_a998f3ec3680c51d19383e0f6e38e48c2}}
+                                                   [147])
+(./kinect__utils_8cc.tex <./kinect__utils_8cc__incl.pdf>
+<kinect__utils_8cc__incl.pdf, id=4346, 2280.52pt x 628.3475pt>
+File: kinect__utils_8cc__incl.pdf Graphic file (type pdf)
+<use kinect__utils_8cc__incl.pdf>
+Package pdftex.def Info: kinect__utils_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 96.43407pt.
+ [148])
+(./kinect__utils_8h.tex <./kinect__utils_8h__incl.pdf>
+<kinect__utils_8h__incl.pdf, id=4378, 2280.52pt x 572.1375pt>
+File: kinect__utils_8h__incl.pdf Graphic file (type pdf)
+<use kinect__utils_8h__incl.pdf>
+Package pdftex.def Info: kinect__utils_8h__incl.pdf  used on input line 20.
+(pdftex.def)             Requested size: 350.0pt x 87.80737pt.
+ <./kinect__utils_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./kinect__utils_8h__dep__incl.pdf): PDF inclusio
+n: multiple pdfs with page group included in a single page
+>
+<kinect__utils_8h__dep__incl.pdf, id=4393, 397.485pt x 212.795pt>
+File: kinect__utils_8h__dep__incl.pdf Graphic file (type pdf)
+<use kinect__utils_8h__dep__incl.pdf>
+Package pdftex.def Info: kinect__utils_8h__dep__incl.pdf  used on input line 28
+.
+(pdftex.def)             Requested size: 350.0pt x 187.3803pt.
+ [149]) (./libav__decoder_8cc.tex <./libav__decoder_8cc__incl.pdf>
+<libav__decoder_8cc__incl.pdf, id=4417, 2374.8725pt x 572.1375pt>
+File: libav__decoder_8cc__incl.pdf Graphic file (type pdf)
+<use libav__decoder_8cc__incl.pdf>
+Package pdftex.def Info: libav__decoder_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 84.31534pt.
+ [150])
+(./libav__decoder_8h.tex <./libav__decoder_8h__incl.pdf>
+<libav__decoder_8h__incl.pdf, id=4445, 2374.8725pt x 515.9275pt>
+File: libav__decoder_8h__incl.pdf Graphic file (type pdf)
+<use libav__decoder_8h__incl.pdf>
+Package pdftex.def Info: libav__decoder_8h__incl.pdf  used on input line 25.
+(pdftex.def)             Requested size: 350.0pt x 76.03172pt.
+ <./libav__decoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./libav__decoder_8h__dep__incl.pdf): PDF inclusi
+on: multiple pdfs with page group included in a single page
+>
+<libav__decoder_8h__dep__incl.pdf, id=4460, 1115.16624pt x 269.005pt>
+File: libav__decoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use libav__decoder_8h__dep__incl.pdf>
+Package pdftex.def Info: libav__decoder_8h__dep__incl.pdf  used on input line 3
+3.
+(pdftex.def)             Requested size: 350.0pt x 84.42506pt.
+ [151]) (./libav__encoder_8cc.tex <./libav__encoder_8cc__incl.pdf>
+<libav__encoder_8cc__incl.pdf, id=4482, 2787.41376pt x 628.3475pt>
+File: libav__encoder_8cc__incl.pdf Graphic file (type pdf)
+<use libav__encoder_8cc__incl.pdf>
+Package pdftex.def Info: libav__encoder_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 78.89798pt.
+)
+(./libav__encoder_8h.tex [152] <./libav__encoder_8h__incl.pdf>
+<libav__encoder_8h__incl.pdf, id=4511, 2787.41376pt x 572.1375pt>
+File: libav__encoder_8h__incl.pdf Graphic file (type pdf)
+<use libav__encoder_8h__incl.pdf>
+Package pdftex.def Info: libav__encoder_8h__incl.pdf  used on input line 32.
+(pdftex.def)             Requested size: 350.0pt x 71.84001pt.
+ <./libav__encoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./libav__encoder_8h__dep__incl.pdf): PDF inclusi
+on: multiple pdfs with page group included in a single page
+>
+<libav__encoder_8h__dep__incl.pdf, id=4526, 550.055pt x 156.585pt>
+File: libav__encoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use libav__encoder_8h__dep__incl.pdf>
+Package pdftex.def Info: libav__encoder_8h__dep__incl.pdf  used on input line 4
+0.
+(pdftex.def)             Requested size: 350.0pt x 99.63823pt.
+ [153]) (./logger_8h.tex <./logger_8h__incl.pdf>
+<logger_8h__incl.pdf, id=4547, 173.64874pt x 156.585pt>
+File: logger_8h__incl.pdf Graphic file (type pdf)
+<use logger_8h__incl.pdf>
+Package pdftex.def Info: logger_8h__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 173.0pt x 156.0064pt.
+ <./logger_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./logger_8h__dep__incl.pdf): PDF inclusion: mult
+iple pdfs with page group included in a single page
+>
+<logger_8h__dep__incl.pdf, id=4556, 3117.6475pt x 606.265pt>
+File: logger_8h__dep__incl.pdf Graphic file (type pdf)
+<use logger_8h__dep__incl.pdf>
+Package pdftex.def Info: logger_8h__dep__incl.pdf  used on input line 22.
+(pdftex.def)             Requested size: 350.0pt x 68.05847pt.
+) (./multi__image__reader_8cc.tex <./multi__image__reader_8cc__incl.pdf
+
+pdfTeX warning: pdflatex (file ./multi__image__reader_8cc__incl.pdf): PDF inclu
+sion: multiple pdfs with page group included in a single page
+>
+<multi__image__reader_8cc__incl.pdf, id=4571, 2256.43pt x 504.88625pt>
+File: multi__image__reader_8cc__incl.pdf Graphic file (type pdf)
+<use multi__image__reader_8cc__incl.pdf>
+Package pdftex.def Info: multi__image__reader_8cc__incl.pdf  used on input line
+ 14.
+(pdftex.def)             Requested size: 350.0pt x 78.31047pt.
+ [154]) (./multi__image__reader_8h.tex <./multi__image__reader_8h__incl.pdf>
+<multi__image__reader_8h__incl.pdf, id=4599, 2256.43pt x 448.67625pt>
+File: multi__image__reader_8h__incl.pdf Graphic file (type pdf)
+<use multi__image__reader_8h__incl.pdf>
+Package pdftex.def Info: multi__image__reader_8h__incl.pdf  used on input line 
+20.
+(pdftex.def)             Requested size: 350.0pt x 69.59201pt.
+ <./multi__image__reader_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./multi__image__reader_8h__dep__incl.pdf): PDF i
+nclusion: multiple pdfs with page group included in a single page
+>
+<multi__image__reader_8h__dep__incl.pdf, id=4614, 580.1675pt x 156.585pt>
+File: multi__image__reader_8h__dep__incl.pdf Graphic file (type pdf)
+<use multi__image__reader_8h__dep__incl.pdf>
+Package pdftex.def Info: multi__image__reader_8h__dep__incl.pdf  used on input 
+line 28.
+(pdftex.def)             Requested size: 350.0pt x 94.46303pt.
+ [155]) (./network__reader_8cc.tex <./network__reader_8cc__incl.pdf>
+<network__reader_8cc__incl.pdf, id=4637, 1718.42pt x 515.9275pt>
+File: network__reader_8cc__incl.pdf Graphic file (type pdf)
+<use network__reader_8cc__incl.pdf>
+Package pdftex.def Info: network__reader_8cc__incl.pdf  used on input line 15.
+(pdftex.def)             Requested size: 350.0pt x 105.08092pt.
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_a884aae59668e7913051f2875b047688e}) has been already used, duplicate 
+ignored
 <to be read again> 
                    \relax 
-l.22 ...1_1ssp_a884aae59668e7913051f2875b047688e}}
-                                                  ) (./network__reader_8h.tex)
-(./null__encoder_8cc.tex [135]) (./null__encoder_8h.tex) (./nv__decoder_8cc.tex
-[136]) (./nv__decoder_8h.tex) (./nv__encoder_8cc.tex [137])
-(./nv__encoder_8h.tex [138]) (./nvpipe__types_8h.texpdfTeX warning (ext4): dest
-ination with the same identifier (name{namespacemoetsi_1_1ssp_a9113dc526e642001
-a9213326b2c5539f}) has been already used, duplicate ignored
+l.28 ...1_1ssp_a884aae59668e7913051f2875b047688e}}
+                                                  ) (./network__reader_8h.tex
+[156] <./network__reader_8h__incl.pdf>
+<network__reader_8h__incl.pdf, id=4666, 1317.92375pt x 392.46625pt>
+File: network__reader_8h__incl.pdf Graphic file (type pdf)
+<use network__reader_8h__incl.pdf>
+Package pdftex.def Info: network__reader_8h__incl.pdf  used on input line 16.
+(pdftex.def)             Requested size: 350.0pt x 104.22462pt.
+ <./network__reader_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./network__reader_8h__dep__incl.pdf): PDF inclus
+ion: multiple pdfs with page group included in a single page
+>
+<network__reader_8h__dep__incl.pdf, id=4681, 592.2125pt x 156.585pt>
+File: network__reader_8h__dep__incl.pdf Graphic file (type pdf)
+<use network__reader_8h__dep__incl.pdf>
+Package pdftex.def Info: network__reader_8h__dep__incl.pdf  used on input line 
+24.
+(pdftex.def)             Requested size: 350.0pt x 92.54442pt.
+) (./null__encoder_8cc.tex [157] <./null__encoder_8cc__incl.pdf>
+<null__encoder_8cc__incl.pdf, id=4705, 1317.92375pt x 448.67625pt>
+File: null__encoder_8cc__incl.pdf Graphic file (type pdf)
+<use null__encoder_8cc__incl.pdf>
+Package pdftex.def Info: null__encoder_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 119.15195pt.
+)
+(./null__encoder_8h.tex <./null__encoder_8h__incl.pdf
+
+pdfTeX warning: pdflatex (file ./null__encoder_8h__incl.pdf): PDF inclusion: mu
+ltiple pdfs with page group included in a single page
+>
+<null__encoder_8h__incl.pdf, id=4722, 1317.92375pt x 392.46625pt>
+File: null__encoder_8h__incl.pdf Graphic file (type pdf)
+<use null__encoder_8h__incl.pdf>
+Package pdftex.def Info: null__encoder_8h__incl.pdf  used on input line 9.
+(pdftex.def)             Requested size: 350.0pt x 104.22462pt.
+ <./null__encoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./null__encoder_8h__dep__incl.pdf): PDF inclusio
+n: multiple pdfs with page group included in a single page
+>
+<null__encoder_8h__dep__incl.pdf, id=4737, 544.0325pt x 156.585pt>
+File: null__encoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use null__encoder_8h__dep__incl.pdf>
+Package pdftex.def Info: null__encoder_8h__dep__incl.pdf  used on input line 17
+.
+(pdftex.def)             Requested size: 350.0pt x 100.74208pt.
+ [158]) (./nv__decoder_8cc.tex <./nv__decoder_8cc__incl.pdf>
+<nv__decoder_8cc__incl.pdf, id=4760, 1946.27126pt x 572.1375pt>
+File: nv__decoder_8cc__incl.pdf Graphic file (type pdf)
+<use nv__decoder_8cc__incl.pdf>
+Package pdftex.def Info: nv__decoder_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 102.88426pt.
+ [159])
+(./nv__decoder_8h.tex <./nv__decoder_8h__incl.pdf>
+<nv__decoder_8h__incl.pdf, id=4788, 1946.27126pt x 515.9275pt>
+File: nv__decoder_8h__incl.pdf Graphic file (type pdf)
+<use nv__decoder_8h__incl.pdf>
+Package pdftex.def Info: nv__decoder_8h__incl.pdf  used on input line 19.
+(pdftex.def)             Requested size: 350.0pt x 92.77634pt.
+ <./nv__decoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./nv__decoder_8h__dep__incl.pdf): PDF inclusion:
+ multiple pdfs with page group included in a single page
+>
+<nv__decoder_8h__dep__incl.pdf, id=4803, 166.6225pt x 156.585pt>
+File: nv__decoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use nv__decoder_8h__dep__incl.pdf>
+Package pdftex.def Info: nv__decoder_8h__dep__incl.pdf  used on input line 27.
+(pdftex.def)             Requested size: 166.0pt x 156.01117pt.
+ [160]) (./nv__encoder_8cc.tex <./nv__encoder_8cc__incl.pdf>
+<nv__encoder_8cc__incl.pdf, id=4826, 2419.0375pt x 628.3475pt>
+File: nv__encoder_8cc__incl.pdf Graphic file (type pdf)
+<use nv__encoder_8cc__incl.pdf>
+Package pdftex.def Info: nv__encoder_8cc__incl.pdf  used on input line 23.
+(pdftex.def)             Requested size: 350.0pt x 90.9115pt.
+ [161])
+(./nv__encoder_8h.tex <./nv__encoder_8h__incl.pdf>
+<nv__encoder_8h__incl.pdf, id=4854, 2496.32625pt x 572.1375pt>
+File: nv__encoder_8h__incl.pdf Graphic file (type pdf)
+<use nv__encoder_8h__incl.pdf>
+Package pdftex.def Info: nv__encoder_8h__incl.pdf  used on input line 20.
+(pdftex.def)             Requested size: 350.0pt x 80.21219pt.
+ <./nv__encoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./nv__encoder_8h__dep__incl.pdf): PDF inclusion:
+ multiple pdfs with page group included in a single page
+>
+<nv__encoder_8h__dep__incl.pdf, id=4869, 166.6225pt x 156.585pt>
+File: nv__encoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use nv__encoder_8h__dep__incl.pdf>
+Package pdftex.def Info: nv__encoder_8h__dep__incl.pdf  used on input line 28.
+(pdftex.def)             Requested size: 166.0pt x 156.01117pt.
+ [162]) (./nvpipe__types_8h.tex <./nvpipe__types_8h__incl.pdf>
+<nvpipe__types_8h__incl.pdf, id=4890, 216.81pt x 156.585pt>
+File: nvpipe__types_8h__incl.pdf Graphic file (type pdf)
+<use nvpipe__types_8h__incl.pdf>
+Package pdftex.def Info: nvpipe__types_8h__incl.pdf  used on input line 15.
+(pdftex.def)             Requested size: 216.0pt x 156.00879pt.
+ <./nvpipe__types_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./nvpipe__types_8h__dep__incl.pdf): PDF inclusio
+n: multiple pdfs with page group included in a single page
+>
+<nvpipe__types_8h__dep__incl.pdf, id=4898, 171.64125pt x 212.795pt>
+File: nvpipe__types_8h__dep__incl.pdf Graphic file (type pdf)
+<use nvpipe__types_8h__dep__incl.pdf>
+Package pdftex.def Info: nvpipe__types_8h__dep__incl.pdf  used on input line 23
+.
+(pdftex.def)             Requested size: 171.0pt x 211.99895pt.
+ [163]pdfTeX warning (ext4): destination with the same identifier (name{namespa
+cemoetsi_1_1ssp_a9113dc526e642001a9213326b2c5539f}) has been already used, dupl
+icate ignored
 <to be read again> 
                    \relax 
-l.29 ...1_1ssp_a9113dc526e642001a9213326b2c5539f}}
+l.41 ...1_1ssp_a9113dc526e642001a9213326b2c5539f}}
                                                   )
-(./similarity__measures_8h.tex [139]
-Underfull \hbox (badness 2903) in paragraph at lines 29--29
+(./similarity__measures_8h.tex <./similarity__measures_8h__incl.pdf>
+<similarity__measures_8h__incl.pdf, id=4920, 343.2825pt x 156.585pt>
+File: similarity__measures_8h__incl.pdf Graphic file (type pdf)
+<use similarity__measures_8h__incl.pdf>
+Package pdftex.def Info: similarity__measures_8h__incl.pdf  used on input line 
+15.
+(pdftex.def)             Requested size: 342.0pt x 155.99922pt.
+ [164] <./similarity__measures_8h__dep__incl.pdf>
+<similarity__measures_8h__dep__incl.pdf, id=4939, 205.76875pt x 156.585pt>
+File: similarity__measures_8h__dep__incl.pdf Graphic file (type pdf)
+<use similarity__measures_8h__dep__incl.pdf>
+Package pdftex.def Info: similarity__measures_8h__dep__incl.pdf  used on input 
+line 23.
+(pdftex.def)             Requested size: 205.0pt x 156.00162pt.
+
+Underfull \hbox (badness 2903) in paragraph at lines 41--41
 []\T1/phv/m/sl/9 Get Struc-tural Sim-i-lar-ity be-tween 2 im-ages cf. for in-st
 ance [][] \T1/pcr/m/sl/9 http[]://amroamroamro.[]github.[]
  []
 
-) (./include_2ssp_8h.tex) (./ssp_8h.tex [140]) (./ssp__client__k4a_8cc.tex
-[141]) (./ssp__client__opencv_8cc.tex [142]) (./ssp__client__template_8cc.tex)
-(./ssp__server_8cc.tex [143]) (./ssp__tester_8cc.tex [144])
-(./include_2utils_2utils_8h.texpdfTeX warning (ext4): destination with the same
- identifier (name{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}) ha
-s been already used, duplicate ignored
+) (./include_2ssp_8h.tex [165] <./include_2ssp_8h__incl.pdf>
+<include_2ssp_8h__incl.pdf, id=4964, 1441.385pt x 448.67625pt>
+File: include_2ssp_8h__incl.pdf Graphic file (type pdf)
+<use include_2ssp_8h__incl.pdf>
+Package pdftex.def Info: include_2ssp_8h__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 108.9442pt.
+) (./ssp_8h.tex <./ssp_8h__incl.pdf
+
+pdfTeX warning: pdflatex (file ./ssp_8h__incl.pdf): PDF inclusion: multiple pdf
+s with page group included in a single page
+>
+<ssp_8h__incl.pdf, id=4981, 1441.385pt x 448.67625pt>
+File: ssp_8h__incl.pdf Graphic file (type pdf)
+<use ssp_8h__incl.pdf>
+Package pdftex.def Info: ssp_8h__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 108.9442pt.
+ [166]) (./ssp__client__k4a_8cc.tex <./ssp__client__k4a_8cc__incl.pdf>
+<ssp__client__k4a_8cc__incl.pdf, id=5009, 2817.52625pt x 639.38875pt>
+File: ssp__client__k4a_8cc__incl.pdf Graphic file (type pdf)
+<use ssp__client__k4a_8cc__incl.pdf>
+Package pdftex.def Info: ssp__client__k4a_8cc__incl.pdf  used on input line 29.
+
+(pdftex.def)             Requested size: 350.0pt x 79.42583pt.
+
+[167]) (./ssp__client__opencv_8cc.tex <./ssp__client__opencv_8cc__incl.pdf>
+<ssp__client__opencv_8cc__incl.pdf, id=5040, 1996.45876pt x 526.96875pt>
+File: ssp__client__opencv_8cc__incl.pdf Graphic file (type pdf)
+<use ssp__client__opencv_8cc__incl.pdf>
+Package pdftex.def Info: ssp__client__opencv_8cc__incl.pdf  used on input line 
+28.
+(pdftex.def)             Requested size: 350.0pt x 92.38173pt.
+
+[168]) (./ssp__client__template_8cc.tex <./ssp__client__template_8cc__incl.pdf
+
+pdfTeX warning: pdflatex (file ./ssp__client__template_8cc__incl.pdf): PDF incl
+usion: multiple pdfs with page group included in a single page
+>
+<ssp__client__template_8cc__incl.pdf, id=5083, 1996.45876pt x 526.96875pt>
+File: ssp__client__template_8cc__incl.pdf Graphic file (type pdf)
+<use ssp__client__template_8cc__incl.pdf>
+Package pdftex.def Info: ssp__client__template_8cc__incl.pdf  used on input lin
+e 28.
+(pdftex.def)             Requested size: 350.0pt x 92.38173pt.
+ [169]) (./ssp__server_8cc.tex <./ssp__server_8cc__incl.pdf>
+<ssp__server_8cc__incl.pdf, id=5112, 3822.28pt x 515.9275pt>
+File: ssp__server_8cc__incl.pdf Graphic file (type pdf)
+<use ssp__server_8cc__incl.pdf>
+Package pdftex.def Info: ssp__server_8cc__incl.pdf  used on input line 28.
+(pdftex.def)             Requested size: 350.0pt x 47.24232pt.
+)
+(./ssp__tester_8cc.tex [170] <./ssp__tester_8cc__incl.pdf>
+<ssp__tester_8cc__incl.pdf, id=5142, 3917.63625pt x 526.96875pt>
+File: ssp__tester_8cc__incl.pdf Graphic file (type pdf)
+<use ssp__tester_8cc__incl.pdf>
+Package pdftex.def Info: ssp__tester_8cc__incl.pdf  used on input line 35.
+(pdftex.def)             Requested size: 350.0pt x 47.07133pt.
+)
+(./include_2utils_2utils_8h.tex <./include_2utils_2utils_8h__incl.pdf
+
+pdfTeX warning: pdflatex (file ./include_2utils_2utils_8h__incl.pdf): PDF inclu
+sion: multiple pdfs with page group included in a single page
+>
+<include_2utils_2utils_8h__incl.pdf, id=5157, 748.7975pt x 223.83624pt>
+File: include_2utils_2utils_8h__incl.pdf Graphic file (type pdf)
+<use include_2utils_2utils_8h__incl.pdf>
+Package pdftex.def Info: include_2utils_2utils_8h__incl.pdf  used on input line
+ 21.
+(pdftex.def)             Requested size: 350.0pt x 104.62582pt.
+ [171] <./include_2utils_2utils_8h__dep__incl.pdf>
+<include_2utils_2utils_8h__dep__incl.pdf, id=5184, 375.4025pt x 325.215pt>
+File: include_2utils_2utils_8h__dep__incl.pdf Graphic file (type pdf)
+<use include_2utils_2utils_8h__dep__incl.pdf>
+Package pdftex.def Info: include_2utils_2utils_8h__dep__incl.pdf  used on input
+ line 29.
+(pdftex.def)             Requested size: 350.0pt x 303.2259pt.
+ [172]pdfTeX warning (ext4): destination with the same identifier (name{namespa
+cemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}) has been already used, dupl
+icate ignored
 <to be read again> 
                    \relax 
-l.41 ...1_1ssp_ac615e71e018ead7a1598be1b67079f93}}
-                                                   [145])
-(./utils_2utils_8h.texpdfTeX warning (ext4): destination with the same identifi
-er (name{namespacemoetsi_1_1ssp_ac615e71e018ead7a1598be1b67079f93}) has been al
-ready used, duplicate ignored
+l.53 ...1_1ssp_ac615e71e018ead7a1598be1b67079f93}}
+                                                  ) (./utils_2utils_8h.tex <./u
+tils_2utils_8h__incl.pdf>
+<utils_2utils_8h__incl.pdf, id=5208, 748.7975pt x 223.83624pt>
+File: utils_2utils_8h__incl.pdf Graphic file (type pdf)
+<use utils_2utils_8h__incl.pdf>
+Package pdftex.def Info: utils_2utils_8h__incl.pdf  used on input line 21.
+(pdftex.def)             Requested size: 350.0pt x 104.62582pt.
+ [173] <./utils_2utils_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./utils_2utils_8h__dep__incl.pdf): PDF inclusion
+: multiple pdfs with page group included in a single page
+>
+<utils_2utils_8h__dep__incl.pdf, id=5235, 2801.46625pt x 550.055pt>
+File: utils_2utils_8h__dep__incl.pdf Graphic file (type pdf)
+<use utils_2utils_8h__dep__incl.pdf>
+Package pdftex.def Info: utils_2utils_8h__dep__incl.pdf  used on input line 29.
+
+(pdftex.def)             Requested size: 350.0pt x 68.71474pt.
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_ac615e71e018ead7a1598be1b67079f93}) has been already used, duplicate 
+ignored
 <to be read again> 
                    \relax 
-l.41 ...1_1ssp_ac615e71e018ead7a1598be1b67079f93}}
-                                                   [146])
-(./video__file__reader_8cc.tex
-Overfull \hbox (105.9142pt too wide) in paragraph at lines 21--31
+l.53 ...1_1ssp_ac615e71e018ead7a1598be1b67079f93}}
+                                                   [174])
+(./video__file__reader_8cc.tex <./video__file__reader_8cc__incl.pdf>
+<video__file__reader_8cc__incl.pdf, id=5268, 1492.57625pt x 448.67625pt>
+File: video__file__reader_8cc__incl.pdf Graphic file (type pdf)
+<use video__file__reader_8cc__incl.pdf>
+Package pdftex.def Info: video__file__reader_8cc__incl.pdf  used on input line 
+14.
+(pdftex.def)             Requested size: 350.0pt x 105.20616pt.
+
+Overfull \hbox (105.9142pt too wide) in paragraph at lines 27--37
 []\T1/phv/m/n/10 , [],
  []
 
 
-Overfull \hbox (166.9152pt too wide) in paragraph at lines 21--31
+Overfull \hbox (166.9152pt too wide) in paragraph at lines 27--37
 []\T1/phv/m/n/10 , [], 
  []
 
 
-Overfull \hbox (136.91858pt too wide) in paragraph at lines 21--31
+Overfull \hbox (136.91858pt too wide) in paragraph at lines 27--37
 []\T1/phv/m/n/10 , []
  []
 
-
-Overfull \hbox (112.93385pt too wide) in paragraph at lines 31--41
+[175]
+Overfull \hbox (112.93385pt too wide) in paragraph at lines 37--47
 []\T1/phv/m/n/10 , [],
  []
 
 
-Overfull \hbox (125.95651pt too wide) in paragraph at lines 31--41
+Overfull \hbox (125.95651pt too wide) in paragraph at lines 37--47
 []\T1/phv/m/n/10 , [], 
  []
 
 
-Overfull \hbox (125.95651pt too wide) in paragraph at lines 31--41
+Overfull \hbox (125.95651pt too wide) in paragraph at lines 37--47
 []\T1/phv/m/n/10 , [],
  []
 
-[147]) (./video__file__reader_8h.tex) (./video__utils_8h.tex [148]pdfTeX warnin
-g (ext4): destination with the same identifier (name{namespacemoetsi_1_1ssp_ac6
-e1b3e0caadb02f6e5a8387e6fee988}) has been already used, duplicate ignored
+) (./video__file__reader_8h.tex <./video__file__reader_8h__incl.pdf>
+<video__file__reader_8h__incl.pdf, id=5312, 1492.57625pt x 392.46625pt>
+File: video__file__reader_8h__incl.pdf Graphic file (type pdf)
+<use video__file__reader_8h__incl.pdf>
+Package pdftex.def Info: video__file__reader_8h__incl.pdf  used on input line 2
+5.
+(pdftex.def)             Requested size: 350.0pt x 92.02596pt.
+ <./video__file__reader_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./video__file__reader_8h__dep__incl.pdf): PDF in
+clusion: multiple pdfs with page group included in a single page
+>
+<video__file__reader_8h__dep__incl.pdf, id=5328, 566.115pt x 156.585pt>
+File: video__file__reader_8h__dep__incl.pdf Graphic file (type pdf)
+<use video__file__reader_8h__dep__incl.pdf>
+Package pdftex.def Info: video__file__reader_8h__dep__incl.pdf  used on input l
+ine 33.
+(pdftex.def)             Requested size: 350.0pt x 96.81169pt.
+ [176]) (./video__utils_8h.tex <./video__utils_8h__incl.pdf>
+<video__utils_8h__incl.pdf, id=5356, 1653.17625pt x 459.7175pt>
+File: video__utils_8h__incl.pdf Graphic file (type pdf)
+<use video__utils_8h__incl.pdf>
+Package pdftex.def Info: video__utils_8h__incl.pdf  used on input line 30.
+(pdftex.def)             Requested size: 350.0pt x 97.32916pt.
+ [177] <./video__utils_8h__dep__incl.pdf>
+<video__utils_8h__dep__incl.pdf, id=5381, 1590.94376pt x 325.215pt>
+File: video__utils_8h__dep__incl.pdf Graphic file (type pdf)
+<use video__utils_8h__dep__incl.pdf>
+Package pdftex.def Info: video__utils_8h__dep__incl.pdf  used on input line 38.
+
+(pdftex.def)             Requested size: 350.0pt x 71.54256pt.
+pdfTeX warning (ext4): destination with the same identifier (name{namespacemoet
+si_1_1ssp_ac6e1b3e0caadb02f6e5a8387e6fee988}) has been already used, duplicate 
+ignored
 <to be read again> 
                    \relax 
-l.66 ...1_1ssp_ac6e1b3e0caadb02f6e5a8387e6fee988}}
+l.78 ...1_1ssp_ac6e1b3e0caadb02f6e5a8387e6fee988}}
                                                   ) (./zdepth__decoder_8cc.tex
-[149]) (./zdepth__decoder_8h.tex) (./zdepth__encoder_8cc.tex [150])
-(./zdepth__encoder_8h.tex) [151] [152
+[178] <./zdepth__decoder_8cc__incl.pdf>
+<zdepth__decoder_8cc__incl.pdf, id=5411, 1317.92375pt x 448.67625pt>
+File: zdepth__decoder_8cc__incl.pdf Graphic file (type pdf)
+<use zdepth__decoder_8cc__incl.pdf>
+Package pdftex.def Info: zdepth__decoder_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 119.15195pt.
+) (./zdepth__decoder_8h.tex <./zdepth__decoder_8h__incl.pdf
+
+pdfTeX warning: pdflatex (file ./zdepth__decoder_8h__incl.pdf): PDF inclusion: 
+multiple pdfs with page group included in a single page
+>
+<zdepth__decoder_8h__incl.pdf, id=5428, 1317.92375pt x 392.46625pt>
+File: zdepth__decoder_8h__incl.pdf Graphic file (type pdf)
+<use zdepth__decoder_8h__incl.pdf>
+Package pdftex.def Info: zdepth__decoder_8h__incl.pdf  used on input line 15.
+(pdftex.def)             Requested size: 350.0pt x 104.22462pt.
+ <./zdepth__decoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./zdepth__decoder_8h__dep__incl.pdf): PDF inclus
+ion: multiple pdfs with page group included in a single page
+>
+<zdepth__decoder_8h__dep__incl.pdf, id=5444, 1317.92375pt x 381.425pt>
+File: zdepth__decoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use zdepth__decoder_8h__dep__incl.pdf>
+Package pdftex.def Info: zdepth__decoder_8h__dep__incl.pdf  used on input line 
+23.
+(pdftex.def)             Requested size: 350.0pt x 101.29248pt.
+ [179]) (./zdepth__encoder_8cc.tex <./zdepth__encoder_8cc__incl.pdf>
+<zdepth__encoder_8cc__incl.pdf, id=5469, 2257.43375pt x 628.3475pt>
+File: zdepth__encoder_8cc__incl.pdf Graphic file (type pdf)
+<use zdepth__encoder_8cc__incl.pdf>
+Package pdftex.def Info: zdepth__encoder_8cc__incl.pdf  used on input line 14.
+(pdftex.def)             Requested size: 350.0pt x 97.42162pt.
+)
+(./zdepth__encoder_8h.tex [180] <./zdepth__encoder_8h__incl.pdf>
+<zdepth__encoder_8h__incl.pdf, id=5498, 2257.43375pt x 572.1375pt>
+File: zdepth__encoder_8h__incl.pdf Graphic file (type pdf)
+<use zdepth__encoder_8h__incl.pdf>
+Package pdftex.def Info: zdepth__encoder_8h__incl.pdf  used on input line 19.
+(pdftex.def)             Requested size: 350.0pt x 88.70657pt.
+ <./zdepth__encoder_8h__dep__incl.pdf
+
+pdfTeX warning: pdflatex (file ./zdepth__encoder_8h__dep__incl.pdf): PDF inclus
+ion: multiple pdfs with page group included in a single page
+>
+<zdepth__encoder_8h__dep__incl.pdf, id=5513, 559.08875pt x 156.585pt>
+File: zdepth__encoder_8h__dep__incl.pdf Graphic file (type pdf)
+<use zdepth__encoder_8h__dep__incl.pdf>
+Package pdftex.def Info: zdepth__encoder_8h__dep__incl.pdf  used on input line 
+27.
+(pdftex.def)             Requested size: 350.0pt x 98.02785pt.
+) [181] [182
 
 ]
 No file refman.ind.
@@ -4207,7 +5557,7 @@ Package rerunfilecheck Warning: File `refman.out' has changed.
 
 Package rerunfilecheck Info: Checksums for `refman.out':
 (rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  9C14EDD66443BFBF69E6298176D18128;93749.
+(rerunfilecheck)             After:  D7862B3F5F8ABB1497328EAD3803C9BA;94480.
 
 LaTeX Warning: There were undefined references.
 
@@ -4216,13 +5566,13 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 19607 strings out of 483140
- 381193 string characters out of 5965150
+ 20586 strings out of 483140
+ 420429 string characters out of 5965150
  562137 words of memory out of 5000000
- 32284 multiletter control sequences out of 15000+600000
+ 33090 multiletter control sequences out of 15000+600000
  596971 words of font info for 104 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 55i,16n,96p,984b,965s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,16n,96p,984b,967s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{libav__types_8h_source} has been referenced but d
 oes not exist, replaced by a fixed one
 
@@ -4245,10 +5595,10 @@ hare/texlive/texmf-dist/fonts/type1/urw/courier/ucrro8a.pfb></usr/share/texlive
 fonts/type1/urw/helvetic/uhvb8ac.pfb></usr/share/texlive/texmf-dist/fonts/type1
 /urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helveti
 c/uhvro8a.pfb>
-Output written on refman.pdf (154 pages, 432616 bytes).
+Output written on refman.pdf (184 pages, 1834721 bytes).
 PDF statistics:
- 4083 PDF objects out of 4296 (max. 8388607)
- 3851 compressed objects within 39 object streams
- 1786 named destinations out of 2073 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 5990 PDF objects out of 6186 (max. 8388607)
+ 5168 compressed objects within 52 object streams
+ 1959 named destinations out of 2073 (max. 500000)
+ 666 words of extra memory for PDF output out of 10000 (max. 10000000)
 

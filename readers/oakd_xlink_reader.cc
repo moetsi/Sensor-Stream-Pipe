@@ -54,6 +54,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Changing the IP address to the correct depthai format (const char*)
     char chText[48];
     std::string ip_name = config["ip"].as<std::string>();
+    ip_name = StringInterpolation(ip_name);
     ip_name.copy(chText, ip_name.size(), 0);
     chText[ip_name.size()] = '\0';
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -106,13 +107,26 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Step 2. Read a model in OpenVINO Intermediate Representation (.xml and
     // .bin files) or ONNX (.onnx file) format
 
+
 #ifndef _WIN32    
-    network = ie.ReadNetwork("../../models/human-pose-estimation-3d-0001.xml");
+    std::string rel = "../../"; 
 #endif
 #ifdef _WIN32    
-    network = ie.ReadNetwork("../../../models/human-pose-estimation-3d-0001.xml");
+    std::string rel = "../../../";
 #endif
 
+    std::map<std::string,std::string> env;
+    env["REL"] = rel;
+    std::string model_path = config["model"].as<std::string>();
+    model_path = StringInterpolation(env, model_path);
+
+    network = ie.ReadNetwork(model_path);
+    //#ifndef _WIN32    
+    //    network = ie.ReadNetwork("../../models/human-pose-estimation-3d-0001.xml");
+    //#endif
+    //#ifdef _WIN32    
+    //    network = ie.ReadNetwork("../../../models/human-pose-estimation-3d-0001.xml");
+    //#endif
     // if (network.getOutputsInfo().size() != 1)
     //     throw std::logic_error("Sample supports topologies with 1 output only");
     if (network.getInputsInfo().size() != 1)

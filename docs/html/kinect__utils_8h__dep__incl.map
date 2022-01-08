@@ -1,0 +1,7 @@
+<map id="kinect_utils.h" name="kinect_utils.h">
+<area shape="rect" id="node1" title="Utils for Kinect RT integration." alt="" coords="172,5,281,32"/>
+<area shape="rect" id="node2" href="$ssp__client__k4a_8cc.html" title="SSP client with lib k4a." alt="" coords="5,80,141,107"/>
+<area shape="rect" id="node3" href="$kinect__reader_8h.html" title="Kinect driver." alt="" coords="165,80,288,107"/>
+<area shape="rect" id="node5" href="$kinect__utils_8cc.html" title="Utils for Kinect RT integration." alt="" coords="312,80,427,107"/>
+<area shape="rect" id="node4" href="$kinect__reader_8cc.html" title="Kinect driver." alt="" coords="163,155,291,181"/>
+</map>

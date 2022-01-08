@@ -25,5 +25,6 @@ var searchData=
   ['stream_5fdepth_186',['stream_depth',['../structmoetsi_1_1ssp_1_1ExtendedAzureConfig.html#ae189c45e7f654e635d802713814cda3e',1,'moetsi::ssp::ExtendedAzureConfig']]],
   ['stream_5fid_187',['stream_id',['../structmoetsi_1_1ssp_1_1FrameStruct.html#a14a7976abfb26a9ca42e17555f8b1a8c',1,'moetsi::ssp::FrameStruct']]],
   ['stream_5fir_188',['stream_ir',['../structmoetsi_1_1ssp_1_1ExtendedAzureConfig.html#ab4c4fd8a25fe1a5c97aace78bc6d987c',1,'moetsi::ssp::ExtendedAzureConfig']]],
-  ['swscontextdeleter_189',['SwsContextDeleter',['../structmoetsi_1_1ssp_1_1SwsContextDeleter.html',1,'moetsi::ssp']]]
+  ['stringinterpolation_189',['StringInterpolation',['../namespacemoetsi_1_1ssp.html#abe74cbb741dec4bebb18148c17158e7d',1,'moetsi::ssp::StringInterpolation(const std::map&lt; std::string, std::string &gt; &amp;env, const std::string &amp;s)'],['../namespacemoetsi_1_1ssp.html#a6454f35414e723f6f49c182bb511c02c',1,'moetsi::ssp::StringInterpolation(const std::string &amp;s)']]],
+  ['swscontextdeleter_190',['SwsContextDeleter',['../structmoetsi_1_1ssp_1_1SwsContextDeleter.html',1,'moetsi::ssp']]]
 ];

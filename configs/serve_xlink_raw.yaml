@@ -16,6 +16,7 @@ general:
       streaming_depth_mode: "STEREO_DISPARITY"
       streaming_depth_resolution: "STEREO_RESOLUTION_480P"
       streaming_rate: "10"
+      model: "@{REL}/models/human-pose-estimation-3d-0001.xml"
 video_encoder:
   0: #color
     type: "null"

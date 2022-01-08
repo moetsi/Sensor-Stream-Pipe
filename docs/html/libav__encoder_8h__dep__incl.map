@@ -1,0 +1,8 @@
+<map id="libav_encoder.h" name="libav_encoder.h">
+<area shape="rect" id="node1" title="Jpeg/Mpeg encoder." alt="" coords="260,5,384,32"/>
+<area shape="rect" id="node2" href="$iencoder_8cc.html" title="IEncoder factory." alt="" coords="5,80,100,107"/>
+<area shape="rect" id="node3" href="$libav__encoder_8cc.html" title="Jpef/Mpeg encoder." alt="" coords="125,80,255,107"/>
+<area shape="rect" id="node4" href="$ireader_8cc.html" title="IReader factory." alt="" coords="279,80,365,107"/>
+<area shape="rect" id="node5" href="$ssp__server_8cc.html" title="SSP, server side." alt="" coords="389,80,498,107"/>
+<area shape="rect" id="node6" href="$ssp__tester_8cc.html" title="SSP test program." alt="" coords="522,80,629,107"/>
+</map>

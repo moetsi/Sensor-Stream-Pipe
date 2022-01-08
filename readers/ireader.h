@@ -16,6 +16,18 @@ namespace moetsi::ssp {
 void SetupLogging(const std::string &level, const std::string &file);
 
 /**
+ * @brief Magic string interpolation
+ * \param env environment
+ * \param str input
+ */
+std::string StringInterpolation(const std::map<std::string, std::string> &env, const std::string &s);
+/**
+ * @brief Magic string interpolation
+ * \param str input
+ */
+std::string StringInterpolation(const std::string &s);
+
+/**
  * @brief SSP reader interface - abstract class.
  */ 
 class IReader {
