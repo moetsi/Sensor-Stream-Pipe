@@ -101,7 +101,7 @@ std::string StringInterpolation(const std::map<std::string, std::string> &env, c
         rv = ss.str();
     } while(had_subst);
 
-    std::cerr << "string interpolation = " << rv << std::endl << std::flush;
+    //std::cerr << "string interpolation = " << rv << std::endl << std::flush;
     return rv;
 }
 
