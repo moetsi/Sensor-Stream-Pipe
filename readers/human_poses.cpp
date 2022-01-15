@@ -7,6 +7,7 @@
 #include <vector>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "human_poses.h"
+#include "../utils/utils.h"
 
 namespace moetsi::ssp {
 namespace human_pose_estimation {
@@ -983,6 +984,9 @@ std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x
 #endif
 
         std::vector<Pose> current_poses_2d;
+        if (poses_3d.size()) {
+            std::cerr << "DIAG: 3D# " << poses_3d.size() << std::endl << std::flush;
+        }
         if (is_video) {    
             for (int pose_id = 0; pose_id < int(poses_2d_scaled.size()); ++pose_id) {
                 std::vector<std::vector<float>> pose_keypoints;
@@ -1000,8 +1004,22 @@ std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x
                 pose.init(pose_keypoints, *poses_2d_scaled.rbegin());
                 current_poses_2d.push_back(pose);
             }
+            if (current_poses_2d.size() > 0) {
+                std::cerr << "DIAG: 2D# " << current_poses_2d.size() << std::endl << std::flush;
+            }
             propagate_ids(common, previous_poses_2d, current_poses_2d);
-            previous_poses_2d = current_poses_2d;
+            if (current_poses_2d.size() > 0) {
+                previous_poses_2d = current_poses_2d;
+                auto t = CurrentTimeNs();
+                std::cerr << "DIAG: dt " << double(t - common.last_poses)*1e-9 << std::endl << std::flush;
+                common.last_poses = t;
+            } else {
+                auto t = CurrentTimeNs();
+                if (t - common.last_poses > 10000000000LL) {
+                    previous_poses_2d = current_poses_2d;
+                    common.last_poses = t;
+                }
+            }
         }
 
         std::vector<std::vector<float>> translated_poses_3d;

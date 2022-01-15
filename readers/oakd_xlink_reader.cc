@@ -443,7 +443,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     auto posesStruct = parse_poses(previous_poses_2d, common, R, 
         featuresMat, heatmapMat, paf_mapMat, input_scale, stride, fx,
         image.size[1] //1080
-        , false); //true);
+        , true); //true);
 
 #ifdef TEST_WITH_IMAGE
 
@@ -550,6 +550,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         //Create a COCO body Struct
         coco_human_t bodyStruct;
         bodyStruct.Id = posesStruct.poses_id[i];
+        std::cerr << "BODY: " << current_frame_counter_ << " # " <<  i << " ... " << bodyStruct.Id << std::endl << std::flush;
         // Map of joints to array index
         // neck 0 
         // nose 1 
