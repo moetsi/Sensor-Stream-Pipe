@@ -409,7 +409,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     std::cerr << "heatmaps_result[0] = " << heatmaps_result[0] << std::endl << std::flush;
     std::cerr << "pafs_result[0] = " << pafs_result[0] << std::endl << std::flush;
 
-    float fx = -1;
+    float fx = 984.344; // -1;
 
     // needed?
     matrix3x4 R = matrix3x4{ { {     
