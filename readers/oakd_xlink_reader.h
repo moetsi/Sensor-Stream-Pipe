@@ -61,18 +61,28 @@ using namespace InferenceEngine;
 class OakdXlinkReader : public IReader {
 private:
   int current_frame_counter_;
-
+  unsigned int fps;
   FrameStruct frame_template_;
+
+  //We use this dictionary to grab pairs of rgb and depth frames that caame from same point in time
+  std::unordered_map<int, std::list<std::tuple<std::string, dai::ImgFrame>>> frames_dictionary;
 
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
   //oakd info
   dai::Pipeline pipeline;
+  std::vector<std::string> queueNames;
+  std::shared_ptr<dai::node::ColorCamera> camRgb;
+  std::shared_ptr<dai::node::MonoCamera> left;
+  std::shared_ptr<dai::node::MonoCamera> right;
+  std::shared_ptr<dai::node::StereoDepth> stereo;
+  std::shared_ptr<dai::node::XLinkOut> xoutRgb;
+  std::shared_ptr<dai::node::XLinkOut> depthOut;
+
   std::shared_ptr<dai::DataOutputQueue> q;
   std::shared_ptr<dai::DataOutputQueue> qRgb;
+  std::shared_ptr<dai::DataOutputQueue> qDepth;
   std::shared_ptr<dai::node::StereoDepth> depth;
-  std::shared_ptr<dai::node::ColorCamera> camRgb;
-  std::shared_ptr<dai::node::XLinkOut> xoutRgb;
   dai::DeviceInfo device_info;
   std::shared_ptr<dai::Device> device;
 

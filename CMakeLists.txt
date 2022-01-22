@@ -96,8 +96,8 @@ elseif (UNIX)
       message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
       FetchContent_Declare(
         ssp_dep
-        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202109242040__ssp_lindep.tar.gz
-        URL_HASH MD5=5ef969687a6fdd37d258d5f84ff1e240
+        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202201211927__ssp_lindep.tar.gz
+        URL_HASH MD5=3b931ec54c5d377b8ef4466903339bb6
       )
     else ()
       FetchContent_Declare(

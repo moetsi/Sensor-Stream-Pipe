@@ -24,8 +24,10 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Starting to open");
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    
+    fps = config["streaming_rate"].as<unsigned int>();
+    
     current_frame_counter_ = 0;
-
     frame_template_.sensor_id = 0;
     frame_template_.stream_id = RandomString(16);
     frame_template_.device_id = config["deviceid"].as<unsigned int>();
@@ -35,21 +37,54 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     frame_template_.message_type = SSPMessageType::MessageTypeDefault; // 0;
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
     // Define source and output
     camRgb = pipeline.create<dai::node::ColorCamera>();
-    xoutRgb = pipeline.create<dai::node::XLinkOut>();
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    xoutRgb->setStreamName("rgb");
+    left = pipeline.create<dai::node::MonoCamera>();
+    right = pipeline.create<dai::node::MonoCamera>();
+    stereo = pipeline.create<dai::node::StereoDepth>();
 
-    // Properties
-    camRgb->setPreviewSize(1280, 720);
+    xoutRgb = pipeline.create<dai::node::XLinkOut>();
+    depthOut = pipeline.create<dai::node::XLinkOut>();
+
+    xoutRgb->setStreamName("rgb");
+    queueNames.push_back("rgb");
+    depthOut->setStreamName("depth");
+    queueNames.push_back("depth");
+
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
+    // Color Properties
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
     camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
-    camRgb->setInterleaved(false);
+    camRgb->setFps(fps);
+    camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
+    camRgb->initialControl.setManualFocus(135); // requires this focus to align depth
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
+    camRgb->setInterleaved(false);
+
+    // Depth Properties
+    auto monoRes = dai::MonoCameraProperties::SensorResolution::THE_400_P;
+    left->setResolution(monoRes);
+    left->setBoardSocket(dai::CameraBoardSocket::LEFT);
+    left->setFps(fps);
+    right->setResolution(monoRes);
+    right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+    right->setFps(fps);
+
+    stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
+    stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
+    stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
+
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
+
     // Linking
-    camRgb->preview.link(xoutRgb->input);
+    camRgb->isp.link(xoutRgb->input);
+    left->out.link(stereo->left);
+    right->out.link(stereo->right);
+    stereo->disparity.link(depthOut->input);
+
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Changing the IP address to the correct depthai format (const char*)
     char chText[48];
@@ -87,7 +122,11 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Output queue will be used to get the rgb frames from the output defined above
+    // Sets queues size and behavior
+
     qRgb = device->getOutputQueue("rgb", 4, false);                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    qDepth = device->getOutputQueue("depth", 4, false);    
+
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -188,8 +227,43 @@ void OakdXlinkReader::NextFrame() {
   current_frame_counter_++;
   uint64_t capture_timestamp = CurrentTimeMs();
 
-  //Color frame
+
 #ifndef TEST_WITH_IMAGE
+    
+    //Here we try until we get a synchronized color and depth frame
+    bool haveSyncedFrames = false;
+    int seqNum;
+    while (!haveSyncedFrames)
+    {
+        //Grab rgb and add to dictionary
+        auto rgbFromQueue = qRgb->get<dai::ImgFrame>();
+        seqNum = rgbFromQueue->getSequenceNum();
+        frames_dictionary[seqNum].push_back(("rgb", rgbFromQueue));
+        //Grab depth and add to dictionary
+        auto depthFromQueue = qRgb->get<dai::ImgFrame>();
+        seqNum = depthFromQueue->getSequenceNum();
+        frames_dictionary[seqNum].push_back(("depth", depthFromQueue))
+        //Check if any dictionary values have an array of length 2
+        for (const auto& kv: mymap) {
+	        std::cout << "Key: " << kv.first << " Value: " kv.second << std::endl;
+            if (kv.second.size() > 1)
+            {
+                
+            }
+        }
+
+    }
+    
+    //This is the dictionary that we use to check if a RGB and Depth frame of the same sequence number have arrived0
+    //Every "next frame" we pull a depth and a color until we get a match of depth and color
+    //pull color
+    //assign to proper key (if doesn't exist make one)
+    //pull depth
+    //assign to proper key (if doesn't exist make one)
+    //check if a key has a value that is length 2
+        // if yes, save those as rgbFrame and depthFrame
+        // if no, start from top
+
    auto frameFromOakD = qRgb->get<dai::ImgFrame>();                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
    auto frameRgbOpenCv = frameFromOakD->getCvFrame();                                     // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 #endif
@@ -672,7 +746,7 @@ std::vector<std::shared_ptr<FrameStruct>> OakdXlinkReader::GetCurrentFrame() {
 }
 
 unsigned int OakdXlinkReader::GetFps() {
-  return 10;
+  return fps;
 }
 
 std::vector<FrameType> OakdXlinkReader::GetType() {
