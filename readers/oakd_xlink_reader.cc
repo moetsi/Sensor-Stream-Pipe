@@ -792,6 +792,50 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         bodyStruct.ear_right_z = posesStruct.poses_3d[i][18 * 4 + 2];
         bodyStruct.ear_right_conf = posesStruct.poses_3d[i][18 * 4 + 3];
 
+        auto to2D = [](float x) -> int16_t {
+            std::cerr << "to2D: value = " << x << std::endl << std::flush;
+            return int64_t(x);
+        };
+
+        bodyStruct.neck_2DX = to2D(posesStruct.poses_2d[i][0 * 2 + 0]);
+        bodyStruct.neck_2DY = to2D(posesStruct.poses_2d[i][0 * 2 + 1]);
+        bodyStruct.nose_2DX = to2D(posesStruct.poses_2d[i][1 * 2 + 0]);
+        bodyStruct.nose_2DY = to2D(posesStruct.poses_2d[i][1 * 2 + 1]);
+        bodyStruct.pelvis_2DX = to2D(posesStruct.poses_2d[i][2 * 2 + 0]);
+        bodyStruct.pelvis_2DY = to2D(posesStruct.poses_2d[i][2 * 2 + 1]);
+        bodyStruct.shoulder_left_2DX = to2D(posesStruct.poses_2d[i][3 * 2 + 0]);
+        bodyStruct.shoulder_left_2DY = to2D(posesStruct.poses_2d[i][3 * 2 + 1]);
+        bodyStruct.elbow_left_2DX = to2D(posesStruct.poses_2d[i][4 * 2 + 0]);
+        bodyStruct.elbow_left_2DY = to2D(posesStruct.poses_2d[i][4 * 2 + 1]);
+        bodyStruct.wrist_left_2DX = to2D(posesStruct.poses_2d[i][5 * 2 + 0]);
+        bodyStruct.wrist_left_2DY = to2D(posesStruct.poses_2d[i][5 * 2 + 1]);
+        bodyStruct.hip_left_2DX = to2D(posesStruct.poses_2d[i][6 * 2 + 0]);
+        bodyStruct.hip_left_2DY = to2D(posesStruct.poses_2d[i][6 * 2 + 1]);
+        bodyStruct.knee_left_2DX = to2D(posesStruct.poses_2d[i][7 * 2 + 0]);
+        bodyStruct.knee_left_2DY = to2D(posesStruct.poses_2d[i][7 * 2 + 1]);
+        bodyStruct.ankle_left_2DX = to2D(posesStruct.poses_2d[i][8 * 2 + 0]);
+        bodyStruct.ankle_left_2DY = to2D(posesStruct.poses_2d[i][8 * 2 + 1]);
+        bodyStruct.shoulder_right_2DX = to2D(posesStruct.poses_2d[i][9 * 2 + 0]);
+        bodyStruct.shoulder_right_2DY = to2D(posesStruct.poses_2d[i][9 * 2 + 1]);
+        bodyStruct.elbow_right_2DX = to2D(posesStruct.poses_2d[i][10 * 2 + 0]);
+        bodyStruct.elbow_right_2DY = to2D(posesStruct.poses_2d[i][10 * 2 + 1]);
+        bodyStruct.wrist_right_2DX = to2D(posesStruct.poses_2d[i][11 * 2 + 0]);
+        bodyStruct.wrist_right_2DY = to2D(posesStruct.poses_2d[i][11 * 2 + 1]);
+        bodyStruct.hip_right_2DX = to2D(posesStruct.poses_2d[i][12 * 2 + 0]);
+        bodyStruct.hip_right_2DY = to2D(posesStruct.poses_2d[i][12 * 2 + 1]);
+        bodyStruct.knee_right_2DX = to2D(posesStruct.poses_2d[i][13 * 2 + 0]);
+        bodyStruct.knee_right_2DY = to2D(posesStruct.poses_2d[i][13 * 2 + 1]);
+        bodyStruct.ankle_right_2DX = to2D(posesStruct.poses_2d[i][14 * 2 + 0]);
+        bodyStruct.ankle_right_2DY = to2D(posesStruct.poses_2d[i][14 * 2 + 1]);
+        bodyStruct.eye_left_2DX = to2D(posesStruct.poses_2d[i][15 * 2 + 0]);
+        bodyStruct.eye_left_2DY = to2D(posesStruct.poses_2d[i][15 * 2 + 1]);
+        bodyStruct.ear_left_2DX = to2D(posesStruct.poses_2d[i][16 * 2 + 0]);
+        bodyStruct.ear_left_2DY = to2D(posesStruct.poses_2d[i][16 * 2 + 1]);
+        bodyStruct.eye_right_2DX = to2D(posesStruct.poses_2d[i][17 * 2 + 0]);
+        bodyStruct.eye_right_2DY = to2D(posesStruct.poses_2d[i][17 * 2 + 1]);
+        bodyStruct.ear_right_2DX = to2D(posesStruct.poses_2d[i][18 * 2 + 0]);
+        bodyStruct.ear_right_2DY = to2D(posesStruct.poses_2d[i][18 * 2 + 1]);
+
         bodyStruct.hton();
         //Finally we copy the COCO body struct memory to the frame
         memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));

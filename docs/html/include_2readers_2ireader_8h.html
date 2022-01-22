@@ -78,13 +78,15 @@ $(function() {
 
 <p>Reader interface to SSP.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="include_2structs_2frame__struct_8h_source.html">../structs/frame_struct.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &lt;map&gt;</code><br />
+<code>#include &quot;<a class="el" href="include_2structs_2frame__struct_8h_source.html">../structs/frame_struct.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for include/readers/ireader.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="include_2readers_2ireader_8h__incl.png" border="0" usemap="#ireader_8h" alt=""/></div>
 <map name="ireader_8h" id="ireader_8h">
-<area shape="rect" title="Reader interface to SSP." alt="" coords="461,5,540,32"/>
+<area shape="rect" title="Reader interface to SSP." alt="" coords="392,5,470,32"/>
+<area shape="rect" title=" " alt="" coords="336,80,387,107"/>
 <area shape="rect" href="include_2structs_2frame__struct_8h.html" title="Frame struct definition. &quot;Universal&quot; frame data type." alt="" coords="412,80,589,107"/>
 <area shape="rect" title=" " alt="" coords="358,237,421,263"/>
 <area shape="rect" title=" " alt="" coords="24,155,94,181"/>
@@ -136,6 +138,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a67a600c84b18e25713a78f85283c7fa9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#a67a600c84b18e25713a78f85283c7fa9">moetsi::ssp::SetupLogging</a> (const std::string &amp;level, const std::string &amp;file)</td></tr>
 <tr class="memdesc:a67a600c84b18e25713a78f85283c7fa9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup logging.  <a href="namespacemoetsi_1_1ssp.html#a67a600c84b18e25713a78f85283c7fa9">More...</a><br /></td></tr>
 <tr class="separator:a67a600c84b18e25713a78f85283c7fa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe74cbb741dec4bebb18148c17158e7d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#abe74cbb741dec4bebb18148c17158e7d">moetsi::ssp::StringInterpolation</a> (const std::map&lt; std::string, std::string &gt; &amp;env, const std::string &amp;s)</td></tr>
+<tr class="memdesc:abe74cbb741dec4bebb18148c17158e7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Magic string interpolation.  <a href="namespacemoetsi_1_1ssp.html#abe74cbb741dec4bebb18148c17158e7d">More...</a><br /></td></tr>
+<tr class="separator:abe74cbb741dec4bebb18148c17158e7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6454f35414e723f6f49c182bb511c02c"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#a6454f35414e723f6f49c182bb511c02c">moetsi::ssp::StringInterpolation</a> (const std::string &amp;s)</td></tr>
+<tr class="memdesc:a6454f35414e723f6f49c182bb511c02c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Magic string interpolation.  <a href="namespacemoetsi_1_1ssp.html#a6454f35414e723f6f49c182bb511c02c">More...</a><br /></td></tr>
+<tr class="separator:a6454f35414e723f6f49c182bb511c02c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5e820c4c6a1a43d5e85608a06b86ea8"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; IReader &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemoetsi_1_1ssp.html#ad5e820c4c6a1a43d5e85608a06b86ea8">moetsi::ssp::IReaderFactory</a> (const std::string &amp;config)</td></tr>
 <tr class="memdesc:ad5e820c4c6a1a43d5e85608a06b86ea8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmoetsi_1_1ssp_1_1IReader.html" title="SSP reader interface - abstract class.">IReader</a> factory.  <a href="namespacemoetsi_1_1ssp.html#ad5e820c4c6a1a43d5e85608a06b86ea8">More...</a><br /></td></tr>
 <tr class="separator:ad5e820c4c6a1a43d5e85608a06b86ea8"><td class="memSeparator" colspan="2">&#160;</td></tr>

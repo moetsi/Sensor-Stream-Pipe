@@ -1,15 +1,15 @@
 <map id="iphone_reader.mm" name="iphone_reader.mm">
-<area shape="rect" id="node1" title="iPhone driver" alt="" coords="785,5,929,32"/>
-<area shape="rect" id="node2" href="$iphone__reader_8h.html" title="iPhone driver" alt="" coords="313,80,440,107"/>
-<area shape="rect" id="node21" title=" " alt="" coords="465,80,627,107"/>
-<area shape="rect" id="node22" title=" " alt="" coords="652,80,763,107"/>
-<area shape="rect" id="node23" title=" " alt="" coords="787,80,926,107"/>
-<area shape="rect" id="node24" title=" " alt="" coords="950,80,1097,107"/>
-<area shape="rect" id="node25" title=" " alt="" coords="1121,80,1267,107"/>
-<area shape="rect" id="node26" title=" " alt="" coords="1292,80,1395,107"/>
+<area shape="rect" id="node1" title="iPhone driver" alt="" coords="823,5,967,32"/>
+<area shape="rect" id="node2" href="$iphone__reader_8h.html" title="iPhone driver" alt="" coords="352,80,479,107"/>
+<area shape="rect" id="node22" title=" " alt="" coords="503,80,666,107"/>
+<area shape="rect" id="node23" title=" " alt="" coords="691,80,801,107"/>
+<area shape="rect" id="node24" title=" " alt="" coords="826,80,965,107"/>
+<area shape="rect" id="node25" title=" " alt="" coords="989,80,1135,107"/>
+<area shape="rect" id="node26" title=" " alt="" coords="1159,80,1306,107"/>
+<area shape="rect" id="node27" title=" " alt="" coords="1331,80,1433,107"/>
 <area shape="rect" id="node3" title=" " alt="" coords="5,386,68,413"/>
 <area shape="rect" id="node4" href="$structs_2frame__struct_8h.html" title="Frame struct definition. &quot;Universal&quot; frame data type." alt="" coords="365,229,543,256"/>
-<area shape="rect" id="node20" href="$readers_2ireader_8h.html" title="Reader interface to SSP." alt="" coords="415,155,493,181"/>
+<area shape="rect" id="node20" href="$readers_2ireader_8h.html" title="Reader interface to SSP." alt="" coords="453,155,532,181"/>
 <area shape="rect" id="node5" title=" " alt="" coords="75,304,145,331"/>
 <area shape="rect" id="node6" title=" " alt="" coords="170,304,362,331"/>
 <area shape="rect" id="node7" title=" " alt="" coords="387,304,521,331"/>
@@ -25,4 +25,5 @@
 <area shape="rect" id="node18" title=" " alt="" coords="1402,379,1543,420"/>
 <area shape="rect" id="node19" title=" " alt="" coords="1568,386,1700,413"/>
 <area shape="rect" id="node17" title=" " alt="" coords="1279,468,1403,495"/>
+<area shape="rect" id="node21" title=" " alt="" coords="567,229,618,256"/>
 </map>

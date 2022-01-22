@@ -5,6 +5,7 @@
 Reader interface to S\+SP.  
 
 
+{\ttfamily \#include $<$map$>$}\newline
 {\ttfamily \#include \char`\"{}../structs/frame\+\_\+struct.\+h\char`\"{}}\newline
 Include dependency graph for include/readers/ireader.h\+:
 \nopagebreak
@@ -39,6 +40,10 @@ class \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader}{moetsi\+::ssp\+::\+I\+Read
 \item 
 void \mbox{\hyperlink{namespacemoetsi_1_1ssp_a67a600c84b18e25713a78f85283c7fa9}{moetsi\+::ssp\+::\+Setup\+Logging}} (const std\+::string \&level, const std\+::string \&file)
 \begin{DoxyCompactList}\small\item\em Setup logging. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{namespacemoetsi_1_1ssp_abe74cbb741dec4bebb18148c17158e7d}{moetsi\+::ssp\+::\+String\+Interpolation}} (const std\+::map$<$ std\+::string, std\+::string $>$ \&env, const std\+::string \&s)
+\begin{DoxyCompactList}\small\item\em Magic string interpolation. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{namespacemoetsi_1_1ssp_a6454f35414e723f6f49c182bb511c02c}{moetsi\+::ssp\+::\+String\+Interpolation}} (const std\+::string \&s)
+\begin{DoxyCompactList}\small\item\em Magic string interpolation. \end{DoxyCompactList}\item 
 std\+::shared\+\_\+ptr$<$ I\+Reader $>$ \mbox{\hyperlink{namespacemoetsi_1_1ssp_ad5e820c4c6a1a43d5e85608a06b86ea8}{moetsi\+::ssp\+::\+I\+Reader\+Factory}} (const std\+::string \&config)
 \begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader}{I\+Reader}} factory. \end{DoxyCompactList}\end{DoxyCompactItemize}
 

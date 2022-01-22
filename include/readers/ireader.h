@@ -3,6 +3,7 @@
  */
 // Created by amourao on 14-08-2019.
 #pragma once
+#include <map>
 
 #include "../structs/frame_struct.h"
 

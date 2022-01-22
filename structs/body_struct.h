@@ -212,6 +212,45 @@ struct coco_human_t
   float ear_right_QZ;
   float ear_right_QW;
   float ear_right_conf;
+// TODO FIXME htons!
+  int16_t neck_2DX;
+  int16_t neck_2DY;
+  int16_t nose_2DX;
+  int16_t nose_2DY;
+  int16_t pelvis_2DX;
+  int16_t pelvis_2DY;
+  int16_t shoulder_left_2DX;
+  int16_t shoulder_left_2DY;
+  int16_t elbow_left_2DX;
+  int16_t elbow_left_2DY;
+  int16_t wrist_left_2DX;
+  int16_t wrist_left_2DY;
+  int16_t hip_left_2DX;
+  int16_t hip_left_2DY;
+  int16_t knee_left_2DX;
+  int16_t knee_left_2DY;
+  int16_t ankle_left_2DX;
+  int16_t ankle_left_2DY;
+  int16_t shoulder_right_2DX;
+  int16_t shoulder_right_2DY;
+  int16_t elbow_right_2DX;
+  int16_t elbow_right_2DY;
+  int16_t wrist_right_2DX;
+  int16_t wrist_right_2DY;
+  int16_t hip_right_2DX;
+  int16_t hip_right_2DY;
+  int16_t knee_right_2DX;
+  int16_t knee_right_2DY;
+  int16_t ankle_right_2DX;
+  int16_t ankle_right_2DY;
+  int16_t eye_left_2DX;
+  int16_t eye_left_2DY;
+  int16_t ear_left_2DX;
+  int16_t ear_left_2DY;
+  int16_t eye_right_2DX;
+  int16_t eye_right_2DY;
+  int16_t ear_right_2DX;
+  int16_t ear_right_2DY;
 
 #ifndef __MOETSI_RAAS__
   // Serialize method (not used by Server but is available)
@@ -369,7 +408,47 @@ struct coco_human_t
       ear_right_QY,
       ear_right_QZ,
       ear_right_QW,
-      ear_right_conf
+      ear_right_conf,
+
+      neck_2DX,
+      neck_2DY,
+      nose_2DX,
+      nose_2DY,
+      pelvis_2DX,
+      pelvis_2DY,
+      shoulder_left_2DX,
+      shoulder_left_2DY,
+      elbow_left_2DX,
+      elbow_left_2DY,
+      wrist_left_2DX,
+      wrist_left_2DY,
+      hip_left_2DX,
+      hip_left_2DY,
+      knee_left_2DX,
+      knee_left_2DY,
+      ankle_left_2DX,
+      ankle_left_2DY,
+      shoulder_right_2DX,
+      shoulder_right_2DY,
+      elbow_right_2DX,
+      elbow_right_2DY,
+      wrist_right_2DX,
+      wrist_right_2DY,
+      hip_right_2DX,
+      hip_right_2DY,
+      knee_right_2DX,
+      knee_right_2DY,
+      ankle_right_2DX,
+      ankle_right_2DY,
+      eye_left_2DX,
+      eye_left_2DY,
+      ear_left_2DX,
+      ear_left_2DY,
+      eye_right_2DX,
+      eye_right_2DY,
+      ear_right_2DX,
+      ear_right_2DY
+
     );
   }
 #endif // !__MOETSI_RAAS__

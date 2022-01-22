@@ -1,8 +1,8 @@
 <map id="iphone_reader.h" name="iphone_reader.h">
-<area shape="rect" id="node1" title="iPhone driver" alt="" coords="313,5,440,32"/>
+<area shape="rect" id="node1" title="iPhone driver" alt="" coords="352,5,479,32"/>
 <area shape="rect" id="node2" title=" " alt="" coords="5,311,68,338"/>
 <area shape="rect" id="node3" href="$structs_2frame__struct_8h.html" title="Frame struct definition. &quot;Universal&quot; frame data type." alt="" coords="365,155,543,181"/>
-<area shape="rect" id="node19" href="$readers_2ireader_8h.html" title="Reader interface to SSP." alt="" coords="415,80,493,107"/>
+<area shape="rect" id="node19" href="$readers_2ireader_8h.html" title="Reader interface to SSP." alt="" coords="453,80,532,107"/>
 <area shape="rect" id="node4" title=" " alt="" coords="75,229,145,256"/>
 <area shape="rect" id="node5" title=" " alt="" coords="170,229,362,256"/>
 <area shape="rect" id="node6" title=" " alt="" coords="387,229,521,256"/>
@@ -18,4 +18,5 @@
 <area shape="rect" id="node17" title=" " alt="" coords="1402,304,1543,345"/>
 <area shape="rect" id="node18" title=" " alt="" coords="1568,311,1700,338"/>
 <area shape="rect" id="node16" title=" " alt="" coords="1279,393,1403,420"/>
+<area shape="rect" id="node20" title=" " alt="" coords="567,155,618,181"/>
 </map>
