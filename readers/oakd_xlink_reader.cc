@@ -44,10 +44,10 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     right = pipeline.create<dai::node::MonoCamera>();
     stereo = pipeline.create<dai::node::StereoDepth>();
 
-    xoutRgb = pipeline.create<dai::node::XLinkOut>();
+    rgbOut = pipeline.create<dai::node::XLinkOut>();
     depthOut = pipeline.create<dai::node::XLinkOut>();
 
-    xoutRgb->setStreamName("rgb");
+    rgbOut->setStreamName("rgb");
     queueNames.push_back("rgb");
     depthOut->setStreamName("depth");
     queueNames.push_back("depth");
@@ -73,6 +73,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     right->setFps(fps);
 
     stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
+    // depth->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
 
@@ -80,7 +81,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 
     // Linking
-    camRgb->isp.link(xoutRgb->input);
+    camRgb->isp.link(rgbOut->input);
     left->out.link(stereo->left);
     right->out.link(stereo->right);
     stereo->disparity.link(depthOut->input);
@@ -230,42 +231,64 @@ void OakdXlinkReader::NextFrame() {
 
 #ifndef TEST_WITH_IMAGE
     
-    //Here we try until we get a synchronized color and depth frame
+    //We try until we get a synchronized color and depth frame
     bool haveSyncedFrames = false;
     int seqNum;
+    std::shared_ptr<dai::ImgFrame> synchedRgbFrame;
+    std::shared_ptr<dai::ImgFrame> synchedDepthFrame;
+
+    //Now we pull frames until we get a synchronized color and depth frame
     while (!haveSyncedFrames)
     {
         //Grab rgb and add to dictionary
         auto rgbFromQueue = qRgb->get<dai::ImgFrame>();
         seqNum = rgbFromQueue->getSequenceNum();
-        frames_dictionary[seqNum].push_back(("rgb", rgbFromQueue));
+        frames_dictionary[seqNum].push_back(std::make_tuple("rgb", rgbFromQueue));
         //Grab depth and add to dictionary
-        auto depthFromQueue = qRgb->get<dai::ImgFrame>();
+        auto depthFromQueue = qDepth->get<dai::ImgFrame>();
         seqNum = depthFromQueue->getSequenceNum();
-        frames_dictionary[seqNum].push_back(("depth", depthFromQueue))
+        frames_dictionary[seqNum].push_back(std::make_tuple("depth", depthFromQueue));
         //Check if any dictionary values have an array of length 2
-        for (const auto& kv: mymap) {
-	        std::cout << "Key: " << kv.first << " Value: " kv.second << std::endl;
+        for (const auto& kv: frames_dictionary) {
+	        // We check if any sequence numbers have delivered both their rgb and depth frame (so list would have size 2)
             if (kv.second.size() > 1)
             {
-                
+                //This sequence number has 2 elements in the list, so now we grab the rgb and depth frames
+
+                //Check if this tuple element in list is an rgb or depth, by checkign for the first index int the tuple which stores type
+                if (std::get<0>(kv.second[0]) == "rgb")
+                {
+                    //This means first element was rgb
+                    synchedRgbFrame = std::get<1>(kv.second[0]);
+                    synchedDepthFrame = std::get<1>(kv.second[1]);
+                }
+                else
+                {
+                    // This means first element was depth
+                    synchedRgbFrame = std::get<1>(kv.second[1]);
+                    synchedDepthFrame = std::get<1>(kv.second[0]);
+                }
+                //We have the frames
+                haveSyncedFrames = true;
+                //We got the frames at this sequence number
+                seqNum = kv.first;
+                //Now we can stop the loop
+                break;
             }
         }
-
+        //Now we remove all sequence numbers that are less than or equal the sequence number
+        for (auto it = frames_dictionary.cbegin(), next_it = it; it != frames_dictionary.cend(); it = next_it)
+        {
+            ++next_it;
+            if (it->first <= seqNum)
+            {
+                frames_dictionary.erase(it);
+            }
+        }
     }
-    
-    //This is the dictionary that we use to check if a RGB and Depth frame of the same sequence number have arrived0
-    //Every "next frame" we pull a depth and a color until we get a match of depth and color
-    //pull color
-    //assign to proper key (if doesn't exist make one)
-    //pull depth
-    //assign to proper key (if doesn't exist make one)
-    //check if a key has a value that is length 2
-        // if yes, save those as rgbFrame and depthFrame
-        // if no, start from top
-
-   auto frameFromOakD = qRgb->get<dai::ImgFrame>();                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   auto frameRgbOpenCv = frameFromOakD->getCvFrame();                                     // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    auto frameRgbOpenCv = synchedRgbFrame->getCvFrame();    
+    auto frameDepthOpenCv = synchedDepthFrame->getCvFrame();
+    auto frameDepthMat = synchedDepthFrame->getFrame();
 #endif
 
   //Color frame
@@ -278,17 +301,39 @@ void OakdXlinkReader::NextFrame() {
 
 #ifndef TEST_WITH_IMAGE
    // convert the raw buffer to cv::Mat
-   int cols = frameRgbOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   int rows = frameRgbOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   size_t size = cols*rows*3*sizeof(uchar); //This assumes that oakd always returns CV_8UC3// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int colorCols = frameRgbOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int colorRows = frameRgbOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   rgbFrame->frame.resize(size + 2 * sizeof(int));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   rgbFrame->frame.resize(colorSize + 2 * sizeof(int));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   memcpy(&rgbFrame->frame[0], &cols, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&rgbFrame->frame[4], &rows, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), size);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 #endif
   current_frame_.push_back(rgbFrame);
+
+  //Depth frame
+  std::shared_ptr<FrameStruct> depthFrame =
+      std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+  depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
+  depthFrame->frame_data_type = FrameDataType::FrameDataTypeGRAY16LE; // 3;
+  depthFrame->frame_id = current_frame_counter_;
+  depthFrame->timestamps.push_back(capture_timestamp);
+
+#ifndef TEST_WITH_IMAGE
+   // convert the raw buffer to cv::Mat
+   int depthCols = frameDepthOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int depthRows = frameDepthOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   size_t depthSize = depthCols*depthRows*1*sizeof(ushort); //This assumes that oakd depth always returns CV_16U// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+
+   depthFrame->frame.resize(depthSize + 2 * sizeof(int));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+
+   memcpy(&depthFrame->frame[0], &depthCols, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&depthFrame->frame[4], &depthRows, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthOpenCv.data), depthSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+#endif
+  current_frame_.push_back(depthFrame);
 
   // --------------------------- Step 5. Create an infer request
   // -------------------------------------------------
@@ -620,7 +665,14 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     //Now we iterate through all detected bodies in poses_3d, create a coco_human_t, and then copy the data into the frame
     for (size_t i = 0; i < bodyCount; i++) {
+
+        //Here we see the 2D joints detected of this body
+        //We grab the depth at the x,y location in the image
+        // posesStruct.poses_2d[i]; //how do I know what joints are being provided? (will need this for bodyStruct depth values)
+        //depth value = (int)frameDepthMat.at<ushort>(yvalue,xvalue);
+
         
+
         //Create a COCO body Struct
         coco_human_t bodyStruct;
         bodyStruct.Id = posesStruct.poses_id[i];

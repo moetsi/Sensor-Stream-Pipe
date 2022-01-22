@@ -65,7 +65,7 @@ private:
   FrameStruct frame_template_;
 
   //We use this dictionary to grab pairs of rgb and depth frames that caame from same point in time
-  std::unordered_map<int, std::list<std::tuple<std::string, dai::ImgFrame>>> frames_dictionary;
+  std::unordered_map<int, std::vector<std::tuple<std::string, std::shared_ptr<dai::ImgFrame>>>> frames_dictionary;
 
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
@@ -76,7 +76,7 @@ private:
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
   std::shared_ptr<dai::node::StereoDepth> stereo;
-  std::shared_ptr<dai::node::XLinkOut> xoutRgb;
+  std::shared_ptr<dai::node::XLinkOut> rgbOut;
   std::shared_ptr<dai::node::XLinkOut> depthOut;
 
   std::shared_ptr<dai::DataOutputQueue> q;
