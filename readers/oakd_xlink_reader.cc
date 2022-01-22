@@ -231,7 +231,7 @@ void OakdXlinkReader::NextFrame() {
 
 #ifndef TEST_WITH_IMAGE
     
-    //We try until we get a synchronized color and depth frame
+    //Here we try until we get a synchronized color and depth frame
     bool haveSyncedFrames = false;
     int seqNum;
     std::shared_ptr<dai::ImgFrame> synchedRgbFrame;
@@ -285,11 +285,24 @@ void OakdXlinkReader::NextFrame() {
                 frames_dictionary.erase(it);
             }
         }
+
     }
+    
+    //This is the dictionary that we use to check if a RGB and Depth frame of the same sequence number have arrived0
+    //Every "next frame" we pull a depth and a color until we get a match of depth and color
+    //pull color
+    //assign to proper key (if doesn't exist make one)
+    //pull depth
+    //assign to proper key (if doesn't exist make one)
+    //check if a key has a value that is length 2
+        // if yes, save those as rgbFrame and depthFrame
+        // if no, start from top
     auto frameRgbOpenCv = synchedRgbFrame->getCvFrame();    
     auto frameDepthOpenCv = synchedDepthFrame->getCvFrame();
     auto frameDepthMat = synchedDepthFrame->getFrame();
 #endif
+
+  // TODO FIXME x big/little endian hazard ~
 
   //Color frame
   std::shared_ptr<FrameStruct> rgbFrame =
@@ -301,14 +314,14 @@ void OakdXlinkReader::NextFrame() {
 
 #ifndef TEST_WITH_IMAGE
    // convert the raw buffer to cv::Mat
-   int colorCols = frameRgbOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   int colorRows = frameRgbOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int32_t colorCols = frameRgbOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int32_t colorRows = frameRgbOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
    size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   rgbFrame->frame.resize(colorSize + 2 * sizeof(int));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
    memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 #endif
   current_frame_.push_back(rgbFrame);
@@ -323,14 +336,14 @@ void OakdXlinkReader::NextFrame() {
 
 #ifndef TEST_WITH_IMAGE
    // convert the raw buffer to cv::Mat
-   int depthCols = frameDepthOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   int depthRows = frameDepthOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int32_t depthCols = frameDepthOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int32_t depthRows = frameDepthOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
    size_t depthSize = depthCols*depthRows*1*sizeof(ushort); //This assumes that oakd depth always returns CV_16U// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   depthFrame->frame.resize(depthSize + 2 * sizeof(int));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   memcpy(&depthFrame->frame[0], &depthCols, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&depthFrame->frame[4], &depthRows, sizeof(int));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
    memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthOpenCv.data), depthSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 #endif
   current_frame_.push_back(depthFrame);
@@ -805,7 +818,7 @@ std::vector<FrameType> OakdXlinkReader::GetType() {
   std::vector<FrameType> types;
 
   types.push_back(FrameType::FrameTypeColor);
-  // later => types.push_back(FrameType::FrameTypeDepth);
+  types.push_back(FrameType::FrameTypeDepth);
   types.push_back(FrameType::FrameTypeHumanPose); // 4;
 
   return types;
