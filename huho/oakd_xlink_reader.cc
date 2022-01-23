@@ -49,8 +49,8 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     rgbOut->setStreamName("rgb");
     queueNames.push_back("rgb");
-    depthOut->setStreamName("disparity");
-    queueNames.push_back("disparity");
+    depthOut->setStreamName("depth");
+    queueNames.push_back("depth");
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
@@ -125,8 +125,8 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Output queue will be used to get the rgb frames from the output defined above
     // Sets queues size and behavior
 
-    qRgb = device->getOutputQueue("rgb", 4, false);                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-    qDepth = device->getOutputQueue("disparity", 4, false);    
+    qRgb = device->getOutputQueue("rgb", 4, true); // false);                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    qDepth = device->getOutputQueue("depth", 4, true); // false);    
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
@@ -159,7 +159,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     env["REL"] = rel;
     std::string model_path = config["model"].as<std::string>();
     model_path = StringInterpolation(env, model_path);
-
+    std::cerr << "model_path = " << model_path << std::endl << std::flush;
     network = ie.ReadNetwork(model_path);
     //#ifndef _WIN32    
     //    network = ie.ReadNetwork("../../models/human-pose-estimation-3d-0001.xml");
@@ -221,71 +221,178 @@ OakdXlinkReader::~OakdXlinkReader() {
 
 }
 
+std::string type2str(int type) {
+  std::string r;
+
+  uchar depth = type & CV_MAT_DEPTH_MASK;
+  uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+  switch ( depth ) {
+    case CV_8U:  r = "8U"; break;
+    case CV_8S:  r = "8S"; break;
+    case CV_16U: r = "16U"; break;
+    case CV_16S: r = "16S"; break;
+    case CV_32S: r = "32S"; break;
+    case CV_32F: r = "32F"; break;
+    case CV_64F: r = "64F"; break;
+    default:     r = "User"; break;
+  }
+
+  r += "C";
+  r += (chans+'0');
+
+  return r;
+}
+
 void OakdXlinkReader::NextFrame() {
   current_frame_.clear();
 
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   //Increment counter and grab time
   current_frame_counter_++;
   uint64_t capture_timestamp = CurrentTimeMs();
-
 
 #ifndef TEST_WITH_IMAGE
     
     //Here we try until we get a synchronized color and depth frame
     bool haveSyncedFrames = false;
     int seqNum;
-    std::shared_ptr<dai::ImgFrame> synchedRgbFrame;
-    std::shared_ptr<dai::ImgFrame> synchedDepthFrame;
+    //std::shared_ptr<dai::ImgFrame> synchedRgbFrame;
+    std::shared_ptr<FrameStruct> synchedRgbFrameStruct;
+    //std::shared_ptr<dai::ImgFrame> synchedDepthFrame;
+    std::shared_ptr<FrameStruct> synchedDepthFrameStruct;
+
+cv::Mat frameRgbOpenCv ; // ugly!
+
+    auto convertRgbFrame = [&](const std::shared_ptr<dai::ImgFrame> &synchedRgbFrame) -> std::shared_ptr<FrameStruct> {
+        // auto  <- todo
+        frameRgbOpenCv = synchedRgbFrame->getCvFrame();    
+        std::shared_ptr<FrameStruct> rgbFrame =
+            std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+        rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
+        rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
+        rgbFrame->frame_id = current_frame_counter_;
+        rgbFrame->timestamps.push_back(capture_timestamp);
+        int32_t colorCols = frameRgbOpenCv.cols;
+        int32_t colorRows = frameRgbOpenCv.rows; 
+        size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
+        rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));   
+        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                         
+        memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t)); 
+        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+        memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t)); 
+        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+        memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);   
+        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+        return rgbFrame;
+    };
+
+    auto convertDepthFrame = [&](const std::shared_ptr<dai::ImgFrame> &synchedDepthFrame) ->  std::shared_ptr<FrameStruct> {
+        auto frameDepthOpenCv = synchedDepthFrame->getCvFrame();
+  std::shared_ptr<FrameStruct> depthFrame =
+      std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+  depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
+  depthFrame->frame_data_type = FrameDataType::FrameDataTypeGRAY16LE; // 3;
+  depthFrame->frame_id = current_frame_counter_;
+  depthFrame->timestamps.push_back(capture_timestamp);
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
+  std::cerr << int(frameDepthOpenCv.isContinuous()) << std::endl;
+  std::cerr << type2str(frameDepthOpenCv.type()) << std::endl;
+   // convert the raw buffer to cv::Mat
+   int32_t depthCols = frameDepthOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int32_t depthRows = frameDepthOpenCv.rows;  
+   std::cerr << "depth: " << depthCols << " x " << depthRows << std::endl << std::flush;                                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   size_t depthSize = depthCols*depthRows*1; // ???? *sizeof(uint16_t); //This assumes that oakd depth always returns CV_16U// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+
+   depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+
+   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+   memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+   memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+   std::cerr << (void*)(frameDepthOpenCv.data) << std::endl << std::flush;
+   memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthOpenCv.data), depthSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    return depthFrame;
+    };
+
 
     //Now we pull frames until we get a synchronized color and depth frame
     while (!haveSyncedFrames)
     {
+        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         //Grab rgb and add to dictionary
         auto rgbFromQueue = qRgb->get<dai::ImgFrame>();
+        if (!rgbFromQueue) {
+            std::cerr << "rgb alert"<< std::endl << std::flush;
+        } else {      
         seqNum = rgbFromQueue->getSequenceNum();
-        frames_dictionary[seqNum].push_back(std::make_tuple("rgb", rgbFromQueue));
+        auto rgbFromQueueC = convertRgbFrame(rgbFromQueue);
+        frames_dictionary[seqNum].push_back(std::make_tuple("rgb", rgbFromQueueC));
+        std::cerr << "rgb " << seqNum << std::endl << std::flush; 
+        }
         //Grab depth and add to dictionary
         auto depthFromQueue = qDepth->get<dai::ImgFrame>();
+        if (!depthFromQueue) {
+            std::cerr << "alert"<< std::endl << std::flush;
+        } else {
         seqNum = depthFromQueue->getSequenceNum();
-        frames_dictionary[seqNum].push_back(std::make_tuple("disparity", depthFromQueue));
+        std::cerr << seqNum	<< std::endl << std::flush;
+        auto depthFromQueueC = convertDepthFrame(depthFromQueue);
+        frames_dictionary[seqNum].push_back(std::make_tuple("depth", depthFromQueueC));
+        std::cerr << "depth " << seqNum << std::endl << std::flush;
+        }
         //Check if any dictionary values have an array of length 2
         for (const auto& kv: frames_dictionary) {
 	        // We check if any sequence numbers have delivered both their rgb and depth frame (so list would have size 2)
             if (kv.second.size() > 1)
             {
                 //This sequence number has 2 elements in the list, so now we grab the rgb and depth frames
-
+                std::cerr << kv.first << " " << std::get<0>(kv.second[0]) << " " << std::get<0>(kv.second[1]) << std::endl << std::flush;
                 //Check if this tuple element in list is an rgb or depth, by checkign for the first index int the tuple which stores type
                 if (std::get<0>(kv.second[0]) == "rgb")
                 {
                     //This means first element was rgb
-                    synchedRgbFrame = std::get<1>(kv.second[0]);
-                    synchedDepthFrame = std::get<1>(kv.second[1]);
+                    synchedRgbFrameStruct = std::get<1>(kv.second[0]);
+                    synchedDepthFrameStruct = std::get<1>(kv.second[1]);
                 }
                 else
                 {
                     // This means first element was depth
-                    synchedRgbFrame = std::get<1>(kv.second[1]);
-                    synchedDepthFrame = std::get<1>(kv.second[0]);
+                    synchedRgbFrameStruct = std::get<1>(kv.second[1]);
+                    synchedDepthFrameStruct = std::get<1>(kv.second[0]);
                 }
                 //We have the frames
                 haveSyncedFrames = true;
                 //We got the frames at this sequence number
                 seqNum = kv.first;
+                std::cerr << seqNum << std::endl;
                 //Now we can stop the loop
                 break;
             }
         }
+
+        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
         //Now we remove all sequence numbers that are less than or equal the sequence number
+        std::vector<int> rem;
         for (auto it = frames_dictionary.cbegin(), next_it = it; it != frames_dictionary.cend(); it = next_it)
         {
             ++next_it;
+            std::cerr << "seq "<< it->first << std::endl << std::flush;
             if (it->first <= seqNum)
             {
-                frames_dictionary.erase(it);
+                std::cerr << "erase" << std::endl << std::flush; 
+                rem.push_back(it->first);
+            //    frames_dictionary.erase(it);
             }
         }
 
+        for (auto &r : rem) {
+            frames_dictionary.erase(r);
+        }
     }
     
     //This is the dictionary that we use to check if a RGB and Depth frame of the same sequence number have arrived0
@@ -297,62 +404,76 @@ void OakdXlinkReader::NextFrame() {
     //check if a key has a value that is length 2
         // if yes, save those as rgbFrame and depthFrame
         // if no, start from top
-    auto frameRgbOpenCv = synchedRgbFrame->getCvFrame();    
-    auto frameDepthOpenCv = synchedDepthFrame->getCvFrame();
-    auto frameDepthMat = synchedDepthFrame->getFrame();
+ //   auto frameRgbOpenCv = synchedRgbFrame->getCvFrame();    
+ //   auto frameDepthOpenCv = synchedDepthFrame->getCvFrame();
+    // auto frameDepthMat = synchedDepthFrame->getFrame();
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 #endif
 
   // TODO FIXME x big/little endian hazard ~
 
   //Color frame
-  std::shared_ptr<FrameStruct> rgbFrame =
-      std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-  rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
-  rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
-  rgbFrame->frame_id = current_frame_counter_;
-  rgbFrame->timestamps.push_back(capture_timestamp);
+//  std::shared_ptr<FrameStruct> rgbFrame =
+//      std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+//  rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
+//  rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
+//  rgbFrame->frame_id = current_frame_counter_;
+//  rgbFrame->timestamps.push_back(capture_timestamp);
+
+//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 #ifndef TEST_WITH_IMAGE
    // convert the raw buffer to cv::Mat
-   int32_t colorCols = frameRgbOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   int32_t colorRows = frameRgbOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   int32_t colorCols = frameRgbOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   int32_t colorRows = frameRgbOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 #endif
+auto rgbFrame = synchedRgbFrameStruct;
+rgbFrame->frame_id = current_frame_counter_;
   current_frame_.push_back(rgbFrame);
 
+//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   //Depth frame
-  std::shared_ptr<FrameStruct> depthFrame =
-      std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-  depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
-  depthFrame->frame_data_type = FrameDataType::FrameDataTypeCvDisparity; // 3;
-  depthFrame->frame_id = current_frame_counter_;
-  depthFrame->timestamps.push_back(capture_timestamp);
-
+//  std::shared_ptr<FrameStruct> depthFrame =
+//      std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+//  depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
+//  depthFrame->frame_data_type = FrameDataType::FrameDataTypeGRAY16LE; // 3;
+//  depthFrame->frame_id = current_frame_counter_;
+//  depthFrame->timestamps.push_back(capture_timestamp);
+//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 #ifndef TEST_WITH_IMAGE
    // convert the raw buffer to cv::Mat
-   int32_t depthCols = frameDepthOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   int32_t depthRows = frameDepthOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   size_t depthSize = depthCols*depthRows*1; // *sizeof(ushort); //This assumes that oakd depth always returns CV_16U// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   int32_t depthCols = frameDepthOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   int32_t depthRows = frameDepthOpenCv.rows;  
+//   std::cerr << "depth: " << depthCols << " x " << depthRows << std::endl << std::flush;                                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   size_t depthSize = depthCols*depthRows*1*sizeof(ushort); //This assumes that oakd depth always returns CV_16U// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
-   memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthOpenCv.data), depthSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+//   memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+//   memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+//   std::cerr << (void*)(frameDepthOpenCv.data) << std::endl << std::flush;
+//   memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthOpenCv.data), depthSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 #endif
+auto depthFrame = synchedDepthFrameStruct;
+depthFrame->frame_id = current_frame_counter_;
   current_frame_.push_back(depthFrame);
-
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   // --------------------------- Step 5. Create an infer request
   // -------------------------------------------------
   InferRequest infer_request = executable_network.CreateInferRequest();
   // -----------------------------------------------------------------------------------------------------
-
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   // --------------------------- Step 6. Prepare input
   // --------------------------------------------------------
   /* Read input image to a blob and set it to an infer request without resize

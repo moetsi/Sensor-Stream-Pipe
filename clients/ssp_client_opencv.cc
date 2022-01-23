@@ -54,6 +54,8 @@ extern "C" {
 
 using namespace moetsi::ssp;
 
+
+
 extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 {
   av_log_set_level(AV_LOG_QUIET);
@@ -86,6 +88,19 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
             } else if (img.type() == CV_32F) {
               // Normalize image to 0;255
               cv::normalize(img, img, 255, 0, cv::NORM_MINMAX);
+            } else if (img.type() == CV_8U) {
+              uint8_t *ptr = (uint8_t*) img.data;
+              for (unsigned i=0; i< img.rows; ++i) {
+                for (unsigned j=0; j < img.cols; ++j) {
+                  auto v = ptr[i*img.cols + j];
+                  // 400P: 441.25
+                  // 800P: 882.5
+                  float depthcm = 441.25 * 7.5 / float(v);
+                  // adjust to 8 bits
+                  float v2 = depthcm; // 1024 cm ~10 m
+                   ptr[i*img.cols + j] = uint8_t(v2);
+                }
+              }
             }
             cv::Mat imgOut;
 
@@ -99,7 +114,7 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
           } else if (f.frame_type == FrameType::FrameTypeConfidence) {
             cv::Mat imgOut;
             img *= 127; // iOS confidence is 0:low, 1:medium, 2:high
-          }
+          } 
 
 #if HAS_IMSHOW
           cv::namedWindow(decoder_id);
