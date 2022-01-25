@@ -118,10 +118,13 @@ function build_depthai {
     # unzip v2.11.0.zip
     #     mv depthai-core-2.11.0 depthai-core
 
-    git clone --depth 1 --branch cmath_math_defines_vstudio \
-        https://github.com/luxonis/depthai-core.git
+    #git clone --depth 1 --branch cmath_math_defines_vstudio \
+    #    https://github.com/luxonis/depthai-core.git
+    git clone --depth 1 \
+        https://github.com/luxonis/depthai-core.git        
     pushd depthai-core
     git submodule update --init --recursive
+    export CXXFLAGS="/Zc:preprocessor"
     cmake -G "Visual Studio 16 2019" -A x64 \
         -H. \
         -Bbuild \
