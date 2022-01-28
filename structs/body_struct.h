@@ -213,45 +213,83 @@ struct coco_human_t
   float ear_right_QW;
   float ear_right_conf;
 // TODO FIXME htons!
-  int16_t neck_2DX;
-  int16_t neck_2DY;
-  int16_t nose_2DX;
-  int16_t nose_2DY;
-  int16_t pelvis_2DX;
-  int16_t pelvis_2DY;
-  int16_t shoulder_left_2DX;
-  int16_t shoulder_left_2DY;
-  int16_t elbow_left_2DX;
-  int16_t elbow_left_2DY;
-  int16_t wrist_left_2DX;
-  int16_t wrist_left_2DY;
-  int16_t hip_left_2DX;
-  int16_t hip_left_2DY;
-  int16_t knee_left_2DX;
-  int16_t knee_left_2DY;
-  int16_t ankle_left_2DX;
-  int16_t ankle_left_2DY;
-  int16_t shoulder_right_2DX;
-  int16_t shoulder_right_2DY;
-  int16_t elbow_right_2DX;
-  int16_t elbow_right_2DY;
-  int16_t wrist_right_2DX;
-  int16_t wrist_right_2DY;
-  int16_t hip_right_2DX;
-  int16_t hip_right_2DY;
-  int16_t knee_right_2DX;
-  int16_t knee_right_2DY;
-  int16_t ankle_right_2DX;
-  int16_t ankle_right_2DY;
-  int16_t eye_left_2DX;
-  int16_t eye_left_2DY;
-  int16_t ear_left_2DX;
-  int16_t ear_left_2DY;
-  int16_t eye_right_2DX;
-  int16_t eye_right_2DY;
-  int16_t ear_right_2DX;
-  int16_t ear_right_2DY;
-
+  int16_t neck_2d_x;
+  int16_t neck_2d_y;
+  int16_t neck_2d_depth;
+  float neck_2d_conf;
+  int16_t nose_2d_x;
+  int16_t nose_2d_y;
+  int16_t nose_2d_depth;
+  float nose_2d_conf;
+  int16_t pelvis_2d_x;
+  int16_t pelvis_2d_y;
+  int16_t pelvis_2d_depth;
+  float pelvis_2d_conf;
+  int16_t shoulder_left_2d_x;
+  int16_t shoulder_left_2d_y;
+  int16_t shoulder_left_2d_depth;
+  float shoulder_left_2d_conf;
+  int16_t elbow_left_2d_x;
+  int16_t elbow_left_2d_y;
+  int16_t elbow_left_2d_depth;
+  float elbow_left_2d_conf;
+  int16_t wrist_left_2d_x;
+  int16_t wrist_left_2d_y;
+  int16_t wrist_left_2d_depth;
+  float wrist_left_2d_conf;
+  int16_t hip_left_2d_x;
+  int16_t hip_left_2d_y;
+  int16_t hip_left_2d_depth;
+  float hip_left_2d_conf;
+  int16_t knee_left_2d_x;
+  int16_t knee_left_2d_y;
+  int16_t knee_left_2d_depth;
+  float knee_left_2d_conf;
+  int16_t ankle_left_2d_x;
+  int16_t ankle_left_2d_y;
+  int16_t ankle_left_2d_depth;
+  float ankle_left_2d_conf;
+  int16_t shoulder_right_2d_x;
+  int16_t shoulder_right_2d_y;
+  int16_t shoulder_right_2d_depth;
+  float shoulder_right_2d_conf;
+  int16_t elbow_right_2d_x;
+  int16_t elbow_right_2d_y;
+  int16_t elbow_right_2d_depth;
+  float elbow_right_2d_conf;
+  int16_t wrist_right_2d_x;
+  int16_t wrist_right_2d_y;
+  int16_t wrist_right_2d_depth;
+  float wrist_right_2d_conf;
+  int16_t hip_right_2d_x;
+  int16_t hip_right_2d_y;
+  int16_t hip_right_2d_depth;
+  float hip_right_2d_conf;
+  int16_t knee_right_2d_x;
+  int16_t knee_right_2d_y;
+  int16_t knee_right_2d_depth;
+  float knee_right_2d_conf;
+  int16_t ankle_right_2d_x;
+  int16_t ankle_right_2d_y;
+  int16_t ankle_right_2d_depth;
+  float ankle_right_2d_conf;
+  int16_t eye_left_2d_x;
+  int16_t eye_left_2d_y;
+  int16_t eye_left_2d_depth;
+  float eye_left_2d_conf;
+  int16_t ear_left_2d_x;
+  int16_t ear_left_2d_y;
+  int16_t ear_left_2d_depth;
+  float ear_left_2d_conf;
+  int16_t eye_right_2d_x;
+  int16_t eye_right_2d_y;
+  int16_t eye_right_2d_depth;
+  float eye_right_2d_conf;
+  int16_t ear_right_2d_x;
+  int16_t ear_right_2d_y;
+  int16_t ear_right_2d_depth;
+  float ear_right_2d_conf;
+  
 #ifndef __MOETSI_RAAS__
   // Serialize method (not used by Server but is available)
   template <class Archive> void serialize(Archive &ar) {
@@ -410,44 +448,82 @@ struct coco_human_t
       ear_right_QW,
       ear_right_conf,
 
-      neck_2DX,
-      neck_2DY,
-      nose_2DX,
-      nose_2DY,
-      pelvis_2DX,
-      pelvis_2DY,
-      shoulder_left_2DX,
-      shoulder_left_2DY,
-      elbow_left_2DX,
-      elbow_left_2DY,
-      wrist_left_2DX,
-      wrist_left_2DY,
-      hip_left_2DX,
-      hip_left_2DY,
-      knee_left_2DX,
-      knee_left_2DY,
-      ankle_left_2DX,
-      ankle_left_2DY,
-      shoulder_right_2DX,
-      shoulder_right_2DY,
-      elbow_right_2DX,
-      elbow_right_2DY,
-      wrist_right_2DX,
-      wrist_right_2DY,
-      hip_right_2DX,
-      hip_right_2DY,
-      knee_right_2DX,
-      knee_right_2DY,
-      ankle_right_2DX,
-      ankle_right_2DY,
-      eye_left_2DX,
-      eye_left_2DY,
-      ear_left_2DX,
-      ear_left_2DY,
-      eye_right_2DX,
-      eye_right_2DY,
-      ear_right_2DX,
-      ear_right_2DY
+      neck_2d_x,
+      neck_2d_y,
+      neck_2d_depth,
+      neck_2d_conf,
+      nose_2d_x,
+      nose_2d_y,
+      nose_2d_depth,
+      nose_2d_conf,
+      pelvis_2d_x,
+      pelvis_2d_y,
+      pelvis_2d_depth,
+      pelvis_2d_conf,
+      shoulder_left_2d_x,
+      shoulder_left_2d_y,
+      shoulder_left_2d_depth,
+      shoulder_left_2d_conf,
+      elbow_left_2d_x,
+      elbow_left_2d_y,
+      elbow_left_2d_depth,
+      elbow_left_2d_conf,
+      wrist_left_2d_x,
+      wrist_left_2d_y,
+      wrist_left_2d_depth,
+      wrist_left_2d_conf,
+      hip_left_2d_x,
+      hip_left_2d_y,
+      hip_left_2d_depth,
+      hip_left_2d_conf,
+      knee_left_2d_x,
+      knee_left_2d_y,
+      knee_left_2d_depth,
+      knee_left_2d_conf,
+      ankle_left_2d_x,
+      ankle_left_2d_y,
+      ankle_left_2d_depth,
+      ankle_left_2d_conf,
+      shoulder_right_2d_x,
+      shoulder_right_2d_y,
+      shoulder_right_2d_depth,
+      shoulder_right_2d_conf,
+      elbow_right_2d_x,
+      elbow_right_2d_y,
+      elbow_right_2d_depth,
+      elbow_right_2d_conf,
+      wrist_right_2d_x,
+      wrist_right_2d_y,
+      wrist_right_2d_depth,
+      wrist_right_2d_conf,
+      hip_right_2d_x,
+      hip_right_2d_y,
+      hip_right_2d_depth,
+      hip_right_2d_conf,
+      knee_right_2d_x,
+      knee_right_2d_y,
+      knee_right_2d_depth,
+      knee_right_2d_conf,
+      ankle_right_2d_x,
+      ankle_right_2d_y,
+      ankle_right_2d_depth,
+      ankle_right_2d_conf,
+      eye_left_2d_x,
+      eye_left_2d_y,
+      eye_left_2d_depth,
+      eye_left_2d_conf,
+      ear_left_2d_x,
+      ear_left_2d_y,
+      ear_left_2d_depth,
+      ear_left_2d_conf,
+      eye_right_2d_x,
+      eye_right_2d_y,
+      eye_right_2d_depth,
+      eye_right_2d_conf,
+      ear_right_2d_x,
+      ear_right_2d_y,
+      ear_right_2d_depth,
+      ear_right_2d_conf
 
     );
   }

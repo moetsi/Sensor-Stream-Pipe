@@ -28,7 +28,6 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     fps = config["streaming_rate"].as<unsigned int>();
     
     current_frame_counter_ = 0;
-    frame_template_.sensor_id = 0;
     frame_template_.stream_id = RandomString(16);
     frame_template_.device_id = config["deviceid"].as<unsigned int>();
     frame_template_.scene_desc = "oakd";
@@ -49,15 +48,15 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     rgbOut->setStreamName("rgb");
     queueNames.push_back("rgb");
-    depthOut->setStreamName("disparity");
-    queueNames.push_back("disparity");
+    depthOut->setStreamName("depth");
+    queueNames.push_back("depth");
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Color Properties
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
     camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
-    camRgb->setFps(fps);
+    camRgb->setFps(5);
     camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
     camRgb->initialControl.setManualFocus(135); // requires this focus to align depth
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
@@ -67,15 +66,27 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     auto monoRes = dai::MonoCameraProperties::SensorResolution::THE_400_P;
     left->setResolution(monoRes);
     left->setBoardSocket(dai::CameraBoardSocket::LEFT);
-    left->setFps(fps);
+    left->setFps(5);
     right->setResolution(monoRes);
     right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
-    right->setFps(fps);
+    right->setFps(5);
 
     stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
-    // depth->setSubpixel(true);
+    stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+    stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
+    auto oakdConfig = stereo->initialConfig.get();
+    oakdConfig.postProcessing.speckleFilter.enable = false;
+    oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
+    oakdConfig.postProcessing.temporalFilter.enable = true;
+    oakdConfig.postProcessing.spatialFilter.enable = true;
+    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 2;
+    oakdConfig.postProcessing.spatialFilter.numIterations = 1;
+    // oakdConfig.postProcessing.thresholdFilter.minRange = 400;
+    // oakdConfig.postProcessing.thresholdFilter.maxRange = 15000;
+    oakdConfig.postProcessing.decimationFilter.decimationFactor = 1;
+    stereo->initialConfig.set(oakdConfig);
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
@@ -84,7 +95,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     camRgb->isp.link(rgbOut->input);
     left->out.link(stereo->left);
     right->out.link(stereo->right);
-    stereo->disparity.link(depthOut->input);
+    stereo->depth.link(depthOut->input);
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Changing the IP address to the correct depthai format (const char*)
@@ -97,7 +108,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //Which sensor
     device_info = dai::DeviceInfo();
     strcpy(device_info.desc.name, chText);
-    device_info.state = X_LINK_BOOTLOADER;
+    device_info.state = X_LINK_BOOTLOADER; 
     device_info.desc.protocol = X_LINK_TCP_IP;
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
 
@@ -126,7 +137,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Sets queues size and behavior
 
     qRgb = device->getOutputQueue("rgb", 4, false);                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-    qDepth = device->getOutputQueue("disparity", 4, false);    
+    qDepth = device->getOutputQueue("depth", 4, false);    
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
@@ -238,54 +249,47 @@ void OakdXlinkReader::NextFrame() {
     std::shared_ptr<dai::ImgFrame> synchedDepthFrame;
 
     //Now we pull frames until we get a synchronized color and depth frame
+    //The dictionary has a key of seqNum (int) and value is a img::frame pointer
+    // std::unordered_map<int, std::shared_ptr<dai::ImgFrame>> frames_dictionary;
     while (!haveSyncedFrames)
     {
         //Grab rgb and add to dictionary
         auto rgbFromQueue = qRgb->get<dai::ImgFrame>();
         seqNum = rgbFromQueue->getSequenceNum();
-        frames_dictionary[seqNum].push_back(std::make_tuple("rgb", rgbFromQueue));
+        if (frames_dictionary[seqNum] != NULL && !haveSyncedFrames)
+        {
+            synchedRgbFrame = rgbFromQueue;
+            synchedDepthFrame = frames_dictionary[seqNum];
+            haveSyncedFrames = true;
+            break;
+        }
+        else
+        {
+            frames_dictionary[seqNum] = rgbFromQueue;
+        }
         //Grab depth and add to dictionary
         auto depthFromQueue = qDepth->get<dai::ImgFrame>();
         seqNum = depthFromQueue->getSequenceNum();
-        frames_dictionary[seqNum].push_back(std::make_tuple("disparity", depthFromQueue));
-        //Check if any dictionary values have an array of length 2
-        for (const auto& kv: frames_dictionary) {
-	        // We check if any sequence numbers have delivered both their rgb and depth frame (so list would have size 2)
-            if (kv.second.size() > 1)
-            {
-                //This sequence number has 2 elements in the list, so now we grab the rgb and depth frames
-
-                //Check if this tuple element in list is an rgb or depth, by checkign for the first index int the tuple which stores type
-                if (std::get<0>(kv.second[0]) == "rgb")
-                {
-                    //This means first element was rgb
-                    synchedRgbFrame = std::get<1>(kv.second[0]);
-                    synchedDepthFrame = std::get<1>(kv.second[1]);
-                }
-                else
-                {
-                    // This means first element was depth
-                    synchedRgbFrame = std::get<1>(kv.second[1]);
-                    synchedDepthFrame = std::get<1>(kv.second[0]);
-                }
-                //We have the frames
-                haveSyncedFrames = true;
-                //We got the frames at this sequence number
-                seqNum = kv.first;
-                //Now we can stop the loop
-                break;
-            }
-        }
-        //Now we remove all sequence numbers that are less than or equal the sequence number
-        for (auto it = frames_dictionary.cbegin(), next_it = it; it != frames_dictionary.cend(); it = next_it)
+        if (frames_dictionary[seqNum] != NULL && !haveSyncedFrames)
         {
-            ++next_it;
-            if (it->first <= seqNum)
-            {
-                frames_dictionary.erase(it);
-            }
+            synchedDepthFrame = depthFromQueue;
+            synchedRgbFrame = frames_dictionary[seqNum];
+            haveSyncedFrames = true;
+            break;
         }
-
+        else
+        {
+            frames_dictionary[seqNum] = depthFromQueue;
+        }
+    }
+    // //Now we remove all sequence numbers that are less than or equal the sequence number
+    for (auto it = frames_dictionary.cbegin(), next_it = it; it != frames_dictionary.cend(); it = next_it)
+    {
+        ++next_it;
+        if (it->first <= seqNum)
+        {
+            frames_dictionary.erase(it);
+        }
     }
     
     //This is the dictionary that we use to check if a RGB and Depth frame of the same sequence number have arrived0
@@ -298,7 +302,7 @@ void OakdXlinkReader::NextFrame() {
         // if yes, save those as rgbFrame and depthFrame
         // if no, start from top
     auto frameRgbOpenCv = synchedRgbFrame->getCvFrame();    
-    auto frameDepthOpenCv = synchedDepthFrame->getCvFrame();
+    // auto frameDepthOpenCv = synchedDepthFrame->getCvFrame();
     auto frameDepthMat = synchedDepthFrame->getFrame();
 #endif
 
@@ -307,6 +311,7 @@ void OakdXlinkReader::NextFrame() {
   //Color frame
   std::shared_ptr<FrameStruct> rgbFrame =
       std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+    rgbFrame->sensor_id = 0; 
   rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
   rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
   rgbFrame->frame_id = current_frame_counter_;
@@ -329,22 +334,23 @@ void OakdXlinkReader::NextFrame() {
   //Depth frame
   std::shared_ptr<FrameStruct> depthFrame =
       std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+    depthFrame->sensor_id = 1;
   depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
-  depthFrame->frame_data_type = FrameDataType::FrameDataTypeCvDisparity; // 3;
+  depthFrame->frame_data_type = FrameDataType::FrameDataTypeGRAY16LE; // 3; It is 
   depthFrame->frame_id = current_frame_counter_;
   depthFrame->timestamps.push_back(capture_timestamp);
 
 #ifndef TEST_WITH_IMAGE
    // convert the raw buffer to cv::Mat
-   int32_t depthCols = frameDepthOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   int32_t depthRows = frameDepthOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   size_t depthSize = depthCols*depthRows*1; // *sizeof(ushort); //This assumes that oakd depth always returns CV_16U// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int32_t depthCols = frameDepthMat.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int32_t depthRows = frameDepthMat.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   size_t depthSize = depthCols*depthRows*sizeof(ushort); //  This assumes  we have subpixel set to true, other wise data is uchar size
 
    depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
    memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
    memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthOpenCv.data), depthSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 #endif
   current_frame_.push_back(depthFrame);
 
@@ -656,6 +662,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //Prepare the bodies frame
     std::shared_ptr<FrameStruct> s =
         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+    s->sensor_id = 4;
     s->frame_id = current_frame_counter_;
     s->frame_type = FrameType::FrameTypeHumanPose; // 4;
     s->frame_data_type = FrameDataType::FrameDataTypeObjectHumanData; // 8;
@@ -713,8 +720,6 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
         //Now we set the data of the COCO body struct
         // posesStruct.poses_3d [ {body number } ][ {body joint index}*4 + {0, 1, 2 ,3 for x, y, z, probability}]
-
-        // bodyStruct.Id = ; Currently id is not supported
         bodyStruct.neck_x = posesStruct.poses_3d[i][0 * 4 + 0];
         bodyStruct.neck_y = posesStruct.poses_3d[i][0 * 4 + 1];
         bodyStruct.neck_z = posesStruct.poses_3d[i][0 * 4 + 2];
@@ -797,44 +802,82 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
             return int64_t(x);
         };
 
-        bodyStruct.neck_2DX = to2D(posesStruct.poses_2d[i][0 * 2 + 0]);
-        bodyStruct.neck_2DY = to2D(posesStruct.poses_2d[i][0 * 2 + 1]);
-        bodyStruct.nose_2DX = to2D(posesStruct.poses_2d[i][1 * 2 + 0]);
-        bodyStruct.nose_2DY = to2D(posesStruct.poses_2d[i][1 * 2 + 1]);
-        bodyStruct.pelvis_2DX = to2D(posesStruct.poses_2d[i][2 * 2 + 0]);
-        bodyStruct.pelvis_2DY = to2D(posesStruct.poses_2d[i][2 * 2 + 1]);
-        bodyStruct.shoulder_left_2DX = to2D(posesStruct.poses_2d[i][3 * 2 + 0]);
-        bodyStruct.shoulder_left_2DY = to2D(posesStruct.poses_2d[i][3 * 2 + 1]);
-        bodyStruct.elbow_left_2DX = to2D(posesStruct.poses_2d[i][4 * 2 + 0]);
-        bodyStruct.elbow_left_2DY = to2D(posesStruct.poses_2d[i][4 * 2 + 1]);
-        bodyStruct.wrist_left_2DX = to2D(posesStruct.poses_2d[i][5 * 2 + 0]);
-        bodyStruct.wrist_left_2DY = to2D(posesStruct.poses_2d[i][5 * 2 + 1]);
-        bodyStruct.hip_left_2DX = to2D(posesStruct.poses_2d[i][6 * 2 + 0]);
-        bodyStruct.hip_left_2DY = to2D(posesStruct.poses_2d[i][6 * 2 + 1]);
-        bodyStruct.knee_left_2DX = to2D(posesStruct.poses_2d[i][7 * 2 + 0]);
-        bodyStruct.knee_left_2DY = to2D(posesStruct.poses_2d[i][7 * 2 + 1]);
-        bodyStruct.ankle_left_2DX = to2D(posesStruct.poses_2d[i][8 * 2 + 0]);
-        bodyStruct.ankle_left_2DY = to2D(posesStruct.poses_2d[i][8 * 2 + 1]);
-        bodyStruct.shoulder_right_2DX = to2D(posesStruct.poses_2d[i][9 * 2 + 0]);
-        bodyStruct.shoulder_right_2DY = to2D(posesStruct.poses_2d[i][9 * 2 + 1]);
-        bodyStruct.elbow_right_2DX = to2D(posesStruct.poses_2d[i][10 * 2 + 0]);
-        bodyStruct.elbow_right_2DY = to2D(posesStruct.poses_2d[i][10 * 2 + 1]);
-        bodyStruct.wrist_right_2DX = to2D(posesStruct.poses_2d[i][11 * 2 + 0]);
-        bodyStruct.wrist_right_2DY = to2D(posesStruct.poses_2d[i][11 * 2 + 1]);
-        bodyStruct.hip_right_2DX = to2D(posesStruct.poses_2d[i][12 * 2 + 0]);
-        bodyStruct.hip_right_2DY = to2D(posesStruct.poses_2d[i][12 * 2 + 1]);
-        bodyStruct.knee_right_2DX = to2D(posesStruct.poses_2d[i][13 * 2 + 0]);
-        bodyStruct.knee_right_2DY = to2D(posesStruct.poses_2d[i][13 * 2 + 1]);
-        bodyStruct.ankle_right_2DX = to2D(posesStruct.poses_2d[i][14 * 2 + 0]);
-        bodyStruct.ankle_right_2DY = to2D(posesStruct.poses_2d[i][14 * 2 + 1]);
-        bodyStruct.eye_left_2DX = to2D(posesStruct.poses_2d[i][15 * 2 + 0]);
-        bodyStruct.eye_left_2DY = to2D(posesStruct.poses_2d[i][15 * 2 + 1]);
-        bodyStruct.ear_left_2DX = to2D(posesStruct.poses_2d[i][16 * 2 + 0]);
-        bodyStruct.ear_left_2DY = to2D(posesStruct.poses_2d[i][16 * 2 + 1]);
-        bodyStruct.eye_right_2DX = to2D(posesStruct.poses_2d[i][17 * 2 + 0]);
-        bodyStruct.eye_right_2DY = to2D(posesStruct.poses_2d[i][17 * 2 + 1]);
-        bodyStruct.ear_right_2DX = to2D(posesStruct.poses_2d[i][18 * 2 + 0]);
-        bodyStruct.ear_right_2DY = to2D(posesStruct.poses_2d[i][18 * 2 + 1]);
+        bodyStruct.neck_2d_x = to2D(posesStruct.poses_2d[i][0 * 3 + 0]);
+        bodyStruct.neck_2d_y = to2D(posesStruct.poses_2d[i][0 * 3 + 1]);
+        bodyStruct.neck_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x));
+        bodyStruct.neck_2d_conf = posesStruct.poses_2d[i][0 * 3 + 2];
+        bodyStruct.nose_2d_x = to2D(posesStruct.poses_2d[i][1 * 3 + 0]);
+        bodyStruct.nose_2d_y = to2D(posesStruct.poses_2d[i][1 * 3 + 1]);
+        bodyStruct.nose_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.nose_2d_y,bodyStruct.nose_2d_x));
+        bodyStruct.nose_2d_conf = posesStruct.poses_2d[i][1 * 3 + 2];
+        bodyStruct.pelvis_2d_x = to2D(posesStruct.poses_2d[i][2 * 3 + 0]);
+        bodyStruct.pelvis_2d_y = to2D(posesStruct.poses_2d[i][2 * 3 + 1]);
+        bodyStruct.pelvis_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.pelvis_2d_y,bodyStruct.pelvis_2d_x));
+        bodyStruct.pelvis_2d_conf = posesStruct.poses_2d[i][2 * 3 + 2];
+        bodyStruct.shoulder_left_2d_x = to2D(posesStruct.poses_2d[i][3 * 3 + 0]);
+        bodyStruct.shoulder_left_2d_y = to2D(posesStruct.poses_2d[i][3 * 3 + 1]);
+        bodyStruct.shoulder_left_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.shoulder_left_2d_y,bodyStruct.shoulder_left_2d_x));
+        bodyStruct.shoulder_left_2d_conf = posesStruct.poses_2d[i][3 * 3 + 2];
+        bodyStruct.elbow_left_2d_x = to2D(posesStruct.poses_2d[i][4 * 3 + 0]);
+        bodyStruct.elbow_left_2d_y = to2D(posesStruct.poses_2d[i][4 * 3 + 1]);
+        bodyStruct.elbow_left_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.elbow_left_2d_y,bodyStruct.elbow_left_2d_x));
+        bodyStruct.elbow_left_2d_conf = posesStruct.poses_2d[i][4 * 3 + 2];
+        bodyStruct.wrist_left_2d_x = to2D(posesStruct.poses_2d[i][5 * 3 + 0]);
+        bodyStruct.wrist_left_2d_y = to2D(posesStruct.poses_2d[i][5 * 3 + 1]);
+        bodyStruct.wrist_left_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.wrist_left_2d_y,bodyStruct.wrist_left_2d_x));
+        bodyStruct.wrist_left_2d_conf = posesStruct.poses_2d[i][5 * 3 + 2];
+        bodyStruct.hip_left_2d_x = to2D(posesStruct.poses_2d[i][6 * 3 + 0]);
+        bodyStruct.hip_left_2d_y = to2D(posesStruct.poses_2d[i][6 * 3 + 1]);
+        bodyStruct.hip_left_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.hip_left_2d_y,bodyStruct.hip_left_2d_x));
+        bodyStruct.hip_left_2d_conf = posesStruct.poses_2d[i][6 * 3 + 2];
+        bodyStruct.knee_left_2d_x = to2D(posesStruct.poses_2d[i][7 * 3 + 0]);
+        bodyStruct.knee_left_2d_y = to2D(posesStruct.poses_2d[i][7 * 3 + 1]);
+        bodyStruct.knee_left_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.knee_left_2d_y,bodyStruct.knee_left_2d_x));
+        bodyStruct.knee_left_2d_conf = posesStruct.poses_2d[i][7 * 3 + 2];
+        bodyStruct.ankle_left_2d_x = to2D(posesStruct.poses_2d[i][8 * 3 + 0]);
+        bodyStruct.ankle_left_2d_y = to2D(posesStruct.poses_2d[i][8 * 3 + 1]);
+        bodyStruct.ankle_left_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.ankle_left_2d_y,bodyStruct.ankle_left_2d_x));
+        bodyStruct.ankle_left_2d_conf = posesStruct.poses_2d[i][8 * 3 + 2];
+        bodyStruct.shoulder_right_2d_x = to2D(posesStruct.poses_2d[i][9 * 3 + 0]);
+        bodyStruct.shoulder_right_2d_y = to2D(posesStruct.poses_2d[i][9 * 3 + 1]);
+        bodyStruct.shoulder_right_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.shoulder_right_2d_y,bodyStruct.shoulder_right_2d_x));
+        bodyStruct.shoulder_right_2d_conf = posesStruct.poses_2d[i][9 * 3 + 2];
+        bodyStruct.elbow_right_2d_x = to2D(posesStruct.poses_2d[i][10 * 3 + 0]);
+        bodyStruct.elbow_right_2d_y = to2D(posesStruct.poses_2d[i][10 * 3 + 1]);
+        bodyStruct.elbow_right_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.elbow_right_2d_y,bodyStruct.elbow_right_2d_x));
+        bodyStruct.elbow_right_2d_conf = posesStruct.poses_2d[i][10 * 3 + 2];
+        bodyStruct.wrist_right_2d_x = to2D(posesStruct.poses_2d[i][11 * 3 + 0]);
+        bodyStruct.wrist_right_2d_y = to2D(posesStruct.poses_2d[i][11 * 3 + 1]);
+        bodyStruct.wrist_right_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.wrist_right_2d_y,bodyStruct.wrist_right_2d_x));
+        bodyStruct.wrist_right_2d_conf = posesStruct.poses_2d[i][11 * 3 + 2];
+        bodyStruct.hip_right_2d_x = to2D(posesStruct.poses_2d[i][12 * 3 + 0]);
+        bodyStruct.hip_right_2d_y = to2D(posesStruct.poses_2d[i][12 * 3 + 1]);
+        bodyStruct.hip_right_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.hip_right_2d_y,bodyStruct.hip_right_2d_x));
+        bodyStruct.hip_right_2d_conf = posesStruct.poses_2d[i][12 * 3 + 2];
+        bodyStruct.knee_right_2d_x = to2D(posesStruct.poses_2d[i][13 * 3 + 0]);
+        bodyStruct.knee_right_2d_y = to2D(posesStruct.poses_2d[i][13 * 3 + 1]);
+        bodyStruct.knee_right_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.knee_right_2d_y,bodyStruct.knee_right_2d_x));
+        bodyStruct.knee_right_2d_conf = posesStruct.poses_2d[i][13 * 3 + 2];
+        bodyStruct.ankle_right_2d_x = to2D(posesStruct.poses_2d[i][14 * 3 + 0]);
+        bodyStruct.ankle_right_2d_y = to2D(posesStruct.poses_2d[i][14 * 3 + 1]);
+        bodyStruct.ankle_right_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.ankle_right_2d_y,bodyStruct.ankle_right_2d_x));
+        bodyStruct.ankle_right_2d_conf = posesStruct.poses_2d[i][14 * 3 + 2];
+        bodyStruct.eye_left_2d_x = to2D(posesStruct.poses_2d[i][15 * 3 + 0]);
+        bodyStruct.eye_left_2d_y = to2D(posesStruct.poses_2d[i][15 * 3 + 1]);
+        bodyStruct.eye_left_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.eye_left_2d_y,bodyStruct.eye_left_2d_x));
+        bodyStruct.eye_left_2d_conf = posesStruct.poses_2d[i][15 * 3 + 2];
+        bodyStruct.ear_left_2d_x = to2D(posesStruct.poses_2d[i][16 * 3 + 0]);
+        bodyStruct.ear_left_2d_y = to2D(posesStruct.poses_2d[i][16 * 3 + 1]);
+        bodyStruct.ear_left_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.ear_left_2d_y,bodyStruct.ear_left_2d_x));
+        bodyStruct.ear_left_2d_conf = posesStruct.poses_2d[i][16 * 3 + 2];
+        bodyStruct.eye_right_2d_x = to2D(posesStruct.poses_2d[i][17 * 3 + 0]);
+        bodyStruct.eye_right_2d_y = to2D(posesStruct.poses_2d[i][17 * 3 + 1]);
+        bodyStruct.eye_right_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.eye_right_2d_y,bodyStruct.eye_right_2d_x));
+        bodyStruct.eye_right_2d_conf = posesStruct.poses_2d[i][17 * 3 + 2];
+        bodyStruct.ear_right_2d_x = to2D(posesStruct.poses_2d[i][18 * 3 + 0]);
+        bodyStruct.ear_right_2d_y = to2D(posesStruct.poses_2d[i][18 * 3 + 1]);
+        bodyStruct.ear_right_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.ear_right_2d_y,bodyStruct.ear_right_2d_x));
+        bodyStruct.ear_right_2d_conf = posesStruct.poses_2d[i][18 * 3 + 2];
 
         bodyStruct.hton();
         //Finally we copy the COCO body struct memory to the frame
@@ -842,7 +885,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     }
 
     //Now that we have copied all memory to the frame we can push it back
-    current_frame_.push_back(s);
+    // current_frame_.push_back(s);
 
 }
 

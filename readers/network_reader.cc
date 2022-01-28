@@ -19,6 +19,12 @@ NetworkReader::NetworkReader(int port) {
 void NetworkReader::init() {
   context_ = std::unique_ptr<zmq::context_t>(new zmq::context_t(1));
   socket_ = std::unique_ptr<zmq::socket_t>(new zmq::socket_t(*context_, ZMQ_PULL));
+  
+  // Do not accumulate packets if no client is connected
+  socket_->set(zmq::sockopt::immediate, true);
+  // Do not keep packets if there is network congestion
+  socket_->set(zmq::sockopt::conflate, true);
+
 #ifdef SSP_WITH_ZMQ_POLLING
   poller_.add(zmq::socket_ref(zmq::from_handle, socket_.get()->handle()),
       zmq::event_flags::pollin);
