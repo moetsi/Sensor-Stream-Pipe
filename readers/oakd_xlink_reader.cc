@@ -885,8 +885,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     }
 
     //Now that we have copied all memory to the frame we can push it back
-    // current_frame_.push_back(s);
-
+    current_frame_.push_back(s);
 }
 
 bool OakdXlinkReader::HasNextFrame() { return true; }
