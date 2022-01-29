@@ -213,82 +213,103 @@ struct coco_human_t
   float ear_right_QW;
   float ear_right_conf;
 // TODO FIXME htons!
+
+  float neck_2d_conf;
+  float nose_2d_conf;
+  float pelvis_2d_conf;
+  float shoulder_left_2d_conf;
+  float elbow_left_2d_conf;
+  float wrist_left_2d_conf;
+  float hip_left_2d_conf;
+  float knee_left_2d_conf;
+  float ankle_left_2d_conf;
+  float shoulder_right_2d_conf;
+  float elbow_right_2d_conf;
+  float wrist_right_2d_conf;
+  float hip_right_2d_conf;
+  float knee_right_2d_conf;
+  float ankle_right_2d_conf;
+  float eye_left_2d_conf;
+  float ear_left_2d_conf;
+  float eye_right_2d_conf;
+  float ear_right_2d_conf;
+  
   int16_t neck_2d_x;
   int16_t neck_2d_y;
   int16_t neck_2d_depth;
-  float neck_2d_conf;
+
   int16_t nose_2d_x;
   int16_t nose_2d_y;
   int16_t nose_2d_depth;
-  float nose_2d_conf;
+
   int16_t pelvis_2d_x;
   int16_t pelvis_2d_y;
   int16_t pelvis_2d_depth;
-  float pelvis_2d_conf;
+
   int16_t shoulder_left_2d_x;
   int16_t shoulder_left_2d_y;
   int16_t shoulder_left_2d_depth;
-  float shoulder_left_2d_conf;
+
   int16_t elbow_left_2d_x;
   int16_t elbow_left_2d_y;
   int16_t elbow_left_2d_depth;
-  float elbow_left_2d_conf;
+
   int16_t wrist_left_2d_x;
   int16_t wrist_left_2d_y;
   int16_t wrist_left_2d_depth;
-  float wrist_left_2d_conf;
+
   int16_t hip_left_2d_x;
   int16_t hip_left_2d_y;
   int16_t hip_left_2d_depth;
-  float hip_left_2d_conf;
+
   int16_t knee_left_2d_x;
   int16_t knee_left_2d_y;
   int16_t knee_left_2d_depth;
-  float knee_left_2d_conf;
+
   int16_t ankle_left_2d_x;
   int16_t ankle_left_2d_y;
   int16_t ankle_left_2d_depth;
-  float ankle_left_2d_conf;
+
   int16_t shoulder_right_2d_x;
   int16_t shoulder_right_2d_y;
   int16_t shoulder_right_2d_depth;
-  float shoulder_right_2d_conf;
+
   int16_t elbow_right_2d_x;
   int16_t elbow_right_2d_y;
   int16_t elbow_right_2d_depth;
-  float elbow_right_2d_conf;
+
   int16_t wrist_right_2d_x;
   int16_t wrist_right_2d_y;
   int16_t wrist_right_2d_depth;
-  float wrist_right_2d_conf;
+
   int16_t hip_right_2d_x;
   int16_t hip_right_2d_y;
   int16_t hip_right_2d_depth;
-  float hip_right_2d_conf;
+
   int16_t knee_right_2d_x;
   int16_t knee_right_2d_y;
   int16_t knee_right_2d_depth;
-  float knee_right_2d_conf;
+
   int16_t ankle_right_2d_x;
   int16_t ankle_right_2d_y;
   int16_t ankle_right_2d_depth;
-  float ankle_right_2d_conf;
+
   int16_t eye_left_2d_x;
   int16_t eye_left_2d_y;
   int16_t eye_left_2d_depth;
-  float eye_left_2d_conf;
+
   int16_t ear_left_2d_x;
   int16_t ear_left_2d_y;
   int16_t ear_left_2d_depth;
-  float ear_left_2d_conf;
+
   int16_t eye_right_2d_x;
   int16_t eye_right_2d_y;
   int16_t eye_right_2d_depth;
-  float eye_right_2d_conf;
+
   int16_t ear_right_2d_x;
   int16_t ear_right_2d_y;
   int16_t ear_right_2d_depth;
-  float ear_right_2d_conf;
+
   
 #ifndef __MOETSI_RAAS__
   // Serialize method (not used by Server but is available)

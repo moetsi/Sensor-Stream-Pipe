@@ -44,6 +44,28 @@ virtual void \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_afbd5e354b72
 unsigned int \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_a3512ebff8cb45042a574a04b8b572c12}{Get\+Fps}} ()
 \begin{DoxyCompactList}\small\item\em Get indicative F\+PS in frame per second. \end{DoxyCompactList}\item 
 std\+::vector$<$ \mbox{\hyperlink{namespacemoetsi_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}{Frame\+Type}} $>$ \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_a60cd720243f109996df6abbb0ea8cb91}{Get\+Type}} ()
+\begin{DoxyCompactList}\small\item\em Get frame types. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_a1dbcfa5d0d8f2f5eda570e31a1c9a04b}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_a1dbcfa5d0d8f2f5eda570e31a1c9a04b}} 
+{\bfseries Oakd\+Xlink\+Reader} (Y\+A\+M\+L\+::\+Node config)
+\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_a6b998f411d33f6355b06398e1293e342}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_a6b998f411d33f6355b06398e1293e342}} 
+void \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_a6b998f411d33f6355b06398e1293e342}{Reset}} ()
+\begin{DoxyCompactList}\small\item\em Reset this reader. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_a6ae1bc0745c7bfea0fb06edc6cd2d73b}{Has\+Next\+Frame}} ()
+\begin{DoxyCompactList}\small\item\em Check if there is a next frame. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_ae71b8e0d6456d0c777235dfc23370332}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_ae71b8e0d6456d0c777235dfc23370332}} 
+void \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_ae71b8e0d6456d0c777235dfc23370332}{Next\+Frame}} ()
+\begin{DoxyCompactList}\small\item\em Go to next frame. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_abf39b70b9f375a9d5c66d6c466ed8796}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_abf39b70b9f375a9d5c66d6c466ed8796}} 
+std\+::vector$<$ std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{structmoetsi_1_1ssp_1_1FrameStruct}{Frame\+Struct}} $>$ $>$ \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_abf39b70b9f375a9d5c66d6c466ed8796}{Get\+Current\+Frame}} ()
+\begin{DoxyCompactList}\small\item\em Get current frame data. \end{DoxyCompactList}\item 
+unsigned int \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_acf21f618309fabee03b41fa84c2856cd}{Get\+Current\+Frame\+Id}} ()
+\begin{DoxyCompactList}\small\item\em Get current frame number. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_adb8f896a5bc7f5016be7adbcc4a09138}{Go\+To\+Frame}} (unsigned int frame\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Go to a given frame. \end{DoxyCompactList}\item 
+unsigned int \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_a3512ebff8cb45042a574a04b8b572c12}{Get\+Fps}} ()
+\begin{DoxyCompactList}\small\item\em Get indicative F\+PS in frame per second. \end{DoxyCompactList}\item 
+std\+::vector$<$ \mbox{\hyperlink{namespacemoetsi_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}{Frame\+Type}} $>$ \mbox{\hyperlink{classmoetsi_1_1ssp_1_1OakdXlinkReader_a2d1a4e56cde16b14a15e991cfd58ed39}{Get\+Type}} ()
 \begin{DoxyCompactList}\small\item\em Get frame types. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
@@ -51,7 +73,24 @@ std\+::vector$<$ \mbox{\hyperlink{namespacemoetsi_1_1ssp_a46efdfa2cd5a28ead465dc
 \mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_acf21f618309fabee03b41fa84c2856cd}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_acf21f618309fabee03b41fa84c2856cd}} 
 \index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!GetCurrentFrameId@{GetCurrentFrameId}}
 \index{GetCurrentFrameId@{GetCurrentFrameId}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
-\doxysubsubsection{\texorpdfstring{GetCurrentFrameId()}{GetCurrentFrameId()}}
+\doxysubsubsection{\texorpdfstring{GetCurrentFrameId()}{GetCurrentFrameId()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Get\+Current\+Frame\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Get current frame number. 
+
+\begin{DoxyReturn}{Returns}
+current frame number. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_ac292d83eb06dee277baaa06e281a562d}{moetsi\+::ssp\+::\+I\+Reader}}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_acf21f618309fabee03b41fa84c2856cd}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_acf21f618309fabee03b41fa84c2856cd}} 
+\index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!GetCurrentFrameId@{GetCurrentFrameId}}
+\index{GetCurrentFrameId@{GetCurrentFrameId}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
+\doxysubsubsection{\texorpdfstring{GetCurrentFrameId()}{GetCurrentFrameId()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Get\+Current\+Frame\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
 
@@ -68,7 +107,24 @@ Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_ac292d83eb06dee277baaa
 \mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_a3512ebff8cb45042a574a04b8b572c12}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_a3512ebff8cb45042a574a04b8b572c12}} 
 \index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!GetFps@{GetFps}}
 \index{GetFps@{GetFps}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
-\doxysubsubsection{\texorpdfstring{GetFps()}{GetFps()}}
+\doxysubsubsection{\texorpdfstring{GetFps()}{GetFps()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Get\+Fps (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Get indicative F\+PS in frame per second. 
+
+\begin{DoxyReturn}{Returns}
+the F\+PS number 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_a9f6a8650ca290b011b8e5451eeae9f32}{moetsi\+::ssp\+::\+I\+Reader}}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_a3512ebff8cb45042a574a04b8b572c12}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_a3512ebff8cb45042a574a04b8b572c12}} 
+\index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!GetFps@{GetFps}}
+\index{GetFps@{GetFps}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
+\doxysubsubsection{\texorpdfstring{GetFps()}{GetFps()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily unsigned int moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Get\+Fps (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
 
@@ -85,8 +141,25 @@ Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_a9f6a8650ca290b011b8e5
 \mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_a60cd720243f109996df6abbb0ea8cb91}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_a60cd720243f109996df6abbb0ea8cb91}} 
 \index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!GetType@{GetType}}
 \index{GetType@{GetType}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
-\doxysubsubsection{\texorpdfstring{GetType()}{GetType()}}
+\doxysubsubsection{\texorpdfstring{GetType()}{GetType()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily std\+::vector$<$ \mbox{\hyperlink{namespacemoetsi_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}{Frame\+Type}} $>$ moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Get\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Get frame types. 
+
+\begin{DoxyReturn}{Returns}
+a vector of Frame\+Type, listing available data types 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_a4116c1931fde7bd66133934ffdca1cce}{moetsi\+::ssp\+::\+I\+Reader}}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_a2d1a4e56cde16b14a15e991cfd58ed39}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_a2d1a4e56cde16b14a15e991cfd58ed39}} 
+\index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!GetType@{GetType}}
+\index{GetType@{GetType}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
+\doxysubsubsection{\texorpdfstring{GetType()}{GetType()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily std\+::vector$<$\mbox{\hyperlink{namespacemoetsi_1_1ssp_a46efdfa2cd5a28ead465dcc8006b5a87}{Frame\+Type}}$>$ moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Get\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
 
 
@@ -102,8 +175,27 @@ Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_a4116c1931fde7bd661339
 \mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_afbd5e354b72a4adf4a48d580c3eb0a88}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_afbd5e354b72a4adf4a48d580c3eb0a88}} 
 \index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!GoToFrame@{GoToFrame}}
 \index{GoToFrame@{GoToFrame}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
-\doxysubsubsection{\texorpdfstring{GoToFrame()}{GoToFrame()}}
+\doxysubsubsection{\texorpdfstring{GoToFrame()}{GoToFrame()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily void moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Go\+To\+Frame (\begin{DoxyParamCaption}\item[{unsigned int}]{frame\+\_\+id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Go to a given frame. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em frame\+\_\+id} & target frame number \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_a6f1be3c06538992cca6d550bd9566681}{moetsi\+::ssp\+::\+I\+Reader}}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_adb8f896a5bc7f5016be7adbcc4a09138}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_adb8f896a5bc7f5016be7adbcc4a09138}} 
+\index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!GoToFrame@{GoToFrame}}
+\index{GoToFrame@{GoToFrame}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
+\doxysubsubsection{\texorpdfstring{GoToFrame()}{GoToFrame()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily virtual void moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Go\+To\+Frame (\begin{DoxyParamCaption}\item[{unsigned int}]{frame\+\_\+id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
 
 
@@ -121,7 +213,24 @@ Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_a6f1be3c06538992cca6d5
 \mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_a6ae1bc0745c7bfea0fb06edc6cd2d73b}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_a6ae1bc0745c7bfea0fb06edc6cd2d73b}} 
 \index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!HasNextFrame@{HasNextFrame}}
 \index{HasNextFrame@{HasNextFrame}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
-\doxysubsubsection{\texorpdfstring{HasNextFrame()}{HasNextFrame()}}
+\doxysubsubsection{\texorpdfstring{HasNextFrame()}{HasNextFrame()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily bool moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Has\+Next\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Check if there is a next frame. 
+
+\begin{DoxyReturn}{Returns}
+true if there is a next frame 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_af9186ba41e136dc4ec3242b5dd55fa04}{moetsi\+::ssp\+::\+I\+Reader}}.
+
+\mbox{\Hypertarget{classmoetsi_1_1ssp_1_1OakdXlinkReader_a6ae1bc0745c7bfea0fb06edc6cd2d73b}\label{classmoetsi_1_1ssp_1_1OakdXlinkReader_a6ae1bc0745c7bfea0fb06edc6cd2d73b}} 
+\index{moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}!HasNextFrame@{HasNextFrame}}
+\index{HasNextFrame@{HasNextFrame}!moetsi::ssp::OakdXlinkReader@{moetsi::ssp::OakdXlinkReader}}
+\doxysubsubsection{\texorpdfstring{HasNextFrame()}{HasNextFrame()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily bool moetsi\+::ssp\+::\+Oakd\+Xlink\+Reader\+::\+Has\+Next\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
 
@@ -139,5 +248,5 @@ Implements \mbox{\hyperlink{classmoetsi_1_1ssp_1_1IReader_af9186ba41e136dc4ec324
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
-oakd\+\_\+xlink\+\_\+reader.\+h\item 
-oakd\+\_\+xlink\+\_\+reader.\+cc\end{DoxyCompactItemize}
+huho/oakd\+\_\+xlink\+\_\+reader.\+h\item 
+huho/oakd\+\_\+xlink\+\_\+reader.\+cc\end{DoxyCompactItemize}
