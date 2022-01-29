@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['oakdxlinkreader_153',['OakdXlinkReader',['../classmoetsi_1_1ssp_1_1OakdXlinkReader.html',1,'moetsi::ssp']]],
-  ['oneeurofilter_154',['OneEuroFilter',['../structmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneEuroFilter.html',1,'moetsi::ssp::human_pose_estimation']]]
+  ['oakdxlinkreader_154',['OakdXlinkReader',['../classmoetsi_1_1ssp_1_1OakdXlinkReader.html',1,'moetsi::ssp']]],
+  ['oneeurofilter_155',['OneEuroFilter',['../structmoetsi_1_1ssp_1_1human__pose__estimation_1_1OneEuroFilter.html',1,'moetsi::ssp::human_pose_estimation']]]
 ];

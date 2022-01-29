@@ -115,7 +115,9 @@ enum class FrameDataType: short {
     FrameDataTypeObjectHumanData = 8,
 
     /** OAKD cv::Mat */
-    FrameDataTypeCvMat = 9
+    FrameDataTypeCvMat = 9,
+    /** OAKD cv::Mat, disparity */
+    FrameDataTypeCvDisparity = 10
 }; 
 
 /**
