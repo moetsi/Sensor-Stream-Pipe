@@ -4,7 +4,7 @@ project(ssp)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(LIBOPENH264_ENABLED "Enable libh264 codec" OFF)
+option(LIBOPENH264_ENABLED "Enable libh264 codec" ON)
 
 # Check if looking for oakd+openvino dependencies (for oakd_xlink_reader.cc)
 SET(XLINK_ENABLED FALSE CACHE BOOL "xlink enabled")
