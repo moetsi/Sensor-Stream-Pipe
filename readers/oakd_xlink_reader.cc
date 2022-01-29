@@ -71,22 +71,23 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
     right->setFps(5);
 
-    stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
-    stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+    // stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
+    // stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
-    auto oakdConfig = stereo->initialConfig.get();
-    oakdConfig.postProcessing.speckleFilter.enable = false;
-    oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
-    oakdConfig.postProcessing.temporalFilter.enable = true;
-    oakdConfig.postProcessing.spatialFilter.enable = true;
-    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 2;
-    oakdConfig.postProcessing.spatialFilter.numIterations = 1;
+    // auto oakdConfig = stereo->initialConfig.get();
+    // oakdConfig.postProcessing.speckleFilter.enable = false;
+    // oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
+    // oakdConfig.postProcessing.temporalFilter.enable = true;
+    // oakdConfig.postProcessing.spatialFilter.enable = true;
+    // oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 2;
+    // oakdConfig.postProcessing.spatialFilter.numIterations = 1;
     // oakdConfig.postProcessing.thresholdFilter.minRange = 400;
     // oakdConfig.postProcessing.thresholdFilter.maxRange = 15000;
-    oakdConfig.postProcessing.decimationFilter.decimationFactor = 1;
-    stereo->initialConfig.set(oakdConfig);
+    // oakdConfig.postProcessing.decimationFilter.decimationFactor = 1;
+    // stereo->initialConfig.set(oakdConfig);
+
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
@@ -114,6 +115,8 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 #ifndef TEST_WITH_IMAGE  
     device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode   // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    deviceCalib = device.readCalibration();
+    // self.monoHFOV = np.deg2rad(calibData.getFov(dai.CameraBoardSocket.LEFT))
 #endif
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;

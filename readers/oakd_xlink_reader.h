@@ -86,6 +86,8 @@ private:
   std::shared_ptr<dai::node::StereoDepth> depth;
   dai::DeviceInfo device_info;
   std::shared_ptr<dai::Device> device;
+  dai::CalibrationHandler deviceCalib;
+
 
   //openvino info
   const file_name_t input_model = "../models/human-pose-estimation-3d-0001.xml";
