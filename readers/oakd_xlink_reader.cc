@@ -115,7 +115,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 #ifndef TEST_WITH_IMAGE  
     device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode   // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-    deviceCalib = device.readCalibration();
+    deviceCalib = device->readCalibration();
     // self.monoHFOV = np.deg2rad(calibData.getFov(dai.CameraBoardSocket.LEFT))
 #endif
 

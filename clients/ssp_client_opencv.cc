@@ -84,7 +84,8 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
           if (f.frame_type == FrameType::FrameTypeDepth) {
             if (img.type() == CV_16U) {
               // Compress images to show up on a 255 valued color map
-              img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+              // img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+            cv::normalize(img, img, 255, 0, cv::NORM_MINMAX);
             } else if (img.type() == CV_32F) {
               // Normalize image to 0;255
               cv::normalize(img, img, 255, 0, cv::NORM_MINMAX);
@@ -150,4 +151,5 @@ int main(int argc, char *argv[]) {
   return ssp_client_opencv(port);
 }
 #endif
+
 
