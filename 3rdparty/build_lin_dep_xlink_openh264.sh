@@ -28,17 +28,17 @@ function install_nasm {
     fi
 }
 
-#function build_openh264 {
-#    # https://github.com/AkillesAILimited/openh264
-#    echo "building libopenh264"
-#    git clone https://github.com/AkillesAILimited/openh264
-#    pushd openh264
-#    cp -fv ../../Makefile.libopenh264 Makefile
-#    ( export PREFIX=${LOCAL_DIR}/openh264; make -j16 OS=linux )
-#    mkdir ${LOCAL_DIR}/openh264
-#    ( export PREFIX=${LOCAL_DIR}/openh264; make install )
-#    popd
-#}
+function build_openh264 {
+    # https://github.com/AkillesAILimited/openh264
+    echo "building libopenh264"
+    git clone https://github.com/AkillesAILimited/openh264
+    pushd openh264
+    cp -fv ../../Makefile.libopenh264 Makefile
+    ( export PREFIX=${LOCAL_DIR}/openh264; make -j16 OS=linux )
+    mkdir ${LOCAL_DIR}/openh264
+    ( export PREFIX=${LOCAL_DIR}/openh264; make install )
+    popd
+}
 
 
 # https://kochuns.blogspot.com/2018/09/ffmpegffmpeg-build-with-openh264.html for openh264 build instructions
@@ -47,12 +47,12 @@ function build_ffmpeg {
     git clone --depth 1 --branch release/4.3 \
          https://git.ffmpeg.org/ffmpeg.git ffmpeg
     pushd ffmpeg
-    #         --enable-libopenh264 \
-    #    --extra-cflags='-I${LOCAL_DIR}/openh264/include' \
-    #    --extra-ldflags='-L${LOCAL_DIR}/openh264/lib' \    
     ( export PKG_CONFIG_PATH=${LOCAL_DIR}/openh264/lib/pkgconfig; ./configure --prefix=${LOCAL_DIR}/ffmpeg \
         --disable-gpl \
         --enable-asm \
+        --enable-libopenh264 \
+        --extra-cflags='-I${LOCAL_DIR}/openh264/include' \
+        --extra-ldflags='-L${LOCAL_DIR}/openh264/lib' \
         --disable-static \
         --enable-shared \
         --enable-rpath \
@@ -303,7 +303,7 @@ export LOCAL_DIR=`pwd`/local.ssp
 mkdir -p ${LOCAL_DIR}
 
 install_nasm
-#build_openh264
+build_openh264
 build_ffmpeg
 
 build_opencv
@@ -322,7 +322,6 @@ prefix=`date +%Y%m%d%H%M`
 filename=${prefix}__ssp_lindep
 
 echo "Packing ${LOCAL_DIR} to ${filename}.tar"
-#   openh264 \
 tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   cereal \
   cppzmq \
@@ -331,6 +330,7 @@ tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   opencv \
   spdlog \
   yaml-cpp \
+  openh264 \
   zdepth \
   depthai-core \
 

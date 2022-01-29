@@ -4,6 +4,8 @@ project(ssp)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+option(LIBOPENH264_ENABLED "Enable libh264 codec" OFF)
+
 # Check if looking for oakd+openvino dependencies (for oakd_xlink_reader.cc)
 SET(XLINK_ENABLED FALSE CACHE BOOL "xlink enabled")
 message(STATUS "XLINK_ENABLED ${XLINK_ENABLED}")
@@ -135,11 +137,17 @@ if (ssp_dep_POPULATED)
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
   if (LOCAL_DEP_BUILD_LINUX)
-    message(STATUS " searching for openh264 in " ${ssp_dep_SOURCE_DIR}/openh264/)
-    set(openh264_INCLUDE_DIR ${ssp_dep_SOURCE_DIR}/openh264/include)
-    set(openh264_DIR ${ssp_dep_SOURCE_DIR}/openh264)
-    set(openh264_LIBRARY ${ssp_dep_SOURCE_DIR}/openh264/lib/libopenh264.so.6) # yes this is linux for now
+    if (LIBOPENH264_ENABLED)
+      message(STATUS " searching for openh264 in " ${ssp_dep_SOURCE_DIR}/openh264/)
+      set(openh264_INCLUDE_DIR ${ssp_dep_SOURCE_DIR}/openh264/include)
+      set(openh264_DIR ${ssp_dep_SOURCE_DIR}/openh264)
+      set(openh264_LIBRARY ${ssp_dep_SOURCE_DIR}/openh264/lib/libopenh264.so.6) # yes this is linux for now
+    endif()
   endif()
+endif()
+
+if (LIBOPENH264_ENABLED)
+add_definitions(-DLIBOPENH264_ENABLED)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -168,7 +176,9 @@ find_package(cppzmq REQUIRED)
 find_package(zdepth REQUIRED)
 
 if (LOCAL_DEP_BUILD_LINUX)
-  find_package(openh264 REQUIRED)
+  if (LIBOPENH264_ENABLED)
+    find_package(openh264 REQUIRED)
+  endif()
 endif()
 
 option(SSP_WITH_DEPTHAI_SUPPORT "Compile with DepthAI support" OFF)
