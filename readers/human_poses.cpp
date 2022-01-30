@@ -54,7 +54,7 @@ std::vector<HumanPose> extractPoses(
     resizeFeatureMaps(heatMaps, upsampleRatio);
     resizeFeatureMaps(pafs, upsampleRatio);
     std::vector<std::vector<Peak> > peaksFromHeatMap(heatMaps.size());
-    float minPeaksDistance = 3.0f;
+    float minPeaksDistance = 6.0f; // 3.0f ??
     FindPeaksBody findPeaksBody(heatMaps, minPeaksDistance, peaksFromHeatMap);
     cv::parallel_for_(cv::Range(0, static_cast<int>(heatMaps.size())),
                       findPeaksBody);
@@ -159,7 +159,9 @@ void findPeaks(const std::vector<cv::Mat>& heatMaps,
                     && (val > right_val)
                     && (val > top_val)
                     && (val > bottom_val)) {
-                peaks.push_back(cv::Point(x, y));
+                //if (x+3 < heatMap.cols) { // TODO restore
+                    peaks.push_back(cv::Point(x, y));
+                //}
             }
         }
     }
@@ -395,8 +397,8 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
 #ifdef VERBOSE
                 std::cerr << "peakIdx = " << peakIdx << " " << candidates[peakIdx].pos.x << " " << candidates[peakIdx].pos.y << " " << candidates[peakIdx].score << std::endl << std::flush;
 #endif
-                pose.keypoints[position].x = candidates[peakIdx].pos.x + 0.5f; // TODO why + 0.5f ??
-                pose.keypoints[position].y = candidates[peakIdx].pos.y + 0.5f;
+                pose.keypoints[position].x = candidates[peakIdx].pos.x; // + 0.5f; // TODO why + 0.5f ??
+                pose.keypoints[position].y = candidates[peakIdx].pos.y; // + 0.5f;
                 pose.keypoints[position].z = candidates[peakIdx].score;
             }
         }
@@ -570,67 +572,147 @@ namespace human_pose_estimation {
             if (poses_2d[pose_id][2] > keypoint_treshold) {
                 neck_2d_x = int(poses_2d[pose_id][0]);
                 neck_2d_y = int(poses_2d[pose_id][1]);
-            }
+                
+                std::vector<float> pose_3d;
+                pose_3d.resize(num_kpt_panoptic * 4);
+                for (int j=0; j< int(pose_3d.size()); ++j) pose_3d[j] = -1;
 
-            std::vector<float> pose_3d;
-            pose_3d.resize(num_kpt_panoptic * 4);
-            for (int j=0; j< int(pose_3d.size()); ++j) pose_3d[j] = -1;
-
-#ifdef VERBOSE
-            std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-#endif
-
-            for (int kpt_id =0; kpt_id < num_kpt_panoptic; ++kpt_id) {
-                int map_3d_idx = kpt_id * 3;
-                pose_3d[kpt_id *4] = features.at<float>(map_3d_idx, neck_2d_y, neck_2d_x) * AVG_PERSON_HEIGHT;
-
-#ifdef VERBOSE
+    #ifdef VERBOSE
                 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-#endif
+    #endif
 
-                pose_3d[kpt_id *4 + 1] = features.at<float>(map_3d_idx+1, neck_2d_y, neck_2d_x) * AVG_PERSON_HEIGHT;
+                for (int kpt_id =0; kpt_id < num_kpt_panoptic; ++kpt_id) {
+                    int map_3d_idx = kpt_id * 3;
+                    pose_3d[kpt_id *4] = features.at<float>(map_3d_idx, neck_2d_y, neck_2d_x) * AVG_PERSON_HEIGHT;
 
-#ifdef VERBOSE
-                std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-#endif
+    #ifdef VERBOSE
+                    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    #endif
 
-                pose_3d[kpt_id *4 + 2] = features.at<float>(map_3d_idx+2, neck_2d_y, neck_2d_x) * AVG_PERSON_HEIGHT;
+                    pose_3d[kpt_id *4 + 1] = features.at<float>(map_3d_idx+1, neck_2d_y, neck_2d_x) * AVG_PERSON_HEIGHT;
 
-#ifdef VERBOSE
-                std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-#endif
+    #ifdef VERBOSE
+                    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    #endif
 
-                pose_3d[kpt_id * 4 + 3] = poses_2d[pose_id][kpt_id * 3 + 2];
-            }
+                    pose_3d[kpt_id *4 + 2] = features.at<float>(map_3d_idx+2, neck_2d_y, neck_2d_x) * AVG_PERSON_HEIGHT;
 
-#ifdef VERBOSE
-            {
-                std::cerr << "3d pose/1 : " << pose_id << std::endl;
-                for (int j=0; j< int(pose_3d.size()); ++j) {
-                    std::cerr << pose_3d[j] << ", ";
+    #ifdef VERBOSE
+                    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    #endif
+
+                    pose_3d[kpt_id * 4 + 3] = poses_2d[pose_id][kpt_id * 3 + 2];
                 }
-                std::cerr << std::endl << std::flush;
-            }
-#endif
 
-            for (int limb = 0; limb < limbs.size(); ++limb) {
-                int kpt_id_from = 0;
+    #ifdef VERBOSE
+                {
+                    std::cerr << "3d pose/1 : " << pose_id << std::endl;
+                    for (int j=0; j< int(pose_3d.size()); ++j) {
+                        std::cerr << pose_3d[j] << ", ";
+                    }
+                    std::cerr << std::endl << std::flush;
+                }
+    #endif
 
-                bool is_not_break = true;
+                for (int limb = 0; limb < limbs.size(); ++limb) {
+                    int kpt_id_from = 0;
 
-#ifdef VERBOSE
-                std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-#endif
-                if (is_not_break) {
-                    kpt_id_from = limbs[limb].x;
+                    bool is_not_break = true;
 
-#ifdef VERBOSE
-                    std::cerr << "limb  " << limb << " " << kpt_id_from << std::endl;
-                    std::cerr << (poses_2d[pose_id][kpt_id_from * 3 + 2]) << " " << keypoint_treshold << " " << int(poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) << std::endl << std::flush;
-#endif
+    #ifdef VERBOSE
+                    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    #endif
+                    if (is_not_break) {
+                        kpt_id_from = limbs[limb].x;
 
-                    if (poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold)
-                    {
+    #ifdef VERBOSE
+                        std::cerr << "limb  " << limb << " " << kpt_id_from << std::endl;
+                        std::cerr << (poses_2d[pose_id][kpt_id_from * 3 + 2]) << " " << keypoint_treshold << " " << int(poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) << std::endl << std::flush;
+    #endif
+
+                        if (poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold)
+                        {
+                            {
+                                int kpt_id_where = 0;
+
+                                {
+                                    kpt_id_where = limbs[limb].x;
+                                    int map_3d_id = kpt_id_where * 3;
+                                    int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
+                                    int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
+
+    #ifdef VERBOSE
+                                    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+                                    std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+    #endif
+
+                                    //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                    pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                    //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                    pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                    //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                    pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                }
+                                is_not_break = false;
+                            }
+
+                            {
+                                int kpt_id_where = 0;
+                                {
+                                    kpt_id_where = limbs[limb].y;
+                                    int map_3d_id = kpt_id_where * 3;
+                                    int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
+                                    int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
+
+    #ifdef VERBOSE
+                                    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+                                    std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+    #endif
+
+                                    //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                    pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                    //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                    pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                    //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                    pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                }
+                                is_not_break = false;
+                            }
+
+                            {
+                                int kpt_id_where = 0;
+                                {
+                                    kpt_id_where = limbs[limb].z;
+                                    int map_3d_id = kpt_id_where * 3;
+                                    int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
+                                    int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
+
+    #ifdef VERBOSE
+                                    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+                                    std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+    #endif
+
+                                    //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                    pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                    //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                    pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                    //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                    pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                }                                                
+                                is_not_break = false;
+                            }
+                        }
+                    }
+
+                    if (is_not_break) {
+                        kpt_id_from = limbs[limb].y;
+
+    #ifdef VERBOSE
+                        std::cerr << "limb  " << limb << " " << kpt_id_from << std::endl;
+                        std::cerr << (poses_2d[pose_id][kpt_id_from * 3 + 2]) << " " << keypoint_treshold << " " << int(poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) << std::endl << std::flush;
+    #endif
+
+                        if (poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) {
                         {
                             int kpt_id_where = 0;
 
@@ -640,10 +722,10 @@ namespace human_pose_estimation {
                                 int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
                                 int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
 
-#ifdef VERBOSE
+    #ifdef VERBOSE
                                 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
                                 std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
-#endif
+    #endif
 
                                 //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
                                 pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
@@ -656,17 +738,17 @@ namespace human_pose_estimation {
                         }
 
                         {
-                            int kpt_id_where = 0;
+                            int kpt_id_where = 0;                                           
                             {
                                 kpt_id_where = limbs[limb].y;
                                 int map_3d_id = kpt_id_where * 3;
                                 int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
                                 int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
 
-#ifdef VERBOSE
+    #ifdef VERBOSE
                                 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
                                 std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
-#endif
+    #endif
 
                                 //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
                                 pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
@@ -686,10 +768,10 @@ namespace human_pose_estimation {
                                 int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
                                 int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
 
-#ifdef VERBOSE
+    #ifdef VERBOSE
                                 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
                                 std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
-#endif
+    #endif
 
                                 //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
                                 pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
@@ -700,179 +782,101 @@ namespace human_pose_estimation {
                             }                                                
                             is_not_break = false;
                         }
+                        }
                     }
+
+                    if (is_not_break) {
+                        kpt_id_from = limbs[limb].z;
+    #ifdef VERBOSE                    
+                        std::cerr << "limb  " << limb << " " << kpt_id_from << std::endl;
+                        std::cerr << (poses_2d[pose_id][kpt_id_from * 3 + 2]) << " " << keypoint_treshold << " " << int(poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) << std::endl << std::flush;
+    #endif      
+                        if (poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) {
+                        {
+                            int kpt_id_where = 0;
+
+                            {
+                                kpt_id_where = limbs[limb].x;
+                                int map_3d_id = kpt_id_where * 3;
+                                int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
+                                int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
+
+
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+
+                                //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                            }
+                            is_not_break = false;
+                        }
+
+                        {
+                            int kpt_id_where = 0;                    
+                            {
+                                kpt_id_where = limbs[limb].y;
+                                int map_3d_id = kpt_id_where * 3;
+                                int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
+                                int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
+
+
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+
+                                //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                            }
+                            is_not_break = false;
+                        }
+
+                        {
+                            int kpt_id_where = 0;
+                            {
+                                kpt_id_where = limbs[limb].z;
+                                int map_3d_id = kpt_id_where * 3;
+                                int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
+                                int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
+
+
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+
+                                //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                                //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
+                                pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
+                            }                                                
+                            is_not_break = false;
+                        }
+                    }    
+
+                    }                            
                 }
 
-                if (is_not_break) {
-                    kpt_id_from = limbs[limb].y;
-
-#ifdef VERBOSE
-                    std::cerr << "limb  " << limb << " " << kpt_id_from << std::endl;
-                    std::cerr << (poses_2d[pose_id][kpt_id_from * 3 + 2]) << " " << keypoint_treshold << " " << int(poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) << std::endl << std::flush;
-#endif
-
-                    if (poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) {
-                    {
-                        int kpt_id_where = 0;
-
-                        {
-                            kpt_id_where = limbs[limb].x;
-                            int map_3d_id = kpt_id_where * 3;
-                            int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
-                            int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
-
-#ifdef VERBOSE
-                            std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-                            std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
-#endif
-
-                            //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                        }
-                        is_not_break = false;
+    #ifdef VERBOSE            
+                {
+                    std::cerr << "3d pose/2 : " << pose_id << std::endl;
+                    for (int j=0; j< int(pose_3d.size()); ++j) {
+                        std::cerr << pose_3d[j] << ", ";
                     }
-
-                    {
-                        int kpt_id_where = 0;                                           
-                        {
-                            kpt_id_where = limbs[limb].y;
-                            int map_3d_id = kpt_id_where * 3;
-                            int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
-                            int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
-
-#ifdef VERBOSE
-                            std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-                            std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
-#endif
-
-                            //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                        }
-                        is_not_break = false;
-                    }
-
-                    {
-                        int kpt_id_where = 0;
-                        {
-                            kpt_id_where = limbs[limb].z;
-                            int map_3d_id = kpt_id_where * 3;
-                            int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
-                            int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
-
-#ifdef VERBOSE
-                            std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-                            std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
-#endif
-
-                            //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                        }                                                
-                        is_not_break = false;
-                    }
-                    }
+                    std::cerr << std::endl << std::flush;
                 }
+    #endif
 
-                if (is_not_break) {
-                    kpt_id_from = limbs[limb].z;
-#ifdef VERBOSE                    
-                    std::cerr << "limb  " << limb << " " << kpt_id_from << std::endl;
-                    std::cerr << (poses_2d[pose_id][kpt_id_from * 3 + 2]) << " " << keypoint_treshold << " " << int(poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) << std::endl << std::flush;
-#endif      
-                    if (poses_2d[pose_id][kpt_id_from * 3 + 2] > keypoint_treshold) {
-                    {
-                        int kpt_id_where = 0;
+                poses_3d.push_back(pose_3d);
+            } else {
 
-                        {
-                            kpt_id_where = limbs[limb].x;
-                            int map_3d_id = kpt_id_where * 3;
-                            int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
-                            int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
-
-
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
-
-                            //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                        }
-                        is_not_break = false;
-                    }
-
-                    {
-                        int kpt_id_where = 0;                    
-                        {
-                            kpt_id_where = limbs[limb].y;
-                            int map_3d_id = kpt_id_where * 3;
-                            int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
-                            int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
-
-
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
-
-                            //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                        }
-                        is_not_break = false;
-                    }
-
-                    {
-                        int kpt_id_where = 0;
-                        {
-                            kpt_id_where = limbs[limb].z;
-                            int map_3d_id = kpt_id_where * 3;
-                            int kpt_from_2d_x = int(poses_2d[pose_id][kpt_id_from *3]);
-                            int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
-
-
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
-
-                            //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 1] = map_3d[1, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+1] = features.at<float>(map_3d_id+1, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                            //poses_3d[pose_id][kpt_id_where * 4 + 2] = map_3d[2, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
-                            pose_3d[kpt_id_where * 4+2] = features.at<float>(map_3d_id+2, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
-                        }                                                
-                        is_not_break = false;
-                    }
-                }    
-
-                }                            
             }
-
-#ifdef VERBOSE            
-            {
-                std::cerr << "3d pose/2 : " << pose_id << std::endl;
-                for (int j=0; j< int(pose_3d.size()); ++j) {
-                    std::cerr << pose_3d[j] << ", ";
-                }
-                std::cerr << std::endl << std::flush;
-            }
-#endif
-
-            poses_3d.push_back(pose_3d);
         }
 
         root_relative_poses rv;
