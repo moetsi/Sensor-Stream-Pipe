@@ -332,7 +332,7 @@ void OakdXlinkReader::NextFrame() {
    memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
    memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 #endif
-  current_frame_.push_back(rgbFrame);
+
 
   //Depth frame
   std::shared_ptr<FrameStruct> depthFrame =
@@ -661,6 +661,13 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         }
 #endif
     /////////////////////////////////////////////
+    //Grab the amount of COCO bodies detected in this rgb frame
+    int32_t bodyCount = (int)posesStruct.poses_3d.size();
+    //If 0, no need to send structs
+    // if (bodyCount > 0)
+    // {
+    //     return;
+    // }
 
     //Prepare the bodies frame
     std::shared_ptr<FrameStruct> s =
@@ -673,8 +680,6 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     s->frame = std::vector<uchar>();
     
-    //Grab the amount of COCO bodies detected in this rgb frame
-    int32_t bodyCount = (int)posesStruct.poses_3d.size();
 
     std::cerr << "bodyCount: " << bodyCount << std::endl << std::flush; 
 
@@ -888,7 +893,12 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     }
 
     //Now that we have copied all memory to the frame we can push it back
-    current_frame_.push_back(s);
+    if (bodyCount > 0)
+    {
+        current_frame_.push_back(s);
+    }
+    //We push the rgb frame to the back (this helps when running ssp_client_opencv)
+    current_frame_.push_back(rgbFrame);
 }
 
 bool OakdXlinkReader::HasNextFrame() { return true; }

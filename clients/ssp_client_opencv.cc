@@ -69,11 +69,27 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 
     bool imgChanged = false;
     int c = 0;
+
+    // For marking 2D pose locations
+    float confidenceThreshold = 0;
+    cv::Scalar red = cv::Scalar( 0, 0, 255 );
+    int markerRadius = 5;
+
     while (reader.HasNextFrame()) {
       reader.NextFrame();
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
+
+      bool detectedBody = false;
+      coco_human_t bodyStruct;
+
       for (FrameStruct f : f_list) {
         std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
+
+        if (f.frame_type == FrameType::FrameTypeHumanPose)
+        {
+          memcpy(&bodyStruct, &f.frame[4], sizeof(coco_human_t));
+          detectedBody = true;
+        }
 
         cv::Mat img;
         imgChanged = FrameStructToMat(f, img, decoders);
@@ -102,7 +118,50 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
           } else if (f.frame_type == FrameType::FrameTypeConfidence) {
             cv::Mat imgOut;
             img *= 127; // iOS confidence is 0:low, 1:medium, 2:high
-          } 
+          } else if (f.frame_type == FrameType::FrameTypeColor && detectedBody)
+          {
+            // take all detected 2D pixel coordinates and turn them red
+            if(bodyStruct.neck_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.neck_2d_x, bodyStruct.neck_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.nose_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.nose_2d_x, bodyStruct.nose_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            // if(bodyStruct.pelvis_2d_conf > confidenceThreshold)
+              // circle( img, cv::Point(bodyStruct.pelvis_2d_x, bodyStruct.pelvis_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.shoulder_left_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.shoulder_left_2d_x, bodyStruct.shoulder_left_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.elbow_left_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.elbow_left_2d_x, bodyStruct.elbow_left_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.wrist_left_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.wrist_left_2d_x, bodyStruct.wrist_left_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.hip_left_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.hip_left_2d_x, bodyStruct.hip_left_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.knee_left_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.knee_left_2d_x, bodyStruct.knee_left_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.ankle_left_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.ankle_left_2d_x, bodyStruct.ankle_left_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.shoulder_right_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.shoulder_right_2d_x, bodyStruct.shoulder_right_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.elbow_right_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.elbow_right_2d_x, bodyStruct.elbow_right_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.wrist_right_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.wrist_right_2d_x, bodyStruct.wrist_right_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.hip_right_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.hip_right_2d_x, bodyStruct.hip_right_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.knee_right_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.knee_right_2d_x, bodyStruct.knee_right_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.ankle_right_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.ankle_right_2d_x, bodyStruct.ankle_right_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.eye_left_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.eye_left_2d_x, bodyStruct.eye_left_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.ear_left_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.ear_left_2d_x, bodyStruct.ear_left_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.eye_right_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.eye_right_x, bodyStruct.eye_right_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            if(bodyStruct.ear_right_2d_conf > confidenceThreshold)
+              circle( img, cv::Point(bodyStruct.ear_right_x, bodyStruct.ear_right_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+            
+
+          }
 
 #if HAS_IMSHOW
           cv::namedWindow(decoder_id);
