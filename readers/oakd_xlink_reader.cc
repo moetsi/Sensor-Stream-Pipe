@@ -4,6 +4,7 @@
 
 #include "oakd_xlink_reader.h"
 #include "human_poses.h"
+#include <cmath>
 // Closer-in minimum depth, disparity range is doubled (from 95 to 190):
 // static std::atomic<bool> extended_disparity{false};
 // // Better accuracy for longer distance, fractional disparity 32-levels:
@@ -116,7 +117,10 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 #ifndef TEST_WITH_IMAGE  
     device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode   // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
     deviceCalib = device->readCalibration();
-    // self.monoHFOV = np.deg2rad(calibData.getFov(dai.CameraBoardSocket.LEFT))
+    cameraIntrinsics = deviceCalib.getCameraIntrinsics(dai::CameraBoardSocket::RGB, 1280, 720);
+    horizontalFocalLengthPixels = cameraIntrinsics[0][0];
+    verticalFocalLengthPixels =  cameraIntrinsics[1][1];
+    cameraHFOVInRadians = ((deviceCalib.getFov(dai::CameraBoardSocket::RGB) * pi) / 180.0) * (3840.0/4056.0); // Must scale for cropping: https://discordapp.com/channels/790680891252932659/924798503270625290/936746213691228260
 #endif
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -893,7 +897,86 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         bodyStruct.ear_right_2d_depth = to2D(frameDepthMat.at<ushort>(bodyStruct.ear_right_2d_y,bodyStruct.ear_right_2d_x));
         bodyStruct.ear_right_2d_conf = posesStruct.poses_2d[i][18 * 3 + 2];
 
+
+
+
+
         bodyStruct.hton();
+
+        //Now we find the spatial coordinates of using StereoDepth and intrinsics
+        //We first find the x,y coordinate in the image of the body that is most confident
+        int xPoint;
+        int yPoint;
+        if(bodyStruct.neck_2d_conf > .5)
+        {
+            xPoint = bodyStruct.neck_2d_x;
+            yPoint = bodyStruct.neck_2d_y;
+        }
+        //If neck not confident but shoulders are confident, choose half way point of shoulders
+        else if (bodyStruct.shoulder_left_2d_conf > .5 && bodyStruct.shoulder_right_2d_conf > .5)
+        {
+            xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
+            yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
+        }
+        //If that isn't true do midpoint between hips
+        else if (bodyStruct.hip_left_2d_conf > .5 && bodyStruct.hip_right_2d_conf > .5)
+        {
+            xPoint = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
+            yPoint = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
+        }
+        //
+        else if (bodyStruct.nose_2d_conf > 0)
+        {
+            xPoint = bodyStruct.nose_2d_x;
+            yPoint = bodyStruct.nose_2d_y;
+        }
+        //Now we grab a the average depth value of a 12x12 grid of pixels surrounding the xPoint and yPoint
+        cv::Scalar mean, stddev;
+        //Region square radius
+        int regionRadius = 6;
+
+        //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
+        int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0;
+        xPointMin  = (xPointMin <= frameDepthMat.cols) ? xPointMin : frameDepthMat.cols;
+        int xPointMax  = (xPoint + regionRadius <= frameDepthMat.cols) ? xPoint + regionRadius : frameDepthMat.cols;
+        xPointMax  = (xPointMax >= 0) ? xPointMax : 0;
+        int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0;
+        yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows;
+        int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.cols;
+        yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
+
+        std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
+        std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
+        std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
+        std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
+        std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
+        std::cerr << "yPointMax: " << xPoint << std::endl << std::flush;
+
+        //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
+        cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
+        cv::Mat croppedDepth = frameDepthMat(myROI);
+        cv::meanStdDev(croppedDepth, mean, stddev);
+        int pointDepth = int(mean[0]);
+
+
+        //Now we use the HFOV and VFOV to find the x and y coordinates in millimeters
+        // https://github.com/luxonis/depthai-experiments/blob/377c50c13931a082825d457f69893c1bf3f24aa2/gen2-calc-spatials-on-host/calc.py#L10
+        int midDepthXCoordinate = frameDepthMat.cols / 2;    // middle of depth image x across (columns) - this is depth origin
+        int midDepthYCoordinate = frameDepthMat.rows / 2;    // middle of depth image y across (rows) - this is depth origin
+        
+        int xPointInDepthCenterCoordinates = xPoint - midDepthXCoordinate; //This is the xPoint but if the depth map center is the origin
+        int yPointInDepthCenterCoordinates = yPoint - midDepthYCoordinate; //This is the yPoint but if the depth map center is the origin
+
+        float angle_x = atan(tan(cameraHFOVInRadians / 2.0f) * float(xPointInDepthCenterCoordinates) / float(midDepthXCoordinate));
+        float angle_y = atan(tan(cameraHFOVInRadians / 2.0f) * float(yPointInDepthCenterCoordinates) / float(midDepthYCoordinate));
+
+        //We will save this depth value as the pelvis depth
+        bodyStruct.pelvis_2d_depth = pointDepth;
+        bodyStruct.pelvis_2d_x = int(float(pointDepth) * tan(angle_x));
+        bodyStruct.pelvis_2d_y = int(-1.0f * float(pointDepth) * tan(angle_y));
+
+        std::cerr << "NECK DEPTH: " << int(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x))  << std::endl << std::flush;
+        std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush;
         //Finally we copy the COCO body struct memory to the frame
         memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
     }

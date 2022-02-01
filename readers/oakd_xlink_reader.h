@@ -87,6 +87,11 @@ private:
   dai::DeviceInfo device_info;
   std::shared_ptr<dai::Device> device;
   dai::CalibrationHandler deviceCalib;
+  std::vector<std::vector<float>> cameraIntrinsics;
+  float horizontalFocalLengthPixels;
+  float verticalFocalLengthPixels;
+  float cameraHFOVInRadians;
+  
 
 
   //openvino info
