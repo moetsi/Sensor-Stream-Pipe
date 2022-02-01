@@ -246,11 +246,11 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 
             // take all detected 2D pixel coordinates and turn them red
             if(bodyStruct.neck_2d_conf > confidenceThreshold) {
-              circle( img, cv::Point(bodyStruct.neck_2d_x, bodyStruct.neck_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+              circle( img, cv::Point(bodyStruct.neck_2d_x, bodyStruct.neck_2d_y), markerRadius, cv::Scalar(0,0,int(double(bodyStruct.neck_2d_conf) * 255.0)), cv::FILLED, cv::LINE_8 );
               std::cerr << "neck 2d: " << bodyStruct.neck_2d_x << " " << bodyStruct.neck_2d_y << std::endl << std::flush;
             }
             if(bodyStruct.nose_2d_conf > confidenceThreshold) {
-              circle( img, cv::Point(bodyStruct.nose_2d_x, bodyStruct.nose_2d_y), markerRadius, red, cv::FILLED, cv::LINE_8 );
+              circle( img, cv::Point(bodyStruct.nose_2d_x, bodyStruct.nose_2d_y), markerRadius, cv::Scalar(0,0,int(double(bodyStruct.nose_2d_conf) * 255.0)), cv::FILLED, cv::LINE_8 );
               showDistance(cv::Point(bodyStruct.nose_2d_x, bodyStruct.nose_2d_y), red, bodyStruct.nose_2d_depth);
               std::cerr << "nose 2d: " << bodyStruct.nose_2d_x << " " << bodyStruct.nose_2d_y << std::endl << std::flush;
             }
