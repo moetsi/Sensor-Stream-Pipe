@@ -64,7 +64,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     camRgb->setInterleaved(false);
 
     // Depth Properties
-    auto monoRes = dai::MonoCameraProperties::SensorResolution::THE_400_P;
+    auto monoRes = dai::MonoCameraProperties::SensorResolution::THE_720_P;
     left->setResolution(monoRes);
     left->setBoardSocket(dai::CameraBoardSocket::LEFT);
     left->setFps(5);
@@ -72,22 +72,22 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
     right->setFps(5);
 
-    // stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
-    // stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+    stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
+    stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
-    // auto oakdConfig = stereo->initialConfig.get();
-    // oakdConfig.postProcessing.speckleFilter.enable = false;
-    // oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
+    auto oakdConfig = stereo->initialConfig.get();
+    oakdConfig.postProcessing.speckleFilter.enable = false;
+    oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
     // oakdConfig.postProcessing.temporalFilter.enable = true;
-    // oakdConfig.postProcessing.spatialFilter.enable = true;
-    // oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 2;
-    // oakdConfig.postProcessing.spatialFilter.numIterations = 1;
+    oakdConfig.postProcessing.spatialFilter.enable = true;
+    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 2;
+    oakdConfig.postProcessing.spatialFilter.numIterations = 1;
     // oakdConfig.postProcessing.thresholdFilter.minRange = 400;
     // oakdConfig.postProcessing.thresholdFilter.maxRange = 15000;
     // oakdConfig.postProcessing.decimationFilter.decimationFactor = 1;
-    // stereo->initialConfig.set(oakdConfig);
+    stereo->initialConfig.set(oakdConfig);
 
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -343,7 +343,7 @@ void OakdXlinkReader::NextFrame() {
       std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
     depthFrame->sensor_id = 1;
   depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
-  depthFrame->frame_data_type = FrameDataType::FrameDataTypeGRAY16LE; // 3; It is 
+  depthFrame->frame_data_type = FrameDataType::FrameDataTypeDepthAIStereoDepth; // 11; It is not when not subpixel
   depthFrame->frame_id = current_frame_counter_;
   depthFrame->timestamps.push_back(capture_timestamp);
 
@@ -351,7 +351,7 @@ void OakdXlinkReader::NextFrame() {
    // convert the raw buffer to cv::Mat
    int32_t depthCols = frameDepthMat.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
    int32_t depthRows = frameDepthMat.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   size_t depthSize = depthCols*depthRows*sizeof(ushort); //  This assumes  we have subpixel set to true, other wise data is uchar size
+   size_t depthSize = depthCols*depthRows*sizeof(u_int16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
 
    depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
@@ -704,8 +704,6 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         // posesStruct.poses_2d[i]; //how do I know what joints are being provided? (will need this for bodyStruct depth values)
         //depth value = (int)frameDepthMat.at<ushort>(yvalue,xvalue);
 
-        
-
         //Create a COCO body Struct
         coco_human_t bodyStruct;
         bodyStruct.Id = posesStruct.poses_id[i];
@@ -942,7 +940,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         xPointMax  = (xPointMax >= 0) ? xPointMax : 0;
         int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0;
         yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows;
-        int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.cols;
+        int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
         yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
 
         std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
@@ -950,14 +948,13 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
         std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
         std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
-        std::cerr << "yPointMax: " << xPoint << std::endl << std::flush;
+        std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
 
         //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
         cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
         cv::Mat croppedDepth = frameDepthMat(myROI);
         cv::meanStdDev(croppedDepth, mean, stddev);
         int pointDepth = int(mean[0]);
-
 
         //Now we use the HFOV and VFOV to find the x and y coordinates in millimeters
         // https://github.com/luxonis/depthai-experiments/blob/377c50c13931a082825d457f69893c1bf3f24aa2/gen2-calc-spatials-on-host/calc.py#L10

@@ -117,7 +117,10 @@ enum class FrameDataType: short {
     /** OAKD cv::Mat */
     FrameDataTypeCvMat = 9,
     /** OAKD cv::Mat, disparity */
-    FrameDataTypeCvDisparity = 10
+    FrameDataTypeCvDisparity = 10,
+
+    //OAKD cv::Mat StereoDepth sub-pixel
+    FrameDataTypeDepthAIStereoDepth = 11
 }; 
 
 /**
