@@ -73,6 +73,7 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
     // For marking 2D pose locations
     float confidenceThreshold = 0;
     cv::Scalar red = cv::Scalar( 0, 0, 255 );
+    cv::Scalar blue = cv::Scalar( 255, 0, 0 );
     int markerRadius = 5;
 
     while (reader.HasNextFrame()) {
@@ -147,11 +148,139 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
             img *= 127; // iOS confidence is 0:low, 1:medium, 2:high
           } else if (f.frame_type == FrameType::FrameTypeColor && detectedBody)
           {
+
+            auto showDistance = [&](const cv::Point &p, cv::Scalar s, float d) {
+              auto w = d / 4000;
+              auto p2 = cv::Point(p.x + cos(w)*100, p.y + sin(w)*100);
+              line(img, p, p2, s, 5);
+            };
+
+            {
+              // project 3d points 
+              float fx = 984.344 / 0.84381;
+              auto project = [fx](float x, float y, float z) {
+                auto y1 = (fx * x / z) * 0.84381 + 1280/2; 
+                auto y2 = (-fx * y / z) * 0.84381 + 720/2;
+                return std::make_tuple(y1, y2);
+              };
+              auto dist = [fx](float x, float y, float z) {
+                return std::sqrt(x*x  + y*y + z*z / 0.84381 / 0.84381) * 1000.0;
+              };
+
+              if (bodyStruct.neck_x != float(-1)) {
+                auto xy = project(bodyStruct.neck_y, bodyStruct.neck_z, -bodyStruct.neck_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "neck: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              }
+              if (bodyStruct.nose_x != float(-1)) {
+                auto xy = project(bodyStruct.nose_y, bodyStruct.nose_z, -bodyStruct.nose_x);
+                auto d = dist(bodyStruct.nose_y, bodyStruct.nose_z, -bodyStruct.nose_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                showDistance(cv::Point(std::get<0>(xy), std::get<1>(xy)), blue, d);
+                showDistance(cv::Point(std::get<0>(xy), std::get<1>(xy)), red, bodyStruct.nose_2d_depth);
+                std::cerr << "nose: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+                std::cerr << d << " vs. depth = " << bodyStruct.nose_2d_depth << std::endl << std::flush;
+              }
+              if (bodyStruct.shoulder_left_x != float(-1)) {
+                auto xy = project(bodyStruct.shoulder_left_y, bodyStruct.shoulder_left_z, -bodyStruct.shoulder_left_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "left shoulder: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              }              
+              if (bodyStruct.elbow_left_x != float(-1)) {
+                auto xy = project(bodyStruct.elbow_left_y, bodyStruct.elbow_left_z, -bodyStruct.elbow_left_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "left elbow: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              }   
+              if (bodyStruct.wrist_left_x != float(-1)) {
+                auto xy = project(bodyStruct.wrist_left_y, bodyStruct.wrist_left_z, -bodyStruct.wrist_left_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "left wrist: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              } 
+              if (bodyStruct.hip_left_x != float(-1)) {
+                auto xy = project(bodyStruct.hip_left_y, bodyStruct.hip_left_z, -bodyStruct.hip_left_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "left hip: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              } 
+              if (bodyStruct.knee_left_x != float(-1)) {
+                auto xy = project(bodyStruct.knee_left_y, bodyStruct.knee_left_z, -bodyStruct.knee_left_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "left knee: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              } 
+              if (bodyStruct.ankle_left_x != float(-1)) {
+                auto xy = project(bodyStruct.ankle_left_y, bodyStruct.ankle_left_z, -bodyStruct.ankle_left_x);
+                auto d = dist(bodyStruct.ankle_left_y, bodyStruct.ankle_left_z, -bodyStruct.ankle_left_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                showDistance(cv::Point(std::get<0>(xy), std::get<1>(xy)), blue, d);
+                showDistance(cv::Point(std::get<0>(xy), std::get<1>(xy)), red, bodyStruct.ankle_left_2d_depth);
+                std::cerr << "left ankle: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+                std::cerr << d << " vs. depth = " << bodyStruct.ankle_left_2d_depth << std::endl << std::flush;
+              }  
+              if (bodyStruct.shoulder_right_x != float(-1)) {
+                auto xy = project(bodyStruct.shoulder_right_y, bodyStruct.shoulder_right_z, -bodyStruct.shoulder_right_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "right shoulder: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              }              
+              if (bodyStruct.elbow_right_x != float(-1)) {
+                auto xy = project(bodyStruct.elbow_right_y, bodyStruct.elbow_right_z, -bodyStruct.elbow_right_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "right elbow: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              }   
+              if (bodyStruct.wrist_right_x != float(-1)) {
+                auto xy = project(bodyStruct.wrist_right_y, bodyStruct.wrist_right_z, -bodyStruct.wrist_right_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "right wrist: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              } 
+              if (bodyStruct.hip_right_x != float(-1)) {
+                auto xy = project(bodyStruct.hip_right_y, bodyStruct.hip_right_z, -bodyStruct.hip_right_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "right hip: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              } 
+              if (bodyStruct.knee_right_x != float(-1)) {
+                auto xy = project(bodyStruct.knee_right_y, bodyStruct.knee_right_z, -bodyStruct.knee_right_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "right knee: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              } 
+              if (bodyStruct.ankle_right_x != float(-1)) {
+                auto xy = project(bodyStruct.ankle_right_y, bodyStruct.ankle_right_z, -bodyStruct.ankle_right_x);
+                auto d = dist(bodyStruct.ankle_right_y, bodyStruct.ankle_right_z, -bodyStruct.ankle_right_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                showDistance(cv::Point(std::get<0>(xy), std::get<1>(xy)), blue, d);
+                showDistance(cv::Point(std::get<0>(xy), std::get<1>(xy)), red, bodyStruct.ankle_right_2d_depth);
+                std::cerr << "left ankle: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+                std::cerr << d << " vs. depth = " << bodyStruct.ankle_right_2d_depth << std::endl << std::flush;
+              } 
+              if (bodyStruct.eye_left_x != float(-1)) {
+                auto xy = project(bodyStruct.eye_left_y, bodyStruct.eye_left_z, -bodyStruct.eye_left_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "right knee: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              }               
+              if (bodyStruct.ear_left_x != float(-1)) {
+                auto xy = project(bodyStruct.ear_left_y, bodyStruct.ear_left_z, -bodyStruct.ear_left_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "right knee: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              }   
+              if (bodyStruct.eye_right_x != float(-1)) {
+                auto xy = project(bodyStruct.eye_right_y, bodyStruct.eye_right_z, -bodyStruct.eye_right_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "right knee: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              }               
+              if (bodyStruct.ear_right_x != float(-1)) {
+                auto xy = project(bodyStruct.ear_right_y, bodyStruct.ear_right_z, -bodyStruct.ear_right_x);
+                circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
+                std::cerr << "right knee: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+              } 
+            }
+
             // take all detected 2D pixel coordinates and turn them red
-            if(bodyStruct.neck_2d_conf > confidenceThreshold)
+            if(bodyStruct.neck_2d_conf > confidenceThreshold) {
               circle( img, cv::Point(bodyStruct.neck_2d_x, bodyStruct.neck_2d_y), markerRadius, cv::Scalar(0,0,int(double(bodyStruct.neck_2d_conf) * 255.0)), cv::FILLED, cv::LINE_8 );
-            if(bodyStruct.nose_2d_conf > confidenceThreshold)
+              std::cerr << "neck 2d: " << bodyStruct.neck_2d_x << " " << bodyStruct.neck_2d_y << std::endl << std::flush;
+            }
+            if(bodyStruct.nose_2d_conf > confidenceThreshold) {
               circle( img, cv::Point(bodyStruct.nose_2d_x, bodyStruct.nose_2d_y), markerRadius, cv::Scalar(0,0,int(double(bodyStruct.nose_2d_conf) * 255.0)), cv::FILLED, cv::LINE_8 );
+              showDistance(cv::Point(bodyStruct.nose_2d_x, bodyStruct.nose_2d_y), red, bodyStruct.nose_2d_depth);
+              std::cerr << "nose 2d: " << bodyStruct.nose_2d_x << " " << bodyStruct.nose_2d_y << std::endl << std::flush;
+            }
             // if(bodyStruct.pelvis_2d_conf > confidenceThreshold)
             //   circle( img, cv::Point(bodyStruct.pelvis_2d_x, bodyStruct.pelvis_2d_y), markerRadius, cv::Scalar(0,0,int(double(bodyStruct.pelvis_2d_conf) * 255.0)), cv::FILLED, cv::LINE_8 );
             if(bodyStruct.shoulder_left_2d_conf > confidenceThreshold)
