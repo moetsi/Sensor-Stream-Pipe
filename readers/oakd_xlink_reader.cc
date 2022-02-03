@@ -77,6 +77,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
+    stereo->setFocalLengthFromCalibration(true);
     auto oakdConfig = stereo->initialConfig.get();
     oakdConfig.postProcessing.speckleFilter.enable = false;
     oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
