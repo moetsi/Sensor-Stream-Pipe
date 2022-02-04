@@ -99,18 +99,45 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 
           // Manipulate image to show as a color map
           if (f.frame_type == FrameType::FrameTypeDepth) {
-            if (img.type() == CV_16U) {
+            if (img.type() == CV_16U && f.frame_data_type != FrameDataType::FrameDataTypeDepthAIStereoDepth) {
               // Compress images to show up on a 255 valued color map
-              // img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
-            cv::normalize(img, img, 255, 0, cv::NORM_MINMAX);
+              img *= (MAX_DEPTH_VALUE_8_BITS / (float)MAX_DEPTH_VALUE_12_BITS);
+              cv::normalize(img, img, 255, 0, cv::NORM_MINMAX);
+              cv::Mat imgOut;
+              img.convertTo(imgOut, CV_8U);
+              cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
+
             } else if (img.type() == CV_32F) {
               // Normalize image to 0;255
               cv::normalize(img, img, 255, 0, cv::NORM_MINMAX);
-            }
-            cv::Mat imgOut;
+              cv::Mat imgOut;
+              img.convertTo(imgOut, CV_8U);
+              cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
 
-            img.convertTo(imgOut, CV_8U);
-            cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
+            } else if (img.type() == CV_16U && f.frame_data_type == FrameDataType::FrameDataTypeDepthAIStereoDepth) {
+              // uint8_t *ptr = (uint8_t*) img.data;
+              // for (unsigned i=0; i< img.rows; ++i) {
+              //   for (unsigned j=0; j < img.cols; ++j) {
+              //     auto v = ptr[i*img.cols + j];
+              //     // 400P: 441.25
+              //     // 800P: 882.5
+              //     float depthcm = 441.25 * 7.5 / float(v);
+              //     // adjust to 8 bits
+              //     float v2 = depthcm; // 1024 cm ~10 m
+              //      ptr[i*img.cols + j] = uint8_t(v2);
+              //   }
+              // }
+              // cv::Mat imgOut;
+              // img.convertTo(imgOut, CV_8U);
+              // cv::applyColorMap(imgOut, img, cv::COLORMAP_JET);
+              
+              cv::Mat depthFrameColor;
+              cv::normalize(img, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
+              cv::equalizeHist(depthFrameColor, depthFrameColor);
+              cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);    
+              img = depthFrameColor; 
+            }
+
           } else if (f.frame_type == FrameType::FrameTypeIR) {
 
             double max = 1024;

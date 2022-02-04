@@ -6,7 +6,7 @@ general:
   frame_source:
     type: "oakd_xlink"
     parameters:
-      ip: "192.168.10.53"
+      ip: "192.168.10.14"
       deviceid: 1
       stream_color_video: True
       stream_depth_video: True
