@@ -148,7 +148,8 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
             img *= 127; // iOS confidence is 0:low, 1:medium, 2:high
           } else if (f.frame_type == FrameType::FrameTypeColor && detectedBody)
           {
-
+#if 0
+            std::cerr << "image + pose!" << std::endl << std::flush;
             cv::imwrite("img-" + std::to_string(c) + ".jpg", img);
 
             //// build export struct [2d]
@@ -399,7 +400,7 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
               w.close();
             }
             /////
-
+#endif
             auto showDistance = [&](const cv::Point &p, cv::Scalar s, float d) {
               auto w = d / 4000;
               auto p2 = cv::Point(p.x + cos(w)*100, p.y + sin(w)*100);
@@ -408,14 +409,14 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 
             {
               // project 3d points 
-              float fx = 984.344 / 0.84381;
+              float fx = 984.344;
               auto project = [fx](float x, float y, float z) {
-                auto y1 = (fx * x / z) * 0.84381 + 1280/2; 
-                auto y2 = (-fx * y / z) * 0.84381 + 720/2;
+                auto y1 = (fx * x / z)  + 1280/2; 
+                auto y2 = (-fx * y / z) + 720/2;
                 return std::make_tuple(y1, y2);
               };
               auto dist = [fx](float x, float y, float z) {
-                return std::sqrt(x*x  + y*y + z*z / 0.84381 / 0.84381) * 1000.0;
+                return std::sqrt(x*x  + y*y + z*z) * 1000.0;
               };
 
               if (bodyStruct.neck_x != float(-1)) {
