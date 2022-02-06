@@ -902,6 +902,8 @@ namespace human_pose_estimation {
         }
     }
 
+    const float magic = 0.84381;
+
     parsed_poses parse_poses(
         std::vector<Pose> & previous_poses_2d, PoseCommon & common, 
         const cv::Mat &features, const cv::Mat &heatmap, const cv::Mat &paf_map, float input_scale, int stride, float fx, bool is_video) {
@@ -952,11 +954,16 @@ namespace human_pose_estimation {
                 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 #endif
   
+                //if (poses_2d[i][kpt_id *3 + 2] != -1) {
+                //            pose_2d_scaled[kpt_id * 3] = int(poses_2d[i][kpt_id * 3] * stride / input_scale * magic);
+                //            pose_2d_scaled[kpt_id * 3 + 1] = int(poses_2d[i][kpt_id * 3 + 1] * stride / input_scale);
+                //            pose_2d_scaled[kpt_id * 3 + 2] = poses_2d[i][kpt_id * 3 + 2];
+                //}
                 if (poses_2d[i][kpt_id *3 + 2] != -1) {
-                            pose_2d_scaled[kpt_id * 3] = int(poses_2d[i][kpt_id * 3] * stride / input_scale);
-                            pose_2d_scaled[kpt_id * 3 + 1] = int(poses_2d[i][kpt_id * 3 + 1] * stride / input_scale);
+                            pose_2d_scaled[kpt_id * 3] = int(poses_2d[i][kpt_id * 3] * stride / input_scale );
+                            pose_2d_scaled[kpt_id * 3 + 1] = int(poses_2d[i][kpt_id * 3 + 1] * stride / input_scale * magic );
                             pose_2d_scaled[kpt_id * 3 + 2] = poses_2d[i][kpt_id * 3 + 2];
-                }
+                }                
             }
 
 #ifdef VERBOSE
@@ -1195,7 +1202,7 @@ namespace human_pose_estimation {
         std::cerr << "fx = " << fx << " input_scale = " << input_scale << " stride = " << stride << std::endl << std::flush;
 #endif
 
-        std::vector<float> mean_2d_ { mean_2d[0], mean_2d[1], fx*input_scale / stride};
+        std::vector<float> mean_2d_ { mean_2d[0], mean_2d[1], fx*input_scale / stride };
         std::vector<float> mean_3d_ { mean_3d[0], mean_3d[1], 0};
         std::vector<float> translation{ numerator / denominator * mean_2d_[0] - mean_3d_[0], numerator / denominator * mean_2d_[1] - mean_3d_[1] , numerator / denominator * mean_2d_[2] - mean_3d_[2]};
 

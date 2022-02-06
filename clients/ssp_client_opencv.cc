@@ -148,7 +148,259 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
             img *= 127; // iOS confidence is 0:low, 1:medium, 2:high
           } else if (f.frame_type == FrameType::FrameTypeColor && detectedBody)
           {
+#if 0
+            std::cerr << "image + pose!" << std::endl << std::flush;
+            cv::imwrite("img-" + std::to_string(c) + ".jpg", img);
 
+            //// build export struct [2d]
+            {
+              std::stringstream ss;
+              ss << "[" << std::endl;
+              ss << "[" 
+                << bodyStruct.neck_2d_x << ","
+                << bodyStruct.neck_2d_y << ","
+                << bodyStruct.neck_2d_depth << ","
+                << bodyStruct.neck_2d_conf
+                << "]," << std::endl;
+              ss << "["
+                << bodyStruct.nose_2d_x << ","
+                << bodyStruct.nose_2d_y << ","
+                << bodyStruct.nose_2d_depth << ","
+                << bodyStruct.nose_2d_conf
+                << "]," << std::endl;
+              ss << "["
+                << bodyStruct.pelvis_2d_x << ","
+                << bodyStruct.pelvis_2d_y << ","
+                << bodyStruct.pelvis_2d_depth << ","
+                << bodyStruct.pelvis_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                << bodyStruct.shoulder_left_2d_x << ","
+                << bodyStruct.shoulder_left_2d_y << ","
+                << bodyStruct.shoulder_left_2d_depth << ","
+                << bodyStruct.shoulder_left_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                << bodyStruct.elbow_left_2d_x << ","
+                << bodyStruct.elbow_left_2d_y << ","
+                << bodyStruct.elbow_left_2d_depth << ","
+                << bodyStruct.elbow_left_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                << bodyStruct.wrist_left_2d_x << ","
+                << bodyStruct.wrist_left_2d_y << ","
+                << bodyStruct.wrist_left_2d_depth << ","
+                << bodyStruct.wrist_left_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                << bodyStruct.hip_left_2d_x << ","
+                << bodyStruct.hip_left_2d_y << ","
+                << bodyStruct.hip_left_2d_depth << ","
+                << bodyStruct.hip_left_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.knee_left_2d_x << ","
+                  << bodyStruct.knee_left_2d_y << ","
+                  << bodyStruct.knee_left_2d_depth << ","
+                  << bodyStruct.knee_left_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.ankle_left_2d_x << ","
+                  << bodyStruct.ankle_left_2d_y << ","
+                  << bodyStruct.ankle_left_2d_depth << ","
+                  << bodyStruct.ankle_left_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.shoulder_right_2d_x << ","
+                  << bodyStruct.shoulder_right_2d_y << ","
+                  << bodyStruct.shoulder_right_2d_depth << ","
+                  << bodyStruct.shoulder_right_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.elbow_right_2d_x << ","
+                  << bodyStruct.elbow_right_2d_y << ","
+                  << bodyStruct.elbow_right_2d_depth << ","
+                  << bodyStruct.elbow_right_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.wrist_right_2d_x << ","
+                  << bodyStruct.wrist_right_2d_y << ","
+                  << bodyStruct.wrist_right_2d_depth << ","
+                  << bodyStruct.wrist_right_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.hip_right_2d_x << ","
+                  << bodyStruct.hip_right_2d_y << ","
+                  << bodyStruct.hip_right_2d_depth << ","
+                  << bodyStruct.hip_right_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.knee_right_2d_x << ","
+                  << bodyStruct.knee_right_2d_y << ","
+                  << bodyStruct.knee_right_2d_depth << ","
+                  << bodyStruct.knee_right_2d_conf 
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.ankle_right_2d_x << ","
+                  << bodyStruct.ankle_right_2d_y << ","
+                  << bodyStruct.ankle_right_2d_depth << "," 
+                  << bodyStruct.ankle_right_2d_conf 
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.eye_left_2d_x << ","
+                  << bodyStruct.eye_left_2d_y << ","
+                  << bodyStruct.eye_left_2d_depth << ","
+                  << bodyStruct.eye_left_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.ear_left_2d_x << ","
+                  << bodyStruct.ear_left_2d_y << ","
+                  << bodyStruct.ear_left_2d_depth << ","
+                  << bodyStruct.ear_left_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.eye_right_2d_x << ","
+                  << bodyStruct.eye_right_2d_y << ","
+                  << bodyStruct.eye_right_2d_depth << ","
+                  << bodyStruct.eye_right_2d_conf
+                  << "]," << std::endl;
+              ss << "["
+                  << bodyStruct.ear_right_2d_x << ","
+                  << bodyStruct.ear_right_2d_y << ","
+                  << bodyStruct.ear_right_2d_depth << ","
+                  << bodyStruct.ear_right_2d_conf
+                  << "]" << std::endl;
+              ss << "]" << std::endl;
+               std::ofstream w("2d-pose-" + std::to_string(c) + ".txt");
+              w << ss.str() << std::endl << std::flush;
+              w.close();
+            }
+
+            //// same, [3d]
+            {
+              std::stringstream ss;
+              ss << "[" << std::endl;
+              ss << "["
+                  << bodyStruct.neck_x << ","
+                  << bodyStruct.neck_y << ","
+                  << bodyStruct.neck_z << ","
+                  << bodyStruct.neck_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.nose_x << ","
+                  << bodyStruct.nose_y << ","
+                  << bodyStruct.nose_z << ","
+                  << bodyStruct.nose_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.pelvis_x << ","
+                  << bodyStruct.pelvis_y << ","
+                  << bodyStruct.pelvis_z << ","
+                  << bodyStruct.pelvis_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.shoulder_left_x << ","
+                  << bodyStruct.shoulder_left_y << ","
+                  << bodyStruct.shoulder_left_z << ","
+                  << bodyStruct.shoulder_left_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.elbow_left_x << ","
+                  << bodyStruct.elbow_left_y << ","
+                  << bodyStruct.elbow_left_z << ","
+                  << bodyStruct.elbow_left_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.wrist_left_x << ","
+                  << bodyStruct.wrist_left_y << ","
+                  << bodyStruct.wrist_left_z << ","
+                  << bodyStruct.wrist_left_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.hip_left_x << ","
+                  << bodyStruct.hip_left_y << ","
+                  << bodyStruct.hip_left_z << ","
+                  << bodyStruct.hip_left_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.knee_left_x << ","
+                  << bodyStruct.knee_left_y << ","
+                  << bodyStruct.knee_left_z << ","
+                  << bodyStruct.knee_left_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.ankle_left_x << ","
+                  << bodyStruct.ankle_left_y << ","
+                  << bodyStruct.ankle_left_z << ","
+                  << bodyStruct.ankle_left_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.shoulder_right_x << ","
+                  << bodyStruct.shoulder_right_y << ","
+                  << bodyStruct.shoulder_right_z << ","
+                  << bodyStruct.shoulder_right_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.elbow_right_x << ","
+                  << bodyStruct.elbow_right_y << ","
+                  << bodyStruct.elbow_right_z << ","
+                  << bodyStruct.elbow_right_conf 
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.wrist_right_x << ","
+                  << bodyStruct.wrist_right_y << ","
+                  << bodyStruct.wrist_right_z << ","
+                  << bodyStruct.wrist_right_conf
+                  << "]," << std::endl << std::flush;
+              ss << "["
+                  << bodyStruct.hip_right_x << ","
+                  << bodyStruct.hip_right_y << ","
+                  << bodyStruct.hip_right_z << ","
+                  << bodyStruct.hip_right_conf
+                  << "]," << std::endl << std::flush;                  
+              ss << "["
+                  << bodyStruct.knee_right_x << ","
+                  << bodyStruct.knee_right_y << ","
+                  << bodyStruct.knee_right_z << ","
+                  << bodyStruct.knee_right_conf
+                  << "]," << std::endl << std::flush;                    
+              ss << "["
+                  << bodyStruct.ankle_right_x << ","
+                  << bodyStruct.ankle_right_y << ","
+                  << bodyStruct.ankle_right_z << ","
+                  << bodyStruct.ankle_right_conf
+                  << "]," << std::endl << std::flush;                   
+              ss << "["
+                  << bodyStruct.eye_left_x << ","
+                  << bodyStruct.eye_left_y << ","
+                  << bodyStruct.eye_left_z << ","
+                  << bodyStruct.eye_left_conf 
+                  << "]," << std::endl << std::flush; 
+              ss << "["
+                  << bodyStruct.ear_left_x << ","
+                  << bodyStruct.ear_left_y << ","
+                  << bodyStruct.ear_left_z << ","
+                  << bodyStruct.ear_left_conf
+                  << "]," << std::endl << std::flush; 
+              ss << "["
+                  << bodyStruct.eye_right_x << ","
+                  << bodyStruct.eye_right_y << ","
+                  << bodyStruct.eye_right_z << ","
+                  << bodyStruct.eye_right_conf
+                  << "]," << std::endl << std::flush; 
+              ss << "["
+                  << bodyStruct.ear_right_x << ","
+                  << bodyStruct.ear_right_y << ","
+                  << bodyStruct.ear_right_z << ","
+                  << bodyStruct.ear_right_conf
+                  << "]," << std::endl << std::flush; 
+              ss << "]" << std::endl;
+              std::ofstream w("3d-pose-" + std::to_string(c) + ".txt");
+              w << ss.str() << std::endl << std::flush;
+              w.close();
+            }
+            /////
+#endif
             auto showDistance = [&](const cv::Point &p, cv::Scalar s, float d) {
               auto w = d / 4000;
               auto p2 = cv::Point(p.x + cos(w)*100, p.y + sin(w)*100);
@@ -157,14 +409,14 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 
             {
               // project 3d points 
-              float fx = 984.344 / 0.84381;
+              float fx = 984.344;
               auto project = [fx](float x, float y, float z) {
-                auto y1 = (fx * x / z) * 0.84381 + 1280/2; 
-                auto y2 = (-fx * y / z) * 0.84381 + 720/2;
+                auto y1 = (fx * x / z)  + 1280/2; 
+                auto y2 = (-fx * y / z) + 720/2;
                 return std::make_tuple(y1, y2);
               };
               auto dist = [fx](float x, float y, float z) {
-                return std::sqrt(x*x  + y*y + z*z / 0.84381 / 0.84381) * 1000.0;
+                return std::sqrt(x*x  + y*y + z*z) * 1000.0;
               };
 
               if (bodyStruct.neck_x != float(-1)) {
@@ -340,6 +592,8 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
             {
               rectangle(img, cv::Point(bodyStruct.nose_2d_x-6, bodyStruct.nose_2d_y-6), cv::Point(bodyStruct.nose_2d_x+6, bodyStruct.nose_2d_y+6), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
             }
+
+            cv::imwrite("decorated-img-" + std::to_string(c) + ".jpg", img);
           }
 
 #if HAS_IMSHOW
@@ -350,8 +604,9 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
         }
       }
 
+      c++;
 #if 0
-      if (c++ > 100) {
+      if (> 100) {
         break;
       }
 #endif      
