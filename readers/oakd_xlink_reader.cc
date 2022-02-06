@@ -59,7 +59,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
     camRgb->setFps(5);
     camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
-    camRgb->initialControl.setManualFocus(135); // requires this focus to align depth
+    // camRgb->initialControl.setManualFocus(135); // requires this focus to align depth
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
     camRgb->setInterleaved(false);
 
@@ -77,18 +77,18 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
-    stereo->setFocalLengthFromCalibration(true);
     auto oakdConfig = stereo->initialConfig.get();
-    oakdConfig.postProcessing.speckleFilter.enable = false;
-    oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
-    // oakdConfig.postProcessing.temporalFilter.enable = true;
-    oakdConfig.postProcessing.spatialFilter.enable = true;
+    // oakdConfig.postProcessing.speckleFilter.enable = false;
+    // oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
+    // oakdConfig.postProcessing.spatialFilter.enable = true;
     oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 2;
     oakdConfig.postProcessing.spatialFilter.numIterations = 1;
+    stereo->initialConfig.set(oakdConfig);
+    stereo->setFocalLengthFromCalibration(true);
+    // oakdConfig.postProcessing.temporalFilter.enable = true;
     // oakdConfig.postProcessing.thresholdFilter.minRange = 400;
     // oakdConfig.postProcessing.thresholdFilter.maxRange = 15000;
     // oakdConfig.postProcessing.decimationFilter.decimationFactor = 1;
-    stereo->initialConfig.set(oakdConfig);
 
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -901,80 +901,80 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 
         bodyStruct.hton();
+        // Uncomment!
+        // //Now we find the spatial coordinates of using StereoDepth and intrinsics
+        // //We first find the x,y coordinate in the image of the body that is most confident
+        // int xPoint;
+        // int yPoint;
+        // if(bodyStruct.neck_2d_conf > .5)
+        // {
+        //     xPoint = bodyStruct.neck_2d_x;
+        //     yPoint = bodyStruct.neck_2d_y;
+        // }
+        // //If neck not confident but shoulders are confident, choose half way point of shoulders
+        // else if (bodyStruct.shoulder_left_2d_conf > .5 && bodyStruct.shoulder_right_2d_conf > .5)
+        // {
+        //     xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
+        //     yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
+        // }
+        // //If that isn't true do midpoint between hips
+        // else if (bodyStruct.hip_left_2d_conf > .5 && bodyStruct.hip_right_2d_conf > .5)
+        // {
+        //     xPoint = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
+        //     yPoint = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
+        // }
+        // //
+        // else if (bodyStruct.nose_2d_conf > 0)
+        // {
+        //     xPoint = bodyStruct.nose_2d_x;
+        //     yPoint = bodyStruct.nose_2d_y;
+        // }
+        // //Now we grab a the average depth value of a 12x12 grid of pixels surrounding the xPoint and yPoint
+        // cv::Scalar mean, stddev;
+        // //Region square radius
+        // int regionRadius = 6;
 
-        //Now we find the spatial coordinates of using StereoDepth and intrinsics
-        //We first find the x,y coordinate in the image of the body that is most confident
-        int xPoint;
-        int yPoint;
-        if(bodyStruct.neck_2d_conf > .5)
-        {
-            xPoint = bodyStruct.neck_2d_x;
-            yPoint = bodyStruct.neck_2d_y;
-        }
-        //If neck not confident but shoulders are confident, choose half way point of shoulders
-        else if (bodyStruct.shoulder_left_2d_conf > .5 && bodyStruct.shoulder_right_2d_conf > .5)
-        {
-            xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
-            yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
-        }
-        //If that isn't true do midpoint between hips
-        else if (bodyStruct.hip_left_2d_conf > .5 && bodyStruct.hip_right_2d_conf > .5)
-        {
-            xPoint = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
-            yPoint = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
-        }
-        //
-        else if (bodyStruct.nose_2d_conf > 0)
-        {
-            xPoint = bodyStruct.nose_2d_x;
-            yPoint = bodyStruct.nose_2d_y;
-        }
-        //Now we grab a the average depth value of a 12x12 grid of pixels surrounding the xPoint and yPoint
-        cv::Scalar mean, stddev;
-        //Region square radius
-        int regionRadius = 6;
+        // //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
+        // int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0;
+        // xPointMin  = (xPointMin <= frameDepthMat.cols) ? xPointMin : frameDepthMat.cols;
+        // int xPointMax  = (xPoint + regionRadius <= frameDepthMat.cols) ? xPoint + regionRadius : frameDepthMat.cols;
+        // xPointMax  = (xPointMax >= 0) ? xPointMax : 0;
+        // int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0;
+        // yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows;
+        // int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
+        // yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
 
-        //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
-        int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0;
-        xPointMin  = (xPointMin <= frameDepthMat.cols) ? xPointMin : frameDepthMat.cols;
-        int xPointMax  = (xPoint + regionRadius <= frameDepthMat.cols) ? xPoint + regionRadius : frameDepthMat.cols;
-        xPointMax  = (xPointMax >= 0) ? xPointMax : 0;
-        int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0;
-        yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows;
-        int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
-        yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
+        // std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
+        // std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
+        // std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
+        // std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
+        // std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
+        // std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
 
-        std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
-        std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
-        std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
-        std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
-        std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
-        std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
+        // //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
+        // cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
+        // cv::Mat croppedDepth = frameDepthMat(myROI);
+        // cv::meanStdDev(croppedDepth, mean, stddev);
+        // int pointDepth = int(mean[0]);
 
-        //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
-        cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
-        cv::Mat croppedDepth = frameDepthMat(myROI);
-        cv::meanStdDev(croppedDepth, mean, stddev);
-        int pointDepth = int(mean[0]);
-
-        //Now we use the HFOV and VFOV to find the x and y coordinates in millimeters
-        // https://github.com/luxonis/depthai-experiments/blob/377c50c13931a082825d457f69893c1bf3f24aa2/gen2-calc-spatials-on-host/calc.py#L10
-        int midDepthXCoordinate = frameDepthMat.cols / 2;    // middle of depth image x across (columns) - this is depth origin
-        int midDepthYCoordinate = frameDepthMat.rows / 2;    // middle of depth image y across (rows) - this is depth origin
+        // //Now we use the HFOV and VFOV to find the x and y coordinates in millimeters
+        // // https://github.com/luxonis/depthai-experiments/blob/377c50c13931a082825d457f69893c1bf3f24aa2/gen2-calc-spatials-on-host/calc.py#L10
+        // int midDepthXCoordinate = frameDepthMat.cols / 2;    // middle of depth image x across (columns) - this is depth origin
+        // int midDepthYCoordinate = frameDepthMat.rows / 2;    // middle of depth image y across (rows) - this is depth origin
         
-        int xPointInDepthCenterCoordinates = xPoint - midDepthXCoordinate; //This is the xPoint but if the depth map center is the origin
-        int yPointInDepthCenterCoordinates = yPoint - midDepthYCoordinate; //This is the yPoint but if the depth map center is the origin
+        // int xPointInDepthCenterCoordinates = xPoint - midDepthXCoordinate; //This is the xPoint but if the depth map center is the origin
+        // int yPointInDepthCenterCoordinates = yPoint - midDepthYCoordinate; //This is the yPoint but if the depth map center is the origin
 
-        float angle_x = atan(tan(cameraHFOVInRadians / 2.0f) * float(xPointInDepthCenterCoordinates) / float(midDepthXCoordinate));
-        float angle_y = atan(tan(cameraHFOVInRadians / 2.0f) * float(yPointInDepthCenterCoordinates) / float(midDepthYCoordinate));
+        // float angle_x = atan(tan(cameraHFOVInRadians / 2.0f) * float(xPointInDepthCenterCoordinates) / float(midDepthXCoordinate));
+        // float angle_y = atan(tan(cameraHFOVInRadians / 2.0f) * float(yPointInDepthCenterCoordinates) / float(midDepthYCoordinate));
 
-        //We will save this depth value as the pelvis depth
-        bodyStruct.pelvis_2d_depth = pointDepth;
-        bodyStruct.pelvis_2d_x = int(float(pointDepth) * tan(angle_x));
-        bodyStruct.pelvis_2d_y = int(-1.0f * float(pointDepth) * tan(angle_y));
+        // //We will save this depth value as the pelvis depth
+        // bodyStruct.pelvis_2d_depth = pointDepth;
+        // bodyStruct.pelvis_2d_x = int(float(pointDepth) * tan(angle_x));
+        // bodyStruct.pelvis_2d_y = int(-1.0f * float(pointDepth) * tan(angle_y));
 
         std::cerr << "NECK DEPTH: " << int(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x))  << std::endl << std::flush;
-        std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush;
+        // std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; //UNCOMMENT
         //Finally we copy the COCO body struct memory to the frame
         memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
     }
