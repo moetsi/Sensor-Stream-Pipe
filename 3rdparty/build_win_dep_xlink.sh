@@ -120,8 +120,10 @@ function build_depthai {
 
     #git clone --depth 1 --branch cmath_math_defines_vstudio \
     #    https://github.com/luxonis/depthai-core.git
-    git clone --depth 1 \
-        https://github.com/luxonis/depthai-core.git        
+    ###git clone --depth 1 \
+    ###    https://github.com/luxonis/depthai-core.git 
+    git clone --depth 1 --branch develop \
+        https://github.com/luxonis/depthai-core.git               
     pushd depthai-core
     git submodule update --init --recursive
     export CXXFLAGS="/Zc:preprocessor"
