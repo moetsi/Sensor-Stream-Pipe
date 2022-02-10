@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##source ./path-helpers-ubuntu20.sh
-
+dos2unix $(find . -name "*.sh")
 rm -Rvf build_release
 rm -Rvf build_debug
 cd 3rdparty
