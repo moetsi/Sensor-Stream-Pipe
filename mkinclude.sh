@@ -1,5 +1,7 @@
 #!/bin/bash
 
+dos2unix $(find . -name "*.sh")
+
 rm -Rvf include
 mkdir include
 cp -fv ssp.h include

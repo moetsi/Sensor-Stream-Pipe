@@ -1,5 +1,6 @@
 #!/bin/bash
 
+dos2unix $(find . -name "*.sh")
 source ./path-helpers-ubuntu20.sh
 
 rm -Rvf build_release

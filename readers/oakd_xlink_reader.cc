@@ -354,7 +354,7 @@ void OakdXlinkReader::NextFrame() {
    // convert the raw buffer to cv::Mat
    int32_t depthCols = frameDepthMat.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
    int32_t depthRows = frameDepthMat.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   size_t depthSize = depthCols*depthRows*sizeof(u_int16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
+   size_t depthSize = depthCols*depthRows*sizeof(uint16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
 
    depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 
@@ -836,12 +836,12 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
         auto to2D = [](float x) -> int16_t {
             std::cerr << "to2D: value = " << x << std::endl << std::flush;
-            return std::min(std::max(0L, int64_t(x )), 1280L - 1L);
+            return std::min(std::max(int64_t(0L), int64_t(x )), int64_t(1280L - 1L));
         };
 
         auto to2Dy = [](float x) -> int16_t {
             std::cerr << "to2D/y: value = " << x << std::endl << std::flush;
-            return std::min(std::max(0L, int64_t(x )), 720L-1L); //  *0.84381); /// 0.84381);
+            return std::min(std::max(int64_t(0L), int64_t(x )), int64_t(720L-1L)); //  *0.84381); /// 0.84381);
         };
 
         auto to2Dd = [](float x) -> int16_t {

@@ -102,8 +102,8 @@ function build_opencv {
         -DWITH_EIGEN=OFF -DWITH_FFMPEG=OFF \
         -DWITH_QUIRC=OFF \
         ..
-    cmake --build . --config Release --target install
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
+    cmake --build . --config Release --target install -j16
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install -j16
     cd ..
     popd
 }
@@ -120,8 +120,10 @@ function build_depthai {
 
     #git clone --depth 1 --branch cmath_math_defines_vstudio \
     #    https://github.com/luxonis/depthai-core.git
-    git clone --depth 1 \
-        https://github.com/luxonis/depthai-core.git        
+    ###git clone --depth 1 \
+    ###    https://github.com/luxonis/depthai-core.git 
+    git clone --depth 1 --branch develop \
+        https://github.com/luxonis/depthai-core.git               
     pushd depthai-core
     git submodule update --init --recursive
     export CXXFLAGS="/Zc:preprocessor"
@@ -130,7 +132,7 @@ function build_depthai {
         -Bbuild \
         -D CMAKE_INSTALL_PREFIX=${LOCAL_DIR}/depthai-core \
         -D OpenCV_DIR=${LOCAL_DIR}/opencv/x64/vc16/staticlib
-    cmake --build build --config Release --target install
+    cmake --build build --config Release --target install -j16
     cd ..
     popd
 }
@@ -145,7 +147,7 @@ function build_cereal {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cereal \
         -DJUST_INSTALL_CEREAL=ON \
         ..
-    cmake --build . --config Release --target install
+    cmake --build . --config Release --target install -j16
     cd ..
     popd
 }
@@ -162,8 +164,8 @@ function build_spdlog {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/spdlog \
         -DSPDLOG_BUILD_SHARED=OFF \
         ..
-    cmake --build . --config Release --target install
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
+    cmake --build . --config Release --target install -j16
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install -j16
     cd ..
     popd
 }
@@ -183,8 +185,8 @@ function build_zdepth {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/zdepth \
         -DCMAKE_DEBUG_POSTFIX=d \
         ..
-    cmake --build . --config Release --target install
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
+    cmake --build . --config Release --target install -j16
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install -j16
     cd ..
     popd
 }
@@ -205,8 +207,8 @@ function build_yaml_cpp {
         -DYAML_CPP_BUILD_TOOLS=OFF \
         -DYAML_CPP_INSTALL=ON \
         ..
-    cmake --build . --config Release --target install
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
+    cmake --build . --config Release --target install -j16
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install -j16
     cd ..
     popd
 }
@@ -227,8 +229,8 @@ function build_libzmq {
         -DWITH_LIBSODIUM_STATIC=ON \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
         ..
-    cmake --build . --config Release --target install
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
+    cmake --build . --config Release --target install -j16
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install -j16
     cd ..
     popd
 }
@@ -246,7 +248,7 @@ function build_cppzmq {
         -DZeroMQ_DIR=${LOCAL_DIR}/libzmq/CMake \
         -DCPPZMQ_BUILD_TESTS=OFF \
         ..
-    cmake --build . --config Release --target install
+    cmake --build . --config Release --target install -j16
     cd ..
     popd
 }
