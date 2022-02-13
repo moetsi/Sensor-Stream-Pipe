@@ -40,6 +40,7 @@
 
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
 #include "../readers/oakd_xlink_reader.h"
+#include "../readers/oakd_device_reader.h"
 #include "depthai/depthai.hpp"
 #endif
 
@@ -103,6 +104,9 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
     else if (reader_type == "oakd_xlink") {
       reader = std::unique_ptr<OakdXlinkReader>(new OakdXlinkReader(general_parameters["frame_source"]["parameters"]));
+    }
+    else if (reader_type == "oakd_device") {
+      reader = std::unique_ptr<OakdDeviceReader>(new OakdDeviceReader(general_parameters["frame_source"]["parameters"]));
     }
 #endif
      else if (reader_type == "video") {

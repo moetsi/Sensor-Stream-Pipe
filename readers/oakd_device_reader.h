@@ -58,7 +58,7 @@ namespace moetsi::ssp {
 using namespace InferenceEngine;
 //DONE OPENVINO HEADERS
 
-class OakdXlinkReader : public IReader {
+class OakdDeviceReader : public IReader {
 private:
   int current_frame_counter_;
   unsigned int fps;
@@ -112,9 +112,9 @@ private:
   std::vector<human_pose_estimation::Pose> previous_poses_2d;
   human_pose_estimation::PoseCommon common;
 public:
-  OakdXlinkReader(YAML::Node config);
+  OakdDeviceReader(YAML::Node config);
 
-  ~OakdXlinkReader();
+  ~OakdDeviceReader();
 
   void Reset();
 
