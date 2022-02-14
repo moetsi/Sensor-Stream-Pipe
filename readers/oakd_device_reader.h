@@ -95,8 +95,8 @@ private:
 
 
   //openvino info
-  const file_name_t input_model = "../models/human-pose-estimation-3d-0001.xml";
-  const file_name_t input_image_path= "../models/pointing_middle_of_view.jpg";
+  //const file_name_t input_model = std::string("../models/human-pose-estimation-3d-0001.xml");
+  //const file_name_t input_image_path= std::string("../models/pointing_middle_of_view.jpg");
   const std::string device_name = "CPU";
   Core ie;
   CNNNetwork network;
