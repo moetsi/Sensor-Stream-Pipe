@@ -537,9 +537,9 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     std::shared_ptr<dai::NNData> nnFromQueue = qNn->get<dai::NNData>();
     // int nnSeqNum = nnFromQueue->getSequenceNum();
-    std::vector<std::int32_t> features_output_new = nnFromQueue->getLayerInt32("features");
-    std::vector<std::int32_t> heatmaps_output_new = nnFromQueue->getLayerInt32("heatmaps");
-    std::vector<std::int32_t> pafs_output_new = nnFromQueue->getLayerInt32("pafs");
+    std::vector<std::float> features_output_new = nnFromQueue->getLayerFp16("features");
+    std::vector<std::float> heatmaps_output_new = nnFromQueue->getLayerFp16("heatmaps");
+    std::vector<std::float> pafs_output_new = nnFromQueue->getLayerFp16("pafs");
 
     dai::TensorInfo featureInfo;
     dai::TensorInfo heatmapsInfo;
