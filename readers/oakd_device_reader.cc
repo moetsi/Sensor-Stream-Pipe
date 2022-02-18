@@ -5,6 +5,7 @@
 #include "oakd_device_reader.h"
 #include "human_poses.h"
 #include <cmath>
+#include <filesystem>
 // Closer-in minimum depth, disparity range is doubled (from 95 to 190):
 // static std::atomic<bool> extended_disparity{false};
 // // Better accuracy for longer distance, fractional disparity 32-levels:
@@ -44,13 +45,27 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     right = pipeline.create<dai::node::MonoCamera>();
     stereo = pipeline.create<dai::node::StereoDepth>();
 
+    std::cerr << "FILE PATH: " << std::filesystem::current_path() << std::endl << std::flush;
+    
+
+    // SETTING UP THE ON-DEVICE INFERENCE
+    // HARDWARID BLOB WAS MADE BY FOLLOWING DEPTHAI HOW-TO
+    // https://docs.luxonis.com/en/latest/pages/model_conversion/
+    nn = pipeline.create<dai::node::NeuralNetwork>();
+    nn->setBlobPath(input_blob);
+
+
     rgbOut = pipeline.create<dai::node::XLinkOut>();
     depthOut = pipeline.create<dai::node::XLinkOut>();
+    nnXout = pipeline.create<dai::node::XLinkOut>();
 
     rgbOut->setStreamName("rgb");
     queueNames.push_back("rgb");
     depthOut->setStreamName("depth");
     queueNames.push_back("depth");
+    nnXout->setStreamName("nn");
+    queueNames.push_back("nn");
+
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
@@ -95,10 +110,12 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 
     // Linking
-    camRgb->isp.link(rgbOut->input);
+    camRgb->isp.link(nn->input);
+    nn->passthrough.link(rgbOut->input);
     left->out.link(stereo->left);
     right->out.link(stereo->right);
     stereo->depth.link(depthOut->input);
+    nn->out.link(nnXout->input);
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Changing the IP address to the correct depthai format (const char*)
@@ -146,11 +163,24 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     qRgb = device->getOutputQueue("rgb", 4, false);                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
     qDepth = device->getOutputQueue("depth", 4, false);    
+    qNn = device->getOutputQueue("nn", 4, false);
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 #endif
+
+
+// COMMENTING OUT ALL OF THE SETTING UP AND CREATING MODEL
+// GOING TO DO THAT JUST BY SENDING THE OAKD BLOB
+// THEN GOING TO SET UP A RGB-DEPTH ALIGNED RGB FRAME SYNCHRONIZED
+// RUN INFERENCE ON RGB AND REMEMBER RGB SEQUENCE NUMBER
+// RUN MESSAGE OF OUTPUT OF THAT INFERENCE RESULT
+// PUT TOGETHER BY SEQUENCE NUMBER OF DEPTH FRAME
+// SEND AS OUTPUT DEPTH + INFERENCE OUTPUT OF RGB
+// THEN PLUG THAT IN AS WHEN PARSE_POSES IS BEING CALLED IN C++
+// PLUG THAT DEPTH FRAME WHERE CURRENTLY BEING CALLED
+
     //Now setting up Body model
     // input_model = {"../models/human-pose-estimation-3d.xml"};
     // input_image_path = "../openvino/fart";
@@ -233,6 +263,9 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // ------------------------------------------
     executable_network = ie.LoadNetwork(network, "CPU");
     // -----------------------------------------------------------------------------------------------------
+
+
+
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 }
 
@@ -364,6 +397,11 @@ void OakdDeviceReader::NextFrame() {
 #endif
   current_frame_.push_back(depthFrame);
 
+
+// COMMENTED THIS OUT BECAUSE NOW THE INFERENCE IS ON THE OAKD
+// WE PULL OFF INFERENCE RESULTS FROM THE QUEUE
+
+
   // --------------------------- Step 5. Create an infer request
   // -------------------------------------------------
   InferRequest infer_request = executable_network.CreateInferRequest();
@@ -494,6 +532,28 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   // --------------------------- Step 8. Process output
   // ------------------------------------------------------
 
+
+    // THE NEW NN WAY OF DOING THINGS
+
+    std::shared_ptr<dai::NNData> nnFromQueue = qNn->get<dai::NNData>();
+    // int nnSeqNum = nnFromQueue->getSequenceNum();
+    std::vector<std::int32_t> features_output_new = nnFromQueue->getLayerInt32("features");
+    std::vector<std::int32_t> heatmaps_output_new = nnFromQueue->getLayerInt32("heatmaps");
+    std::vector<std::int32_t> pafs_output_new = nnFromQueue->getLayerInt32("pafs");
+
+    dai::TensorInfo featureInfo;
+    dai::TensorInfo heatmapsInfo;
+    dai::TensorInfo pafsInfo; 
+    nnFromQueue->getLayer("features", featureInfo);
+    nnFromQueue->getLayer("heatmaps", heatmapsInfo);
+    nnFromQueue->getLayer("pafs", pafsInfo);
+
+    // const SizeVector features_output_shape_new = featureInfo.dims;
+    // const SizeVector heatmaps_output_shape_new = heatmapsInfo.dims;
+    // const SizeVector pafs_output_shape_new = pafsInfo.dims;
+
+//  OLD NN WAY OF DOING THINGS
+
     Blob::Ptr features_output = infer_request.GetBlob("features");
     Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
     Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
@@ -515,10 +575,24 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         oss << "]";
         return oss.str();
     };
+    auto dumpVec2 = [](const std::vector<uint32_t>& vec) -> std::string {
+        if (vec.empty())
+            return "[]";
+        std::stringstream oss;
+        oss << "[" << vec[0];
+        for (size_t i = 1; i < vec.size(); i++)
+            oss << "," << vec[i];
+        oss << "]";
+        return oss.str();
+    };
     std::cerr << "Resulting output shape dumpVec(features_output_shape) = " << dumpVec(features_output_shape) << std::endl << std::flush;
     std::cerr << "Resulting output shape dumpVec(heatmaps_output_shape) = " << dumpVec(heatmaps_output_shape) << std::endl << std::flush;
     std::cerr << "Resulting output shape dumpVec(pafs_output_shape) = " << dumpVec(pafs_output_shape) << std::endl << std::flush;
 
+        std::cerr << "Resulting output shape dumpVec2(featureInfo.dims) = " << dumpVec2(featureInfo.dims) << std::endl << std::flush;
+    std::cerr << "Resulting output shape dumpVec2(heatmapsInfo.dims) = " << dumpVec2(heatmapsInfo.dims) << std::endl << std::flush;
+    std::cerr << "Resulting output shape dumpVec2(pafsInfo.dims) = " << dumpVec2(pafsInfo.dims) << std::endl << std::flush;
+    
     InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);
     InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);
     InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);
@@ -586,6 +660,8 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     int paf_mapMatSize[] =  { (int) pafs_output_shape[1], (int) pafs_output_shape[2], (int) pafs_output_shape[3] };  // {38,32,48};
     cv::Mat paf_mapMat = cv::Mat(3, paf_mapMatSize, CV_32FC1, const_cast<float*>(pafs_result));
 
+    std::cerr << "ON HOST FEATURE MAP SIZE : " << featureMapSize << std::endl << std::flush;
+
     std::cerr << "image size " << image.size[0] << " " << image.size[1] << std::endl << std::flush; 
 
     try {
@@ -595,6 +671,27 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         featuresMat, heatmapMat, paf_mapMat, input_scale2, stride, fx,
         image.size[1] //1080
         , true); //true);
+
+
+    //NEED TO CREATE FEATUREMAPSIZE HEATMAPMATSIZE HEATMAPMAT PAFMAPMATSIZE PAFMAPMAT FROM ABOVE FROM THE NEW VERSION
+    //  SO IT CAN BE PLUGGED INTO PARSE POSES BELOW
+
+    // int featureMapSizeNew[] = { (int)features_output_shape_new[1], (int)features_output_shape_new[2], (int)features_output_shape_new[3] }; // { 57,32,48 }; 
+    // cv::Mat featuresMatNew = cv::Mat(3, featureMapSizeNew, CV_32FC1, const_cast<float*>(features_output_new));
+    // int heatmapMatSizeNew[] =  { (int)heatmaps_output_shape_new[1], (int)heatmaps_output_shape_new[2], (int)heatmaps_output_shape_new[3] }; // { 19,32,48 };
+    // cv::Mat heatmapMatNew = cv::Mat(3, heatmapMatSizeNew, CV_32FC1, const_cast<float*>(heatmaps_output_new));
+    // int paf_mapMatSizeNew[] =  { (int) pafs_output_shape_new[1], (int) pafs_output_shape_new[2], (int) pafs_output_shape_new[3] };  // {38,32,48};
+    // cv::Mat paf_mapMatNew = cv::Mat(3, paf_mapMatSizeNew, CV_32FC1, const_cast<float*>(pafs_output_new));
+
+    // std::cerr << "ON DEVICE FEATURE MAP SIZE NEW : " << featureMapSizeNew << std::endl << std::flush;
+
+    // try {
+
+    // // auto input_scale2 = 256.0/720.0 * magic; // * 0.84; //  /1.04065; // -> 0.8*1280/984 || *0.83;
+    // auto posesStruct2 = parse_poses(previous_poses_2d, common, R, 
+    //     featuresMatNew, heatmapMatNew, paf_mapMatNew, input_scale2, stride, fx,
+    //     image.size[1] //1080
+    //     , true); //true);
 
 
 #ifdef TEST_WITH_IMAGE

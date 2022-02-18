@@ -77,12 +77,15 @@ private:
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
   std::shared_ptr<dai::node::StereoDepth> stereo;
+  std::shared_ptr<dai::node::NeuralNetwork> nn;
   std::shared_ptr<dai::node::XLinkOut> rgbOut;
   std::shared_ptr<dai::node::XLinkOut> depthOut;
+  std::shared_ptr<dai::node::XLinkOut> nnXout;
 
   std::shared_ptr<dai::DataOutputQueue> q;
   std::shared_ptr<dai::DataOutputQueue> qRgb;
   std::shared_ptr<dai::DataOutputQueue> qDepth;
+  std::shared_ptr<dai::DataOutputQueue> qNn;
   std::shared_ptr<dai::node::StereoDepth> depth;
   dai::DeviceInfo device_info;
   std::shared_ptr<dai::Device> device;
@@ -96,6 +99,7 @@ private:
 
   //openvino info
   const file_name_t input_model = "../models/human-pose-estimation-3d-0001.xml";
+  const std::string input_blob = "../../models/human-pose-estimation-3d-0001.blob";
   const file_name_t input_image_path= "../models/pointing_middle_of_view.jpg";
   const std::string device_name = "CPU";
   Core ie;
