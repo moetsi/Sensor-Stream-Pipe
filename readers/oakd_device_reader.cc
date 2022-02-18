@@ -537,9 +537,9 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     std::shared_ptr<dai::NNData> nnFromQueue = qNn->get<dai::NNData>();
     // int nnSeqNum = nnFromQueue->getSequenceNum();
-    std::vector<std::float> features_output_new = nnFromQueue->getLayerFp16("features");
-    std::vector<std::float> heatmaps_output_new = nnFromQueue->getLayerFp16("heatmaps");
-    std::vector<std::float> pafs_output_new = nnFromQueue->getLayerFp16("pafs");
+    std::vector<float> features_output_new = nnFromQueue->getLayerFp16("features");
+    std::vector<float> heatmaps_output_new = nnFromQueue->getLayerFp16("heatmaps");
+    std::vector<float> pafs_output_new = nnFromQueue->getLayerFp16("pafs");
 
     dai::TensorInfo featureInfo;
     dai::TensorInfo heatmapsInfo;
@@ -548,22 +548,29 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     nnFromQueue->getLayer("heatmaps", heatmapsInfo);
     nnFromQueue->getLayer("pafs", pafsInfo);
 
-    // const SizeVector features_output_shape_new = featureInfo.dims;
-    // const SizeVector heatmaps_output_shape_new = heatmapsInfo.dims;
-    // const SizeVector pafs_output_shape_new = pafsInfo.dims;
+    auto toSizeVector = [](auto v) -> SizeVector {
+        SizeVector rv;
+        for(auto &x: v) {
+            rv.push_back((size_t) x);
+        }
+        return rv;
+    };
+
+    const SizeVector features_output_shape = toSizeVector(featureInfo.dims);
+    const SizeVector heatmaps_output_shape = toSizeVector(heatmapsInfo.dims);
+    const SizeVector pafs_output_shape = toSizeVector(pafsInfo.dims);
 
 //  OLD NN WAY OF DOING THINGS
-
-    Blob::Ptr features_output = infer_request.GetBlob("features");
-    Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
-    Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
-
-    const SizeVector features_output_shape = features_output_info->getTensorDesc().getDims();
-    auto l = features_output_info->getTensorDesc().getLayout();
-    auto p = features_output_info->getTensorDesc().getPrecision(); 
-    std::cerr << "lp " << l << " " << p << std::endl << std::flush;
-    const SizeVector heatmaps_output_shape = heatmaps_output_info->getTensorDesc().getDims();
-    const SizeVector pafs_output_shape = pafs_output_info->getTensorDesc().getDims();
+//    Blob::Ptr features_output = infer_request.GetBlob("features");
+//    Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
+//    Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
+//
+//    const SizeVector features_output_shape = features_output_info->getTensorDesc().getDims();
+//    auto l = features_output_info->getTensorDesc().getLayout();
+//    auto p = features_output_info->getTensorDesc().getPrecision(); 
+//    std::cerr << "lp " << l << " " << p << std::endl << std::flush;
+//    const SizeVector heatmaps_output_shape = heatmaps_output_info->getTensorDesc().getDims();
+//    const SizeVector pafs_output_shape = pafs_output_info->getTensorDesc().getDims();
 
     auto dumpVec = [](const SizeVector& vec) -> std::string {
         if (vec.empty())
@@ -589,21 +596,25 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     std::cerr << "Resulting output shape dumpVec(heatmaps_output_shape) = " << dumpVec(heatmaps_output_shape) << std::endl << std::flush;
     std::cerr << "Resulting output shape dumpVec(pafs_output_shape) = " << dumpVec(pafs_output_shape) << std::endl << std::flush;
 
-        std::cerr << "Resulting output shape dumpVec2(featureInfo.dims) = " << dumpVec2(featureInfo.dims) << std::endl << std::flush;
+    std::cerr << "Resulting output shape dumpVec2(featureInfo.dims) = " << dumpVec2(featureInfo.dims) << std::endl << std::flush;
     std::cerr << "Resulting output shape dumpVec2(heatmapsInfo.dims) = " << dumpVec2(heatmapsInfo.dims) << std::endl << std::flush;
     std::cerr << "Resulting output shape dumpVec2(pafsInfo.dims) = " << dumpVec2(pafsInfo.dims) << std::endl << std::flush;
     
-    InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);
-    InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);
-    InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);
+    //InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);
+    //InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);
+    //InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);
 
-    InferenceEngine::LockedMemory<const void> features_outputMapped = features_moutput->rmap();
-    InferenceEngine::LockedMemory<const void> heatmaps_outputMapped = heatmaps_moutput->rmap();
-    InferenceEngine::LockedMemory<const void> pafs_outputMapped = pafs_moutput->rmap();
+    //InferenceEngine::LockedMemory<const void> features_outputMapped = features_moutput->rmap();
+    //InferenceEngine::LockedMemory<const void> heatmaps_outputMapped = heatmaps_moutput->rmap();
+    //InferenceEngine::LockedMemory<const void> pafs_outputMapped = pafs_moutput->rmap();
 
-    const float *features_result = features_outputMapped.as<float *>();
-    const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
-    const float *pafs_result = pafs_outputMapped.as<float *>();
+    //const float *features_result = features_outputMapped.as<float *>();
+    //const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
+    //const float *pafs_result = pafs_outputMapped.as<float *>();
+
+    const float *features_result = &features_output_new[0]; // features_outputMapped.as<float *>();
+    const float *heatmaps_result = &heatmaps_output_new[0]; // heatmaps_outputMapped.as<float *>();
+    const float *pafs_result = &pafs_output_new[0]; // pafs_outputMapped.as<float *>();
 
     std::cerr << "features_result[0] = " << features_result[0] << std::endl << std::flush;
 
