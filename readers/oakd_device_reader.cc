@@ -253,9 +253,9 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     heatmaps_output_info->setPrecision(Precision::FP32);
     pafs_output_info->setPrecision(Precision::FP32);
 
-    // TODO needed?
-    ICNNNetwork::InputShapes inputShape {{ "data", std::vector<size_t>{1,3,256,384} }};
-    network.reshape(inputShape); 
+    // TODO needed? No because changed the actual input shape of the model directly
+    // ICNNNetwork::InputShapes inputShape {{ "data", std::vector<size_t>{1,3,256,384} }};
+    // network.reshape(inputShape); 
 
     // -----------------------------------------------------------------------------------------------------
 
