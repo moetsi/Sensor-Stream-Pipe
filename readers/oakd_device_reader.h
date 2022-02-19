@@ -66,7 +66,8 @@ private:
 
   //We use this dictionary to grab pairs of rgb and depth frames that caame from same point in time
   // std::unordered_map<int, std::vector<std::shared_ptr<dai::ImgFrame>>> frames_dictionary;
-  std::unordered_map<int, std::shared_ptr<dai::ImgFrame>> frames_dictionary;
+  struct nn_and_depth { std::shared_ptr<dai::NNData> nn; std::shared_ptr<dai::ImgFrame> depth;};
+  std::unordered_map<int, nn_and_depth> frames_dictionary;
 
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
@@ -77,15 +78,18 @@ private:
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
   std::shared_ptr<dai::node::StereoDepth> stereo;
+  std::shared_ptr<dai::node::VideoEncoder> videnc;
   std::shared_ptr<dai::node::NeuralNetwork> nn;
   std::shared_ptr<dai::node::XLinkOut> rgbOut;
   std::shared_ptr<dai::node::XLinkOut> depthOut;
+  std::shared_ptr<dai::node::XLinkOut> nnPassOut;
   std::shared_ptr<dai::node::XLinkOut> nnXout;
 
   std::shared_ptr<dai::DataOutputQueue> q;
   std::shared_ptr<dai::DataOutputQueue> qRgb;
   std::shared_ptr<dai::DataOutputQueue> qDepth;
   std::shared_ptr<dai::DataOutputQueue> qNn;
+  std::shared_ptr<dai::DataOutputQueue> qNnPass;
   std::shared_ptr<dai::node::StereoDepth> depth;
   dai::DeviceInfo device_info;
   std::shared_ptr<dai::Device> device;
