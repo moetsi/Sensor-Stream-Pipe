@@ -73,11 +73,11 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // videnc->setDefaultProfilePreset(30, dai::VideoEncoderProperties::Profile::MJPEG);
     // Color Properties
-    // camRgb->setPreviewSize(300, 300);
+    camRgb->setPreviewSize(384, 256);
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
     camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
-    camRgb->setFps(10);
-    camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
+    camRgb->setFps(5);
+    // camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
     camRgb->setInterleaved(false);
 
@@ -116,7 +116,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Linking
     // camRgb->preview.link(rgbOut->input);
     // camRgb->preview.link(rgbOut->input);
-    camRgb->isp.link(nn->input);
+    camRgb->preview.link(nn->input);
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // nn->passthrough.link(rgbOut->input);
     left->out.link(stereo->left);
@@ -384,7 +384,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
-  //Depth frame
+//   Depth frame
 //   std::shared_ptr<FrameStruct> depthFrame =
 //       std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
 //     depthFrame->sensor_id = 1;
@@ -396,7 +396,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 #ifndef TEST_WITH_IMAGE
-   // convert the raw buffer to cv::Mat
+//    convert the raw buffer to cv::Mat
 //    int32_t depthCols = frameDepthMat.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 //    int32_t depthRows = frameDepthMat.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
 //    size_t depthSize = depthCols*depthRows*sizeof(uint16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
