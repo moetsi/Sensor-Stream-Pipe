@@ -1264,7 +1264,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //Now that we have copied all memory to the frame we can push it back
     if (bodyCount > 0)
     {
-        // current_frame_.push_back(s);
+        current_frame_.push_back(s);
     }
     //We push the rgb frame to the back (this helps when running ssp_client_opencv)
     // current_frame_.push_back(rgbFrame);
@@ -1291,9 +1291,9 @@ unsigned int OakdDeviceReader::GetFps() {
 std::vector<FrameType> OakdDeviceReader::GetType() {
   std::vector<FrameType> types;
 
-  types.push_back(FrameType::FrameTypeColor);
-  types.push_back(FrameType::FrameTypeDepth);
-//   types.push_back(FrameType::FrameTypeHumanPose); // 4;
+  //types.push_back(FrameType::FrameTypeColor);
+  //types.push_back(FrameType::FrameTypeDepth);
+  types.push_back(FrameType::FrameTypeHumanPose); // 4;
 
   return types;
 }
