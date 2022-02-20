@@ -49,7 +49,20 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // HARDWARID BLOB WAS MADE BY FOLLOWING DEPTHAI HOW-TO
     // https://docs.luxonis.com/en/latest/pages/model_conversion/
     nn = pipeline.create<dai::node::NeuralNetwork>();
-    nn->setBlobPath(input_blob);
+
+#ifndef _WIN32    
+    std::string rel = "../../"; 
+#endif
+#ifdef _WIN32    
+    std::string rel = "../../../";
+#endif
+
+    std::map<std::string,std::string> env;
+    env["REL"] = rel;
+    std::string model_blob_path = input_blob;
+    model_blob_path = StringInterpolation(env, model_blob_path);
+
+    nn->setBlobPath(model_blob_path);
 
     // # Only send metadata, we are only interested in timestamp, so we can sync
     // # depth frames with NN output
@@ -63,7 +76,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // nn->passthrough.link(nnPassOut->input);
 
 
-        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // rgbOut->setStreamName("rgb");
     depthOut->setStreamName("depth");
@@ -193,7 +206,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Step 2. Read a model in OpenVINO Intermediate Representation (.xml and
     // .bin files) or ONNX (.onnx file) format
 
-
+/*
 #ifndef _WIN32    
     std::string rel = "../../"; 
 #endif
@@ -205,7 +218,8 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     env["REL"] = rel;
     std::string model_path = config["model"].as<std::string>();
     model_path = StringInterpolation(env, model_path);
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; */
+    
     // network = ie.ReadNetwork(model_path);
     // //#ifndef _WIN32    
     // //    network = ie.ReadNetwork("../../models/human-pose-estimation-3d-0001.xml");

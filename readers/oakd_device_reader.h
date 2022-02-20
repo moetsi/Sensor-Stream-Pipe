@@ -103,7 +103,7 @@ private:
 
   //openvino info
   const file_name_t input_model = "../models/human-pose-estimation-3d-0001.xml";
-  const std::string input_blob = "../../models/human-pose-estimation-3d-0001.blob";
+  const std::string input_blob = "@{REL}/models/human-pose-estimation-3d-0001.blob";
   const file_name_t input_image_path= "../models/pointing_middle_of_view.jpg";
   const std::string device_name = "CPU";
   Core ie;
