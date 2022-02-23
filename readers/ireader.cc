@@ -32,6 +32,7 @@
 
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
 #include "../readers/oakd_xlink_reader.h"
+#include "../readers/oakd_device_reader.h"
 #include "depthai/depthai.hpp"
 #endif
 
@@ -176,6 +177,12 @@ std::shared_ptr<IReader> IReaderFactory(const std::string & config) {
     } else if (reader_type == "oakd_xlink") {
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
       reader = std::shared_ptr<OakdXlinkReader>(new OakdXlinkReader(general_parameters["frame_source"]["parameters"]));
+#else
+      return reader;
+#endif
+    } else if (reader_type == "oakd_device") {
+#ifdef SSP_WITH_DEPTHAI_SUPPORT
+      reader = std::shared_ptr<OakdDeviceReader>(new OakdDeviceReader(general_parameters["frame_source"]["parameters"]));
 #else
       return reader;
 #endif
