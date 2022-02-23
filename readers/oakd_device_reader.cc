@@ -349,7 +349,7 @@ void OakdDeviceReader::NextFrame() {
 
     int32_t bodyCount = (int)posesStruct.poses_3d.size();
     // If 0, no need to send structs
-    if (bodyCount > 0)
+    if (bodyCount < 1)
     {
         return;
     }
