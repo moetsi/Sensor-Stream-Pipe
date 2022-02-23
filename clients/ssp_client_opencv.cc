@@ -76,7 +76,15 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
     cv::Scalar blue = cv::Scalar( 255, 0, 0 );
     int markerRadius = 5;
 
+    auto previous_frame_time = CurrentTimeMs();
+
     while (reader.HasNextFrame()) {
+
+    auto current_frame_time = CurrentTimeMs();
+    auto time_diff_in_ms_since_last_frame = current_frame_time - previous_frame_time;
+    std::cerr << "Frame Rate:  " << 1000.0/time_diff_in_ms_since_last_frame << std::endl << std::flush; 
+    previous_frame_time  = current_frame_time;
+
       reader.NextFrame();
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
 

@@ -60,6 +60,9 @@ using namespace InferenceEngine;
 
 class OakdDeviceReader : public IReader {
 private:
+
+  uint64_t start_time_in_ms;
+
   int current_frame_counter_;
   unsigned int fps;
   FrameStruct frame_template_;
@@ -78,18 +81,15 @@ private:
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
   std::shared_ptr<dai::node::StereoDepth> stereo;
-  std::shared_ptr<dai::node::VideoEncoder> videnc;
   std::shared_ptr<dai::node::NeuralNetwork> nn;
   std::shared_ptr<dai::node::XLinkOut> rgbOut;
   std::shared_ptr<dai::node::XLinkOut> depthOut;
-  std::shared_ptr<dai::node::XLinkOut> nnPassOut;
   std::shared_ptr<dai::node::XLinkOut> nnXout;
 
   std::shared_ptr<dai::DataOutputQueue> q;
   std::shared_ptr<dai::DataOutputQueue> qRgb;
   std::shared_ptr<dai::DataOutputQueue> qDepth;
   std::shared_ptr<dai::DataOutputQueue> qNn;
-  std::shared_ptr<dai::DataOutputQueue> qNnPass;
   std::shared_ptr<dai::node::StereoDepth> depth;
   dai::DeviceInfo device_info;
   std::shared_ptr<dai::Device> device;
@@ -99,11 +99,13 @@ private:
   float verticalFocalLengthPixels;
   float cameraHFOVInRadians;
   
-
+  int stride = 8;
+  double input_scale = 256.0 / 720.0;
+  float fx = 984.344; // -1;
 
   //openvino info
   const file_name_t input_model = "../models/human-pose-estimation-3d-0001.xml";
-  const std::string input_blob = "../../models/human-pose-estimation-3d-0001.blob";
+  const std::string input_blob = "../../models/human-pose-estimation-3d-0001-4-shaves.blob";
   const file_name_t input_image_path= "../models/pointing_middle_of_view.jpg";
   const std::string device_name = "CPU";
   Core ie;

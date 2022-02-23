@@ -60,6 +60,7 @@ using namespace InferenceEngine;
 
 class OakdXlinkReader : public IReader {
 private:
+
   int current_frame_counter_;
   unsigned int fps;
   FrameStruct frame_template_;
