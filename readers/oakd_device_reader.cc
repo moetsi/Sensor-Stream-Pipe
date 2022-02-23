@@ -41,43 +41,26 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // HARDWARID BLOB WAS MADE BY FOLLOWING DEPTHAI HOW-TO
     // https://docs.luxonis.com/en/latest/pages/model_conversion/
     nn = pipeline.create<dai::node::NeuralNetwork>();
-<<<<<<< HEAD
-    nn->setBlobPath(input_blob);
     nn->setNumInferenceThreads(2);
+    #ifndef _WIN32    
+        std::string rel = "../../"; 
+    #endif
+    #ifdef _WIN32    
+        std::string rel = "../../../";
+    #endif
+        std::map<std::string,std::string> env;
+        env["REL"] = rel;
+        std::string model_blob_path = input_blob;
+        model_blob_path = StringInterpolation(env, model_blob_path);
+
+        nn->setBlobPath(model_blob_path);
     
-=======
-
-#ifndef _WIN32    
-    std::string rel = "../../"; 
-#endif
-#ifdef _WIN32    
-    std::string rel = "../../../";
-#endif
-
-    std::map<std::string,std::string> env;
-    env["REL"] = rel;
-    std::string model_blob_path = input_blob;
-    model_blob_path = StringInterpolation(env, model_blob_path);
-
-    nn->setBlobPath(model_blob_path);
-
->>>>>>> 78c52511340d0f9687e9c9962e8b8b0ad78031dc
     // # Only send metadata, we are only interested in timestamp, so we can sync
     // # depth frames with NN output
 
     // rgbOut = pipeline.create<dai::node::XLinkOut>();
     depthOut = pipeline.create<dai::node::XLinkOut>();
     nnXout = pipeline.create<dai::node::XLinkOut>();
-<<<<<<< HEAD
-=======
-    // nnPassOut = pipeline.create<dai::node::XLinkOut>();
-
-    // nnPassOut->setMetadataOnly(true);
-    // nn->passthrough.link(nnPassOut->input);
-
-
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
->>>>>>> 78c52511340d0f9687e9c9962e8b8b0ad78031dc
 
     // rgbOut->setStreamName("rgb");
     depthOut->setStreamName("depth");
@@ -131,17 +114,16 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     strcpy(device_info.desc.name, chText);
     device_info.state = X_LINK_BOOTLOADER; 
     device_info.desc.protocol = X_LINK_TCP_IP;
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
- 
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
     device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode   // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
     deviceCalib = device->readCalibration();
     cameraIntrinsics = deviceCalib.getCameraIntrinsics(dai::CameraBoardSocket::RGB, 1280, 720);
     horizontalFocalLengthPixels = cameraIntrinsics[0][0];
     verticalFocalLengthPixels =  cameraIntrinsics[1][1];
     cameraHFOVInRadians = ((deviceCalib.getFov(dai::CameraBoardSocket::RGB) * pi) / 180.0) * (3840.0/4056.0); // Must scale for cropping: https://discordapp.com/channels/790680891252932659/924798503270625290/936746213691228260
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
     // Connect to device and start pipeline
     cout << "Connected cameras: ";
        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
@@ -154,120 +136,10 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Output queue will be used to get the rgb frames from the output defined above
     // Sets queues size and behavior
     // qRgb = device->getOutputQueue("rgb", 4, false);                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-<<<<<<< HEAD
     qDepth = device->getOutputQueue("depth", 10, false);    
     qNn = device->getOutputQueue("nn", 10, false);
 
-=======
-    qDepth = device->getOutputQueue("depth", 4, false);    
-    qNn = device->getOutputQueue("nn", 4, false);
-    // qNnPass = device->getOutputQueue("nn_pass", 4, false);    
-
-#endif
-
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-// COMMENTING OUT ALL OF THE SETTING UP AND CREATING MODEL
-// GOING TO DO THAT JUST BY SENDING THE OAKD BLOB
-// THEN GOING TO SET UP A RGB-DEPTH ALIGNED RGB FRAME SYNCHRONIZED
-// RUN INFERENCE ON RGB AND REMEMBER RGB SEQUENCE NUMBER
-// RUN MESSAGE OF OUTPUT OF THAT INFERENCE RESULT
-// PUT TOGETHER BY SEQUENCE NUMBER OF DEPTH FRAME
-// SEND AS OUTPUT DEPTH + INFERENCE OUTPUT OF RGB
-// THEN PLUG THAT IN AS WHEN PARSE_POSES IS BEING CALLED IN C++
-// PLUG THAT DEPTH FRAME WHERE CURRENTLY BEING CALLED
-
-    //Now setting up Body model
-    // input_model = {"../models/human-pose-estimation-3d.xml"};
-    // input_image_path = "../openvino/fart";
-    // device_name = simpleConvert("CPU");
-    //Generating bodies
-    // -----------------------------------------------------------------------------------------------------
-
-    // --------------------------- Step 1. Initialize inference engine core
-    // -------------------------------------
-    // Core ie;
-    // -----------------------------------------------------------------------------------------------------
-
-    // Step 2. Read a model in OpenVINO Intermediate Representation (.xml and
-    // .bin files) or ONNX (.onnx file) format
-
-/*
->>>>>>> 78c52511340d0f9687e9c9962e8b8b0ad78031dc
-#ifndef _WIN32    
-    std::string rel = "../../"; 
-#endif
-#ifdef _WIN32    
-    std::string rel = "../../../";
-#endif
-
-<<<<<<< HEAD
     // start_time_in_ms = CurrentTimeMs();
-=======
-    std::map<std::string,std::string> env;
-    env["REL"] = rel;
-    std::string model_path = config["model"].as<std::string>();
-    model_path = StringInterpolation(env, model_path);
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; */
-    
-    // network = ie.ReadNetwork(model_path);
-    // //#ifndef _WIN32    
-    // //    network = ie.ReadNetwork("../../models/human-pose-estimation-3d-0001.xml");
-    // //#endif
-    // //#ifdef _WIN32    
-    // //    network = ie.ReadNetwork("../../../models/human-pose-estimation-3d-0001.xml");
-    // //#endif
-    // // if (network.getOutputsInfo().size() != 1)
-    // //     throw std::logic_error("Sample supports topologies with 1 output only");
-    // if (network.getInputsInfo().size() != 1)
-    //     throw std::logic_error("Sample supports topologies with 1 input only");
-    // // -----------------------------------------------------------------------------------------------------
-
-    // // --------------------------- Step 3. Configure input & output
-    // // ---------------------------------------------
-    // // --------------------------- Prepare input blobs
-    // // -----------------------------------------------------
-    // input_info = network.getInputsInfo().begin()->second;
-    // input_name = network.getInputsInfo().begin()->first;
-
-    // /* Mark input as resizable by setting of a resize algorithm.
-    //   * In this case we will be able to set an input blob of any shape to an
-    //   * infer request. Resize and layout conversions are executed automatically
-    //   * during inference */
-    
-    // // TODO keep?
-    // input_info->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
-    
-    // input_info->setLayout(Layout::NHWC);
-    // input_info->setPrecision(Precision::U8);
-    // // --------------------------- Prepare output blobs
-    // // ----------------------------------------------------
-    // if (network.getOutputsInfo().empty()) {
-    //     std::cerr << "Network outputs info is empty" << std::endl;
-    //     return;
-    // }
-    // features_output_info = network.getOutputsInfo()["features"];
-    // heatmaps_output_info = network.getOutputsInfo()["heatmaps"];
-    // pafs_output_info = network.getOutputsInfo()["pafs"];
-
-    // features_output_info->setPrecision(Precision::FP32);
-    // heatmaps_output_info->setPrecision(Precision::FP32);
-    // pafs_output_info->setPrecision(Precision::FP32);
-
-    // // TODO needed? No because changed the actual input shape of the model directly
-    // // ICNNNetwork::InputShapes inputShape {{ "data", std::vector<size_t>{1,3,256,384} }};
-    // // network.reshape(inputShape); 
-
-    // // -----------------------------------------------------------------------------------------------------
-
-    // // --------------------------- Step 4. Loading a model to the device
-    // // ------------------------------------------
-    // executable_network = ie.LoadNetwork(network, "CPU");
-    // // -----------------------------------------------------------------------------------------------------
-
-
-
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
->>>>>>> 78c52511340d0f9687e9c9962e8b8b0ad78031dc
 }
 
 OakdDeviceReader::~OakdDeviceReader() {
