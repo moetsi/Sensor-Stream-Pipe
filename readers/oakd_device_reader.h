@@ -61,6 +61,9 @@ using namespace InferenceEngine;
 class OakdDeviceReader : public IReader {
 private:
 
+  bool stream_rgb = false;
+  bool stream_depth = false;
+  bool stream_bodies = false;
   uint64_t start_time_in_ms;
 
   int current_frame_counter_;

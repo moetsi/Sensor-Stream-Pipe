@@ -61,6 +61,10 @@ using namespace InferenceEngine;
 class OakdXlinkReader : public IReader {
 private:
 
+  bool stream_rgb = false;
+  bool stream_depth = false;
+  bool stream_bodies = false;
+
   int current_frame_counter_;
   unsigned int fps;
   FrameStruct frame_template_;
@@ -73,7 +77,6 @@ private:
 
   //oakd info
   dai::Pipeline pipeline;
-  std::vector<std::string> queueNames;
   std::shared_ptr<dai::node::ColorCamera> camRgb;
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;

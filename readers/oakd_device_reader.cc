@@ -20,8 +20,47 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Starting to open");
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     
+    // Pull variables from yaml
+    stream_rgb = config["stream_color"].as<bool>();
+    stream_depth = config["stream_depth"].as<bool>();
+    stream_bodies = config["stream_bodies"].as<bool>();
     fps = config["streaming_rate"].as<unsigned int>();
-    
+    auto rgb_res = config["rgb_resolution"].as<unsigned int>();
+    dai::ColorCameraProperties::SensorResolution rgb_dai_res;
+    if (rgb_res == 1080)
+        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
+    else if (rgb_res == 4000)
+        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_4_K;
+    else if (rgb_res == 12000)
+        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_12_MP;
+    else if (rgb_res == 13000)
+        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_13_MP;
+    else
+        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
+    auto rgb_dai_preview_y = config["rgb_preview_size_y"].as<unsigned int>();
+    auto rgb_dai_preview_x = config["rgb_preview_size_x"].as<unsigned int>();
+    auto rgb_dai_fps = config["rgb_fps"].as<unsigned int>();
+
+    auto depth_res = config["depth_resolution"].as<unsigned int>();
+    dai::MonoCameraProperties::SensorResolution depth_dai_res;
+    if (depth_res == 720)
+        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
+    else if (depth_res == 800)
+        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_800_P;
+    else if (depth_res == 400)
+        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_400_P;
+    else if (depth_res == 480)
+        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_480_P;
+    else
+        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
+    auto depth_dai_preview_y = config["depth_preview_size_y"].as<unsigned int>();
+    auto depth_dai_preview_x = config["depth_preview_size_x"].as<unsigned int>();
+    auto depth_dai_fps = config["depth_fps"].as<unsigned int>();
+    auto depth_dai_sf = config["depth_spatial_filter"].as<bool>();
+    auto depth_dai_sf_hfr = config["depth_spatial_hole_filling_radius"].as<unsigned int>();
+    auto depth_dai_sf_num_it = config["depth_sptial_filter_num_it"].as<unsigned int>();
+
+    // Now set up frame template that is consistent across data types
     current_frame_counter_ = 0;
     frame_template_.stream_id = RandomString(16);
     frame_template_.device_id = config["deviceid"].as<unsigned int>();
@@ -37,8 +76,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     left = pipeline.create<dai::node::MonoCamera>();
     right = pipeline.create<dai::node::MonoCamera>();
     stereo = pipeline.create<dai::node::StereoDepth>();
-    // SETTING UP THE ON-DEVICE INFERENCE
-    // HARDWARID BLOB WAS MADE BY FOLLOWING DEPTHAI HOW-TO
+    // SETTING UP THE ON-DEVICE INFERENCE HARDWARID BLOB WAS MADE BY FOLLOWING DEPTHAI HOW-TO
     // https://docs.luxonis.com/en/latest/pages/model_conversion/
     nn = pipeline.create<dai::node::NeuralNetwork>();
     nn->setNumInferenceThreads(2);
@@ -52,12 +90,10 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
         env["REL"] = rel;
         std::string model_blob_path = input_blob;
         model_blob_path = StringInterpolation(env, model_blob_path);
-
         nn->setBlobPath(model_blob_path);
     
     // # Only send metadata, we are only interested in timestamp, so we can sync
     // # depth frames with NN output
-
     // rgbOut = pipeline.create<dai::node::XLinkOut>();
     depthOut = pipeline.create<dai::node::XLinkOut>();
     nnXout = pipeline.create<dai::node::XLinkOut>();
@@ -67,32 +103,31 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     nnXout->setStreamName("nn");
 
     // Color Properties
-    camRgb->setPreviewSize(384, 256);
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
-    camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
-    camRgb->setFps(7);
+    camRgb->setResolution(rgb_dai_res);
+    camRgb->setPreviewSize(rgb_dai_preview_x, rgb_dai_preview_y);
+    camRgb->setFps(rgb_dai_fps);
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
     camRgb->setInterleaved(false);
 
     // Depth Properties
-    auto monoRes = dai::MonoCameraProperties::SensorResolution::THE_400_P;
-    left->setResolution(monoRes);
+    left->setResolution(depth_dai_res);
     left->setBoardSocket(dai::CameraBoardSocket::LEFT);
-    left->setFps(7);
-    right->setResolution(monoRes);
+    left->setFps(depth_dai_fps);
+    right->setResolution(depth_dai_res);
     right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
-    right->setFps(7);
+    right->setFps(depth_dai_fps);
     stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
     stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
-    stereo->setOutputSize(384, 256);
+    stereo->setOutputSize(depth_dai_preview_x, depth_dai_preview_y);
     stereo->setFocalLengthFromCalibration(true);
     auto oakdConfig = stereo->initialConfig.get();
-    oakdConfig.postProcessing.spatialFilter.enable = true;
-    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 50;
-    oakdConfig.postProcessing.spatialFilter.numIterations = 1;
+    oakdConfig.postProcessing.spatialFilter.enable = depth_dai_sf;
+    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = depth_dai_sf_hfr;
+    oakdConfig.postProcessing.spatialFilter.numIterations = depth_dai_sf_num_it;
     stereo->initialConfig.set(oakdConfig);
     
     // Linking
@@ -298,51 +333,52 @@ void OakdDeviceReader::NextFrame() {
     cv::resize(frameDepthMat, frameDepthMat, cv::Size(1280, 720), 0, 0, cv::INTER_NEAREST);
 
 
-//   // TODO FIXME x big/little endian hazard ~
+  // TODO FIXME x big/little endian hazard ~
 
-//   //Color frame
-// //   std::shared_ptr<FrameStruct> rgbFrame =
-// //       std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-// //     rgbFrame->sensor_id = 0; 
-// //   rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
-// //   rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
-// //   rgbFrame->frame_id = current_frame_counter_;
-// //   rgbFrame->timestamps.push_back(capture_timestamp);
+  //Color frame
+//   std::shared_ptr<FrameStruct> rgbFrame =
+//       std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+//     rgbFrame->sensor_id = 0; 
+//   rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
+//   rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
+//   rgbFrame->frame_id = current_frame_counter_;
+//   rgbFrame->timestamps.push_back(capture_timestamp);
 
-//    // convert the raw buffer to cv::Mat
-// //    int32_t colorCols = frameRgbOpenCv.cols;                                                        
-// //    int32_t colorRows = frameRgbOpenCv.rows;                                                        
-// //    size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
+//     //convert the raw buffer to cv::Mat
+//    int32_t colorCols = frameRgbOpenCv.cols;                                                        
+//    int32_t colorRows = frameRgbOpenCv.rows;                                                        
+//    size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
 
-// //    rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        
+//    rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        
 
-// //    memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       
-// //    memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       
-// //    memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              
+//    memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       
+//    memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       
+//    memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              
 
 //     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
-// //   Depth frame
-//     std::shared_ptr<FrameStruct> depthFrame =
-//         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-//         depthFrame->sensor_id = 1;
-//     depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
-//     depthFrame->frame_data_type = FrameDataType::FrameDataTypeDepthAIStereoDepth; // 11; It is not when not subpixel
-//     depthFrame->frame_id = current_frame_counter_;
-//     depthFrame->timestamps.push_back(capture_timestamp);
+//   Depth frame
+    std::shared_ptr<FrameStruct> depthFrame =
+        std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+        depthFrame->sensor_id = 1;
+    depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
+    depthFrame->frame_data_type = FrameDataType::FrameDataTypeDepthAIStereoDepth; // 11; It is not when not subpixel
+    depthFrame->frame_id = current_frame_counter_;
+    depthFrame->timestamps.push_back(capture_timestamp);
 
 
-//     int32_t depthCols = frameDepthMat.cols;                                                        
-//     int32_t depthRows = frameDepthMat.rows;                                                        
-//     size_t depthSize = depthCols*depthRows*sizeof(uint16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
+    int32_t depthCols = frameDepthMat.cols;                                                        
+    int32_t depthRows = frameDepthMat.rows;                                                        
+    size_t depthSize = depthCols*depthRows*sizeof(uint16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
 
-//     depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        
+    depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        
 
-//     memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       
-//     memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       
-//     memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              
+    memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       
+    memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       
+    memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              
 
-//     current_frame_.push_back(depthFrame);
+    if (stream_depth)
+        current_frame_.push_back(depthFrame);
 
     try {
     /////////////////////////////////////////////
@@ -788,24 +824,26 @@ void OakdDeviceReader::NextFrame() {
         
         memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
 
-        cv::Mat depthFrameColor;
-        // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
-        cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
-        cv::equalizeHist(depthFrameColor, depthFrameColor);
-        cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
-        rectangle(depthFrameColor, cv::Point(bodyStruct.neck_2d_x-6, bodyStruct.neck_2d_y-6), cv::Point(bodyStruct.neck_2d_x+6, bodyStruct.neck_2d_y+6), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
-        cv::imshow("depth", depthFrameColor);
-        cv::waitKey(1);
+        // cv::Mat depthFrameColor;
+        // // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
+        // cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
+        // cv::equalizeHist(depthFrameColor, depthFrameColor);
+        // cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
+        // rectangle(depthFrameColor, cv::Point(bodyStruct.neck_2d_x-6, bodyStruct.neck_2d_y-6), cv::Point(bodyStruct.neck_2d_x+6, bodyStruct.neck_2d_y+6), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
+        // cv::imshow("depth", depthFrameColor);
+        // cv::waitKey(1);
         
     }
 
     //Now that we have copied all memory to the frame we can push it back
     if (bodyCount > 0)
     {
-        current_frame_.push_back(s);
+        if (stream_bodies)
+            current_frame_.push_back(s);
     }
     //We push the rgb frame to the back (this helps when running ssp_client_opencv)
-    // current_frame_.push_back(rgbFrame);
+    // if (stream_rgb)
+    //     current_frame_.push_back(rgbFrame);
 
     } catch(...) {
         std::cerr << "TRY/CATCH CATCH AFTER PARSE POSES " << std::endl << std::flush;
@@ -830,9 +868,12 @@ unsigned int OakdDeviceReader::GetFps() {
 std::vector<FrameType> OakdDeviceReader::GetType() {
   std::vector<FrameType> types;
 
-  //types.push_back(FrameType::FrameTypeColor);
-  //types.push_back(FrameType::FrameTypeDepth);
-  types.push_back(FrameType::FrameTypeHumanPose); // 4;
+    // if (stream_rgb)
+        // types.push_back(FrameType::FrameTypeColor);
+    if (stream_depth)
+        types.push_back(FrameType::FrameTypeDepth);
+    if (stream_bodies)
+        types.push_back(FrameType::FrameTypeHumanPose); // 4;
 
   return types;
 }
