@@ -489,49 +489,49 @@ void OakdXlinkReader::NextFrame() {
 
     // TODO FIXME x big/little endian hazard ~
 
-    //Color frame
-    std::shared_ptr<FrameStruct> rgbFrame =
-        std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-        rgbFrame->sensor_id = 0; 
-    rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
-    rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
-    rgbFrame->frame_id = current_frame_counter_;
-    rgbFrame->timestamps.push_back(capture_timestamp);
+    // //Color frame
+    // std::shared_ptr<FrameStruct> rgbFrame =
+    //     std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+    //     rgbFrame->sensor_id = 0; 
+    // rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
+    // rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
+    // rgbFrame->frame_id = current_frame_counter_;
+    // rgbFrame->timestamps.push_back(capture_timestamp);
 
-    // convert the raw buffer to cv::Mat
-    int32_t colorCols = frameRgbOpenCv.cols;                                                        
-    int32_t colorRows = frameRgbOpenCv.rows;                                                        
-    size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
+    // // convert the raw buffer to cv::Mat
+    // int32_t colorCols = frameRgbOpenCv.cols;                                                        
+    // int32_t colorRows = frameRgbOpenCv.rows;                                                        
+    // size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
 
-    rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        
+    // rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        
 
-    memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       
-    memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       
-    memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              
+    // memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       
+    // memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       
+    // memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              
 
 
 
-  //Depth frame
-  std::shared_ptr<FrameStruct> depthFrame =
-      std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-    depthFrame->sensor_id = 1;
-  depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
-  depthFrame->frame_data_type = FrameDataType::FrameDataTypeDepthAIStereoDepth; // 11; It is not when not subpixel
-  depthFrame->frame_id = current_frame_counter_;
-  depthFrame->timestamps.push_back(capture_timestamp);
+//   //Depth frame
+//   std::shared_ptr<FrameStruct> depthFrame =
+//       std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+//     depthFrame->sensor_id = 1;
+//   depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
+//   depthFrame->frame_data_type = FrameDataType::FrameDataTypeDepthAIStereoDepth; // 11; It is not when not subpixel
+//   depthFrame->frame_id = current_frame_counter_;
+//   depthFrame->timestamps.push_back(capture_timestamp);
 
-   // convert the raw buffer to cv::Mat
-   int32_t depthCols = frameDepthMat.cols;                                                        
-   int32_t depthRows = frameDepthMat.rows;                                                        
-   size_t depthSize = depthCols*depthRows*sizeof(uint16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
+//    // convert the raw buffer to cv::Mat
+//    int32_t depthCols = frameDepthMat.cols;                                                        
+//    int32_t depthRows = frameDepthMat.rows;                                                        
+//    size_t depthSize = depthCols*depthRows*sizeof(uint16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
 
-   depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        
+//    depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        
 
-   memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       
-   memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       
-   memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              
+//    memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       
+//    memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       
+//    memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              
 
-  current_frame_.push_back(depthFrame);
+//   current_frame_.push_back(depthFrame);
 
     
     try {
@@ -1035,7 +1035,7 @@ void OakdXlinkReader::NextFrame() {
         current_frame_.push_back(s);
     }
     //We push the rgb frame to the back (this helps when running ssp_client_opencv)
-    current_frame_.push_back(rgbFrame);
+    // current_frame_.push_back(rgbFrame);
 
     } catch(...) {
         std::cerr << "TRY/CATCH CATCH AFTER PARSE POSES " << std::endl << std::flush;
@@ -1060,8 +1060,8 @@ unsigned int OakdXlinkReader::GetFps() {
 std::vector<FrameType> OakdXlinkReader::GetType() {
   std::vector<FrameType> types;
 
-  types.push_back(FrameType::FrameTypeColor);
-  types.push_back(FrameType::FrameTypeDepth);
+//   types.push_back(FrameType::FrameTypeColor);
+//   types.push_back(FrameType::FrameTypeDepth);
   types.push_back(FrameType::FrameTypeHumanPose); // 4;
 
   return types;
