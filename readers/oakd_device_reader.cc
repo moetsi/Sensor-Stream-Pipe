@@ -75,7 +75,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     camRgb->setInterleaved(false);
 
     // Depth Properties
-    auto monoRes = dai::MonoCameraProperties::SensorResolution::THE_720_P;
+    auto monoRes = dai::MonoCameraProperties::SensorResolution::THE_400_P;
     left->setResolution(monoRes);
     left->setBoardSocket(dai::CameraBoardSocket::LEFT);
     left->setFps(7);
@@ -87,11 +87,11 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
-    stereo->setOutputSize(640,360);
+    stereo->setOutputSize(384, 256);
     stereo->setFocalLengthFromCalibration(true);
     auto oakdConfig = stereo->initialConfig.get();
     oakdConfig.postProcessing.spatialFilter.enable = true;
-    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 2;
+    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 50;
     oakdConfig.postProcessing.spatialFilter.numIterations = 1;
     stereo->initialConfig.set(oakdConfig);
     
@@ -115,7 +115,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     device_info.state = X_LINK_BOOTLOADER; 
     device_info.desc.protocol = X_LINK_TCP_IP;
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
-    device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode   // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode   
 
     deviceCalib = device->readCalibration();
     cameraIntrinsics = deviceCalib.getCameraIntrinsics(dai::CameraBoardSocket::RGB, 1280, 720);
@@ -126,7 +126,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Connect to device and start pipeline
     cout << "Connected cameras: ";
-       std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+       std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     
        for(const auto& cam : device->getConnectedCameras()) {
           cout << static_cast<int>(cam) << " ";
           cout << cam << " ";
@@ -135,7 +135,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Output queue will be used to get the rgb frames from the output defined above
     // Sets queues size and behavior
-    // qRgb = device->getOutputQueue("rgb", 4, false);                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    // qRgb = device->getOutputQueue("rgb", 4, false);                                      
     qDepth = device->getOutputQueue("depth", 10, false);    
     qNn = device->getOutputQueue("nn", 10, false);
 
@@ -247,6 +247,7 @@ void OakdDeviceReader::NextFrame() {
                 , true); //true);
 
             } catch(...) {
+                std::cerr << "TRY/CATCH CATCH AFTER INFERENCE " << std::endl << std::flush;
                 return;
             }
 
@@ -293,8 +294,8 @@ void OakdDeviceReader::NextFrame() {
         }
     }
 
-        auto frameDepthMat = synchedDepthFrame->getFrame();
-        cv::resize(frameDepthMat, frameDepthMat, cv::Size(1280, 720), 0, 0, cv::INTER_NEAREST);
+    auto frameDepthMat = synchedDepthFrame->getFrame();
+    cv::resize(frameDepthMat, frameDepthMat, cv::Size(1280, 720), 0, 0, cv::INTER_NEAREST);
 
 
 //   // TODO FIXME x big/little endian hazard ~
@@ -309,15 +310,15 @@ void OakdDeviceReader::NextFrame() {
 // //   rgbFrame->timestamps.push_back(capture_timestamp);
 
 //    // convert the raw buffer to cv::Mat
-// //    int32_t colorCols = frameRgbOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-// //    int32_t colorRows = frameRgbOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-// //    size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+// //    int32_t colorCols = frameRgbOpenCv.cols;                                                        
+// //    int32_t colorRows = frameRgbOpenCv.rows;                                                        
+// //    size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
 
-// //    rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+// //    rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        
 
-// //    memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-// //    memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-// //    memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+// //    memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       
+// //    memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       
+// //    memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              
 
 //     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
@@ -331,15 +332,15 @@ void OakdDeviceReader::NextFrame() {
 //     depthFrame->timestamps.push_back(capture_timestamp);
 
 
-//     int32_t depthCols = frameDepthMat.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-//     int32_t depthRows = frameDepthMat.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//     int32_t depthCols = frameDepthMat.cols;                                                        
+//     int32_t depthRows = frameDepthMat.rows;                                                        
 //     size_t depthSize = depthCols*depthRows*sizeof(uint16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
 
-//     depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//     depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        
 
-//     memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-//     memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-//     memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+//     memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       
+//     memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       
+//     memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              
 
 //     current_frame_.push_back(depthFrame);
 
@@ -586,28 +587,33 @@ void OakdDeviceReader::NextFrame() {
         {
             xPoint = bodyStruct.neck_2d_x;
             yPoint = bodyStruct.neck_2d_y;
+            std::cerr << "!! OPTION 1 !!" << std::endl << std::flush; 
         }
         //If neck not confident but shoulders are confident, choose half way point of shoulders
         else if (bodyStruct.shoulder_left_2d_conf > .5 && bodyStruct.shoulder_right_2d_conf > .5)
         {
             xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
             yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
+            std::cerr << "!! OPTION 2 !!" << std::endl << std::flush; 
         }
         //If that isn't true do midpoint between hips
         else if (bodyStruct.hip_left_2d_conf > .5 && bodyStruct.hip_right_2d_conf > .5)
         {
             xPoint = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
             yPoint = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
+            std::cerr << "!! OPTION 3 !!" << std::endl << std::flush; 
         }
         //If head, shoulders, hips aren't confident, then try nose
         else if (bodyStruct.nose_2d_conf > .5)
         {
             xPoint = bodyStruct.nose_2d_x;
             yPoint = bodyStruct.nose_2d_y;
+            std::cerr << "!! OPTION 4 !!" << std::endl << std::flush; 
         }
         //Finally, if none of those are confident, we will grab the average x/y location of all detected joints
         else
         {
+            std::cerr << "!! OPTION 5 !!" << std::endl << std::flush; 
             int countOfDetectedJoints = 0;
             int xValueOfDetectedJoints = 0;
             int yValueOfDetectedJoints = 0;
@@ -734,7 +740,7 @@ void OakdDeviceReader::NextFrame() {
         //Now we grab a the average depth value of a 6x6 grid of pixels surrounding the xPoint and yPoint
         cv::Scalar mean, stddev;
         //Region square radius
-        int regionRadius = 3;
+        int regionRadius = 6;
 
         //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
         int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0;
@@ -746,12 +752,12 @@ void OakdDeviceReader::NextFrame() {
         int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
         yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
 
-        // std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
-        // std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
-        // std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
-        // std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
-        // std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
-        // std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
+        std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
+        std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
+        std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
+        std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
+        std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
+        std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
 
         //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
         cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
@@ -776,11 +782,21 @@ void OakdDeviceReader::NextFrame() {
         bodyStruct.pelvis_2d_y = int(-1.0f * float(pointDepth) * tan(angle_y));
 
         std::cerr << "NECK DEPTH: " << int(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x))  << std::endl << std::flush;
-        std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; //UNCOMMENT
+        std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; 
         //Finally we copy the COCO body struct memory to the frame
         bodyStruct.hton();
         
         memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
+
+        cv::Mat depthFrameColor;
+        // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
+        cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
+        cv::equalizeHist(depthFrameColor, depthFrameColor);
+        cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
+        rectangle(depthFrameColor, cv::Point(bodyStruct.neck_2d_x-6, bodyStruct.neck_2d_y-6), cv::Point(bodyStruct.neck_2d_x+6, bodyStruct.neck_2d_y+6), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
+        cv::imshow("depth", depthFrameColor);
+        cv::waitKey(1);
+        
     }
 
     //Now that we have copied all memory to the frame we can push it back
@@ -792,6 +808,7 @@ void OakdDeviceReader::NextFrame() {
     // current_frame_.push_back(rgbFrame);
 
     } catch(...) {
+        std::cerr << "TRY/CATCH CATCH AFTER PARSE POSES " << std::endl << std::flush;
         return;
     }
 

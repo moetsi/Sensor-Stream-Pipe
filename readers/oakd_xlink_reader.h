@@ -66,8 +66,8 @@ private:
   FrameStruct frame_template_;
 
   //We use this dictionary to grab pairs of rgb and depth frames that caame from same point in time
-  // std::unordered_map<int, std::vector<std::shared_ptr<dai::ImgFrame>>> frames_dictionary;
-  std::unordered_map<int, std::shared_ptr<dai::ImgFrame>> frames_dictionary;
+  struct color_and_depth { std::shared_ptr<dai::ImgFrame> rgb; std::shared_ptr<dai::ImgFrame> depth;};
+  std::unordered_map<int, color_and_depth> frames_dictionary;
 
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 

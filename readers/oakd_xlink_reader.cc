@@ -57,31 +57,35 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Color Properties
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
     camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
-    camRgb->setFps(5);
-    camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
+    camRgb->setFps(15);
+    camRgb->setPreviewSize(384, 256);
+    // camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
     // camRgb->initialControl.setManualFocus(135); // requires this focus to align depth
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
     camRgb->setInterleaved(false);
 
     // Depth Properties
-    auto monoRes = dai::MonoCameraProperties::SensorResolution::THE_720_P;
+    auto monoRes = dai::MonoCameraProperties::SensorResolution::THE_400_P;
     left->setResolution(monoRes);
     left->setBoardSocket(dai::CameraBoardSocket::LEFT);
-    left->setFps(5);
+    left->setFps(15);
     right->setResolution(monoRes);
     right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
-    right->setFps(5);
+    right->setFps(15);
 
     stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
     stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
+    stereo->setOutputSize(384, 256);
+    stereo->setFocalLengthFromCalibration(true);
+
     auto oakdConfig = stereo->initialConfig.get();
     // oakdConfig.postProcessing.speckleFilter.enable = false;
     // oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
     // oakdConfig.postProcessing.spatialFilter.enable = true;
-    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 2;
+    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = 50;
     oakdConfig.postProcessing.spatialFilter.numIterations = 1;
     stereo->initialConfig.set(oakdConfig);
     stereo->setFocalLengthFromCalibration(true);
@@ -95,7 +99,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 
     // Linking
-    camRgb->isp.link(rgbOut->input);
+    camRgb->preview.link(rgbOut->input);
     left->out.link(stereo->left);
     right->out.link(stereo->right);
     stereo->depth.link(depthOut->input);
@@ -116,7 +120,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
 
 #ifndef TEST_WITH_IMAGE  
-    device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode   // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    device = std::make_shared<dai::Device>(pipeline, device_info, true); // usb 2 mode   
     deviceCalib = device->readCalibration();
     cameraIntrinsics = deviceCalib.getCameraIntrinsics(dai::CameraBoardSocket::RGB, 1280, 720);
     horizontalFocalLengthPixels = cameraIntrinsics[0][0];
@@ -128,7 +132,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Connect to device and start pipeline
     cout << "Connected cameras: ";
 #ifndef TEST_WITH_IMAGE
-       std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+       std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     
        for(const auto& cam : device->getConnectedCameras()) {
           cout << static_cast<int>(cam) << " ";
           cout << cam << " ";
@@ -137,14 +141,14 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug(std::string(__FILE__) + ":" + std::to_string(__LINE__));
     // Print USB speed
-    cout << "Usb speed: " << device->getUsbSpeed() << endl;                              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    cout << "Usb speed: " << device->getUsbSpeed() << endl;                              
     spdlog::debug(std::string(__FILE__) + ":" + std::to_string(__LINE__));
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Output queue will be used to get the rgb frames from the output defined above
     // Sets queues size and behavior
 
-    qRgb = device->getOutputQueue("rgb", 4, false);                                      // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    qRgb = device->getOutputQueue("rgb", 4, false);                                      
     qDepth = device->getOutputQueue("depth", 4, false);    
 
 std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -204,7 +208,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
       * infer request. Resize and layout conversions are executed automatically
       * during inference */
     
-    // TODO keep?
+
     input_info->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
     
     input_info->setLayout(Layout::NHWC);
@@ -233,7 +237,6 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // ------------------------------------------
     executable_network = ie.LoadNetwork(network, "CPU");
     // -----------------------------------------------------------------------------------------------------
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 }
 
 OakdXlinkReader::~OakdXlinkReader() {
@@ -241,6 +244,47 @@ OakdXlinkReader::~OakdXlinkReader() {
 }
 
 const float magic = 0.84381;
+
+int findMedian(vector<int> a,
+                  int n)
+{
+  
+    // If size of the arr[] is even
+    if (n % 2 == 0) {
+  
+        // Applying nth_element
+        // on n/2th index
+        nth_element(a.begin(),
+                    a.begin() + n / 2,
+                    a.end());
+  
+        // Applying nth_element
+        // on (n-1)/2 th index
+        nth_element(a.begin(),
+                    a.begin() + (n - 1) / 2,
+                    a.end());
+  
+        // Find the average of value at
+        // index N/2 and (N-1)/2
+        return (int)(a[(n - 1) / 2]
+                        + a[n / 2])
+               / 2.0;
+    }
+  
+    // If size of the arr[] is odd
+    else {
+  
+        // Applying nth_element
+        // on n/2
+        nth_element(a.begin(),
+                    a.begin() + n / 2,
+                    a.end());
+  
+        // Value at index (N/2)th
+        // is the median
+        return (int)a[n / 2];
+    }
+}
 
 void OakdXlinkReader::NextFrame() {
   current_frame_.clear();
@@ -250,49 +294,183 @@ void OakdXlinkReader::NextFrame() {
   uint64_t capture_timestamp = CurrentTimeMs();
 
 
-#ifndef TEST_WITH_IMAGE
     
     //Here we try until we get a synchronized color and depth frame
     bool haveSyncedFrames = false;
-    int seqNum;
     std::shared_ptr<dai::ImgFrame> synchedRgbFrame;
     std::shared_ptr<dai::ImgFrame> synchedDepthFrame;
-
-    //Now we pull frames until we get a synchronized color and depth frame
-    //The dictionary has a key of seqNum (int) and value is a img::frame pointer
-    // std::unordered_map<int, std::shared_ptr<dai::ImgFrame>> frames_dictionary;
+    int seqNum;
+    struct moetsi::ssp::human_pose_estimation::poses posesStruct;
+    // Now we pull frames until we get a synchronized nn and depth frame
+    // The dictionary has a key of seqNum (int) and value is a img::frame pointer
+    // std::unordered_map<int, struct rgb_and_depth { std::shared_ptr<dai::ImgFrame> rgb; std::shared_ptr<dai::ImgFrame> depth };>> frames_dictionary;
     while (!haveSyncedFrames)
     {
-        //Grab rgb and add to dictionary
-        auto rgbFromQueue = qRgb->get<dai::ImgFrame>();
-        seqNum = rgbFromQueue->getSequenceNum();
-        if (frames_dictionary[seqNum] != NULL && !haveSyncedFrames)
+        auto rgbFromQueue = qRgb->tryGet<dai::ImgFrame>();
+        if (rgbFromQueue != nullptr)
         {
-            synchedRgbFrame = rgbFromQueue;
-            synchedDepthFrame = frames_dictionary[seqNum];
-            haveSyncedFrames = true;
-            break;
+            // We run inference and parse poses on every received RGB to help with body tracking
+            try
+            {
+                // --------------------------- Step 5. Create an infer request
+                // -------------------------------------------------
+                InferRequest infer_request = executable_network.CreateInferRequest();
+                // -----------------------------------------------------------------------------------------------------
+
+                // --------------------------- Step 6. Prepare input
+                // --------------------------------------------------------
+                /* Read input image to a blob and set it to an infer request without resize
+                * and layout conversions. */
+                auto rgbCvMat = rgbFromQueue->getCvFrame();
+                auto &image = rgbCvMat;
+                cv::Mat image2;
+                int stride = 8;
+                // scale to 256 ~
+                double input_scale = 256.0 / image.size[0];
+                std::cerr << "input_scale = " << input_scale << std::endl << std::flush;
+                cv::resize(image, image2, cv::Size(), input_scale, input_scale, cv::INTER_LINEAR);
+
+
+
+                std::cerr << image2.size[0] << std::endl << std::flush; 
+                std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
+
+                cv::Mat image3 = cv::Mat(image2, cv::Rect(0, 0, 
+                                                                image2.size[1] - (image2.size[1] % stride),
+                                                                image2.size[0]));
+
+
+
+                cv::Mat image4(image3.size[0], image3.size[1], CV_8UC3);
+                for (int i=0; i< image3.size[0]; ++i) {
+                    for (int j=0; j< image3.size[1]; ++j) {
+                        auto v = image3.at<cv::Vec3b>(i,j);
+                        auto v2 = cv::Vec3b{ v[0], v[1], v[2] }; // 0,1,2
+                        image4.at<cv::Vec3b>(i,j) = v2;
+                    }
+                }
+
+                Blob::Ptr imgBlobX = wrapMat2Blob(image4);
+
+                infer_request.SetBlob(input_name, imgBlobX);  // infer_request accepts input blob of any size
+
+                // -----------------------------------------------------------------------------------------------------
+
+                // --------------------------- Step 7. Do inference
+                // --------------------------------------------------------
+                /* Running the request synchronously */
+                    infer_request.Infer();
+                // ----------------------------------------------------------------------------------------------------
+                // --------------------------- Step 8. Process output
+                // ------------------------------------------------------
+
+                Blob::Ptr features_output = infer_request.GetBlob("features");
+                Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
+                Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
+
+                const SizeVector features_output_shape = features_output_info->getTensorDesc().getDims();
+                auto l = features_output_info->getTensorDesc().getLayout();
+                auto p = features_output_info->getTensorDesc().getPrecision(); 
+                std::cerr << "lp " << l << " " << p << std::endl << std::flush;
+                const SizeVector heatmaps_output_shape = heatmaps_output_info->getTensorDesc().getDims();
+                const SizeVector pafs_output_shape = pafs_output_info->getTensorDesc().getDims();
+
+                auto dumpVec = [](const SizeVector& vec) -> std::string {
+                    if (vec.empty())
+                        return "[]";
+                    std::stringstream oss;
+                    oss << "[" << vec[0];
+                    for (size_t i = 1; i < vec.size(); i++)
+                        oss << "," << vec[i];
+                    oss << "]";
+                    return oss.str();
+                };
+
+                InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);
+                InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);
+                InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);
+
+                InferenceEngine::LockedMemory<const void> features_outputMapped = features_moutput->rmap();
+                InferenceEngine::LockedMemory<const void> heatmaps_outputMapped = heatmaps_moutput->rmap();
+                InferenceEngine::LockedMemory<const void> pafs_outputMapped = pafs_moutput->rmap();
+
+                const float *features_result = features_outputMapped.as<float *>();
+                const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
+                const float *pafs_result = pafs_outputMapped.as<float *>();
+
+                float fx = 984.344; // -1;
+
+                // needed?
+                matrix3x4 R = matrix3x4{ { {     
+                            0.1656794936,
+                            0.0336560618,
+                            -0.9856051821,
+                            0.0
+                        },
+                        {
+                            -0.09224101321,
+                            0.9955650135,
+                            0.01849052095,
+                            0.0
+                        },
+                        {
+                            0.9818563545,
+                            0.08784972047,
+                            0.1680491765,
+                            0.0
+                } } };
+
+                int featureMapSize[] = { (int)features_output_shape[1], (int)features_output_shape[2], (int)features_output_shape[3] }; // { 57,32,48 }; 
+                cv::Mat featuresMat = cv::Mat(3, featureMapSize, CV_32FC1, const_cast<float*>(features_result));
+                int heatmapMatSize[] =  { (int)heatmaps_output_shape[1], (int)heatmaps_output_shape[2], (int)heatmaps_output_shape[3] }; // { 19,32,48 };
+                cv::Mat heatmapMat = cv::Mat(3, heatmapMatSize, CV_32FC1, const_cast<float*>(heatmaps_result));
+                int paf_mapMatSize[] =  { (int) pafs_output_shape[1], (int) pafs_output_shape[2], (int) pafs_output_shape[3] };  // {38,32,48};
+                cv::Mat paf_mapMat = cv::Mat(3, paf_mapMatSize, CV_32FC1, const_cast<float*>(pafs_result));
+
+                auto input_scale2 = 256.0/720.0 * magic; // * 0.84; //  /1.04065; // -> 0.8*1280/984 || *0.83;
+                posesStruct = parse_poses(previous_poses_2d, common, R, 
+                    featuresMat, heatmapMat, paf_mapMat, input_scale2, stride, fx,
+                    image.size[1] //1080
+                    , true); //true);
+            } catch(...) {
+                std::cerr << "TRY/CATCH CATCH AFTER INFERENCE " << std::endl << std::flush;
+                return;
+            }
+
+            //Grab rgb data and add to dictionary
+            seqNum = rgbFromQueue->getSequenceNum();
+            if (frames_dictionary.find(seqNum) != frames_dictionary.end() && !haveSyncedFrames)
+            {
+                synchedRgbFrame = rgbFromQueue;
+                synchedDepthFrame = frames_dictionary[seqNum].depth;
+                haveSyncedFrames = true;
+                break;
+            }
+            else
+            {
+                frames_dictionary[seqNum].rgb = rgbFromQueue;
+            }
         }
-        else
+
+        auto depthFromQueue = qDepth->tryGet<dai::ImgFrame>();
+        if (depthFromQueue != nullptr)
         {
-            frames_dictionary[seqNum] = rgbFromQueue;
-        }
-        //Grab depth and add to dictionary
-        auto depthFromQueue = qDepth->get<dai::ImgFrame>();
-        seqNum = depthFromQueue->getSequenceNum();
-        if (frames_dictionary[seqNum] != NULL && !haveSyncedFrames)
-        {
-            synchedDepthFrame = depthFromQueue;
-            synchedRgbFrame = frames_dictionary[seqNum];
-            haveSyncedFrames = true;
-            break;
-        }
-        else
-        {
-            frames_dictionary[seqNum] = depthFromQueue;
+            //Grab depth and add to dictionary
+            seqNum = depthFromQueue->getSequenceNum();
+            if (frames_dictionary.find(seqNum) != frames_dictionary.end() && !haveSyncedFrames)
+            {
+                synchedDepthFrame = depthFromQueue;
+                synchedRgbFrame = frames_dictionary[seqNum].rgb;
+                haveSyncedFrames = true;
+                break;
+            }
+            else
+            {
+                frames_dictionary[seqNum].depth = depthFromQueue;
+            }
         }
     }
-    // //Now we remove all sequence numbers that are less than or equal the sequence number
+    //Now we remove all sequence numbers that are less than or equal the sequence number
     for (auto it = frames_dictionary.cbegin(), next_it = it; it != frames_dictionary.cend(); it = next_it)
     {
         ++next_it;
@@ -301,44 +479,36 @@ void OakdXlinkReader::NextFrame() {
             frames_dictionary.erase(it);
         }
     }
-    
-    //This is the dictionary that we use to check if a RGB and Depth frame of the same sequence number have arrived0
-    //Every "next frame" we pull a depth and a color until we get a match of depth and color
-    //pull color
-    //assign to proper key (if doesn't exist make one)
-    //pull depth
-    //assign to proper key (if doesn't exist make one)
-    //check if a key has a value that is length 2
-        // if yes, save those as rgbFrame and depthFrame
-        // if no, start from top
-    auto frameRgbOpenCv = synchedRgbFrame->getCvFrame();    
+
+    auto frameRgbOpenCv = synchedRgbFrame->getCvFrame();
+    cv::resize(frameRgbOpenCv, frameRgbOpenCv, cv::Size(1280, 720), 0, 0, cv::INTER_NEAREST);
     // auto frameDepthOpenCv = synchedDepthFrame->getCvFrame();
     auto frameDepthMat = synchedDepthFrame->getFrame();
-#endif
+    cv::resize(frameDepthMat, frameDepthMat, cv::Size(1280, 720), 0, 0, cv::INTER_NEAREST);
 
-  // TODO FIXME x big/little endian hazard ~
 
-  //Color frame
-  std::shared_ptr<FrameStruct> rgbFrame =
-      std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-    rgbFrame->sensor_id = 0; 
-  rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
-  rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
-  rgbFrame->frame_id = current_frame_counter_;
-  rgbFrame->timestamps.push_back(capture_timestamp);
+    // TODO FIXME x big/little endian hazard ~
 
-#ifndef TEST_WITH_IMAGE
-   // convert the raw buffer to cv::Mat
-   int32_t colorCols = frameRgbOpenCv.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   int32_t colorRows = frameRgbOpenCv.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3// UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    //Color frame
+    std::shared_ptr<FrameStruct> rgbFrame =
+        std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+        rgbFrame->sensor_id = 0; 
+    rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
+    rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
+    rgbFrame->frame_id = current_frame_counter_;
+    rgbFrame->timestamps.push_back(capture_timestamp);
 
-   rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+    // convert the raw buffer to cv::Mat
+    int32_t colorCols = frameRgbOpenCv.cols;                                                        
+    int32_t colorRows = frameRgbOpenCv.rows;                                                        
+    size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
 
-   memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-#endif
+    rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        
+
+    memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       
+    memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       
+    memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);              
+
 
 
   //Depth frame
@@ -350,335 +520,30 @@ void OakdXlinkReader::NextFrame() {
   depthFrame->frame_id = current_frame_counter_;
   depthFrame->timestamps.push_back(capture_timestamp);
 
-#ifndef TEST_WITH_IMAGE
    // convert the raw buffer to cv::Mat
-   int32_t depthCols = frameDepthMat.cols;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   int32_t depthRows = frameDepthMat.rows;                                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   int32_t depthCols = frameDepthMat.cols;                                                        
+   int32_t depthRows = frameDepthMat.rows;                                                        
    size_t depthSize = depthCols*depthRows*sizeof(uint16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
 
-   depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
+   depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        
 
-   memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-   memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              // UNCOMMENT ONCE INFERENCE PARSING IS FIGURED OUT
-#endif
+   memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       
+   memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       
+   memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              
+
   current_frame_.push_back(depthFrame);
 
-  // --------------------------- Step 5. Create an infer request
-  // -------------------------------------------------
-  InferRequest infer_request = executable_network.CreateInferRequest();
-  // -----------------------------------------------------------------------------------------------------
-
-  // --------------------------- Step 6. Prepare input
-  // --------------------------------------------------------
-  /* Read input image to a blob and set it to an infer request without resize
-   * and layout conversions. */
-
-#ifdef TEST_WITH_IMAGE
-
-#ifndef _WIN32 
-    cv::Mat image = cv::imread("../../models/two_bodies_in_middle.jpg"); //This is a hardwired image only to help Renaud with parsing
-#endif
-#ifdef _WIN32
-    cv::Mat image = cv::imread("../../../models/two_bodies_in_middle.jpg"); //This is a hardwired image only to help Renaud with parsing
-#endif
-#else
-    auto &image = frameRgbOpenCv;
-#endif
-
-    // compare to:
-    // python demo.py --model human-pose-estimation-3d-0001.xml --use-openvino -d CPU --images pointing_close_of_view.jpg 
-
-    cv::Mat image2;
-    int stride = 8;
-    // scale to 256 ~
-    double input_scale = 256.0 / image.size[0];
-    std::cerr << "input_scale = " << input_scale << std::endl << std::flush;
-    cv::resize(image, image2, cv::Size(), input_scale, input_scale, cv::INTER_LINEAR);
-
-#ifdef VERY_VERBOSE
-{
-    // https://stackoverflow.com/questions/26681713/convert-mat-to-array-vector-in-opencv
-    std::vector<uchar> array;
-    auto &mat = image2;
-    if (mat.isContinuous()) {
-        // array.assign(mat.datastart, mat.dataend); // <- has problems for sub-matrix like mat = big_mat.row(i)
-        array.assign(mat.data, mat.data + mat.total()*mat.channels());
-    } else {
-        for (int i = 0; i < mat.rows; ++i) {
-            array.insert(array.end(), mat.ptr<uchar>(i), mat.ptr<uchar>(i)+mat.cols*mat.channels());
-        }
-    }
-
-    auto dumpU8 = [](const uchar *vec, size_t n) -> std::string {
-        if (n == 0)
-            return "[]";
-        std::stringstream oss;
-        oss << "[" << int(vec[0]);
-        for (size_t i = 1; i < n; i++)
-            oss << "," << int(vec[i]);
-        oss << "]";
-        return oss.str();
-    };
-
-    std::cerr << "SCALED_IMAGE_DUMP " << dumpU8(&array[0], array.size()) << std::endl << std::flush;
-}
-#endif
-
-    std::cerr << image2.size[0] << std::endl << std::flush; 
-    std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
-
-    cv::Mat image3 = cv::Mat(image2, cv::Rect(0, 0, 
-                                                    image2.size[1] - (image2.size[1] % stride),
-                                                    image2.size[0]));
-
-#ifdef VERY_VERBOSE
-{
-    // https://stackoverflow.com/questions/26681713/convert-mat-to-array-vector-in-opencv
-    std::vector<uchar> array;
-    auto &mat = image3;
-    if (mat.isContinuous()) {
-        std::cerr << "is continuous" << std::endl << std::flush;
-
-        // array.assign(mat.datastart, mat.dataend); // <- has problems for sub-matrix like mat = big_mat.row(i)
-        array.assign(mat.data, mat.data + mat.total()*mat.channels());
-    } else {
-        for (int i = 0; i < mat.rows; ++i) {
-            array.insert(array.end(), mat.ptr<uchar>(i), mat.ptr<uchar>(i)+mat.cols*mat.channels());
-        }
-    }
-
-    auto dumpU8 = [](const uchar *vec, size_t n) -> std::string {
-        if (n == 0)
-            return "[]";
-        std::stringstream oss;
-        oss << "[" << int(vec[0]);
-        for (size_t i = 1; i < n; i++)
-            oss << "," << int(vec[i]);
-        oss << "]";
-        return oss.str();
-    };
-
-    std::cerr << "IMAGE_DUMP " << dumpU8(&array[0], array.size()) << std::endl << std::flush;
-}
-#endif
-
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-
-    cv::Mat image4(image3.size[0], image3.size[1], CV_8UC3);
-    for (int i=0; i< image3.size[0]; ++i) {
-        for (int j=0; j< image3.size[1]; ++j) {
-            auto v = image3.at<cv::Vec3b>(i,j);
-            auto v2 = cv::Vec3b{ v[0], v[1], v[2] }; // 0,1,2
-            image4.at<cv::Vec3b>(i,j) = v2;
-        }
-    }
-
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-
-   Blob::Ptr imgBlobX = wrapMat2Blob(image4);
-
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-
-    infer_request.SetBlob(input_name, imgBlobX);  // infer_request accepts input blob of any size
-
-  // -----------------------------------------------------------------------------------------------------
-
-  // --------------------------- Step 7. Do inference
-  // --------------------------------------------------------
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-  /* Running the request synchronously */
-    infer_request.Infer();
-  // -----------------------------------------------------------------------------------------------------
-std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-  // --------------------------- Step 8. Process output
-  // ------------------------------------------------------
-
-    Blob::Ptr features_output = infer_request.GetBlob("features");
-    Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
-    Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
-
-    const SizeVector features_output_shape = features_output_info->getTensorDesc().getDims();
-    auto l = features_output_info->getTensorDesc().getLayout();
-    auto p = features_output_info->getTensorDesc().getPrecision(); 
-    std::cerr << "lp " << l << " " << p << std::endl << std::flush;
-    const SizeVector heatmaps_output_shape = heatmaps_output_info->getTensorDesc().getDims();
-    const SizeVector pafs_output_shape = pafs_output_info->getTensorDesc().getDims();
-
-    auto dumpVec = [](const SizeVector& vec) -> std::string {
-        if (vec.empty())
-            return "[]";
-        std::stringstream oss;
-        oss << "[" << vec[0];
-        for (size_t i = 1; i < vec.size(); i++)
-            oss << "," << vec[i];
-        oss << "]";
-        return oss.str();
-    };
-    std::cerr << "Resulting output shape dumpVec(features_output_shape) = " << dumpVec(features_output_shape) << std::endl << std::flush;
-    std::cerr << "Resulting output shape dumpVec(heatmaps_output_shape) = " << dumpVec(heatmaps_output_shape) << std::endl << std::flush;
-    std::cerr << "Resulting output shape dumpVec(pafs_output_shape) = " << dumpVec(pafs_output_shape) << std::endl << std::flush;
-
-    InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);
-    InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);
-    InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);
-
-    InferenceEngine::LockedMemory<const void> features_outputMapped = features_moutput->rmap();
-    InferenceEngine::LockedMemory<const void> heatmaps_outputMapped = heatmaps_moutput->rmap();
-    InferenceEngine::LockedMemory<const void> pafs_outputMapped = pafs_moutput->rmap();
-
-    const float *features_result = features_outputMapped.as<float *>();
-    const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
-    const float *pafs_result = pafs_outputMapped.as<float *>();
-
-    std::cerr << "features_result[0] = " << features_result[0] << std::endl << std::flush;
-
-    for (int i=0;i<10;++i) {
-      std::cerr << "features_result[" << i << "] = " << features_result[i] << std::endl << std::flush;
-    }
-
-#ifdef VERY_VERBOSE
-    auto dumpRes = [](const float *vec, size_t n) -> std::string {
-        if (n == 0)
-            return "[]";
-        std::stringstream oss;
-        oss << "[" << vec[0];
-        for (size_t i = 1; i < n; i++)
-            oss << "," << vec[i];
-        oss << "]";
-        return oss.str();
-    };
-
-    // grep FEATURES_RESULT_DUMP log | tail +2 | cut -d " " -f 2 > features.txt 
-    std::cerr << "FEATURES_RESULT_DUMP " << dumpRes(features_result, 57*32*48) << std::endl << std::flush; 
-    std::cerr << "HEATMAPS_RESULT_DUMP " << dumpRes(heatmaps_result, 19*32*48) << std::endl << std::flush; 
-    std::cerr << "PAFS_RESULT_DUMP " << dumpRes(pafs_result, 38*32*48) << std::endl << std::flush; 
-#endif
-    std::cerr << "heatmaps_result[0] = " << heatmaps_result[0] << std::endl << std::flush;
-    std::cerr << "pafs_result[0] = " << pafs_result[0] << std::endl << std::flush;
-
-    float fx = 984.344; // -1;
-
-    // needed?
-    matrix3x4 R = matrix3x4{ { {     
-                0.1656794936,
-                0.0336560618,
-                -0.9856051821,
-                0.0
-            },
-            {
-                -0.09224101321,
-                0.9955650135,
-                0.01849052095,
-                0.0
-            },
-            {
-                0.9818563545,
-                0.08784972047,
-                0.1680491765,
-                0.0
-    } } };
-
-    int featureMapSize[] = { (int)features_output_shape[1], (int)features_output_shape[2], (int)features_output_shape[3] }; // { 57,32,48 }; 
-    cv::Mat featuresMat = cv::Mat(3, featureMapSize, CV_32FC1, const_cast<float*>(features_result));
-    int heatmapMatSize[] =  { (int)heatmaps_output_shape[1], (int)heatmaps_output_shape[2], (int)heatmaps_output_shape[3] }; // { 19,32,48 };
-    cv::Mat heatmapMat = cv::Mat(3, heatmapMatSize, CV_32FC1, const_cast<float*>(heatmaps_result));
-    int paf_mapMatSize[] =  { (int) pafs_output_shape[1], (int) pafs_output_shape[2], (int) pafs_output_shape[3] };  // {38,32,48};
-    cv::Mat paf_mapMat = cv::Mat(3, paf_mapMatSize, CV_32FC1, const_cast<float*>(pafs_result));
-
-    std::cerr << "image size " << image.size[0] << " " << image.size[1] << std::endl << std::flush; 
-
+    
     try {
 
-    auto input_scale2 = 256.0/720.0 * magic; // * 0.84; //  /1.04065; // -> 0.8*1280/984 || *0.83;
-    auto posesStruct = parse_poses(previous_poses_2d, common, R, 
-        featuresMat, heatmapMat, paf_mapMat, input_scale2, stride, fx,
-        image.size[1] //1080
-        , true); //true);
-
-
-#ifdef TEST_WITH_IMAGE
-
-        std::cerr << "poses3d" << std::endl << std::flush;
-        for (auto &l: posesStruct.poses_3d) {
-            std::cerr << "pose3d_line";
-            for (auto &x: l) {
-                std::cerr << ", " << x;
-            }
-            std::cerr << std::endl << std::flush;
-        }
-        std::cerr << "poses2d" << std::endl << std::flush;
-        for (auto &l: posesStruct.poses_2d) {
-            std::cerr << "pose2d_line";
-            for (auto &x: l) {
-                std::cerr << ", " << x;
-            }
-            std::cerr << std::endl << std::flush;
-        }
-
-        // 3D data
-        std::vector<std::vector<float>> d1 = 
-            std::vector<std::vector<float>> { 
-                std::vector<float> { -5.8116764e-01,  1.3135418e-01, -2.6623271e-02},
-                std::vector<float> { -4.1665617e-01,  9.0584852e-02,  1.0973391e-01},
-                std::vector<float> { -6.3156098e-01,  1.0134139e-01, -5.2170849e-01},
-                std::vector<float> { -5.7664627e-01,  2.7422610e-01, -1.6360372e-02},
-                std::vector<float> { -5.7326126e-01,  3.8949987e-01, -2.4231449e-01},
-                std::vector<float> { -4.7172031e-01,  3.3503777e-01, -3.6468127e-01},
-                std::vector<float> { -6.1248940e-01,  2.0294990e-01, -5.3791904e-01},
-                std::vector<float> { -6.3211733e-01,  1.8192437e-01, -8.9180791e-01},
-                std::vector<float> { -7.2299236e-01,  1.6886683e-01, -1.2353224e+00},
-                std::vector<float> { -6.3673156e-01,  7.0862949e-02, -8.2087860e-04},
-                std::vector<float> { -7.6713055e-01, -1.1119901e-01, -7.6769933e-02},
-                std::vector<float> { -7.2015315e-01, -2.5040415e-01, -1.9094884e-02},
-                std::vector<float> { -6.5249604e-01,  3.2747467e-03, -5.1337701e-01},
-                std::vector<float> { -6.6003913e-01, -1.6922930e-02, -8.6318237e-01},
-                std::vector<float> { -7.5892818e-01,  5.9486399e-03, -1.2117190e+00},
-                std::vector<float> { -4.1849327e-01,  1.1638151e-01,  1.1316368e-01},
-                std::vector<float> { -5.0609869e-01,  1.7822178e-01,  1.0136506e-01},
-                std::vector<float> { -4.3404469e-01,  5.1015873e-02,  1.4532641e-01},
-                std::vector<float> { -4.9512008e-01,  6.2296622e-02,  1.3576485e-01}
-            };
-
-        std::vector<float> d2 = std::vector<float> {  7.3100000e+02,  3.9300000e+02,  6.6418380e-01,  6.8600000e+02,
-                    1.9100000e+02, 7.7300525e-01, -1.0000000e+00, -1.0000000e+00,
-                    -1.0000000e+00,  9.1100000e+02,  4.1600000e+02,  5.5604172e-01,
-                    -1.0000000e+00, -1.0000000e+00, -1.0000000e+00, -1.0000000e+00,
-                    -1.0000000e+00, -1.0000000e+00, -1.0000000e+00, -1.0000000e+00,
-                    -1.0000000e+00, -1.0000000e+00, -1.0000000e+00, -1.0000000e+00,
-                    -1.0000000e+00, -1.0000000e+00, -1.0000000e+00,  5.6800000e+02,
-                    3.8800000e+02,  5.8045483e-01,  3.7100000e+02,  4.8300000e+02,
-                    6.5866584e-01,  1.9100000e+02,  3.8800000e+02,  5.9422147e-01,
-                    -1.0000000e+00, -1.0000000e+00, -1.0000000e+00, -1.0000000e+00,
-                    -1.0000000e+00, -1.0000000e+00, -1.0000000e+00, -1.0000000e+00,
-                    -1.0000000e+00,  6.6300000e+02,  1.6300000e+02,  8.0384231e-01,
-                    7.3100000e+02,  1.4600000e+02,  7.8739011e-01,  6.3500000e+02,
-                    1.6800000e+02,  2.3887357e-01,  8.2100000e+02,  1.6800000e+02,
-                    7.9140055e-01,  1.2366208e+01 };
-
-        for (unsigned i=0; i<d1.size(); ++i) {
-            std::cerr << posesStruct.poses_3d[0][i*4] - d1[i][0] 
-                << " " << posesStruct.poses_3d[0][i*4+1] - d1[i][1] 
-                << " " << posesStruct.poses_3d[0][i*4+2] - d1[i][2] 
-                << std::endl << std::flush;
-        }
-
-        std::cerr << "=======" << std::endl << std::flush;
-
-        for (unsigned i =0; i< d2.size() / 3; ++i) {
-            std::cerr << posesStruct.poses_2d[0][i*3] - d2[i*3] 
-                << " " << posesStruct.poses_2d[0][i*3+1] - d2[i*3+1] 
-                << std::endl << std::flush; 
-        }
-#endif
     /////////////////////////////////////////////
     //Grab the amount of COCO bodies detected in this rgb frame
     int32_t bodyCount = (int)posesStruct.poses_3d.size();
     //If 0, no need to send structs
-    // if (bodyCount > 0)
-    // {
-    //     return;
-    // }
+    if (bodyCount < 1)
+    {
+        return;
+    }
 
     //Prepare the bodies frame
     std::shared_ptr<FrameStruct> s =
@@ -1087,8 +952,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
             yPoint = yValueOfDetectedJoints/countOfDetectedJoints;
         }
 
-        //Now we grab a the average depth value of a 12x12 grid of pixels surrounding the xPoint and yPoint
-        cv::Scalar mean, stddev;
+
         //Region square radius
         int regionRadius = 6;
 
@@ -1104,18 +968,41 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 
 
-        std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
-        std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
-        std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
-        std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
-        std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
-        std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
+        // std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
+        // std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
+        // std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
+        // std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
+        // std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
+        // std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
 
-        //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
+        // //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
+        //Now we grab a the average depth value of a 12x12 grid of pixels surrounding the xPoint and yPoint
+        cv::Scalar mean, stddev;
         cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
         cv::Mat croppedDepth = frameDepthMat(myROI);
         cv::meanStdDev(croppedDepth, mean, stddev);
         int pointDepth = int(mean[0]);
+
+        
+
+        // // Now we will try to get the non-0 median
+        // cv::Rect myROI2(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
+        // cv::Mat croppedDepth2 = frameDepthMat(myROI2);
+        // std::vector<int> nonZeroDepthValues;
+        // for(int row = 0; row < croppedDepth2.rows; ++row) {
+        //     uchar* p = croppedDepth2.ptr(row);
+        //     for(int col = 0; col < croppedDepth2.cols; ++col) {
+        //         *p += (col * 2);
+        //         // check if the pixel value is 0
+        //         uint16_t  value = *p; 
+        //         if (value != 0)
+        //         {
+        //             nonZeroDepthValues.push_back(value);
+        //         }
+                
+        //     }
+        // }
+        // int pointDepth2 = findMedian(nonZeroDepthValues, nonZeroDepthValues.size());
 
         //Now we use the HFOV and VFOV to find the x and y coordinates in millimeters
         // https://github.com/luxonis/depthai-experiments/blob/377c50c13931a082825d457f69893c1bf3f24aa2/gen2-calc-spatials-on-host/calc.py#L10
@@ -1135,6 +1022,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
         std::cerr << "NECK DEPTH: " << int(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x))  << std::endl << std::flush;
         std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; //UNCOMMENT
+        // std::cerr << "AVERAGE NECK DEPTH2: " << pointDepth2  << std::endl << std::flush; //UNCOMMENT
         //Finally we copy the COCO body struct memory to the frame
         bodyStruct.hton();
         
@@ -1150,6 +1038,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     current_frame_.push_back(rgbFrame);
 
     } catch(...) {
+        std::cerr << "TRY/CATCH CATCH AFTER PARSE POSES " << std::endl << std::flush;
         return;
     }
 
@@ -1165,7 +1054,7 @@ std::vector<std::shared_ptr<FrameStruct>> OakdXlinkReader::GetCurrentFrame() {
 }
 
 unsigned int OakdXlinkReader::GetFps() {
-  return fps;
+  return 30;
 }
 
 std::vector<FrameType> OakdXlinkReader::GetType() {
@@ -1182,3 +1071,4 @@ void OakdXlinkReader::GoToFrame(unsigned int frame_id) {}
 unsigned int OakdXlinkReader::GetCurrentFrameId() {return current_frame_counter_;}
 
 }
+
