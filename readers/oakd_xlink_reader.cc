@@ -64,7 +64,8 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     auto depth_dai_fps = config["depth_fps"].as<unsigned int>();
     auto depth_dai_sf = config["depth_spatial_filter"].as<bool>();
     auto depth_dai_sf_hfr = config["depth_spatial_hole_filling_radius"].as<unsigned int>();
-    auto depth_dai_sf_num_it = config["depth_sptial_filter_num_it"].as<unsigned int>();
+    auto depth_dai_sf_num_it = config["depth_spatial_filter_num_it"].as<unsigned int>();
+    auto depth_dai_df = config["depth_decimation_factor"].as<unsigned int>();
 
     // Now set up frame template that is consistent across data types
     current_frame_counter_ = 0;
@@ -118,12 +119,12 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     oakdConfig.postProcessing.spatialFilter.enable = depth_dai_sf;
     oakdConfig.postProcessing.spatialFilter.holeFillingRadius = depth_dai_sf_hfr;
     oakdConfig.postProcessing.spatialFilter.numIterations = depth_dai_sf_num_it;
+    oakdConfig.postProcessing.decimationFilter.decimationFactor = depth_dai_df;
     // oakdConfig.postProcessing.speckleFilter.enable = false;
     // oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
     // oakdConfig.postProcessing.temporalFilter.enable = true;
     // oakdConfig.postProcessing.thresholdFilter.minRange = 400;
     // oakdConfig.postProcessing.thresholdFilter.maxRange = 15000;
-    // oakdConfig.postProcessing.decimationFilter.decimationFactor = 1;
     stereo->initialConfig.set(oakdConfig);
 
 
@@ -278,7 +279,7 @@ OakdXlinkReader::~OakdXlinkReader() {
 
 const float magic = 0.84381;
 
-int findMedian(vector<int> a,
+int findMedian(vector<u_int16_t> a,
                   int n)
 {
   
@@ -315,7 +316,7 @@ int findMedian(vector<int> a,
   
         // Value at index (N/2)th
         // is the median
-        return (int)a[n / 2];
+        return (u_int16_t)a[n / 2];
     }
 }
 
@@ -827,8 +828,24 @@ void OakdXlinkReader::NextFrame() {
 
 
 
+        // Now we will try to get the non-0 median
+        // Keep changing until we get a non-0 point depth 2 value
+            // go neck bigger 3 times
+            // then between neck and pelvis
+            // then go bigger 3 times
+            // then go full torso, shoulder shoulder hip hip, entire thing
+
+        
+        // Try one, if doesn't work, do next
+
+        // provide point, radius, return
 
 
+        // If neck > 0 grab neck, find depth with radius of 6, if more than 10 pixels are > 0, good
+        // If that didn't work grab point between shoulders
+        // If that didn't work grab point between shoulders and between hips, and the point between there
+        // If that didn't work grab point between shoulders and between hips, a bigger radius
+        // keep making bigger radius until it is > 10
 
 
         //Now we find the spatial coordinates of using StereoDepth and intrinsics
@@ -998,8 +1015,6 @@ void OakdXlinkReader::NextFrame() {
         int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
         yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
 
-
-
         // std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
         // std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
         // std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
@@ -1013,28 +1028,37 @@ void OakdXlinkReader::NextFrame() {
         cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
         cv::Mat croppedDepth = frameDepthMat(myROI);
         cv::meanStdDev(croppedDepth, mean, stddev);
-        int pointDepth = int(mean[0]);
+        int pointDepth = int(mean[0]);        
 
-        
-
-        // // Now we will try to get the non-0 median
-        // cv::Rect myROI2(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
-        // cv::Mat croppedDepth2 = frameDepthMat(myROI2);
-        // std::vector<int> nonZeroDepthValues;
-        // for(int row = 0; row < croppedDepth2.rows; ++row) {
-        //     uchar* p = croppedDepth2.ptr(row);
-        //     for(int col = 0; col < croppedDepth2.cols; ++col) {
-        //         *p += (col * 2);
-        //         // check if the pixel value is 0
-        //         uint16_t  value = *p; 
-        //         if (value != 0)
-        //         {
-        //             nonZeroDepthValues.push_back(value);
-        //         }
-                
-        //     }
-        // }
-        // int pointDepth2 = findMedian(nonZeroDepthValues, nonZeroDepthValues.size());
+        // Now we will try to get the non-0 median
+        // Keep changing until we get a non-0 point depth 2 value
+            // go neck bigger 3 times
+            // then between neck and pelvis
+            // then go bigger 3 times
+            // then go full torso, shoulder shoulder hip hip, entire thing
+        cv::Rect myROI2(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
+        cv::Mat croppedDepth2 = frameDepthMat(myROI2);
+        std::vector<u_int16_t> nonZeroDepthValues;
+        // ushort table[];
+        int limit = croppedDepth2.rows * croppedDepth2.cols;
+        ushort* ptr = reinterpret_cast<ushort*>(croppedDepth2.data);
+        if (!croppedDepth2.isContinuous())
+        {
+            croppedDepth2 = croppedDepth2.clone();
+        }
+        // std::cerr << "ROI 2 - Limit: " << limit  << std::endl << std::flush;
+        for (int i = 0; i < limit; i++, ptr++)
+        {
+            // *ptr = table[*ptr];
+            // std::cerr << "ROI 2 - i: " << i  << "   |  *ptr value: " << *ptr  << std::endl << std::flush;
+            if(*ptr != 0)
+            {
+                nonZeroDepthValues.push_back((u_int16_t)(*ptr));
+            }
+        }
+        u_int16_t pointDepth2 = 0;
+        if (nonZeroDepthValues.size() > 0)
+            pointDepth2 = findMedian(nonZeroDepthValues, nonZeroDepthValues.size());
 
         //Now we use the HFOV and VFOV to find the x and y coordinates in millimeters
         // https://github.com/luxonis/depthai-experiments/blob/377c50c13931a082825d457f69893c1bf3f24aa2/gen2-calc-spatials-on-host/calc.py#L10
@@ -1048,26 +1072,26 @@ void OakdXlinkReader::NextFrame() {
         float angle_y = atan(tan(cameraHFOVInRadians / 2.0f) * float(yPointInDepthCenterCoordinates) / float(midDepthYCoordinate));
 
         //We will save this depth value as the pelvis depth
-        bodyStruct.pelvis_2d_depth = pointDepth;
-        bodyStruct.pelvis_2d_x = int(float(pointDepth) * tan(angle_x));
-        bodyStruct.pelvis_2d_y = int(-1.0f * float(pointDepth) * tan(angle_y));
+        bodyStruct.pelvis_2d_depth = pointDepth2;
+        bodyStruct.pelvis_2d_x = int(float(pointDepth2) * tan(angle_x));
+        bodyStruct.pelvis_2d_y = int(-1.0f * float(pointDepth2) * tan(angle_y));
 
         std::cerr << "NECK DEPTH: " << int(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x))  << std::endl << std::flush;
         std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; //UNCOMMENT
-        // std::cerr << "AVERAGE NECK DEPTH2: " << pointDepth2  << std::endl << std::flush; //UNCOMMENT
+        std::cerr << "MEDIAN NON-0 NECK DEPTH2: " << pointDepth2  << " | PERCENT OF NON 0 PIXELS: " << (int)(((float)nonZeroDepthValues.size()/(float)limit)*100.0f) << " | # of ROI pixels: " << limit << "Number of non 0 pixels: " << nonZeroDepthValues.size() << std::endl << std::flush; //UNCOMMENT
         //Finally we copy the COCO body struct memory to the frame
         bodyStruct.hton();
         
         memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
 
-        // cv::Mat depthFrameColor;
-        // // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
-        // cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
-        // cv::equalizeHist(depthFrameColor, depthFrameColor);
-        // cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
-        // rectangle(depthFrameColor, cv::Point(bodyStruct.neck_2d_x-6, bodyStruct.neck_2d_y-6), cv::Point(bodyStruct.neck_2d_x+6, bodyStruct.neck_2d_y+6), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
-        // cv::imshow("depth", depthFrameColor);
-        // cv::waitKey(1);
+        cv::Mat depthFrameColor;
+        // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
+        cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
+        cv::equalizeHist(depthFrameColor, depthFrameColor);
+        cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
+        rectangle(depthFrameColor, cv::Point(xPointMin, yPointMin), cv::Point(xPointMax, yPointMax), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
+        cv::imshow("depth", depthFrameColor);
+        cv::waitKey(1);
     }
 
     //Now that we have copied all memory to the frame we can push it back
