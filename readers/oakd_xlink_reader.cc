@@ -1078,19 +1078,36 @@ void OakdXlinkReader::NextFrame() {
 
             std::vector<uint16_t> nonZeroVector;
             int roiRadius = 6;
-
+            bool noGoodReadingsAnywhere = false;
             while (nonZeroVector.size() < 10)
             {
                 nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint, yPoint, roiRadius);
                 roiRadius += 6;
+                // There can be the case where there are 0 depth values anywhere reasonable in which case we must return 0
+                if (roiRadius > 60)
+                {
+                    noGoodReadingsAnywhere = true;
+                    break;
+                }
             }
-            medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
-            usedXPoint = xPoint;
-            usedYPoint = yPoint;
-            usedRadius = roiRadius;
-            foundGoodDepth = true;
-            std::cerr << "OPTION 4 TRIGGERED (all joints) - " << roiRadius <<  " roi radius" << std::endl << std::flush;
-            
+            if (!noGoodReadingsAnywhere)
+            {
+                medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
+                usedXPoint = xPoint;
+                usedYPoint = yPoint;
+                usedRadius = roiRadius;
+                foundGoodDepth = true;
+                std::cerr << "OPTION 4 TRIGGERED (all joints) - " << roiRadius <<  " roi radius" << std::endl << std::flush;
+            }
+            else
+            {
+                medianPointDepth = 0;
+                usedXPoint = frameDepthMat.cols/2;
+                usedYPoint = frameDepthMat.rows/2;
+                usedRadius = roiRadius;
+                foundGoodDepth = true;
+                std::cerr << "OPTION 5 TRIGGERED - NO GOOD DEPTH, RETURNING 0" << std::endl << std::flush;
+            }
         }
 
         // //Now we find the spatial coordinates of using StereoDepth and intrinsics
