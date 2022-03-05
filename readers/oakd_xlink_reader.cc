@@ -392,9 +392,9 @@ void OakdXlinkReader::NextFrame() {
             }
 
             // if (kk=0) 
-            {
-                throw std::logic_error("BOO");
-            }
+            //{
+            //    throw std::logic_error("BOO");
+            //}
 
             current_frame_.clear();
 
