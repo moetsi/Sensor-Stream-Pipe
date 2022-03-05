@@ -18,7 +18,7 @@ using namespace InferenceEngine;
 //#define TEST_WITH_IMAGE
 //#define VERY_VERBOSE
 #define MAX_RETRIAL 10
-#define WAIT_AFTER_RETRIAL 10000
+#define WAIT_AFTER_RETRIAL 5000
 
 namespace moetsi::ssp {
 using namespace human_pose_estimation;
