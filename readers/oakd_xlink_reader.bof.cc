@@ -1,4 +1,3 @@
-
 //
 // Created by adammpolak on 26-09-2021.
 //
@@ -18,13 +17,12 @@ using namespace InferenceEngine;
 //#define TEST_WITH_IMAGE
 //#define VERY_VERBOSE
 #define MAX_RETRIAL 10
-#define WAIT_AFTER_RETRIAL 10000
+#define WAIT_AFTER_RETRIAL 5000
 
 namespace moetsi::ssp {
 using namespace human_pose_estimation;
 
 OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
-
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Starting to open");
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -34,10 +32,8 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     stream_depth = config["stream_depth"].as<bool>();
     stream_bodies = config["stream_bodies"].as<bool>();
     fps = config["streaming_rate"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    rgb_res = config["rgb_resolution"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    //dai::ColorCameraProperties::SensorResolution rgb_dai_res;
+    auto rgb_res = config["rgb_resolution"].as<unsigned int>();
+    dai::ColorCameraProperties::SensorResolution rgb_dai_res;
     if (rgb_res == 1080)
         rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
     else if (rgb_res == 4000)
@@ -48,13 +44,12 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
         rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_13_MP;
     else
         rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     rgb_dai_preview_y = config["rgb_preview_size_y"].as<unsigned int>();
     rgb_dai_preview_x = config["rgb_preview_size_x"].as<unsigned int>();
     rgb_dai_fps = config["rgb_fps"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
     depth_res = config["depth_resolution"].as<unsigned int>();
-    //dai::MonoCameraProperties::SensorResolution depth_dai_res;
+    dai::MonoCameraProperties::SensorResolution depth_dai_res;
     if (depth_res == 720)
         depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
     else if (depth_res == 800)
@@ -65,17 +60,15 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
         depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_480_P;
     else
         depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;        
-    depth_dai_preview_y = config["depth_preview_size_y"].as<unsigned int>();
-    depth_dai_preview_x = config["depth_preview_size_x"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    depth_dai_fps = config["depth_fps"].as<unsigned int>();
-    depth_dai_sf = config["depth_spatial_filter"].as<bool>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    depth_dai_sf_hfr = config["depth_spatial_hole_filling_radius"].as<unsigned int>();
-    depth_dai_sf_num_it = config["depth_spatial_filter_num_it"].as<unsigned int>();
-    depth_dai_df = config["depth_decimation_factor"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    auto depth_dai_preview_y = config["depth_preview_size_y"].as<unsigned int>();
+    auto depth_dai_preview_x = config["depth_preview_size_x"].as<unsigned int>();
+    auto depth_dai_fps = config["depth_fps"].as<unsigned int>();
+    auto depth_dai_sf = config["depth_spatial_filter"].as<bool>();
+    auto depth_dai_sf_hfr = config["depth_spatial_hole_filling_radius"].as<unsigned int>();
+    auto depth_dai_sf_num_it = config["depth_spatial_filter_num_it"].as<unsigned int>();
+    auto depth_dai_df = config["depth_decimation_factor"].as<unsigned int>();
+
+
     // Now set up frame template that is consistent across data types
     current_frame_counter_ = 0;
     frame_template_.stream_id = RandomString(16);
@@ -86,35 +79,21 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     frame_template_.message_type = SSPMessageType::MessageTypeDefault; // 0;
 
     ip_name = config["ip"].as<std::string>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-
-#ifndef _WIN32    
-    std::string rel = "../../"; 
-#endif
-#ifdef _WIN32    
-    std::string rel = "../../../";
-#endif
-
-    std::map<std::string,std::string> env;
-    env["REL"] = rel;
     model_path = config["model"].as<std::string>();
-    model_path = StringInterpolation(env, model_path);
-
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     try {
         failed = true;
         SetOrResetInternals();
         failed = false;
-    } catch(std::exception & e) {
+    } catch(std::exception &e) {
         std::cerr << e.what() << std::endl << std::flush;
     }
 }
 
-void OakdXlinkReader::SetOrResetInternals() {
-    ResetStateAndMisc();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+void OakdXlinkReader::SetOrResetInternals() { 
 
-    // Define source and output
     pipeline = std::make_shared<dai::Pipeline>();
+    // Define source and output
     camRgb = pipeline->create<dai::node::ColorCamera>();
     left = pipeline->create<dai::node::MonoCamera>();
     right = pipeline->create<dai::node::MonoCamera>();
@@ -151,18 +130,15 @@ void OakdXlinkReader::SetOrResetInternals() {
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
     stereo->setOutputSize(depth_dai_preview_x, depth_dai_preview_y);
     stereo->setFocalLengthFromCalibration(true);
-    auto oakdConfig = stereo->initialConfig.get();
-    oakdConfig.postProcessing.spatialFilter.enable = depth_dai_sf;
-    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = depth_dai_sf_hfr;
-    oakdConfig.postProcessing.spatialFilter.numIterations = depth_dai_sf_num_it;
-    oakdConfig.postProcessing.decimationFilter.decimationFactor = depth_dai_df;
-    // oakdConfig.postProcessing.speckleFilter.enable = false;
-    // oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
-    // oakdConfig.postProcessing.temporalFilter.enable = true;
-    // oakdConfig.postProcessing.thresholdFilter.minRange = 400;
-    // oakdConfig.postProcessing.thresholdFilter.maxRange = 15000;
-    stereo->initialConfig.set(oakdConfig);
 
+    auto oakdConfig = std::make_shared<dai::RawStereoDepthConfig>(stereo->initialConfig.get());
+    oakdConfig->postProcessing.spatialFilter.enable = depth_dai_sf;
+    oakdConfig->postProcessing.spatialFilter.holeFillingRadius = depth_dai_sf_hfr;
+    oakdConfig->postProcessing.spatialFilter.numIterations = depth_dai_sf_num_it;
+    oakdConfig->postProcessing.decimationFilter.decimationFactor = depth_dai_df;
+
+    // oakdConfig.postProcessing.decimationFilter.decimationFactor = 1;
+    stereo->initialConfig.set(*oakdConfig);
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Linking
@@ -170,46 +146,44 @@ void OakdXlinkReader::SetOrResetInternals() {
     left->out.link(stereo->left);
     right->out.link(stereo->right);
     stereo->depth.link(depthOut->input);
-
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Changing the IP address to the correct depthai format (const char*)
     char chText[48];
-    // std::string ip_name = config["ip"].as<std::string>();
     ip_name = StringInterpolation(ip_name);
     ip_name.copy(chText, ip_name.size(), 0);
     chText[ip_name.size()] = '\0';
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //Which sensor
-    device_info = std::make_shared<dai::DeviceInfo>();
+    device_info = std::make_shared<dai::DeviceInfo>(dai::DeviceInfo());
     strcpy(device_info->desc.name, chText);
-    std::cerr << "device_info->desc.name = " << device_info->desc.name << std::endl << std::flush;
     device_info->state = X_LINK_BOOTLOADER; 
     device_info->desc.protocol = X_LINK_TCP_IP;
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
 
 #ifndef TEST_WITH_IMAGE  
     device = std::make_shared<dai::Device>(*pipeline, *device_info, true); // usb 2 mode   
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     deviceCalib = std::make_shared<dai::CalibrationHandler>(device->readCalibration());
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;    
     cameraIntrinsics = deviceCalib->getCameraIntrinsics(dai::CameraBoardSocket::RGB, 1280, 720);
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;    
     horizontalFocalLengthPixels = cameraIntrinsics[0][0];
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;    
     verticalFocalLengthPixels =  cameraIntrinsics[1][1];
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;    
     cameraHFOVInRadians = ((deviceCalib->getFov(dai::CameraBoardSocket::RGB) * pi) / 180.0) * (3840.0/4056.0); // Must scale for cropping: https://discordapp.com/channels/790680891252932659/924798503270625290/936746213691228260
 #endif
 
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Connect to device and start pipeline
-    std:cerr << "Connected cameras: ";
-#ifndef TEST_WITH_IMAGE
+    std::cerr << "Connected cameras: ";
+    #ifndef TEST_WITH_IMAGE
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     
     for(const auto& cam : device->getConnectedCameras()) {
           std::cerr << static_cast<int>(cam) << " ";
           std::cerr << cam << " ";
     }
-    std::cerr << endl;
+    std::cerr << std::endl << std::flush;
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug(std::string(__FILE__) + ":" + std::to_string(__LINE__));
     // Print USB speed
@@ -223,9 +197,9 @@ void OakdXlinkReader::SetOrResetInternals() {
     qRgb = device->getOutputQueue("rgb", 4, false);                                      
     qDepth = device->getOutputQueue("depth", 4, false);    
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 #endif
     //Now setting up Body model
     // input_model = {"../models/human-pose-estimation-3d.xml"};
@@ -242,7 +216,18 @@ void OakdXlinkReader::SetOrResetInternals() {
     // Step 2. Read a model in OpenVINO Intermediate Representation (.xml and
     // .bin files) or ONNX (.onnx file) format
 
-    state->network = state->ie.ReadNetwork(model_path);
+
+#ifndef _WIN32    
+    std::string rel = "../../"; 
+#endif
+#ifdef _WIN32    
+    std::string rel = "../../../";
+#endif
+
+    std::map<std::string,std::string> env;
+    env["REL"] = rel;
+    model_path = StringInterpolation(env, model_path);
+    network = std::make_shared<CNNNetwork>(ie->ReadNetwork(model_path));
     //#ifndef _WIN32    
     //    network = ie.ReadNetwork("../../models/human-pose-estimation-3d-0001.xml");
     //#endif
@@ -251,7 +236,7 @@ void OakdXlinkReader::SetOrResetInternals() {
     //#endif
     // if (network.getOutputsInfo().size() != 1)
     //     throw std::logic_error("Sample supports topologies with 1 output only");
-    if (state->network.getInputsInfo().size() != 1)
+    if (network->getInputsInfo().size() != 1)
         throw std::logic_error("Sample supports topologies with 1 input only");
     // -----------------------------------------------------------------------------------------------------
 
@@ -259,8 +244,8 @@ void OakdXlinkReader::SetOrResetInternals() {
     // ---------------------------------------------
     // --------------------------- Prepare input blobs
     // -----------------------------------------------------
-    state->input_info = state->network.getInputsInfo().begin()->second;
-    state->input_name = state->network.getInputsInfo().begin()->first;
+    input_info = std::make_shared<InputInfo::Ptr>(network->getInputsInfo().begin()->second);
+    input_name = network->getInputsInfo().begin()->first;
 
     /* Mark input as resizable by setting of a resize algorithm.
       * In this case we will be able to set an input blob of any shape to an
@@ -268,33 +253,33 @@ void OakdXlinkReader::SetOrResetInternals() {
       * during inference */
     
 
-    state->input_info->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
+    (*input_info)->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
     
-    state->input_info->setLayout(Layout::NHWC);
-    state->input_info->setPrecision(Precision::U8);
+    (*input_info)->setLayout(Layout::NHWC);
+    (*input_info)->setPrecision(Precision::U8);
     // --------------------------- Prepare output blobs
     // ----------------------------------------------------
-    if (state->network.getOutputsInfo().empty()) {
+    if (network->getOutputsInfo().empty()) {
         std::cerr << "Network outputs info is empty" << std::endl;
         return;
     }
-    state->features_output_info = state->network.getOutputsInfo()["features"];
-    state->heatmaps_output_info = state->network.getOutputsInfo()["heatmaps"];
-    state->pafs_output_info = state->network.getOutputsInfo()["pafs"];
+    features_output_info = std::make_shared<DataPtr>(network->getOutputsInfo()["features"]);
+    heatmaps_output_info = std::make_shared<DataPtr>(network->getOutputsInfo()["heatmaps"]);
+    pafs_output_info = std::make_shared<DataPtr>(network->getOutputsInfo()["pafs"]);
 
-    state->features_output_info->setPrecision(Precision::FP32);
-    state->heatmaps_output_info->setPrecision(Precision::FP32);
-    state->pafs_output_info->setPrecision(Precision::FP32);
+    (*features_output_info)->setPrecision(Precision::FP32);
+    (*heatmaps_output_info)->setPrecision(Precision::FP32);
+    (*pafs_output_info)->setPrecision(Precision::FP32);
 
     // // TODO needed? No because changed the actual input shape of the model directly
     // ICNNNetwork::InputShapes inputShape {{ "data", std::vector<size_t>{1,3,256,384} }};
     // network.reshape(inputShape); 
-
     // -----------------------------------------------------------------------------------------------------
 
     // --------------------------- Step 4. Loading a model to the device
     // ------------------------------------------
-    state->executable_network = state->ie.LoadNetwork(state->network, "CPU");
+    ie = std::make_shared<Core>();
+    executable_network = std::make_shared<ExecutableNetwork>(ie->LoadNetwork(*network, "CPU"));
     // -----------------------------------------------------------------------------------------------------
 }
 
@@ -397,11 +382,10 @@ void OakdXlinkReader::NextFrame() {
             }
 
             current_frame_.clear();
-
             //Increment counter and grab time
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
-   
+
             //Here we try until we get a synchronized color and depth frame
             bool haveSyncedFrames = false;
             std::shared_ptr<dai::ImgFrame> synchedRgbFrame;
@@ -421,7 +405,7 @@ void OakdXlinkReader::NextFrame() {
                     {
                         // --------------------------- Step 5. Create an infer request
                         // -------------------------------------------------
-                        InferRequest infer_request = state->executable_network.CreateInferRequest();
+                        InferRequest infer_request = executable_network->CreateInferRequest();
                         // -----------------------------------------------------------------------------------------------------
 
                         // --------------------------- Step 6. Prepare input
@@ -437,16 +421,12 @@ void OakdXlinkReader::NextFrame() {
                         std::cerr << "input_scale = " << input_scale << std::endl << std::flush;
                         cv::resize(image, image2, cv::Size(), input_scale, input_scale, cv::INTER_LINEAR);
 
-
-
                         std::cerr << image2.size[0] << std::endl << std::flush; 
                         std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
 
                         cv::Mat image3 = cv::Mat(image2, cv::Rect(0, 0, 
                                                                         image2.size[1] - (image2.size[1] % stride),
                                                                         image2.size[0]));
-
-
 
                         cv::Mat image4(image3.size[0], image3.size[1], CV_8UC3);
                         for (int i=0; i< image3.size[0]; ++i) {
@@ -459,14 +439,14 @@ void OakdXlinkReader::NextFrame() {
 
                         Blob::Ptr imgBlobX = wrapMat2Blob(image4);
 
-                        infer_request.SetBlob(state->input_name, imgBlobX);  // infer_request accepts input blob of any size
+                        infer_request.SetBlob(input_name, imgBlobX);  // infer_request accepts input blob of any size
 
                         // -----------------------------------------------------------------------------------------------------
 
                         // --------------------------- Step 7. Do inference
                         // --------------------------------------------------------
                         /* Running the request synchronously */
-                            infer_request.Infer();
+                        infer_request.Infer();
                         // ----------------------------------------------------------------------------------------------------
                         // --------------------------- Step 8. Process output
                         // ------------------------------------------------------
@@ -475,12 +455,12 @@ void OakdXlinkReader::NextFrame() {
                         Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
                         Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
 
-                        const SizeVector features_output_shape = state->features_output_info->getTensorDesc().getDims();
-                        auto l = state->features_output_info->getTensorDesc().getLayout();
-                        auto p = state->features_output_info->getTensorDesc().getPrecision(); 
+                        const SizeVector features_output_shape = (*features_output_info)->getTensorDesc().getDims();
+                        auto l = (*features_output_info)->getTensorDesc().getLayout();
+                        auto p = (*features_output_info)->getTensorDesc().getPrecision(); 
                         std::cerr << "lp " << l << " " << p << std::endl << std::flush;
-                        const SizeVector heatmaps_output_shape = state->heatmaps_output_info->getTensorDesc().getDims();
-                        const SizeVector pafs_output_shape = state->pafs_output_info->getTensorDesc().getDims();
+                        const SizeVector heatmaps_output_shape = (*heatmaps_output_info)->getTensorDesc().getDims();
+                        const SizeVector pafs_output_shape = (*pafs_output_info)->getTensorDesc().getDims();
 
                         auto dumpVec = [](const SizeVector& vec) -> std::string {
                             if (vec.empty())
@@ -617,7 +597,7 @@ void OakdXlinkReader::NextFrame() {
 
             //Depth frame
             std::shared_ptr<FrameStruct> depthFrame =
-                std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+            std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
             depthFrame->sensor_id = 1;
             depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
             depthFrame->frame_data_type = FrameDataType::FrameDataTypeDepthAIStereoDepth; // 11; It is not when not subpixel
@@ -637,7 +617,7 @@ void OakdXlinkReader::NextFrame() {
 
             if (stream_depth)
                 current_frame_.push_back(depthFrame);
-              
+            
             try {
 
                 /////////////////////////////////////////////
@@ -660,8 +640,7 @@ void OakdXlinkReader::NextFrame() {
 
                 s->frame = std::vector<uchar>();
                 
-
-                std::cerr << "!!BODY COUNT: " << bodyCount << std::endl << std::flush; 
+                std::cerr << "bodyCount: " << bodyCount << std::endl << std::flush; 
 
                 //Resize the frame to hold all the detected COCO bodies detected in this frame
                 s->frame.resize(sizeof(coco_human_t)*bodyCount + sizeof(int32_t));
@@ -804,21 +783,19 @@ void OakdXlinkReader::NextFrame() {
                     //};
 
                     auto to2D = [](float x) -> int16_t {
-                        // std::cerr << "to2D: value = " << x << std::endl << std::flush;
+                        std::cerr << "to2D: value = " << x << std::endl << std::flush;
                         return std::min(std::max(int64_t(0L), int64_t(x )), int64_t(1280L - 1L));
                     };
 
                     auto to2Dy = [](float x) -> int16_t {
-                        // std::cerr << "to2D/y: value = " << x << std::endl << std::flush;
+                        std::cerr << "to2D/y: value = " << x << std::endl << std::flush;
                         return std::min(std::max(int64_t(0L), int64_t(x )), int64_t(720L-1L)); //  *0.84381); /// 0.84381);
                     };
 
                     auto to2Dd = [](float x) -> int16_t {
-                        // std::cerr << "to2D/d: value = " << x << std::endl << std::flush;
+                        std::cerr << "to2D/d: value = " << x << std::endl << std::flush;
                         return int64_t(x); //  *0.84381); /// 0.84381);
                     };
-
-
 
                     bodyStruct.neck_2d_x = to2D(posesStruct.poses_2d[i][0 * 3 + 0]);
                     bodyStruct.neck_2d_y = to2Dy(posesStruct.poses_2d[i][0 * 3 + 1]);
@@ -897,95 +874,35 @@ void OakdXlinkReader::NextFrame() {
                     bodyStruct.ear_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ear_right_2d_y,bodyStruct.ear_right_2d_x));
                     bodyStruct.ear_right_2d_conf = posesStruct.poses_2d[i][18 * 3 + 2];
 
-                    //Now we find the depth value to use to mark where the detected human body is located, depends on confidence of 2D joints and the amount of stereo depth regions
-                    u_int16_t medianPointDepth = 0;     //This will store the end depth value
-                    bool foundGoodDepth = false;        //This will be used to stop the conditionals when good depth is found
-                    int usedXPoint;                     //This will save what x point was used (for visualization purposes)
-                    int usedYPoint;                     //This will save what y point was used (for visualization purposes)
-                    int usedRadius;                     //This will save what radius was used (for visualization purposes)
-
-                    // If there is good depth around neck, use that
-                    if(bodyStruct.neck_2d_conf > 0)
+                    //Now we find the spatial coordinates of using StereoDepth and intrinsics
+                    //We first find the x,y coordinate in the image of the body that is most confident
+                    int xPoint;
+                    int yPoint;
+                    if(bodyStruct.neck_2d_conf > .5)
                     {
-                        auto nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, bodyStruct.neck_2d_x, bodyStruct.neck_2d_y, 6);
-                        if (nonZeroVector.size() > 9)
-                        {
-                            medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
-                            usedXPoint = bodyStruct.neck_2d_x;
-                            usedYPoint = bodyStruct.neck_2d_y;
-                            usedRadius = 6;
-                            foundGoodDepth = true;
-                        }
-                        std::cerr << "OPTION 1 TRIGGERED (neck)" << std::endl << std::flush;
+                        xPoint = bodyStruct.neck_2d_x;
+                        yPoint = bodyStruct.neck_2d_y;
                     }
-                    // If there is good depth in between shoulders, use that
-                    if (bodyStruct.shoulder_left_2d_conf > 0 && bodyStruct.shoulder_right_2d_conf > 0 && !foundGoodDepth)
+                    //If neck not confident but shoulders are confident, choose half way point of shoulders
+                    else if (bodyStruct.shoulder_left_2d_conf > .5 && bodyStruct.shoulder_right_2d_conf > .5)
                     {
-                        int xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
-                        int yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
-
-                        auto nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint, yPoint, 6);
-                        if (nonZeroVector.size() > 9)
-                        {
-                            medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
-                            usedXPoint = xPoint;
-                            usedYPoint = yPoint;
-                            usedRadius = 6;
-                            foundGoodDepth = true;
-                        }
-                        std::cerr << "OPTION 2 TRIGGERED (between shoulders)" << std::endl << std::flush;
+                        xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
+                        yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
                     }
-                    //If there is good depth in the center of shoulders and hips, use that, increase the ROI size 2 times if needed
-                    if (bodyStruct.hip_left_2d_conf > 0 && bodyStruct.hip_right_2d_conf > 0 && bodyStruct.shoulder_left_2d_conf > 0 && bodyStruct.shoulder_right_2d_conf && !foundGoodDepth)
+                    //If that isn't true do midpoint between hips
+                    else if (bodyStruct.hip_left_2d_conf > .5 && bodyStruct.hip_right_2d_conf > .5)
                     {
-                        int xPoint1 = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
-                        int yPoint1 = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
-                        int xPoint2 = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
-                        int yPoint2 = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
-                        int xPoint3 = (xPoint1 + xPoint2)/2;
-                        int yPoint3 = (yPoint1 + yPoint2)/2;
-                        bool foundDepth = false;
-
-                        auto nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint3, yPoint3, 6);
-                        if (nonZeroVector.size() > 9)
-                        {
-                            medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
-                            usedXPoint = xPoint3;
-                            usedYPoint = yPoint3;
-                            usedRadius = 6;
-                            foundDepth = true;
-                            foundGoodDepth = true;
-                            std::cerr << "OPTION 3A TRIGGERED (between shoulders and hips) - 6 roi" << std::endl << std::flush;
-                        }
-                        else
-                        {
-                            nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint3, yPoint3, 12);
-                        }
-                        if (nonZeroVector.size() > 9 && !foundDepth)
-                        {
-                            medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
-                            usedXPoint = xPoint3;
-                            usedYPoint = yPoint3;
-                            usedRadius = 12;
-                            foundDepth = true;
-                            foundGoodDepth = true;
-                            std::cerr << "OPTION 3B TRIGGERED (between shoulders and hips) - 12 roi" << std::endl << std::flush;
-                        }
-                        else
-                        {
-                            nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint3, yPoint3, 18);
-                        }
-                        if (nonZeroVector.size() > 9 && !foundDepth)
-                        {
-                            medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
-                            usedXPoint = xPoint3;
-                            usedYPoint = yPoint3;
-                            usedRadius = 18;
-                            std::cerr << "OPTION 3C TRIGGERED (between shoulders and hips) - 18 roi" << std::endl << std::flush;
-                            foundGoodDepth = true;
-                        }
+                        xPoint = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
+                        yPoint = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
                     }
-                    if (!foundGoodDepth)
+                    //If head, shoulders, hips aren't confident, then try nose
+                    else if (bodyStruct.nose_2d_conf > .5)
+                    {
+                        xPoint = bodyStruct.nose_2d_x;
+                        yPoint = bodyStruct.nose_2d_y;
+                    }
+                    //Finally, if none of those are confident, we will grab the average x/y location of all detected joints
+                    else
                     {
                         int countOfDetectedJoints = 0;
                         int xValueOfDetectedJoints = 0;
@@ -1106,273 +1023,76 @@ void OakdXlinkReader::NextFrame() {
                             yValueOfDetectedJoints += bodyStruct.ear_right_2d_y;
                         }
 
-                        int xPoint = xValueOfDetectedJoints/countOfDetectedJoints;
-                        int yPoint = yValueOfDetectedJoints/countOfDetectedJoints;
-
-                        std::vector<uint16_t> nonZeroVector;
-                        int roiRadius = 6;
-                        bool noGoodReadingsAnywhere = false;
-                        while (nonZeroVector.size() < 10)
-                        {
-                            nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint, yPoint, roiRadius);
-                            roiRadius += 6;
-                            // There can be the case where there are 0 depth values anywhere reasonable in which case we must return 0
-                            if (roiRadius > 60)
-                            {
-                                noGoodReadingsAnywhere = true;
-                                break;
-                            }
-                        }
-                        if (!noGoodReadingsAnywhere)
-                        {
-                            medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
-                            usedXPoint = xPoint;
-                            usedYPoint = yPoint;
-                            usedRadius = roiRadius;
-                            foundGoodDepth = true;
-                            std::cerr << "OPTION 4 TRIGGERED (all joints) - " << roiRadius <<  " roi radius" << std::endl << std::flush;
-                        }
-                        else
-                        {
-                            medianPointDepth = 0;
-                            usedXPoint = frameDepthMat.cols/2;
-                            usedYPoint = frameDepthMat.rows/2;
-                            usedRadius = roiRadius;
-                            foundGoodDepth = true;
-                            std::cerr << "OPTION 5 TRIGGERED - NO GOOD DEPTH, RETURNING 0" << std::endl << std::flush;
-                        }
+                        xPoint = xValueOfDetectedJoints/countOfDetectedJoints;
+                        yPoint = yValueOfDetectedJoints/countOfDetectedJoints;
                     }
 
-                    // //Now we find the spatial coordinates of using StereoDepth and intrinsics
-                    // //We first find the x,y coordinate in the image of the body that is most confident
-                    // int xPoint;
-                    // int yPoint;
-                    // if(bodyStruct.neck_2d_conf > .5)
-                    // {
-                    //     xPoint = bodyStruct.neck_2d_x;
-                    //     yPoint = bodyStruct.neck_2d_y;
-                    // }
-                    // //If neck not confident but shoulders are confident, choose half way point of shoulders
-                    // else if (bodyStruct.shoulder_left_2d_conf > .5 && bodyStruct.shoulder_right_2d_conf > .5)
-                    // {
-                    //     xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
-                    //     yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
-                    // }
-                    // //If that isn't true do midpoint between hips
-                    // else if (bodyStruct.hip_left_2d_conf > .5 && bodyStruct.hip_right_2d_conf > .5)
-                    // {
-                    //     xPoint = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
-                    //     yPoint = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
-                    // }
-                    // //If head, shoulders, hips aren't confident, then try nose
-                    // else if (bodyStruct.nose_2d_conf > .5)
-                    // {
-                    //     xPoint = bodyStruct.nose_2d_x;
-                    //     yPoint = bodyStruct.nose_2d_y;
-                    // }
-                    // //Finally, if none of those are confident, we will grab the average x/y location of all detected joints
-                    // else
-                    // {
-                    //     int countOfDetectedJoints = 0;
-                    //     int xValueOfDetectedJoints = 0;
-                    //     int yValueOfDetectedJoints = 0;
+                    //Region square radius
+                    int regionRadius = 6;
 
-                    //     if(bodyStruct.neck_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.neck_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.neck_2d_y;
-                    //     }
-                    //     if(bodyStruct.nose_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.nose_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.nose_2d_y;
-                    //     }
-                    //     // if(bodyStruct.pelvis_2d_conf > 0)
-                    //     // {
-                    //     //     countOfDetectedJoints++;
-                    //     //     xValueOfDetectedJoints += bodyStruct.pelvis_2d_x;
-                    //     //     yValueOfDetectedJoints += bodyStruct.pelvis_2d_y;
-                    //     // }
-                    //     if(bodyStruct.shoulder_left_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.shoulder_left_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.shoulder_left_2d_y;
-                    //     }
-                    //     if(bodyStruct.elbow_left_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.elbow_left_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.elbow_left_2d_y;
-                    //     }
-                    //     if(bodyStruct.wrist_left_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.wrist_left_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.wrist_left_2d_y;
-                    //     }
-                    //     if(bodyStruct.hip_left_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.hip_left_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.hip_left_2d_y;
-                    //     }
-                    //     if(bodyStruct.knee_left_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.knee_left_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.knee_left_2d_y;
-                    //     }
-                    //     if(bodyStruct.ankle_left_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.ankle_left_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.ankle_left_2d_y;
-                    //     }
-                    //     if(bodyStruct.shoulder_right_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.shoulder_right_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.shoulder_right_2d_y;
-                    //     }
-                    //     if(bodyStruct.elbow_right_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.elbow_right_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.elbow_right_2d_y;
-                    //     }
-                    //     if(bodyStruct.wrist_right_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.wrist_right_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.wrist_right_2d_y;
-                    //     }
-                    //     if(bodyStruct.hip_right_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.hip_right_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.hip_right_2d_y;
-                    //     }
-                    //     if(bodyStruct.knee_right_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.knee_right_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.knee_right_2d_y;
-                    //     }
-                    //     if(bodyStruct.ankle_right_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.ankle_right_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.ankle_right_2d_y;
-                    //     }
-                    //     if(bodyStruct.eye_left_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.eye_left_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.eye_left_2d_y;
-                    //     }
-                    //     if(bodyStruct.ear_left_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.ear_left_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.ear_left_2d_y;
-                    //     }
-                    //     if(bodyStruct.eye_right_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.eye_right_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.eye_right_2d_y;
-                    //     }
-                    //     if(bodyStruct.ear_right_2d_conf > 0)
-                    //     {
-                    //         countOfDetectedJoints++;
-                    //         xValueOfDetectedJoints += bodyStruct.ear_right_2d_x;
-                    //         yValueOfDetectedJoints += bodyStruct.ear_right_2d_y;
-                    //     }
+                    //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
+                    int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0;
+                    xPointMin  = (xPointMin <= frameDepthMat.cols) ? xPointMin : frameDepthMat.cols;
+                    int xPointMax  = (xPoint + regionRadius <= frameDepthMat.cols) ? xPoint + regionRadius : frameDepthMat.cols;
+                    xPointMax  = (xPointMax >= 0) ? xPointMax : 0;
+                    int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0;
+                    yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows;
+                    int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
+                    yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
 
-                    //     xPoint = xValueOfDetectedJoints/countOfDetectedJoints;
-                    //     yPoint = yValueOfDetectedJoints/countOfDetectedJoints;
-                    // }
+                    // std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
+                    // std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
+                    // std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
+                    // std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
+                    // std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
+                    // std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
 
-                    // //Region square radius
-                    // int regionRadius = 6;
-
-                    // //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
-                    // int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0;
-                    // xPointMin  = (xPointMin <= frameDepthMat.cols) ? xPointMin : frameDepthMat.cols;
-                    // int xPointMax  = (xPoint + regionRadius <= frameDepthMat.cols) ? xPoint + regionRadius : frameDepthMat.cols;
-                    // xPointMax  = (xPointMax >= 0) ? xPointMax : 0;
-                    // int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0;
-                    // yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows;
-                    // int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
-                    // yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
-
-                    // // std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
-                    // // std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
-                    // // std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
-                    // // std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
-                    // // std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
-                    // // std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
-
-                    // // //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
-                    // //Now we grab a the average depth value of a 12x12 grid of pixels surrounding the xPoint and yPoint
-                    // cv::Scalar mean, stddev;
-                    // cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
-                    // cv::Mat croppedDepth = frameDepthMat(myROI);
-                    // cv::meanStdDev(croppedDepth, mean, stddev);
-                    // int pointDepth = int(mean[0]);        
+                    // //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
+                    //Now we grab a the average depth value of a 12x12 grid of pixels surrounding the xPoint and yPoint
+                    cv::Scalar mean, stddev;
+                    cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
+                    cv::Mat croppedDepth = frameDepthMat(myROI);
+                    cv::meanStdDev(croppedDepth, mean, stddev);
+                    int pointDepth = int(mean[0]);
 
                     // // Now we will try to get the non-0 median
-                    // // Keep changing until we get a non-0 point depth 2 value
-                    //     // go neck bigger 3 times
-                    //     // then between neck and pelvis
-                    //     // then go bigger 3 times
-                    //     // then go full torso, shoulder shoulder hip hip, entire thing
                     // cv::Rect myROI2(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
                     // cv::Mat croppedDepth2 = frameDepthMat(myROI2);
-                    // std::vector<u_int16_t> nonZeroDepthValues;
-                    // // ushort table[];
-                    // int limit = croppedDepth2.rows * croppedDepth2.cols;
-                    // ushort* ptr = reinterpret_cast<ushort*>(croppedDepth2.data);
-                    // if (!croppedDepth2.isContinuous())
-                    // {
-                    //     croppedDepth2 = croppedDepth2.clone();
-                    // }
-                    // // std::cerr << "ROI 2 - Limit: " << limit  << std::endl << std::flush;
-                    // for (int i = 0; i < limit; i++, ptr++)
-                    // {
-                    //     // *ptr = table[*ptr];
-                    //     // std::cerr << "ROI 2 - i: " << i  << "   |  *ptr value: " << *ptr  << std::endl << std::flush;
-                    //     if(*ptr != 0)
-                    //     {
-                    //         nonZeroDepthValues.push_back((u_int16_t)(*ptr));
+                    // std::vector<int> nonZeroDepthValues;
+                    // for(int row = 0; row < croppedDepth2.rows; ++row) {
+                    //     uchar* p = croppedDepth2.ptr(row);
+                    //     for(int col = 0; col < croppedDepth2.cols; ++col) {
+                    //         *p += (col * 2);
+                    //         // check if the pixel value is 0
+                    //         uint16_t  value = *p; 
+                    //         if (value != 0)
+                    //         {
+                    //             nonZeroDepthValues.push_back(value);
+                    //         }
+                            
                     //     }
                     // }
-                    // u_int16_t pointDepth2 = 0;
-                    // if (nonZeroDepthValues.size() > 0)
-                    //     pointDepth2 = findMedian(nonZeroDepthValues, nonZeroDepthValues.size());
+                    // int pointDepth2 = findMedian(nonZeroDepthValues, nonZeroDepthValues.size());
 
                     //Now we use the HFOV and VFOV to find the x and y coordinates in millimeters
                     // https://github.com/luxonis/depthai-experiments/blob/377c50c13931a082825d457f69893c1bf3f24aa2/gen2-calc-spatials-on-host/calc.py#L10
                     int midDepthXCoordinate = frameDepthMat.cols / 2;    // middle of depth image x across (columns) - this is depth origin
                     int midDepthYCoordinate = frameDepthMat.rows / 2;    // middle of depth image y across (rows) - this is depth origin
                     
-                    int xPointInDepthCenterCoordinates = usedXPoint - midDepthXCoordinate; //This is the xPoint but if the depth map center is the origin
-                    int yPointInDepthCenterCoordinates = usedYPoint - midDepthYCoordinate; //This is the yPoint but if the depth map center is the origin
+                    int xPointInDepthCenterCoordinates = xPoint - midDepthXCoordinate; //This is the xPoint but if the depth map center is the origin
+                    int yPointInDepthCenterCoordinates = yPoint - midDepthYCoordinate; //This is the yPoint but if the depth map center is the origin
 
                     float angle_x = atan(tan(cameraHFOVInRadians / 2.0f) * float(xPointInDepthCenterCoordinates) / float(midDepthXCoordinate));
                     float angle_y = atan(tan(cameraHFOVInRadians / 2.0f) * float(yPointInDepthCenterCoordinates) / float(midDepthYCoordinate));
 
                     //We will save this depth value as the pelvis depth
-                    bodyStruct.pelvis_2d_depth = medianPointDepth;
-                    bodyStruct.pelvis_2d_x = int(float(medianPointDepth) * tan(angle_x));
-                    bodyStruct.pelvis_2d_y = int(-1.0f * float(medianPointDepth) * tan(angle_y));
+                    bodyStruct.pelvis_2d_depth = pointDepth;
+                    bodyStruct.pelvis_2d_x = int(float(pointDepth) * tan(angle_x));
+                    bodyStruct.pelvis_2d_y = int(-1.0f * float(pointDepth) * tan(angle_y));
 
                     std::cerr << "NECK DEPTH: " << int(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x))  << std::endl << std::flush;
-                    // std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; //UNCOMMENT
-                    std::cerr << "MEDIAN NON-0 NECK DEPTH: " << medianPointDepth << std::endl << std::flush;
+                    std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; //UNCOMMENT
+                    // std::cerr << "AVERAGE NECK DEPTH2: " << pointDepth2  << std::endl << std::flush; //UNCOMMENT
                     //Finally we copy the COCO body struct memory to the frame
                     bodyStruct.hton();
                     
@@ -1383,7 +1103,7 @@ void OakdXlinkReader::NextFrame() {
                     // cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
                     // cv::equalizeHist(depthFrameColor, depthFrameColor);
                     // cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
-                    // rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
+                    // rectangle(depthFrameColor, cv::Point(bodyStruct.neck_2d_x-6, bodyStruct.neck_2d_y-6), cv::Point(bodyStruct.neck_2d_x+6, bodyStruct.neck_2d_y+6), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
                     // cv::imshow("depth", depthFrameColor);
                     // cv::waitKey(1);
                 }
@@ -1398,11 +1118,11 @@ void OakdXlinkReader::NextFrame() {
                 if (stream_rgb)
                     current_frame_.push_back(rgbFrame);
 
-                } catch(...) {
+
+            } catch(...) {
                 std::cerr << "TRY/CATCH CATCH AFTER PARSE POSES " << std::endl << std::flush;
                 return;
             }
-
         } catch(std::exception &e) {
             std::cerr << "TRY/CATCH CATCH " << e.what() << std::endl << std::flush;
             failed = true;
@@ -1410,6 +1130,739 @@ void OakdXlinkReader::NextFrame() {
         }
 
         break;
+
+    std::cerr << "!!BODY COUNT: " << bodyCount << std::endl << std::flush; 
+
+    //Resize the frame to hold all the detected COCO bodies detected in this frame
+    s->frame.resize(sizeof(coco_human_t)*bodyCount + sizeof(int32_t));
+
+    //Copy the number of COCO bodies detected into the first 4 bytes of the bodies frame
+    auto nBodyCount = bodyCount;
+    inplace_hton(nBodyCount);  
+    memcpy(&s->frame[0], &nBodyCount, sizeof(int32_t));
+
+    //Now we iterate through all detected bodies in poses_3d, create a coco_human_t, and then copy the data into the frame
+    for (size_t i = 0; i < bodyCount; i++) {
+
+        //Here we see the 2D joints detected of this body
+        //We grab the depth at the x,y location in the image
+        // posesStruct.poses_2d[i]; //how do I know what joints are being provided? (will need this for bodyStruct depth values)
+        //depth value = (int)frameDepthMat.at<ushort>(yvalue,xvalue);
+
+        //Create a COCO body Struct
+        coco_human_t bodyStruct;
+        bodyStruct.Id = posesStruct.poses_id[i];
+        std::cerr << "BODY: " << current_frame_counter_ << " # " <<  i << " ... " << bodyStruct.Id << std::endl << std::flush;
+        // Map of joints to array index
+        // neck 0 
+        // nose 1 
+        // pelvis (can't use it!) 2 
+        // left shoulder 3 
+        // left elbow 4 
+        // left wrist 5 
+        // left hip 6 
+        // left knee 7 
+        // left ankle 8 
+        // right shoulder 9 
+        // right elbow 10 
+        // right wrist 11 
+        // right hip 12 
+        // right knee 13 
+        // right ankle 14 
+        // left eye 15
+        // left ear 16
+        // right eye 17
+        // right ear 18
+
+        //Now we set the data of the COCO body struct
+        // posesStruct.poses_3d [ {body number } ][ {body joint index}*4 + {0, 1, 2 ,3 for x, y, z, probability}]
+
+        auto zCorrection = [](float x) -> float {
+            return x; // / 0.84381;
+        };
+
+        bodyStruct.neck_x = posesStruct.poses_3d[i][0 * 4 + 0];
+        bodyStruct.neck_y = posesStruct.poses_3d[i][0 * 4 + 1];
+        bodyStruct.neck_z = zCorrection(posesStruct.poses_3d[i][0 * 4 + 2]);
+        bodyStruct.neck_conf = posesStruct.poses_3d[i][0 * 4 + 3];
+        bodyStruct.nose_x = posesStruct.poses_3d[i][1 * 4 + 0];
+        bodyStruct.nose_y = posesStruct.poses_3d[i][1 * 4 + 1];
+        bodyStruct.nose_z = zCorrection(posesStruct.poses_3d[i][1 * 4 + 2]);
+        bodyStruct.nose_conf = posesStruct.poses_3d[i][1 * 4 + 3];
+        bodyStruct.pelvis_x = posesStruct.poses_3d[i][2 * 4 + 0];
+        bodyStruct.pelvis_y = posesStruct.poses_3d[i][2 * 4 + 1];
+        bodyStruct.pelvis_z = zCorrection(posesStruct.poses_3d[i][2 * 4 + 2]);
+        bodyStruct.pelvis_conf = posesStruct.poses_3d[i][2 * 4 + 3];
+        bodyStruct.shoulder_left_x = posesStruct.poses_3d[i][3 * 4 + 0];
+        bodyStruct.shoulder_left_y = posesStruct.poses_3d[i][3 * 4 + 1];
+        bodyStruct.shoulder_left_z = zCorrection(posesStruct.poses_3d[i][3 * 4 + 2]);
+        bodyStruct.shoulder_left_conf = posesStruct.poses_3d[i][3 * 4 + 3];
+        bodyStruct.elbow_left_x = posesStruct.poses_3d[i][4 * 4 + 0];
+        bodyStruct.elbow_left_y = posesStruct.poses_3d[i][4 * 4 + 1];
+        bodyStruct.elbow_left_z = zCorrection(posesStruct.poses_3d[i][4 * 4 + 2]);
+        bodyStruct.elbow_left_conf = posesStruct.poses_3d[i][4 * 4 + 3];
+        bodyStruct.wrist_left_x = posesStruct.poses_3d[i][5 * 4 + 0];
+        bodyStruct.wrist_left_y = posesStruct.poses_3d[i][5 * 4 + 1];
+        bodyStruct.wrist_left_z = zCorrection(posesStruct.poses_3d[i][5 * 4 + 2]);
+        bodyStruct.wrist_left_conf = posesStruct.poses_3d[i][5 * 4 + 3];
+        bodyStruct.hip_left_x = posesStruct.poses_3d[i][6 * 4 + 0];
+        bodyStruct.hip_left_y = posesStruct.poses_3d[i][6 * 4 + 1];
+        bodyStruct.hip_left_z = zCorrection(posesStruct.poses_3d[i][6 * 4 + 2]);
+        bodyStruct.hip_left_conf = posesStruct.poses_3d[i][6 * 4 + 3];
+        bodyStruct.knee_left_x = posesStruct.poses_3d[i][7 * 4 + 0];
+        bodyStruct.knee_left_y = posesStruct.poses_3d[i][7 * 4 + 1];
+        bodyStruct.knee_left_z = zCorrection(posesStruct.poses_3d[i][7 * 4 + 2]);
+        bodyStruct.knee_left_conf = posesStruct.poses_3d[i][7 * 4 + 3];
+        bodyStruct.ankle_left_x = posesStruct.poses_3d[i][8 * 4 + 0];
+        bodyStruct.ankle_left_y = posesStruct.poses_3d[i][8 * 4 + 1];
+        bodyStruct.ankle_left_z = zCorrection(posesStruct.poses_3d[i][8 * 4 + 2]);
+        bodyStruct.ankle_left_conf = posesStruct.poses_3d[i][8 * 4 + 3];
+        bodyStruct.shoulder_right_x = posesStruct.poses_3d[i][9 * 4 + 0];
+        bodyStruct.shoulder_right_y = posesStruct.poses_3d[i][9 * 4 + 1];
+        bodyStruct.shoulder_right_z = zCorrection(posesStruct.poses_3d[i][9 * 4 + 2]);
+        bodyStruct.shoulder_right_conf = posesStruct.poses_3d[i][9 * 4 + 3];
+        bodyStruct.elbow_right_x = posesStruct.poses_3d[i][10 * 4 + 0];
+        bodyStruct.elbow_right_y = posesStruct.poses_3d[i][10 * 4 + 1];
+        bodyStruct.elbow_right_z = zCorrection(posesStruct.poses_3d[i][10 * 4 + 2]);
+        bodyStruct.elbow_right_conf = posesStruct.poses_3d[i][10 * 4 + 3];
+        bodyStruct.wrist_right_x = posesStruct.poses_3d[i][11 * 4 + 0];
+        bodyStruct.wrist_right_y = posesStruct.poses_3d[i][11 * 4 + 1];
+        bodyStruct.wrist_right_z = zCorrection(posesStruct.poses_3d[i][11 * 4 + 2]);
+        bodyStruct.wrist_right_conf = posesStruct.poses_3d[i][11 * 4 + 3];
+        bodyStruct.hip_right_x = posesStruct.poses_3d[i][12 * 4 + 0];
+        bodyStruct.hip_right_y = posesStruct.poses_3d[i][12 * 4 + 1];
+        bodyStruct.hip_right_z = zCorrection(posesStruct.poses_3d[i][12 * 4 + 2]);
+        bodyStruct.hip_right_conf = posesStruct.poses_3d[i][12 * 4 + 3];
+        bodyStruct.knee_right_x = posesStruct.poses_3d[i][13 * 4 + 0];
+        bodyStruct.knee_right_y = posesStruct.poses_3d[i][13 * 4 + 1];
+        bodyStruct.knee_right_z = zCorrection(posesStruct.poses_3d[i][13 * 4 + 2]);
+        bodyStruct.knee_right_conf = posesStruct.poses_3d[i][13 * 4 + 3];
+        bodyStruct.ankle_right_x = posesStruct.poses_3d[i][14 * 4 + 0];
+        bodyStruct.ankle_right_y = posesStruct.poses_3d[i][14 * 4 + 1];
+        bodyStruct.ankle_right_z = zCorrection(posesStruct.poses_3d[i][14 * 4 + 2]);
+        bodyStruct.ankle_right_conf = posesStruct.poses_3d[i][14 * 4 + 3];
+        bodyStruct.eye_left_x = posesStruct.poses_3d[i][15 * 4 + 0];
+        bodyStruct.eye_left_y = posesStruct.poses_3d[i][15 * 4 + 1];
+        bodyStruct.eye_left_z = zCorrection(posesStruct.poses_3d[i][15 * 4 + 2]);
+        bodyStruct.eye_left_conf = posesStruct.poses_3d[i][15 * 4 + 3];
+        bodyStruct.ear_left_x = posesStruct.poses_3d[i][16 * 4 + 0];
+        bodyStruct.ear_left_y = posesStruct.poses_3d[i][16 * 4 + 1];
+        bodyStruct.ear_left_z = zCorrection(posesStruct.poses_3d[i][16 * 4 + 2]);
+        bodyStruct.ear_left_conf = posesStruct.poses_3d[i][16 * 4 + 3];
+        bodyStruct.eye_right_x = posesStruct.poses_3d[i][17 * 4 + 0];
+        bodyStruct.eye_right_y = posesStruct.poses_3d[i][17 * 4 + 1];
+        bodyStruct.eye_right_z = zCorrection(posesStruct.poses_3d[i][17 * 4 + 2]);
+        bodyStruct.eye_right_conf = posesStruct.poses_3d[i][17 * 4 + 3];
+        bodyStruct.ear_right_x = posesStruct.poses_3d[i][18 * 4 + 0];
+        bodyStruct.ear_right_y = posesStruct.poses_3d[i][18 * 4 + 1];
+        bodyStruct.ear_right_z = zCorrection(posesStruct.poses_3d[i][18 * 4 + 2]);
+        bodyStruct.ear_right_conf = posesStruct.poses_3d[i][18 * 4 + 3];
+
+        //auto to2D = [](float x) -> int16_t {
+        //    std::cerr << "to2D: value = " << x << std::endl << std::flush;
+        //    return std::min(std::max(0L, int64_t(x / magic)), 1280L - 1L);
+        //};
+
+        //auto to2Dy = [](float x) -> int16_t {
+        //    std::cerr << "to2D/y: value = " << x << std::endl << std::flush;
+        //    return std::min(std::max(0L, int64_t(x * magic)), 720L-1L); //  *0.84381); /// 0.84381);
+        //};
+
+        //auto to2Dd = [](float x) -> int16_t {
+        //    std::cerr << "to2D/d: value = " << x << std::endl << std::flush;
+        //    return int64_t(x); //  *0.84381); /// 0.84381);
+        //};
+
+        auto to2D = [](float x) -> int16_t {
+            // std::cerr << "to2D: value = " << x << std::endl << std::flush;
+            return std::min(std::max(int64_t(0L), int64_t(x )), int64_t(1280L - 1L));
+        };
+
+        auto to2Dy = [](float x) -> int16_t {
+            // std::cerr << "to2D/y: value = " << x << std::endl << std::flush;
+            return std::min(std::max(int64_t(0L), int64_t(x )), int64_t(720L-1L)); //  *0.84381); /// 0.84381);
+        };
+
+        auto to2Dd = [](float x) -> int16_t {
+            // std::cerr << "to2D/d: value = " << x << std::endl << std::flush;
+            return int64_t(x); //  *0.84381); /// 0.84381);
+        };
+
+
+
+        bodyStruct.neck_2d_x = to2D(posesStruct.poses_2d[i][0 * 3 + 0]);
+        bodyStruct.neck_2d_y = to2Dy(posesStruct.poses_2d[i][0 * 3 + 1]);
+        bodyStruct.neck_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x));
+        bodyStruct.neck_2d_conf = posesStruct.poses_2d[i][0 * 3 + 2];
+        bodyStruct.nose_2d_x = to2D(posesStruct.poses_2d[i][1 * 3 + 0]);
+        bodyStruct.nose_2d_y = to2Dy(posesStruct.poses_2d[i][1 * 3 + 1]);
+        bodyStruct.nose_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.nose_2d_y,bodyStruct.nose_2d_x));
+        bodyStruct.nose_2d_conf = posesStruct.poses_2d[i][1 * 3 + 2];
+        bodyStruct.pelvis_2d_x = to2D(posesStruct.poses_2d[i][2 * 3 + 0]);
+        bodyStruct.pelvis_2d_y = to2Dy(posesStruct.poses_2d[i][2 * 3 + 1]);
+        bodyStruct.pelvis_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.pelvis_2d_y,bodyStruct.pelvis_2d_x));
+        bodyStruct.pelvis_2d_conf = posesStruct.poses_2d[i][2 * 3 + 2];
+        bodyStruct.shoulder_left_2d_x = to2D(posesStruct.poses_2d[i][3 * 3 + 0]);
+        bodyStruct.shoulder_left_2d_y = to2Dy(posesStruct.poses_2d[i][3 * 3 + 1]);
+        bodyStruct.shoulder_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.shoulder_left_2d_y,bodyStruct.shoulder_left_2d_x));
+        bodyStruct.shoulder_left_2d_conf = posesStruct.poses_2d[i][3 * 3 + 2];
+        bodyStruct.elbow_left_2d_x = to2D(posesStruct.poses_2d[i][4 * 3 + 0]);
+        bodyStruct.elbow_left_2d_y = to2Dy(posesStruct.poses_2d[i][4 * 3 + 1]);
+        bodyStruct.elbow_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.elbow_left_2d_y,bodyStruct.elbow_left_2d_x));
+        bodyStruct.elbow_left_2d_conf = posesStruct.poses_2d[i][4 * 3 + 2];
+        bodyStruct.wrist_left_2d_x = to2D(posesStruct.poses_2d[i][5 * 3 + 0]);
+        bodyStruct.wrist_left_2d_y = to2Dy(posesStruct.poses_2d[i][5 * 3 + 1]);
+        bodyStruct.wrist_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.wrist_left_2d_y,bodyStruct.wrist_left_2d_x));
+        bodyStruct.wrist_left_2d_conf = posesStruct.poses_2d[i][5 * 3 + 2];
+        bodyStruct.hip_left_2d_x = to2D(posesStruct.poses_2d[i][6 * 3 + 0]);
+        bodyStruct.hip_left_2d_y = to2Dy(posesStruct.poses_2d[i][6 * 3 + 1]);
+        bodyStruct.hip_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.hip_left_2d_y,bodyStruct.hip_left_2d_x));
+        bodyStruct.hip_left_2d_conf = posesStruct.poses_2d[i][6 * 3 + 2];
+        bodyStruct.knee_left_2d_x = to2D(posesStruct.poses_2d[i][7 * 3 + 0]);
+        bodyStruct.knee_left_2d_y = to2Dy(posesStruct.poses_2d[i][7 * 3 + 1]);
+        bodyStruct.knee_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.knee_left_2d_y,bodyStruct.knee_left_2d_x));
+        bodyStruct.knee_left_2d_conf = posesStruct.poses_2d[i][7 * 3 + 2];
+        bodyStruct.ankle_left_2d_x = to2D(posesStruct.poses_2d[i][8 * 3 + 0]);
+        bodyStruct.ankle_left_2d_y = to2Dy(posesStruct.poses_2d[i][8 * 3 + 1]);
+        bodyStruct.ankle_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ankle_left_2d_y,bodyStruct.ankle_left_2d_x));
+        bodyStruct.ankle_left_2d_conf = posesStruct.poses_2d[i][8 * 3 + 2];
+        bodyStruct.shoulder_right_2d_x = to2D(posesStruct.poses_2d[i][9 * 3 + 0]);
+        bodyStruct.shoulder_right_2d_y = to2Dy(posesStruct.poses_2d[i][9 * 3 + 1]);
+        bodyStruct.shoulder_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.shoulder_right_2d_y,bodyStruct.shoulder_right_2d_x));
+        bodyStruct.shoulder_right_2d_conf = posesStruct.poses_2d[i][9 * 3 + 2];
+        bodyStruct.elbow_right_2d_x = to2D(posesStruct.poses_2d[i][10 * 3 + 0]);
+        bodyStruct.elbow_right_2d_y = to2Dy(posesStruct.poses_2d[i][10 * 3 + 1]);
+        bodyStruct.elbow_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.elbow_right_2d_y,bodyStruct.elbow_right_2d_x));
+        bodyStruct.elbow_right_2d_conf = posesStruct.poses_2d[i][10 * 3 + 2];
+        bodyStruct.wrist_right_2d_x = to2D(posesStruct.poses_2d[i][11 * 3 + 0]);
+        bodyStruct.wrist_right_2d_y = to2Dy(posesStruct.poses_2d[i][11 * 3 + 1]);
+        bodyStruct.wrist_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.wrist_right_2d_y,bodyStruct.wrist_right_2d_x));
+        bodyStruct.wrist_right_2d_conf = posesStruct.poses_2d[i][11 * 3 + 2];
+        bodyStruct.hip_right_2d_x = to2D(posesStruct.poses_2d[i][12 * 3 + 0]);
+        bodyStruct.hip_right_2d_y = to2Dy(posesStruct.poses_2d[i][12 * 3 + 1]);
+        bodyStruct.hip_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.hip_right_2d_y,bodyStruct.hip_right_2d_x));
+        bodyStruct.hip_right_2d_conf = posesStruct.poses_2d[i][12 * 3 + 2];
+        bodyStruct.knee_right_2d_x = to2D(posesStruct.poses_2d[i][13 * 3 + 0]);
+        bodyStruct.knee_right_2d_y = to2Dy(posesStruct.poses_2d[i][13 * 3 + 1]);
+        bodyStruct.knee_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.knee_right_2d_y,bodyStruct.knee_right_2d_x));
+        bodyStruct.knee_right_2d_conf = posesStruct.poses_2d[i][13 * 3 + 2];
+        bodyStruct.ankle_right_2d_x = to2D(posesStruct.poses_2d[i][14 * 3 + 0]);
+        bodyStruct.ankle_right_2d_y = to2Dy(posesStruct.poses_2d[i][14 * 3 + 1]);
+        bodyStruct.ankle_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ankle_right_2d_y,bodyStruct.ankle_right_2d_x));
+        bodyStruct.ankle_right_2d_conf = posesStruct.poses_2d[i][14 * 3 + 2];
+        bodyStruct.eye_left_2d_x = to2D(posesStruct.poses_2d[i][15 * 3 + 0]);
+        bodyStruct.eye_left_2d_y = to2Dy(posesStruct.poses_2d[i][15 * 3 + 1]);
+        bodyStruct.eye_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.eye_left_2d_y,bodyStruct.eye_left_2d_x));
+        bodyStruct.eye_left_2d_conf = posesStruct.poses_2d[i][15 * 3 + 2];
+        bodyStruct.ear_left_2d_x = to2D(posesStruct.poses_2d[i][16 * 3 + 0]);
+        bodyStruct.ear_left_2d_y = to2Dy(posesStruct.poses_2d[i][16 * 3 + 1]);
+        bodyStruct.ear_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ear_left_2d_y,bodyStruct.ear_left_2d_x));
+        bodyStruct.ear_left_2d_conf = posesStruct.poses_2d[i][16 * 3 + 2];
+        bodyStruct.eye_right_2d_x = to2D(posesStruct.poses_2d[i][17 * 3 + 0]);
+        bodyStruct.eye_right_2d_y = to2Dy(posesStruct.poses_2d[i][17 * 3 + 1]);
+        bodyStruct.eye_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.eye_right_2d_y,bodyStruct.eye_right_2d_x));
+        bodyStruct.eye_right_2d_conf = posesStruct.poses_2d[i][17 * 3 + 2];
+        bodyStruct.ear_right_2d_x = to2D(posesStruct.poses_2d[i][18 * 3 + 0]);
+        bodyStruct.ear_right_2d_y = to2Dy(posesStruct.poses_2d[i][18 * 3 + 1]);
+        bodyStruct.ear_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ear_right_2d_y,bodyStruct.ear_right_2d_x));
+        bodyStruct.ear_right_2d_conf = posesStruct.poses_2d[i][18 * 3 + 2];
+
+        //Now we find the depth value to use to mark where the detected human body is located, depends on confidence of 2D joints and the amount of stereo depth regions
+        u_int16_t medianPointDepth = 0;     //This will store the end depth value
+        bool foundGoodDepth = false;        //This will be used to stop the conditionals when good depth is found
+        int usedXPoint;                     //This will save what x point was used (for visualization purposes)
+        int usedYPoint;                     //This will save what y point was used (for visualization purposes)
+        int usedRadius;                     //This will save what radius was used (for visualization purposes)
+
+        // If there is good depth around neck, use that
+        if(bodyStruct.neck_2d_conf > 0)
+        {
+            auto nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, bodyStruct.neck_2d_x, bodyStruct.neck_2d_y, 6);
+            if (nonZeroVector.size() > 9)
+            {
+                medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
+                usedXPoint = bodyStruct.neck_2d_x;
+                usedYPoint = bodyStruct.neck_2d_y;
+                usedRadius = 6;
+                foundGoodDepth = true;
+            }
+            std::cerr << "OPTION 1 TRIGGERED (neck)" << std::endl << std::flush;
+        }
+        // If there is good depth in between shoulders, use that
+        if (bodyStruct.shoulder_left_2d_conf > 0 && bodyStruct.shoulder_right_2d_conf > 0 && !foundGoodDepth)
+        {
+            int xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
+            int yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
+
+            auto nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint, yPoint, 6);
+            if (nonZeroVector.size() > 9)
+            {
+                medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
+                usedXPoint = xPoint;
+                usedYPoint = yPoint;
+                usedRadius = 6;
+                foundGoodDepth = true;
+            }
+            std::cerr << "OPTION 2 TRIGGERED (between shoulders)" << std::endl << std::flush;
+        }
+        //If there is good depth in the center of shoulders and hips, use that, increase the ROI size 2 times if needed
+        if (bodyStruct.hip_left_2d_conf > 0 && bodyStruct.hip_right_2d_conf > 0 && bodyStruct.shoulder_left_2d_conf > 0 && bodyStruct.shoulder_right_2d_conf && !foundGoodDepth)
+        {
+            int xPoint1 = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
+            int yPoint1 = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
+            int xPoint2 = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
+            int yPoint2 = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
+            int xPoint3 = (xPoint1 + xPoint2)/2;
+            int yPoint3 = (yPoint1 + yPoint2)/2;
+            bool foundDepth = false;
+
+            auto nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint3, yPoint3, 6);
+            if (nonZeroVector.size() > 9)
+            {
+                medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
+                usedXPoint = xPoint3;
+                usedYPoint = yPoint3;
+                usedRadius = 6;
+                foundDepth = true;
+                foundGoodDepth = true;
+                std::cerr << "OPTION 3A TRIGGERED (between shoulders and hips) - 6 roi" << std::endl << std::flush;
+            }
+            else
+            {
+                nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint3, yPoint3, 12);
+            }
+            if (nonZeroVector.size() > 9 && !foundDepth)
+            {
+                medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
+                usedXPoint = xPoint3;
+                usedYPoint = yPoint3;
+                usedRadius = 12;
+                foundDepth = true;
+                foundGoodDepth = true;
+                std::cerr << "OPTION 3B TRIGGERED (between shoulders and hips) - 12 roi" << std::endl << std::flush;
+            }
+            else
+            {
+                nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint3, yPoint3, 18);
+            }
+            if (nonZeroVector.size() > 9 && !foundDepth)
+            {
+                medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
+                usedXPoint = xPoint3;
+                usedYPoint = yPoint3;
+                usedRadius = 18;
+                std::cerr << "OPTION 3C TRIGGERED (between shoulders and hips) - 18 roi" << std::endl << std::flush;
+                foundGoodDepth = true;
+            }
+        }
+        if (!foundGoodDepth)
+        {
+            int countOfDetectedJoints = 0;
+            int xValueOfDetectedJoints = 0;
+            int yValueOfDetectedJoints = 0;
+
+            if(bodyStruct.neck_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.neck_2d_x;
+                yValueOfDetectedJoints += bodyStruct.neck_2d_y;
+            }
+            if(bodyStruct.nose_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.nose_2d_x;
+                yValueOfDetectedJoints += bodyStruct.nose_2d_y;
+            }
+            // if(bodyStruct.pelvis_2d_conf > 0)
+            // {
+            //     countOfDetectedJoints++;
+            //     xValueOfDetectedJoints += bodyStruct.pelvis_2d_x;
+            //     yValueOfDetectedJoints += bodyStruct.pelvis_2d_y;
+            // }
+            if(bodyStruct.shoulder_left_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.shoulder_left_2d_x;
+                yValueOfDetectedJoints += bodyStruct.shoulder_left_2d_y;
+            }
+            if(bodyStruct.elbow_left_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.elbow_left_2d_x;
+                yValueOfDetectedJoints += bodyStruct.elbow_left_2d_y;
+            }
+            if(bodyStruct.wrist_left_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.wrist_left_2d_x;
+                yValueOfDetectedJoints += bodyStruct.wrist_left_2d_y;
+            }
+            if(bodyStruct.hip_left_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.hip_left_2d_x;
+                yValueOfDetectedJoints += bodyStruct.hip_left_2d_y;
+            }
+            if(bodyStruct.knee_left_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.knee_left_2d_x;
+                yValueOfDetectedJoints += bodyStruct.knee_left_2d_y;
+            }
+            if(bodyStruct.ankle_left_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.ankle_left_2d_x;
+                yValueOfDetectedJoints += bodyStruct.ankle_left_2d_y;
+            }
+            if(bodyStruct.shoulder_right_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.shoulder_right_2d_x;
+                yValueOfDetectedJoints += bodyStruct.shoulder_right_2d_y;
+            }
+            if(bodyStruct.elbow_right_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.elbow_right_2d_x;
+                yValueOfDetectedJoints += bodyStruct.elbow_right_2d_y;
+            }
+            if(bodyStruct.wrist_right_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.wrist_right_2d_x;
+                yValueOfDetectedJoints += bodyStruct.wrist_right_2d_y;
+            }
+            if(bodyStruct.hip_right_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.hip_right_2d_x;
+                yValueOfDetectedJoints += bodyStruct.hip_right_2d_y;
+            }
+            if(bodyStruct.knee_right_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.knee_right_2d_x;
+                yValueOfDetectedJoints += bodyStruct.knee_right_2d_y;
+            }
+            if(bodyStruct.ankle_right_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.ankle_right_2d_x;
+                yValueOfDetectedJoints += bodyStruct.ankle_right_2d_y;
+            }
+            if(bodyStruct.eye_left_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.eye_left_2d_x;
+                yValueOfDetectedJoints += bodyStruct.eye_left_2d_y;
+            }
+            if(bodyStruct.ear_left_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.ear_left_2d_x;
+                yValueOfDetectedJoints += bodyStruct.ear_left_2d_y;
+            }
+            if(bodyStruct.eye_right_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.eye_right_2d_x;
+                yValueOfDetectedJoints += bodyStruct.eye_right_2d_y;
+            }
+            if(bodyStruct.ear_right_2d_conf > 0)
+            {
+                countOfDetectedJoints++;
+                xValueOfDetectedJoints += bodyStruct.ear_right_2d_x;
+                yValueOfDetectedJoints += bodyStruct.ear_right_2d_y;
+            }
+
+            int xPoint = xValueOfDetectedJoints/countOfDetectedJoints;
+            int yPoint = yValueOfDetectedJoints/countOfDetectedJoints;
+
+            std::vector<uint16_t> nonZeroVector;
+            int roiRadius = 6;
+            bool noGoodReadingsAnywhere = false;
+            while (nonZeroVector.size() < 10)
+            {
+                nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, xPoint, yPoint, roiRadius);
+                roiRadius += 6;
+                // There can be the case where there are 0 depth values anywhere reasonable in which case we must return 0
+                if (roiRadius > 60)
+                {
+                    noGoodReadingsAnywhere = true;
+                    break;
+                }
+            }
+            if (!noGoodReadingsAnywhere)
+            {
+                medianPointDepth = findMedian(nonZeroVector, nonZeroVector.size());
+                usedXPoint = xPoint;
+                usedYPoint = yPoint;
+                usedRadius = roiRadius;
+                foundGoodDepth = true;
+                std::cerr << "OPTION 4 TRIGGERED (all joints) - " << roiRadius <<  " roi radius" << std::endl << std::flush;
+            }
+            else
+            {
+                medianPointDepth = 0;
+                usedXPoint = frameDepthMat.cols/2;
+                usedYPoint = frameDepthMat.rows/2;
+                usedRadius = roiRadius;
+                foundGoodDepth = true;
+                std::cerr << "OPTION 5 TRIGGERED - NO GOOD DEPTH, RETURNING 0" << std::endl << std::flush;
+            }
+        }
+
+        // //Now we find the spatial coordinates of using StereoDepth and intrinsics
+        // //We first find the x,y coordinate in the image of the body that is most confident
+        // int xPoint;
+        // int yPoint;
+        // if(bodyStruct.neck_2d_conf > .5)
+        // {
+        //     xPoint = bodyStruct.neck_2d_x;
+        //     yPoint = bodyStruct.neck_2d_y;
+        // }
+        // //If neck not confident but shoulders are confident, choose half way point of shoulders
+        // else if (bodyStruct.shoulder_left_2d_conf > .5 && bodyStruct.shoulder_right_2d_conf > .5)
+        // {
+        //     xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
+        //     yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
+        // }
+        // //If that isn't true do midpoint between hips
+        // else if (bodyStruct.hip_left_2d_conf > .5 && bodyStruct.hip_right_2d_conf > .5)
+        // {
+        //     xPoint = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
+        //     yPoint = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
+        // }
+        // //If head, shoulders, hips aren't confident, then try nose
+        // else if (bodyStruct.nose_2d_conf > .5)
+        // {
+        //     xPoint = bodyStruct.nose_2d_x;
+        //     yPoint = bodyStruct.nose_2d_y;
+        // }
+        // //Finally, if none of those are confident, we will grab the average x/y location of all detected joints
+        // else
+        // {
+        //     int countOfDetectedJoints = 0;
+        //     int xValueOfDetectedJoints = 0;
+        //     int yValueOfDetectedJoints = 0;
+
+        //     if(bodyStruct.neck_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.neck_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.neck_2d_y;
+        //     }
+        //     if(bodyStruct.nose_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.nose_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.nose_2d_y;
+        //     }
+        //     // if(bodyStruct.pelvis_2d_conf > 0)
+        //     // {
+        //     //     countOfDetectedJoints++;
+        //     //     xValueOfDetectedJoints += bodyStruct.pelvis_2d_x;
+        //     //     yValueOfDetectedJoints += bodyStruct.pelvis_2d_y;
+        //     // }
+        //     if(bodyStruct.shoulder_left_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.shoulder_left_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.shoulder_left_2d_y;
+        //     }
+        //     if(bodyStruct.elbow_left_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.elbow_left_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.elbow_left_2d_y;
+        //     }
+        //     if(bodyStruct.wrist_left_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.wrist_left_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.wrist_left_2d_y;
+        //     }
+        //     if(bodyStruct.hip_left_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.hip_left_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.hip_left_2d_y;
+        //     }
+        //     if(bodyStruct.knee_left_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.knee_left_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.knee_left_2d_y;
+        //     }
+        //     if(bodyStruct.ankle_left_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.ankle_left_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.ankle_left_2d_y;
+        //     }
+        //     if(bodyStruct.shoulder_right_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.shoulder_right_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.shoulder_right_2d_y;
+        //     }
+        //     if(bodyStruct.elbow_right_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.elbow_right_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.elbow_right_2d_y;
+        //     }
+        //     if(bodyStruct.wrist_right_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.wrist_right_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.wrist_right_2d_y;
+        //     }
+        //     if(bodyStruct.hip_right_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.hip_right_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.hip_right_2d_y;
+        //     }
+        //     if(bodyStruct.knee_right_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.knee_right_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.knee_right_2d_y;
+        //     }
+        //     if(bodyStruct.ankle_right_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.ankle_right_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.ankle_right_2d_y;
+        //     }
+        //     if(bodyStruct.eye_left_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.eye_left_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.eye_left_2d_y;
+        //     }
+        //     if(bodyStruct.ear_left_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.ear_left_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.ear_left_2d_y;
+        //     }
+        //     if(bodyStruct.eye_right_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.eye_right_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.eye_right_2d_y;
+        //     }
+        //     if(bodyStruct.ear_right_2d_conf > 0)
+        //     {
+        //         countOfDetectedJoints++;
+        //         xValueOfDetectedJoints += bodyStruct.ear_right_2d_x;
+        //         yValueOfDetectedJoints += bodyStruct.ear_right_2d_y;
+        //     }
+
+        //     xPoint = xValueOfDetectedJoints/countOfDetectedJoints;
+        //     yPoint = yValueOfDetectedJoints/countOfDetectedJoints;
+        // }
+
+        // //Region square radius
+        // int regionRadius = 6;
+
+        // //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
+        // int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0;
+        // xPointMin  = (xPointMin <= frameDepthMat.cols) ? xPointMin : frameDepthMat.cols;
+        // int xPointMax  = (xPoint + regionRadius <= frameDepthMat.cols) ? xPoint + regionRadius : frameDepthMat.cols;
+        // xPointMax  = (xPointMax >= 0) ? xPointMax : 0;
+        // int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0;
+        // yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows;
+        // int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
+        // yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
+
+        // // std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
+        // // std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
+        // // std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
+        // // std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
+        // // std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
+        // // std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
+
+        // // //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
+        // //Now we grab a the average depth value of a 12x12 grid of pixels surrounding the xPoint and yPoint
+        // cv::Scalar mean, stddev;
+        // cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
+        // cv::Mat croppedDepth = frameDepthMat(myROI);
+        // cv::meanStdDev(croppedDepth, mean, stddev);
+        // int pointDepth = int(mean[0]);        
+
+        // // Now we will try to get the non-0 median
+        // // Keep changing until we get a non-0 point depth 2 value
+        //     // go neck bigger 3 times
+        //     // then between neck and pelvis
+        //     // then go bigger 3 times
+        //     // then go full torso, shoulder shoulder hip hip, entire thing
+        // cv::Rect myROI2(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
+        // cv::Mat croppedDepth2 = frameDepthMat(myROI2);
+        // std::vector<u_int16_t> nonZeroDepthValues;
+        // // ushort table[];
+        // int limit = croppedDepth2.rows * croppedDepth2.cols;
+        // ushort* ptr = reinterpret_cast<ushort*>(croppedDepth2.data);
+        // if (!croppedDepth2.isContinuous())
+        // {
+        //     croppedDepth2 = croppedDepth2.clone();
+        // }
+        // // std::cerr << "ROI 2 - Limit: " << limit  << std::endl << std::flush;
+        // for (int i = 0; i < limit; i++, ptr++)
+        // {
+        //     // *ptr = table[*ptr];
+        //     // std::cerr << "ROI 2 - i: " << i  << "   |  *ptr value: " << *ptr  << std::endl << std::flush;
+        //     if(*ptr != 0)
+        //     {
+        //         nonZeroDepthValues.push_back((u_int16_t)(*ptr));
+        //     }
+        // }
+        // u_int16_t pointDepth2 = 0;
+        // if (nonZeroDepthValues.size() > 0)
+        //     pointDepth2 = findMedian(nonZeroDepthValues, nonZeroDepthValues.size());
+
+        //Now we use the HFOV and VFOV to find the x and y coordinates in millimeters
+        // https://github.com/luxonis/depthai-experiments/blob/377c50c13931a082825d457f69893c1bf3f24aa2/gen2-calc-spatials-on-host/calc.py#L10
+        int midDepthXCoordinate = frameDepthMat.cols / 2;    // middle of depth image x across (columns) - this is depth origin
+        int midDepthYCoordinate = frameDepthMat.rows / 2;    // middle of depth image y across (rows) - this is depth origin
+        
+        int xPointInDepthCenterCoordinates = usedXPoint - midDepthXCoordinate; //This is the xPoint but if the depth map center is the origin
+        int yPointInDepthCenterCoordinates = usedYPoint - midDepthYCoordinate; //This is the yPoint but if the depth map center is the origin
+
+        float angle_x = atan(tan(cameraHFOVInRadians / 2.0f) * float(xPointInDepthCenterCoordinates) / float(midDepthXCoordinate));
+        float angle_y = atan(tan(cameraHFOVInRadians / 2.0f) * float(yPointInDepthCenterCoordinates) / float(midDepthYCoordinate));
+
+        //We will save this depth value as the pelvis depth
+        bodyStruct.pelvis_2d_depth = medianPointDepth;
+        bodyStruct.pelvis_2d_x = int(float(medianPointDepth) * tan(angle_x));
+        bodyStruct.pelvis_2d_y = int(-1.0f * float(medianPointDepth) * tan(angle_y));
+
+        std::cerr << "NECK DEPTH: " << int(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x))  << std::endl << std::flush;
+        // std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; //UNCOMMENT
+        std::cerr << "MEDIAN NON-0 NECK DEPTH: " << medianPointDepth << std::endl << std::flush;
+        //Finally we copy the COCO body struct memory to the frame
+        bodyStruct.hton();
+        
+        memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
+
+        // cv::Mat depthFrameColor;
+        // // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
+        // cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
+        // cv::equalizeHist(depthFrameColor, depthFrameColor);
+        // cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
+        // rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
+        // cv::imshow("depth", depthFrameColor);
+        // cv::waitKey(1);
+    }
+
+    //Now that we have copied all memory to the frame we can push it back
+    if (bodyCount > 0)
+    {
+        if (stream_bodies)
+            current_frame_.push_back(s);
     }
 }
 

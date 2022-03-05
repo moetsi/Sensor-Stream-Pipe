@@ -21,7 +21,8 @@ general:
       depth_fps: 5
       depth_spatial_filter: True
       depth_spatial_hole_filling_radius: 2
-      depth_sptial_filter_num_it: 1
+      depth_spatial_filter_num_it: 1
+      depth_decimation_factor: 1
       streaming_color_format: "COLOR_BGRA32"
       streaming_color_resolution: "COLOR_RESOLUTION_720P"
       streaming_depth_mode: "STEREO_DISPARITY"
