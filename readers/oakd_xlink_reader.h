@@ -51,8 +51,6 @@
 #include <string>
 #include <vector>
 
-
-
 namespace moetsi::ssp { 
 
 using namespace InferenceEngine;
@@ -76,7 +74,7 @@ private:
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
   //oakd info
-  dai::Pipeline pipeline;
+  std::shared_ptr<dai::Pipeline> pipeline;
   std::shared_ptr<dai::node::ColorCamera> camRgb;
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
@@ -88,33 +86,52 @@ private:
   std::shared_ptr<dai::DataOutputQueue> qRgb;
   std::shared_ptr<dai::DataOutputQueue> qDepth;
   std::shared_ptr<dai::node::StereoDepth> depth;
-  dai::DeviceInfo device_info;
+  std::shared_ptr<dai::DeviceInfo> device_info;
   std::shared_ptr<dai::Device> device;
-  dai::CalibrationHandler deviceCalib;
+  std::shared_ptr<dai::CalibrationHandler> deviceCalib;
   std::vector<std::vector<float>> cameraIntrinsics;
   float horizontalFocalLengthPixels;
   float verticalFocalLengthPixels;
   float cameraHFOVInRadians;
   
-
-
   //openvino info
   const file_name_t input_model = "../models/human-pose-estimation-3d-0001.xml";
   const file_name_t input_image_path= "../models/pointing_middle_of_view.jpg";
   const std::string device_name = "CPU";
-  Core ie;
-  CNNNetwork network;
-  InputInfo::Ptr input_info;
+  std::shared_ptr<Core> ie;
+  std::shared_ptr<CNNNetwork> network;
+  std::shared_ptr<InputInfo::Ptr> input_info;
   std::string input_name;
-  DataPtr features_output_info;
-  DataPtr heatmaps_output_info;
-  DataPtr pafs_output_info;
+  std::shared_ptr<DataPtr> features_output_info;
+  std::shared_ptr<DataPtr> heatmaps_output_info;
+  std::shared_ptr<DataPtr> pafs_output_info;
   std::string output_name;
-  ExecutableNetwork executable_network;
-  InferRequest infer_request;
+  std::shared_ptr<ExecutableNetwork> executable_network;
+  std::shared_ptr<InferRequest> infer_request;
 
   std::vector<human_pose_estimation::Pose> previous_poses_2d;
   human_pose_estimation::PoseCommon common;
+
+  void SetOrResetInternals();
+  // init only vars
+  unsigned int rgb_res;
+  unsigned int rgb_dai_preview_y;
+  unsigned int rgb_dai_preview_x; 
+  unsigned int rgb_dai_fps;
+  unsigned int depth_res;
+  dai::ColorCameraProperties::SensorResolution rgb_dai_res;
+  dai::MonoCameraProperties::SensorResolution depth_dai_res;
+  unsigned int depth_dai_preview_y;
+  unsigned int depth_dai_preview_x;
+  unsigned int depth_dai_fps;
+  bool depth_dai_sf;
+  unsigned int depth_dai_sf_hfr;
+  unsigned int depth_dai_sf_num_it;
+  std::string ip_name;
+  std::string model_path;
+  std::shared_ptr<dai::RawStereoDepthConfig> oakdConfig;
+
+  bool failed;
 public:
   OakdXlinkReader(YAML::Node config);
 
