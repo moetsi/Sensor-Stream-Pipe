@@ -340,11 +340,11 @@ vector<u_int16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int x
     cv::Mat croppedDepth = frameDepthMat(myROI);
     std::vector<u_int16_t> nonZeroDepthValues;
     int limit = croppedDepth.rows * croppedDepth.cols;
-    ushort* ptr = reinterpret_cast<ushort*>(croppedDepth.data);
     if (!croppedDepth.isContinuous())
     {
         croppedDepth = croppedDepth.clone();
     }
+    ushort* ptr = reinterpret_cast<ushort*>(croppedDepth.data);
     // std::cerr << "ROI 2 - Limit: " << limit  << std::endl << std::flush;
     for (int i = 0; i < limit; i++, ptr++)
     {
@@ -353,6 +353,7 @@ vector<u_int16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int x
         {
             nonZeroDepthValues.push_back((u_int16_t)(*ptr));
         }
+        
     }
     return nonZeroDepthValues;
 
@@ -404,8 +405,8 @@ void OakdXlinkReader::NextFrame() {
 
 
 
-                std::cerr << image2.size[0] << std::endl << std::flush; 
-                std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
+                // std::cerr << image2.size[0] << std::endl << std::flush; 
+                // std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
 
                 cv::Mat image3 = cv::Mat(image2, cv::Rect(0, 0, 
                                                                 image2.size[1] - (image2.size[1] % stride),
@@ -443,7 +444,7 @@ void OakdXlinkReader::NextFrame() {
                 const SizeVector features_output_shape = features_output_info->getTensorDesc().getDims();
                 auto l = features_output_info->getTensorDesc().getLayout();
                 auto p = features_output_info->getTensorDesc().getPrecision(); 
-                std::cerr << "lp " << l << " " << p << std::endl << std::flush;
+                // std::cerr << "lp " << l << " " << p << std::endl << std::flush;
                 const SizeVector heatmaps_output_shape = heatmaps_output_info->getTensorDesc().getDims();
                 const SizeVector pafs_output_shape = pafs_output_info->getTensorDesc().getDims();
 
@@ -874,6 +875,7 @@ void OakdXlinkReader::NextFrame() {
         // If there is good depth around neck, use that
         if(bodyStruct.neck_2d_conf > 0)
         {
+            // frameDepthMat.clone();
             auto nonZeroVector = returnVectorOfNonZeroValuesInRoi(frameDepthMat, bodyStruct.neck_2d_x, bodyStruct.neck_2d_y, 6);
             if (nonZeroVector.size() > 9)
             {
