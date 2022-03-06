@@ -802,8 +802,8 @@ namespace human_pose_estimation {
                                 int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
 
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
 
                                 //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
                                 pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
@@ -824,8 +824,8 @@ namespace human_pose_estimation {
                                 int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
 
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
 
                                 //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
                                 pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
@@ -846,8 +846,8 @@ namespace human_pose_estimation {
                                 int kpt_from_2d_y = int(poses_2d[pose_id][kpt_id_from *3 + 1]);
 
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << "<< " << kpt_id_from << " " << kpt_id_where << " " << kpt_from_2d_x << "," << kpt_from_2d_y << std::endl << std::flush; 
 
                                 //poses_3d[pose_id][kpt_id_where * 4] = map_3d[0, kpt_from_2d[1], kpt_from_2d[0]] * AVG_PERSON_HEIGHT
                                 pose_3d[kpt_id_where * 4] = features.at<float>(map_3d_id, kpt_from_2d_y, kpt_from_2d_x) * AVG_PERSON_HEIGHT;
@@ -996,7 +996,7 @@ namespace human_pose_estimation {
 
         std::vector<Pose> current_poses_2d;
         if (poses_3d.size()) {
-            std::cerr << "DIAG: 3D# " << poses_3d.size() << std::endl << std::flush;
+            // std::cerr << "DIAG: 3D# " << poses_3d.size() << std::endl << std::flush;
         }
         if (is_video) {    
             for (int pose_id = 0; pose_id < int(poses_2d_scaled.size()); ++pose_id) {
@@ -1016,13 +1016,13 @@ namespace human_pose_estimation {
                 current_poses_2d.push_back(pose);
             }
             if (current_poses_2d.size() > 0) {
-                std::cerr << "DIAG: 2D# " << current_poses_2d.size() << std::endl << std::flush;
+                // std::cerr << "DIAG: 2D# " << current_poses_2d.size() << std::endl << std::flush;
             }
             propagate_ids(common, previous_poses_2d, current_poses_2d);
             if (current_poses_2d.size() > 0) {
                 previous_poses_2d = current_poses_2d;
                 auto t = CurrentTimeNs();
-                std::cerr << "DIAG: dt " << double(t - common.last_poses)*1e-9 << std::endl << std::flush;
+                // std::cerr << "DIAG: dt " << double(t - common.last_poses)*1e-9 << std::endl << std::flush;
                 common.last_poses = t;
             } else {
                 auto t = CurrentTimeNs();

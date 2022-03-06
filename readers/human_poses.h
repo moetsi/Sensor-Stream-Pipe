@@ -202,7 +202,7 @@ inline int get_similarity(const PoseCommon & common, const Pose &a, const Pose &
 
 inline void propagate_ids(PoseCommon & common, std::vector<Pose> & previous_poses, std::vector<Pose> &current_poses, int threshold=3) {
 
-    std::cerr << "previous: " << previous_poses.size() << " current: " << current_poses.size() << std::endl << std::flush;
+    // std::cerr << "previous: " << previous_poses.size() << " current: " << current_poses.size() << std::endl << std::flush;
 
     /* Propagate poses ids from previous frame results. Id is propagated,
     if there are at least `threshold` similar keypoints between pose from previous frame and current.

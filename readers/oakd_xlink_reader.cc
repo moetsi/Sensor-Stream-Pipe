@@ -25,18 +25,18 @@ using namespace human_pose_estimation;
 
 OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Starting to open");
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     
     // Pull variables from yaml
     stream_rgb = config["stream_color"].as<bool>();
     stream_depth = config["stream_depth"].as<bool>();
     stream_bodies = config["stream_bodies"].as<bool>();
     fps = config["streaming_rate"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     rgb_res = config["rgb_resolution"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //dai::ColorCameraProperties::SensorResolution rgb_dai_res;
     if (rgb_res == 1080)
         rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
@@ -48,11 +48,11 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
         rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_13_MP;
     else
         rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     rgb_dai_preview_y = config["rgb_preview_size_y"].as<unsigned int>();
     rgb_dai_preview_x = config["rgb_preview_size_x"].as<unsigned int>();
     rgb_dai_fps = config["rgb_fps"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     depth_res = config["depth_resolution"].as<unsigned int>();
     //dai::MonoCameraProperties::SensorResolution depth_dai_res;
     if (depth_res == 720)
@@ -65,17 +65,17 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
         depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_480_P;
     else
         depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;        
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;        
     depth_dai_preview_y = config["depth_preview_size_y"].as<unsigned int>();
     depth_dai_preview_x = config["depth_preview_size_x"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     depth_dai_fps = config["depth_fps"].as<unsigned int>();
     depth_dai_sf = config["depth_spatial_filter"].as<bool>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     depth_dai_sf_hfr = config["depth_spatial_hole_filling_radius"].as<unsigned int>();
     depth_dai_sf_num_it = config["depth_spatial_filter_num_it"].as<unsigned int>();
     depth_dai_df = config["depth_decimation_factor"].as<unsigned int>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Now set up frame template that is consistent across data types
     current_frame_counter_ = 0;
     frame_template_.stream_id = RandomString(16);
@@ -86,7 +86,7 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     frame_template_.message_type = SSPMessageType::MessageTypeDefault; // 0;
 
     ip_name = config["ip"].as<std::string>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 #ifndef _WIN32    
     std::string rel = "../../"; 
@@ -126,7 +126,7 @@ void OakdXlinkReader::SetOrResetInternals() {
     rgbOut->setStreamName("rgb");
     depthOut->setStreamName("depth");
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Color Properties
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
@@ -163,7 +163,7 @@ void OakdXlinkReader::SetOrResetInternals() {
     // oakdConfig.postProcessing.thresholdFilter.maxRange = 15000;
     stereo->initialConfig.set(oakdConfig);
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Linking
     camRgb->preview.link(rgbOut->input);
@@ -171,51 +171,51 @@ void OakdXlinkReader::SetOrResetInternals() {
     right->out.link(stereo->right);
     stereo->depth.link(depthOut->input);
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Changing the IP address to the correct depthai format (const char*)
     char chText[48];
     // std::string ip_name = config["ip"].as<std::string>();
     ip_name = StringInterpolation(ip_name);
     ip_name.copy(chText, ip_name.size(), 0);
     chText[ip_name.size()] = '\0';
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //Which sensor
     device_info = std::make_shared<dai::DeviceInfo>();
     strcpy(device_info->desc.name, chText);
     std::cerr << "device_info->desc.name = " << device_info->desc.name << std::endl << std::flush;
     device_info->state = X_LINK_BOOTLOADER; 
     device_info->desc.protocol = X_LINK_TCP_IP;
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
 
-#ifndef TEST_WITH_IMAGE  
+ 
     device = std::make_shared<dai::Device>(*pipeline, *device_info, true); // usb 2 mode   
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
     deviceCalib = std::make_shared<dai::CalibrationHandler>(device->readCalibration());
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
     cameraIntrinsics = deviceCalib->getCameraIntrinsics(dai::CameraBoardSocket::RGB, 1280, 720);
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
     horizontalFocalLengthPixels = cameraIntrinsics[0][0];
     verticalFocalLengthPixels =  cameraIntrinsics[1][1];
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
     cameraHFOVInRadians = ((deviceCalib->getFov(dai::CameraBoardSocket::RGB) * pi) / 180.0) * (3840.0/4056.0); // Must scale for cropping: https://discordapp.com/channels/790680891252932659/924798503270625290/936746213691228260
-#endif
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Connect to device and start pipeline
-    std:cerr << "Connected cameras: ";
-#ifndef TEST_WITH_IMAGE
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     
+    // std:cerr << "Connected cameras: ";
+
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     
     for(const auto& cam : device->getConnectedCameras()) {
           std::cerr << static_cast<int>(cam) << " ";
           std::cerr << cam << " ";
     }
     std::cerr << endl;
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    spdlog::debug(std::string(__FILE__) + ":" + std::to_string(__LINE__));
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // spdlog::debug(std::string(__FILE__) + ":" + std::to_string(__LINE__));
     // Print USB speed
-    std::cerr << "Usb speed: " << device->getUsbSpeed() << endl;                              
-    spdlog::debug(std::string(__FILE__) + ":" + std::to_string(__LINE__));
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << "Usb speed: " << device->getUsbSpeed() << endl;                              
+    // spdlog::debug(std::string(__FILE__) + ":" + std::to_string(__LINE__));
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Output queue will be used to get the rgb frames from the output defined above
     // Sets queues size and behavior
@@ -223,10 +223,10 @@ void OakdXlinkReader::SetOrResetInternals() {
     qRgb = device->getOutputQueue("rgb", 4, false);                                      
     qDepth = device->getOutputQueue("depth", 4, false);    
 
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-#endif
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+
     //Now setting up Body model
     // input_model = {"../models/human-pose-estimation-3d.xml"};
     // input_image_path = "../openvino/fart";
@@ -365,11 +365,11 @@ vector<u_int16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int x
     cv::Mat croppedDepth = frameDepthMat(myROI);
     std::vector<u_int16_t> nonZeroDepthValues;
     int limit = croppedDepth.rows * croppedDepth.cols;
-    ushort* ptr = reinterpret_cast<ushort*>(croppedDepth.data);
     if (!croppedDepth.isContinuous())
     {
         croppedDepth = croppedDepth.clone();
     }
+    ushort* ptr = reinterpret_cast<ushort*>(croppedDepth.data);
     // std::cerr << "ROI 2 - Limit: " << limit  << std::endl << std::flush;
     for (int i = 0; i < limit; i++, ptr++)
     {
@@ -378,6 +378,7 @@ vector<u_int16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int x
         {
             nonZeroDepthValues.push_back((u_int16_t)(*ptr));
         }
+        
     }
     return nonZeroDepthValues;
 
@@ -434,13 +435,13 @@ void OakdXlinkReader::NextFrame() {
                         int stride = 8;
                         // scale to 256 ~
                         double input_scale = 256.0 / image.size[0];
-                        std::cerr << "input_scale = " << input_scale << std::endl << std::flush;
+                        // std::cerr << "input_scale = " << input_scale << std::endl << std::flush;
                         cv::resize(image, image2, cv::Size(), input_scale, input_scale, cv::INTER_LINEAR);
 
 
 
-                        std::cerr << image2.size[0] << std::endl << std::flush; 
-                        std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
+                        // std::cerr << image2.size[0] << std::endl << std::flush; 
+                        // std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
 
                         cv::Mat image3 = cv::Mat(image2, cv::Rect(0, 0, 
                                                                         image2.size[1] - (image2.size[1] % stride),
@@ -478,7 +479,7 @@ void OakdXlinkReader::NextFrame() {
                         const SizeVector features_output_shape = state->features_output_info->getTensorDesc().getDims();
                         auto l = state->features_output_info->getTensorDesc().getLayout();
                         auto p = state->features_output_info->getTensorDesc().getPrecision(); 
-                        std::cerr << "lp " << l << " " << p << std::endl << std::flush;
+                        // std::cerr << "lp " << l << " " << p << std::endl << std::flush;
                         const SizeVector heatmaps_output_shape = state->heatmaps_output_info->getTensorDesc().getDims();
                         const SizeVector pafs_output_shape = state->pafs_output_info->getTensorDesc().getDims();
 
