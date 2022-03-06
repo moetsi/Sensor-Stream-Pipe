@@ -1389,7 +1389,7 @@ void OakdXlinkReader::NextFrame() {
                 }
 
                 //Now that we have copied all memory to the frame we can push it back
-                if (bodyCount > 0)
+                // ALL THE TIME (HEARTBEAT) if (bodyCount > 0)
                 {
                     if (stream_bodies)
                         current_frame_.push_back(s);
