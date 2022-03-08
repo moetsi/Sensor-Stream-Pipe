@@ -37,7 +37,6 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     rgb_res = config["rgb_resolution"].as<unsigned int>();
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    //dai::ColorCameraProperties::SensorResolution rgb_dai_res;
     if (rgb_res == 1080)
         rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
     else if (rgb_res == 4000)
@@ -54,7 +53,6 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     rgb_dai_fps = config["rgb_fps"].as<unsigned int>();
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     depth_res = config["depth_resolution"].as<unsigned int>();
-    //dai::MonoCameraProperties::SensorResolution depth_dai_res;
     if (depth_res == 720)
         depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
     else if (depth_res == 800)
@@ -131,11 +129,11 @@ void OakdXlinkReader::SetOrResetInternals() {
     // Color Properties
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
     camRgb->setResolution(rgb_dai_res);
-    camRgb->setFps(rgb_dai_fps);
     camRgb->setPreviewSize(rgb_dai_preview_x, rgb_dai_preview_y);
-    // camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
+    camRgb->setFps(rgb_dai_fps);
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
     camRgb->setInterleaved(false);
+    // camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
 
     // Depth Properties
     left->setResolution(depth_dai_res);
@@ -296,6 +294,7 @@ void OakdXlinkReader::SetOrResetInternals() {
     // ------------------------------------------
     state->executable_network = state->ie.LoadNetwork(state->network, "CPU");
     // -----------------------------------------------------------------------------------------------------
+    start_time = CurrentTimeMs();
 }
 
 OakdXlinkReader::~OakdXlinkReader() {
@@ -303,6 +302,23 @@ OakdXlinkReader::~OakdXlinkReader() {
 }
 
 const float magic = 0.84381;
+auto dumpVec = [](const SizeVector& vec) -> std::string {
+    if (vec.empty())
+        return "[]";
+    std::stringstream oss;
+    oss << "[" << vec[0];
+    for (size_t i = 1; i < vec.size(); i++)
+        oss << "," << vec[i];
+    oss << "]";
+    return oss.str();
+};
+auto toSizeVector = [](auto v) -> SizeVector {
+    SizeVector rv;
+    for(auto &x: v) {
+        rv.push_back((size_t) x);
+    }
+    return rv;
+};
 
 int findMedian(vector<u_int16_t> a,
                   int n)
@@ -402,7 +418,9 @@ void OakdXlinkReader::NextFrame() {
             //Increment counter and grab time
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
-   
+            // auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+            // std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
+
             //Here we try until we get a synchronized color and depth frame
             bool haveSyncedFrames = false;
             std::shared_ptr<dai::ImgFrame> synchedRgbFrame;
@@ -432,9 +450,7 @@ void OakdXlinkReader::NextFrame() {
                         auto rgbCvMat = rgbFromQueue->getCvFrame();
                         auto &image = rgbCvMat;
                         cv::Mat image2;
-                        int stride = 8;
                         // scale to 256 ~
-                        double input_scale = 256.0 / image.size[0];
                         // std::cerr << "input_scale = " << input_scale << std::endl << std::flush;
                         cv::resize(image, image2, cv::Size(), input_scale, input_scale, cv::INTER_LINEAR);
 
@@ -506,8 +522,6 @@ void OakdXlinkReader::NextFrame() {
                         const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
                         const float *pafs_result = pafs_outputMapped.as<float *>();
 
-                        float fx = 984.344; // -1;
-
                         // needed?
                         matrix3x4 R = matrix3x4{ { {     
                                     0.1656794936,
@@ -538,7 +552,7 @@ void OakdXlinkReader::NextFrame() {
                         auto input_scale2 = 256.0/720.0 * magic; // * 0.84; //  /1.04065; // -> 0.8*1280/984 || *0.83;
                         posesStruct = parse_poses(previous_poses_2d, common, R, 
                             featuresMat, heatmapMat, paf_mapMat, input_scale2, stride, fx,
-                            image.size[1] //1080
+                            1080 //1080
                             , true); //true);
                     } catch(...) {
                         std::cerr << "TRY/CATCH CATCH AFTER INFERENCE " << std::endl << std::flush;

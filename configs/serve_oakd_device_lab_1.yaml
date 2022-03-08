@@ -6,7 +6,7 @@ general:
   frame_source:
     type: "oakd_device"
     parameters:
-      ip: "192.168.10.24"
+      ip: "192.168.10.216"
       deviceid: 1
       stream_color: False
       stream_depth: False
@@ -14,19 +14,20 @@ general:
       rgb_resolution: 1080
       rgb_preview_size_y: 256
       rgb_preview_size_x: 384 
-      rgb_fps: 5
+      rgb_fps: 7
       depth_resolution: 720
       depth_preview_size_y: 512
       depth_preview_size_x: 768
-      depth_fps: 5
+      depth_fps: 7
       depth_spatial_filter: True
       depth_spatial_hole_filling_radius: 2
-      depth_sptial_filter_num_it: 1
+      depth_spatial_filter_num_it: 1
+      depth_decimation_factor: 1
       streaming_color_format: "COLOR_BGRA32"
       streaming_color_resolution: "COLOR_RESOLUTION_720P"
       streaming_depth_mode: "STEREO_DISPARITY"
       streaming_depth_resolution: "STEREO_RESOLUTION_480P"
-      streaming_rate: "30"
+      streaming_rate: "10"
       model: "@{REL}/models/human-pose-estimation-3d-0001.xml"
 video_encoder:
   0: #color

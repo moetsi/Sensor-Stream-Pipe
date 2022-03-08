@@ -17,9 +17,9 @@ namespace moetsi::ssp {
 using namespace human_pose_estimation;
 
 OakdDeviceReader::OakdDeviceReader(YAML::Node config) {
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Starting to open");
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     
     // Pull variables from yaml
     stream_rgb = config["stream_color"].as<bool>();
@@ -43,7 +43,6 @@ OakdDeviceReader::OakdDeviceReader(YAML::Node config) {
     rgb_dai_fps = config["rgb_fps"].as<unsigned int>();
 
     depth_res = config["depth_resolution"].as<unsigned int>();
-    // ai::MonoCameraProperties::SensorResolution depth_dai_res;
     if (depth_res == 720)
         depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
     else if (depth_res == 800)
@@ -59,7 +58,8 @@ OakdDeviceReader::OakdDeviceReader(YAML::Node config) {
     depth_dai_fps = config["depth_fps"].as<unsigned int>();
     depth_dai_sf = config["depth_spatial_filter"].as<bool>();
     depth_dai_sf_hfr = config["depth_spatial_hole_filling_radius"].as<unsigned int>();
-    depth_dai_sf_num_it = config["depth_sptial_filter_num_it"].as<unsigned int>();
+    depth_dai_sf_num_it = config["depth_spatial_filter_num_it"].as<unsigned int>();
+    depth_dai_df = config["depth_decimation_factor"].as<unsigned int>();
 
     // Now set up frame template that is consistent across data types
     current_frame_counter_ = 0;
@@ -71,7 +71,7 @@ OakdDeviceReader::OakdDeviceReader(YAML::Node config) {
     frame_template_.message_type = SSPMessageType::MessageTypeDefault; 
 
     std::string ip_name = config["ip"].as<std::string>();
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     try {
         failed = true;
@@ -142,6 +142,7 @@ void OakdDeviceReader::SetOrResetInternals() {
     oakdConfig.postProcessing.spatialFilter.enable = depth_dai_sf;
     oakdConfig.postProcessing.spatialFilter.holeFillingRadius = depth_dai_sf_hfr;
     oakdConfig.postProcessing.spatialFilter.numIterations = depth_dai_sf_num_it;
+    oakdConfig.postProcessing.decimationFilter.decimationFactor = depth_dai_df;
     stereo->initialConfig.set(oakdConfig);
     
     // Linking
@@ -162,12 +163,12 @@ void OakdDeviceReader::SetOrResetInternals() {
     strcpy(device_info->desc.name, chText);
     device_info->state = X_LINK_BOOTLOADER; 
     device_info->desc.protocol = X_LINK_TCP_IP;
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
     std::shared_ptr<dai::Device> deviceZero;
     device = deviceZero;
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
     device = std::make_shared<dai::Device>(*pipeline, *device_info, true); // usb 2 mode   
-    std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
+    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
     deviceCalib = std::make_shared<dai::CalibrationHandler>(device->readCalibration());
     cameraIntrinsics = deviceCalib->getCameraIntrinsics(dai::CameraBoardSocket::RGB, 1280, 720);
     horizontalFocalLengthPixels = cameraIntrinsics[0][0];
@@ -213,6 +214,84 @@ auto toSizeVector = [](auto v) -> SizeVector {
     }
     return rv;
 };
+int findMedianDevice(vector<u_int16_t> a,
+                  int n)
+{
+  
+    // If size of the arr[] is even
+    if (n % 2 == 0) {
+  
+        // Applying nth_element
+        // on n/2th index
+        nth_element(a.begin(),
+                    a.begin() + n / 2,
+                    a.end());
+  
+        // Applying nth_element
+        // on (n-1)/2 th index
+        nth_element(a.begin(),
+                    a.begin() + (n - 1) / 2,
+                    a.end());
+  
+        // Find the average of value at
+        // index N/2 and (N-1)/2
+        return (int)(a[(n - 1) / 2]
+                        + a[n / 2])
+               / 2.0;
+    }
+  
+    // If size of the arr[] is odd
+    else {
+  
+        // Applying nth_element
+        // on n/2
+        nth_element(a.begin(),
+                    a.begin() + n / 2,
+                    a.end());
+  
+        // Value at index (N/2)th
+        // is the median
+        return (u_int16_t)a[n / 2];
+    }
+}
+vector<u_int16_t> returnVectorOfNonZeroValuesInRoiDevice(cv::Mat &frameDepthMat, int xPoint, int yPoint, int roiRadius)
+{
+    //Region square radius
+    int regionRadius = roiRadius;
+
+    //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
+    int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0; //make sure the x min isn't less than 0
+    xPointMin  = (xPointMin <= frameDepthMat.cols) ? xPointMin : frameDepthMat.cols; //make sure the x min isn't more than amount of columns
+    int xPointMax  = (xPoint + regionRadius <= frameDepthMat.cols) ? xPoint + regionRadius : frameDepthMat.cols; //make sure the x max isn't more than number of columns
+    xPointMax  = (xPointMax >= 0) ? xPointMax : 0; //make sure the x max isn't less than 0
+    int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0; //make sure the y min isn't less than 0
+    yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows; //make sure the y min isn't more than amount of rows
+    int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows; //make sure the y max isn't more than amount of rows
+    yPointMax   = (yPointMax >= 0) ? yPointMax : 0; //make sure the y max isn't less than 0
+
+
+    cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax));
+    cv::Mat croppedDepth = frameDepthMat(myROI);
+    std::vector<u_int16_t> nonZeroDepthValues;
+    int limit = croppedDepth.rows * croppedDepth.cols;
+    if (!croppedDepth.isContinuous())
+    {
+        croppedDepth = croppedDepth.clone();
+    }
+    ushort* ptr = reinterpret_cast<ushort*>(croppedDepth.data);
+    // std::cerr << "ROI 2 - Limit: " << limit  << std::endl << std::flush;
+    for (int i = 0; i < limit; i++, ptr++)
+    {
+        // std::cerr << "ROI 2 - i: " << i  << "   |  *ptr value: " << *ptr  << std::endl << std::flush;
+        if(*ptr != 0)
+        {
+            nonZeroDepthValues.push_back((u_int16_t)(*ptr));
+        }
+        
+    }
+    return nonZeroDepthValues;
+
+}
 
 void OakdDeviceReader::NextFrame() {
     for (int kk=0; kk<MAX_RETRIAL; ++kk) {
@@ -231,6 +310,11 @@ void OakdDeviceReader::NextFrame() {
             //Increment counter and grab time
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
+            // auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+            // std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
+
+            // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
+
 
             // Here we try until we get a synchronized color and depth frame
             bool haveSyncedFrames = false;
@@ -348,6 +432,7 @@ void OakdDeviceReader::NextFrame() {
                     frames_dictionary.erase(it);
                 }
             }
+            // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
 
             auto frameDepthMat = synchedDepthFrame->getFrame();
             cv::resize(frameDepthMat, frameDepthMat, cv::Size(1280, 720), 0, 0, cv::INTER_NEAREST);
@@ -632,41 +717,96 @@ void OakdDeviceReader::NextFrame() {
                     bodyStruct.ear_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ear_right_2d_y,bodyStruct.ear_right_2d_x));
                     bodyStruct.ear_right_2d_conf = posesStruct.poses_2d[i][18 * 3 + 2];
 
-                    //Now we find the spatial coordinates of using StereoDepth and intrinsics
-                    //We first find the x,y coordinate in the image of the body that is most confident
-                    int xPoint;
-                    int yPoint;
-                    if(bodyStruct.neck_2d_conf > .5)
+                    //Now we find the depth value to use to mark where the detected human body is located, depends on confidence of 2D joints and the amount of stereo depth regions
+                    u_int16_t medianPointDepth = 0;     //This will store the end depth value
+                    bool foundGoodDepth = false;        //This will be used to stop the conditionals when good depth is found
+                    int usedXPoint;                     //This will save what x point was used (for visualization purposes)
+                    int usedYPoint;                     //This will save what y point was used (for visualization purposes)
+                    int usedRadius;                     //This will save what radius was used (for visualization purposes)
+
+                    // If there is good depth around neck, use that
+                    if(bodyStruct.neck_2d_conf > 0)
                     {
-                        xPoint = bodyStruct.neck_2d_x;
-                        yPoint = bodyStruct.neck_2d_y;
-                        std::cerr << "!! OPTION 1 !!" << std::endl << std::flush; 
+                        auto nonZeroVector = returnVectorOfNonZeroValuesInRoiDevice(frameDepthMat, bodyStruct.neck_2d_x, bodyStruct.neck_2d_y, 6);
+                        if (nonZeroVector.size() > 9)
+                        {
+                            medianPointDepth = findMedianDevice(nonZeroVector, nonZeroVector.size());
+                            usedXPoint = bodyStruct.neck_2d_x;
+                            usedYPoint = bodyStruct.neck_2d_y;
+                            usedRadius = 6;
+                            foundGoodDepth = true;
+                        }
+                        std::cerr << "OPTION 1 TRIGGERED (neck)" << std::endl << std::flush;
                     }
-                    //If neck not confident but shoulders are confident, choose half way point of shoulders
-                    else if (bodyStruct.shoulder_left_2d_conf > .5 && bodyStruct.shoulder_right_2d_conf > .5)
+                    // If there is good depth in between shoulders, use that
+                    if (bodyStruct.shoulder_left_2d_conf > 0 && bodyStruct.shoulder_right_2d_conf > 0 && !foundGoodDepth)
                     {
-                        xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
-                        yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
-                        std::cerr << "!! OPTION 2 !!" << std::endl << std::flush; 
+                        int xPoint = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
+                        int yPoint = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
+
+                        auto nonZeroVector = returnVectorOfNonZeroValuesInRoiDevice(frameDepthMat, xPoint, yPoint, 6);
+                        if (nonZeroVector.size() > 9)
+                        {
+                            medianPointDepth = findMedianDevice(nonZeroVector, nonZeroVector.size());
+                            usedXPoint = xPoint;
+                            usedYPoint = yPoint;
+                            usedRadius = 6;
+                            foundGoodDepth = true;
+                        }
+                        std::cerr << "OPTION 2 TRIGGERED (between shoulders)" << std::endl << std::flush;
                     }
-                    //If that isn't true do midpoint between hips
-                    else if (bodyStruct.hip_left_2d_conf > .5 && bodyStruct.hip_right_2d_conf > .5)
+                    //If there is good depth in the center of shoulders and hips, use that, increase the ROI size 2 times if needed
+                    if (bodyStruct.hip_left_2d_conf > 0 && bodyStruct.hip_right_2d_conf > 0 && bodyStruct.shoulder_left_2d_conf > 0 && bodyStruct.shoulder_right_2d_conf && !foundGoodDepth)
                     {
-                        xPoint = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
-                        yPoint = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
-                        std::cerr << "!! OPTION 3 !!" << std::endl << std::flush; 
+                        int xPoint1 = (bodyStruct.shoulder_left_2d_x + bodyStruct.shoulder_right_2d_x)/2;
+                        int yPoint1 = (bodyStruct.shoulder_left_2d_y + bodyStruct.shoulder_right_2d_y)/2;
+                        int xPoint2 = (bodyStruct.hip_left_2d_x + bodyStruct.hip_right_2d_x)/2;
+                        int yPoint2 = (bodyStruct.hip_left_2d_y + bodyStruct.hip_right_2d_y)/2;
+                        int xPoint3 = (xPoint1 + xPoint2)/2;
+                        int yPoint3 = (yPoint1 + yPoint2)/2;
+                        bool foundDepth = false;
+
+                        auto nonZeroVector = returnVectorOfNonZeroValuesInRoiDevice(frameDepthMat, xPoint3, yPoint3, 6);
+                        if (nonZeroVector.size() > 9)
+                        {
+                            medianPointDepth = findMedianDevice(nonZeroVector, nonZeroVector.size());
+                            usedXPoint = xPoint3;
+                            usedYPoint = yPoint3;
+                            usedRadius = 6;
+                            foundDepth = true;
+                            foundGoodDepth = true;
+                            std::cerr << "OPTION 3A TRIGGERED (between shoulders and hips) - 6 roi" << std::endl << std::flush;
+                        }
+                        else
+                        {
+                            nonZeroVector = returnVectorOfNonZeroValuesInRoiDevice(frameDepthMat, xPoint3, yPoint3, 12);
+                        }
+                        if (nonZeroVector.size() > 9 && !foundDepth)
+                        {
+                            medianPointDepth = findMedianDevice(nonZeroVector, nonZeroVector.size());
+                            usedXPoint = xPoint3;
+                            usedYPoint = yPoint3;
+                            usedRadius = 12;
+                            foundDepth = true;
+                            foundGoodDepth = true;
+                            std::cerr << "OPTION 3B TRIGGERED (between shoulders and hips) - 12 roi" << std::endl << std::flush;
+                        }
+                        else
+                        {
+                            nonZeroVector = returnVectorOfNonZeroValuesInRoiDevice(frameDepthMat, xPoint3, yPoint3, 18);
+                        }
+                        if (nonZeroVector.size() > 9 && !foundDepth)
+                        {
+                            medianPointDepth = findMedianDevice(nonZeroVector, nonZeroVector.size());
+                            usedXPoint = xPoint3;
+                            usedYPoint = yPoint3;
+                            usedRadius = 18;
+                            std::cerr << "OPTION 3C TRIGGERED (between shoulders and hips) - 18 roi" << std::endl << std::flush;
+                            foundGoodDepth = true;
+                        }
                     }
-                    //If head, shoulders, hips aren't confident, then try nose
-                    else if (bodyStruct.nose_2d_conf > .5)
+                    if (!foundGoodDepth)
                     {
-                        xPoint = bodyStruct.nose_2d_x;
-                        yPoint = bodyStruct.nose_2d_y;
-                        std::cerr << "!! OPTION 4 !!" << std::endl << std::flush; 
-                    }
-                    //Finally, if none of those are confident, we will grab the average x/y location of all detected joints
-                    else
-                    {
-                        std::cerr << "!! OPTION 5 !!" << std::endl << std::flush; 
                         int countOfDetectedJoints = 0;
                         int xValueOfDetectedJoints = 0;
                         int yValueOfDetectedJoints = 0;
@@ -786,56 +926,90 @@ void OakdDeviceReader::NextFrame() {
                             yValueOfDetectedJoints += bodyStruct.ear_right_2d_y;
                         }
 
-                        xPoint = xValueOfDetectedJoints/countOfDetectedJoints;
-                        yPoint = yValueOfDetectedJoints/countOfDetectedJoints;
+                        int xPoint = xValueOfDetectedJoints/countOfDetectedJoints;
+                        int yPoint = yValueOfDetectedJoints/countOfDetectedJoints;
+
+                        std::vector<uint16_t> nonZeroVector;
+                        int roiRadius = 6;
+                        bool noGoodReadingsAnywhere = false;
+                        while (nonZeroVector.size() < 10)
+                        {
+                            nonZeroVector = returnVectorOfNonZeroValuesInRoiDevice(frameDepthMat, xPoint, yPoint, roiRadius);
+                            roiRadius += 6;
+                            // There can be the case where there are 0 depth values anywhere reasonable in which case we must return 0
+                            if (roiRadius > 60)
+                            {
+                                noGoodReadingsAnywhere = true;
+                                break;
+                            }
+                        }
+                        if (!noGoodReadingsAnywhere)
+                        {
+                            medianPointDepth = findMedianDevice(nonZeroVector, nonZeroVector.size());
+                            usedXPoint = xPoint;
+                            usedYPoint = yPoint;
+                            usedRadius = roiRadius;
+                            foundGoodDepth = true;
+                            std::cerr << "OPTION 4 TRIGGERED (all joints) - " << roiRadius <<  " roi radius" << std::endl << std::flush;
+                        }
+                        else
+                        {
+                            medianPointDepth = 0;
+                            usedXPoint = frameDepthMat.cols/2;
+                            usedYPoint = frameDepthMat.rows/2;
+                            usedRadius = roiRadius;
+                            foundGoodDepth = true;
+                            std::cerr << "OPTION 5 TRIGGERED - NO GOOD DEPTH, RETURNING 0" << std::endl << std::flush;
+                        }
                     }
 
-                    //Now we grab a the average depth value of a 6x6 grid of pixels surrounding the xPoint and yPoint
-                    cv::Scalar mean, stddev;
-                    //Region square radius
-                    int regionRadius = 6;
+                    // //Now we grab a the average depth value of a 6x6 grid of pixels surrounding the xPoint and yPoint
+                    // cv::Scalar mean, stddev;
+                    // //Region square radius
+                    // int regionRadius = 6;
 
-                    //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
-                    int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0;
-                    xPointMin  = (xPointMin <= frameDepthMat.cols) ? xPointMin : frameDepthMat.cols;
-                    int xPointMax  = (xPoint + regionRadius <= frameDepthMat.cols) ? xPoint + regionRadius : frameDepthMat.cols;
-                    xPointMax  = (xPointMax >= 0) ? xPointMax : 0;
-                    int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0;
-                    yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows;
-                    int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
-                    yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
+                    // //We grab a region of interest, we need to make sure it is not asking for pixels outside of the frame
+                    // int xPointMin  = (xPoint - regionRadius >= 0) ? xPoint - regionRadius : 0;
+                    // xPointMin  = (xPointMin <= frameDepthMat.cols) ? xPointMin : frameDepthMat.cols;
+                    // int xPointMax  = (xPoint + regionRadius <= frameDepthMat.cols) ? xPoint + regionRadius : frameDepthMat.cols;
+                    // xPointMax  = (xPointMax >= 0) ? xPointMax : 0;
+                    // int yPointMin  = (yPoint - regionRadius >= 0) ? yPoint - regionRadius : 0;
+                    // yPointMin  = (yPointMin <= frameDepthMat.rows) ? yPointMin : frameDepthMat.rows;
+                    // int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows;
+                    // yPointMax   = (yPointMax >= 0) ? yPointMax : 0;
 
-                    std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
-                    std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
-                    std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
-                    std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
-                    std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
-                    std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
+                    // std::cerr << "xPoint: " << xPoint << std::endl << std::flush;
+                    // std::cerr << "yPoint: " << yPoint << std::endl << std::flush;
+                    // std::cerr << "xPointMin: " << xPointMin << std::endl << std::flush;
+                    // std::cerr << "xPointMax: " << xPointMax << std::endl << std::flush;
+                    // std::cerr << "yPointMin: " << yPointMin << std::endl << std::flush;
+                    // std::cerr << "yPointMax: " << yPointMax << std::endl << std::flush;
 
-                    //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
-                    cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
-                    cv::Mat croppedDepth = frameDepthMat(myROI);
-                    cv::meanStdDev(croppedDepth, mean, stddev);
-                    int pointDepth = int(mean[0]);
+                    // //We grab a reference to the cropped image and calculate the mean, and then store it as pointDepth
+                    // cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
+                    // cv::Mat croppedDepth = frameDepthMat(myROI);
+                    // cv::meanStdDev(croppedDepth, mean, stddev);
+                    // int pointDepth = int(mean[0]);
 
                     //Now we use the HFOV and VFOV to find the x and y coordinates in millimeters
                     // https://github.com/luxonis/depthai-experiments/blob/377c50c13931a082825d457f69893c1bf3f24aa2/gen2-calc-spatials-on-host/calc.py#L10
                     int midDepthXCoordinate = frameDepthMat.cols / 2;    // middle of depth image x across (columns) - this is depth origin
                     int midDepthYCoordinate = frameDepthMat.rows / 2;    // middle of depth image y across (rows) - this is depth origin
                     
-                    int xPointInDepthCenterCoordinates = xPoint - midDepthXCoordinate; //This is the xPoint but if the depth map center is the origin
-                    int yPointInDepthCenterCoordinates = yPoint - midDepthYCoordinate; //This is the yPoint but if the depth map center is the origin
+                    int xPointInDepthCenterCoordinates = usedXPoint - midDepthXCoordinate; //This is the xPoint but if the depth map center is the origin
+                    int yPointInDepthCenterCoordinates = usedYPoint - midDepthYCoordinate; //This is the yPoint but if the depth map center is the origin
 
                     float angle_x = atan(tan(cameraHFOVInRadians / 2.0f) * float(xPointInDepthCenterCoordinates) / float(midDepthXCoordinate));
                     float angle_y = atan(tan(cameraHFOVInRadians / 2.0f) * float(yPointInDepthCenterCoordinates) / float(midDepthYCoordinate));
 
                     //We will save this depth value as the pelvis depth
-                    bodyStruct.pelvis_2d_depth = pointDepth;
-                    bodyStruct.pelvis_2d_x = int(float(pointDepth) * tan(angle_x));
-                    bodyStruct.pelvis_2d_y = int(-1.0f * float(pointDepth) * tan(angle_y));
+                    bodyStruct.pelvis_2d_depth = medianPointDepth;
+                    bodyStruct.pelvis_2d_x = int(float(medianPointDepth) * tan(angle_x));
+                    bodyStruct.pelvis_2d_y = int(-1.0f * float(medianPointDepth) * tan(angle_y));
 
                     std::cerr << "NECK DEPTH: " << int(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x))  << std::endl << std::flush;
-                    std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; 
+                    // std::cerr << "AVERAGE NECK DEPTH: " << pointDepth  << std::endl << std::flush; //UNCOMMENT
+                    std::cerr << "MEDIAN NON-0 NECK DEPTH: " << medianPointDepth << std::endl << std::flush;
                     //Finally we copy the COCO body struct memory to the frame
                     bodyStruct.hton();
                     

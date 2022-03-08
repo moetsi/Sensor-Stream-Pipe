@@ -67,6 +67,7 @@ private:
   int current_frame_counter_;
   unsigned int fps;
   FrameStruct frame_template_;
+  uint64_t start_time;
 
   struct nn_and_depth { std::shared_ptr<dai::NNData> nn; std::shared_ptr<dai::ImgFrame> depth;};
   std::unordered_map<int, nn_and_depth> frames_dictionary;
@@ -135,6 +136,7 @@ private:
   bool depth_dai_sf;
   unsigned int depth_dai_sf_hfr;
   unsigned int depth_dai_sf_num_it;
+  unsigned int depth_dai_df; // = config["depth_decimation_factor"].as<unsigned int>();
   std::string ip_name;
   bool failed;
 public:
