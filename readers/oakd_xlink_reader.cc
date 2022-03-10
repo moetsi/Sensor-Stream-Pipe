@@ -418,23 +418,26 @@ void OakdXlinkReader::NextFrame() {
             //Increment counter and grab time
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
-            // auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-            // std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
+            auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+            std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
 
             //Here we try until we get a synchronized color and depth frame
             bool haveSyncedFrames = false;
             std::shared_ptr<dai::ImgFrame> synchedRgbFrame;
             std::shared_ptr<dai::ImgFrame> synchedDepthFrame;
-            int seqNum;
-            struct moetsi::ssp::human_pose_estimation::poses posesStruct;
+            int rgbSeqNum;
+            int depthSeqNum;
+            struct moetsi::ssp::human_pose_estimation::poses synchedPosesStruct;
             // Now we pull frames until we get a synchronized nn and depth frame
             // The dictionary has a key of seqNum (int) and value is a img::frame pointer
-            // std::unordered_map<int, struct rgb_and_depth { std::shared_ptr<dai::ImgFrame> rgb; std::shared_ptr<dai::ImgFrame> depth };>> frames_dictionary;
+            // std::unordered_map<int, struct color_poses_and_depth { std::shared_ptr<dai::ImgFrame> rgb; moetsi::ssp::human_pose_estimation::poses poses; std::shared_ptr<dai::ImgFrame> depth;};
             while (!haveSyncedFrames)
             {
                 auto rgbFromQueue = qRgb->tryGet<dai::ImgFrame>();
                 if (rgbFromQueue != nullptr)
                 {
+                    auto testRgbSeqNum = rgbFromQueue->getSequenceNum();
+                    struct moetsi::ssp::human_pose_estimation::poses posesStruct;
                     // We run inference and parse poses on every received RGB to help with body tracking
                     try
                     {
@@ -560,17 +563,19 @@ void OakdXlinkReader::NextFrame() {
                     }
 
                     //Grab rgb data and add to dictionary
-                    seqNum = rgbFromQueue->getSequenceNum();
-                    if (frames_dictionary.find(seqNum) != frames_dictionary.end() && !haveSyncedFrames)
+                    rgbSeqNum = rgbFromQueue->getSequenceNum();
+                    if (frames_dictionary.find(rgbSeqNum) != frames_dictionary.end() && !haveSyncedFrames)
                     {
                         synchedRgbFrame = rgbFromQueue;
-                        synchedDepthFrame = frames_dictionary[seqNum].depth;
+                        synchedDepthFrame = frames_dictionary[rgbSeqNum].depth;
+                        synchedPosesStruct = posesStruct;
                         haveSyncedFrames = true;
                         break;
                     }
                     else
                     {
-                        frames_dictionary[seqNum].rgb = rgbFromQueue;
+                        frames_dictionary[rgbSeqNum].rgb = rgbFromQueue;
+                        frames_dictionary[rgbSeqNum].poses = posesStruct;
                     }
                 }
 
@@ -578,25 +583,27 @@ void OakdXlinkReader::NextFrame() {
                 if (depthFromQueue != nullptr)
                 {
                     //Grab depth and add to dictionary
-                    seqNum = depthFromQueue->getSequenceNum();
-                    if (frames_dictionary.find(seqNum) != frames_dictionary.end() && !haveSyncedFrames)
+                    depthSeqNum = depthFromQueue->getSequenceNum();
+                    if (frames_dictionary.find(depthSeqNum) != frames_dictionary.end() && !haveSyncedFrames)
                     {
                         synchedDepthFrame = depthFromQueue;
-                        synchedRgbFrame = frames_dictionary[seqNum].rgb;
+                        synchedRgbFrame = frames_dictionary[depthSeqNum].rgb;
+                        synchedPosesStruct = frames_dictionary[depthSeqNum].poses;
                         haveSyncedFrames = true;
                         break;
                     }
                     else
                     {
-                        frames_dictionary[seqNum].depth = depthFromQueue;
+                        frames_dictionary[depthSeqNum].depth = depthFromQueue;
                     }
                 }
             }
+
             //Now we remove all sequence numbers that are less than or equal the sequence number
             for (auto it = frames_dictionary.cbegin(), next_it = it; it != frames_dictionary.cend(); it = next_it)
             {
                 ++next_it;
-                if (it->first <= seqNum)
+                if (it->first <= depthSeqNum)
                 {
                     frames_dictionary.erase(it);
                 }
@@ -657,7 +664,7 @@ void OakdXlinkReader::NextFrame() {
 
                 /////////////////////////////////////////////
                 //Grab the amount of COCO bodies detected in this rgb frame
-                int32_t bodyCount = (int)posesStruct.poses_3d.size();
+                int32_t bodyCount = (int)synchedPosesStruct.poses_3d.size();
                 //If 0, no need to send structs
                 if (bodyCount < 1)
                 {
@@ -691,12 +698,12 @@ void OakdXlinkReader::NextFrame() {
 
                     //Here we see the 2D joints detected of this body
                     //We grab the depth at the x,y location in the image
-                    // posesStruct.poses_2d[i]; //how do I know what joints are being provided? (will need this for bodyStruct depth values)
+                    // synchedPosesStruct.poses_2d[i]; //how do I know what joints are being provided? (will need this for bodyStruct depth values)
                     //depth value = (int)frameDepthMat.at<ushort>(yvalue,xvalue);
 
                     //Create a COCO body Struct
                     coco_human_t bodyStruct;
-                    bodyStruct.Id = posesStruct.poses_id[i];
+                    bodyStruct.Id = synchedPosesStruct.poses_id[i];
                     std::cerr << "BODY: " << current_frame_counter_ << " # " <<  i << " ... " << bodyStruct.Id << std::endl << std::flush;
                     // Map of joints to array index
                     // neck 0 
@@ -720,88 +727,88 @@ void OakdXlinkReader::NextFrame() {
                     // right ear 18
 
                     //Now we set the data of the COCO body struct
-                    // posesStruct.poses_3d [ {body number } ][ {body joint index}*4 + {0, 1, 2 ,3 for x, y, z, probability}]
+                    // synchedPosesStruct.poses_3d [ {body number } ][ {body joint index}*4 + {0, 1, 2 ,3 for x, y, z, probability}]
 
                     auto zCorrection = [](float x) -> float {
                         return x; // / 0.84381;
                     };
 
-                    bodyStruct.neck_x = posesStruct.poses_3d[i][0 * 4 + 0];
-                    bodyStruct.neck_y = posesStruct.poses_3d[i][0 * 4 + 1];
-                    bodyStruct.neck_z = zCorrection(posesStruct.poses_3d[i][0 * 4 + 2]);
-                    bodyStruct.neck_conf = posesStruct.poses_3d[i][0 * 4 + 3];
-                    bodyStruct.nose_x = posesStruct.poses_3d[i][1 * 4 + 0];
-                    bodyStruct.nose_y = posesStruct.poses_3d[i][1 * 4 + 1];
-                    bodyStruct.nose_z = zCorrection(posesStruct.poses_3d[i][1 * 4 + 2]);
-                    bodyStruct.nose_conf = posesStruct.poses_3d[i][1 * 4 + 3];
-                    bodyStruct.pelvis_x = posesStruct.poses_3d[i][2 * 4 + 0];
-                    bodyStruct.pelvis_y = posesStruct.poses_3d[i][2 * 4 + 1];
-                    bodyStruct.pelvis_z = zCorrection(posesStruct.poses_3d[i][2 * 4 + 2]);
-                    bodyStruct.pelvis_conf = posesStruct.poses_3d[i][2 * 4 + 3];
-                    bodyStruct.shoulder_left_x = posesStruct.poses_3d[i][3 * 4 + 0];
-                    bodyStruct.shoulder_left_y = posesStruct.poses_3d[i][3 * 4 + 1];
-                    bodyStruct.shoulder_left_z = zCorrection(posesStruct.poses_3d[i][3 * 4 + 2]);
-                    bodyStruct.shoulder_left_conf = posesStruct.poses_3d[i][3 * 4 + 3];
-                    bodyStruct.elbow_left_x = posesStruct.poses_3d[i][4 * 4 + 0];
-                    bodyStruct.elbow_left_y = posesStruct.poses_3d[i][4 * 4 + 1];
-                    bodyStruct.elbow_left_z = zCorrection(posesStruct.poses_3d[i][4 * 4 + 2]);
-                    bodyStruct.elbow_left_conf = posesStruct.poses_3d[i][4 * 4 + 3];
-                    bodyStruct.wrist_left_x = posesStruct.poses_3d[i][5 * 4 + 0];
-                    bodyStruct.wrist_left_y = posesStruct.poses_3d[i][5 * 4 + 1];
-                    bodyStruct.wrist_left_z = zCorrection(posesStruct.poses_3d[i][5 * 4 + 2]);
-                    bodyStruct.wrist_left_conf = posesStruct.poses_3d[i][5 * 4 + 3];
-                    bodyStruct.hip_left_x = posesStruct.poses_3d[i][6 * 4 + 0];
-                    bodyStruct.hip_left_y = posesStruct.poses_3d[i][6 * 4 + 1];
-                    bodyStruct.hip_left_z = zCorrection(posesStruct.poses_3d[i][6 * 4 + 2]);
-                    bodyStruct.hip_left_conf = posesStruct.poses_3d[i][6 * 4 + 3];
-                    bodyStruct.knee_left_x = posesStruct.poses_3d[i][7 * 4 + 0];
-                    bodyStruct.knee_left_y = posesStruct.poses_3d[i][7 * 4 + 1];
-                    bodyStruct.knee_left_z = zCorrection(posesStruct.poses_3d[i][7 * 4 + 2]);
-                    bodyStruct.knee_left_conf = posesStruct.poses_3d[i][7 * 4 + 3];
-                    bodyStruct.ankle_left_x = posesStruct.poses_3d[i][8 * 4 + 0];
-                    bodyStruct.ankle_left_y = posesStruct.poses_3d[i][8 * 4 + 1];
-                    bodyStruct.ankle_left_z = zCorrection(posesStruct.poses_3d[i][8 * 4 + 2]);
-                    bodyStruct.ankle_left_conf = posesStruct.poses_3d[i][8 * 4 + 3];
-                    bodyStruct.shoulder_right_x = posesStruct.poses_3d[i][9 * 4 + 0];
-                    bodyStruct.shoulder_right_y = posesStruct.poses_3d[i][9 * 4 + 1];
-                    bodyStruct.shoulder_right_z = zCorrection(posesStruct.poses_3d[i][9 * 4 + 2]);
-                    bodyStruct.shoulder_right_conf = posesStruct.poses_3d[i][9 * 4 + 3];
-                    bodyStruct.elbow_right_x = posesStruct.poses_3d[i][10 * 4 + 0];
-                    bodyStruct.elbow_right_y = posesStruct.poses_3d[i][10 * 4 + 1];
-                    bodyStruct.elbow_right_z = zCorrection(posesStruct.poses_3d[i][10 * 4 + 2]);
-                    bodyStruct.elbow_right_conf = posesStruct.poses_3d[i][10 * 4 + 3];
-                    bodyStruct.wrist_right_x = posesStruct.poses_3d[i][11 * 4 + 0];
-                    bodyStruct.wrist_right_y = posesStruct.poses_3d[i][11 * 4 + 1];
-                    bodyStruct.wrist_right_z = zCorrection(posesStruct.poses_3d[i][11 * 4 + 2]);
-                    bodyStruct.wrist_right_conf = posesStruct.poses_3d[i][11 * 4 + 3];
-                    bodyStruct.hip_right_x = posesStruct.poses_3d[i][12 * 4 + 0];
-                    bodyStruct.hip_right_y = posesStruct.poses_3d[i][12 * 4 + 1];
-                    bodyStruct.hip_right_z = zCorrection(posesStruct.poses_3d[i][12 * 4 + 2]);
-                    bodyStruct.hip_right_conf = posesStruct.poses_3d[i][12 * 4 + 3];
-                    bodyStruct.knee_right_x = posesStruct.poses_3d[i][13 * 4 + 0];
-                    bodyStruct.knee_right_y = posesStruct.poses_3d[i][13 * 4 + 1];
-                    bodyStruct.knee_right_z = zCorrection(posesStruct.poses_3d[i][13 * 4 + 2]);
-                    bodyStruct.knee_right_conf = posesStruct.poses_3d[i][13 * 4 + 3];
-                    bodyStruct.ankle_right_x = posesStruct.poses_3d[i][14 * 4 + 0];
-                    bodyStruct.ankle_right_y = posesStruct.poses_3d[i][14 * 4 + 1];
-                    bodyStruct.ankle_right_z = zCorrection(posesStruct.poses_3d[i][14 * 4 + 2]);
-                    bodyStruct.ankle_right_conf = posesStruct.poses_3d[i][14 * 4 + 3];
-                    bodyStruct.eye_left_x = posesStruct.poses_3d[i][15 * 4 + 0];
-                    bodyStruct.eye_left_y = posesStruct.poses_3d[i][15 * 4 + 1];
-                    bodyStruct.eye_left_z = zCorrection(posesStruct.poses_3d[i][15 * 4 + 2]);
-                    bodyStruct.eye_left_conf = posesStruct.poses_3d[i][15 * 4 + 3];
-                    bodyStruct.ear_left_x = posesStruct.poses_3d[i][16 * 4 + 0];
-                    bodyStruct.ear_left_y = posesStruct.poses_3d[i][16 * 4 + 1];
-                    bodyStruct.ear_left_z = zCorrection(posesStruct.poses_3d[i][16 * 4 + 2]);
-                    bodyStruct.ear_left_conf = posesStruct.poses_3d[i][16 * 4 + 3];
-                    bodyStruct.eye_right_x = posesStruct.poses_3d[i][17 * 4 + 0];
-                    bodyStruct.eye_right_y = posesStruct.poses_3d[i][17 * 4 + 1];
-                    bodyStruct.eye_right_z = zCorrection(posesStruct.poses_3d[i][17 * 4 + 2]);
-                    bodyStruct.eye_right_conf = posesStruct.poses_3d[i][17 * 4 + 3];
-                    bodyStruct.ear_right_x = posesStruct.poses_3d[i][18 * 4 + 0];
-                    bodyStruct.ear_right_y = posesStruct.poses_3d[i][18 * 4 + 1];
-                    bodyStruct.ear_right_z = zCorrection(posesStruct.poses_3d[i][18 * 4 + 2]);
-                    bodyStruct.ear_right_conf = posesStruct.poses_3d[i][18 * 4 + 3];
+                    bodyStruct.neck_x = synchedPosesStruct.poses_3d[i][0 * 4 + 0];
+                    bodyStruct.neck_y = synchedPosesStruct.poses_3d[i][0 * 4 + 1];
+                    bodyStruct.neck_z = zCorrection(synchedPosesStruct.poses_3d[i][0 * 4 + 2]);
+                    bodyStruct.neck_conf = synchedPosesStruct.poses_3d[i][0 * 4 + 3];
+                    bodyStruct.nose_x = synchedPosesStruct.poses_3d[i][1 * 4 + 0];
+                    bodyStruct.nose_y = synchedPosesStruct.poses_3d[i][1 * 4 + 1];
+                    bodyStruct.nose_z = zCorrection(synchedPosesStruct.poses_3d[i][1 * 4 + 2]);
+                    bodyStruct.nose_conf = synchedPosesStruct.poses_3d[i][1 * 4 + 3];
+                    bodyStruct.pelvis_x = synchedPosesStruct.poses_3d[i][2 * 4 + 0];
+                    bodyStruct.pelvis_y = synchedPosesStruct.poses_3d[i][2 * 4 + 1];
+                    bodyStruct.pelvis_z = zCorrection(synchedPosesStruct.poses_3d[i][2 * 4 + 2]);
+                    bodyStruct.pelvis_conf = synchedPosesStruct.poses_3d[i][2 * 4 + 3];
+                    bodyStruct.shoulder_left_x = synchedPosesStruct.poses_3d[i][3 * 4 + 0];
+                    bodyStruct.shoulder_left_y = synchedPosesStruct.poses_3d[i][3 * 4 + 1];
+                    bodyStruct.shoulder_left_z = zCorrection(synchedPosesStruct.poses_3d[i][3 * 4 + 2]);
+                    bodyStruct.shoulder_left_conf = synchedPosesStruct.poses_3d[i][3 * 4 + 3];
+                    bodyStruct.elbow_left_x = synchedPosesStruct.poses_3d[i][4 * 4 + 0];
+                    bodyStruct.elbow_left_y = synchedPosesStruct.poses_3d[i][4 * 4 + 1];
+                    bodyStruct.elbow_left_z = zCorrection(synchedPosesStruct.poses_3d[i][4 * 4 + 2]);
+                    bodyStruct.elbow_left_conf = synchedPosesStruct.poses_3d[i][4 * 4 + 3];
+                    bodyStruct.wrist_left_x = synchedPosesStruct.poses_3d[i][5 * 4 + 0];
+                    bodyStruct.wrist_left_y = synchedPosesStruct.poses_3d[i][5 * 4 + 1];
+                    bodyStruct.wrist_left_z = zCorrection(synchedPosesStruct.poses_3d[i][5 * 4 + 2]);
+                    bodyStruct.wrist_left_conf = synchedPosesStruct.poses_3d[i][5 * 4 + 3];
+                    bodyStruct.hip_left_x = synchedPosesStruct.poses_3d[i][6 * 4 + 0];
+                    bodyStruct.hip_left_y = synchedPosesStruct.poses_3d[i][6 * 4 + 1];
+                    bodyStruct.hip_left_z = zCorrection(synchedPosesStruct.poses_3d[i][6 * 4 + 2]);
+                    bodyStruct.hip_left_conf = synchedPosesStruct.poses_3d[i][6 * 4 + 3];
+                    bodyStruct.knee_left_x = synchedPosesStruct.poses_3d[i][7 * 4 + 0];
+                    bodyStruct.knee_left_y = synchedPosesStruct.poses_3d[i][7 * 4 + 1];
+                    bodyStruct.knee_left_z = zCorrection(synchedPosesStruct.poses_3d[i][7 * 4 + 2]);
+                    bodyStruct.knee_left_conf = synchedPosesStruct.poses_3d[i][7 * 4 + 3];
+                    bodyStruct.ankle_left_x = synchedPosesStruct.poses_3d[i][8 * 4 + 0];
+                    bodyStruct.ankle_left_y = synchedPosesStruct.poses_3d[i][8 * 4 + 1];
+                    bodyStruct.ankle_left_z = zCorrection(synchedPosesStruct.poses_3d[i][8 * 4 + 2]);
+                    bodyStruct.ankle_left_conf = synchedPosesStruct.poses_3d[i][8 * 4 + 3];
+                    bodyStruct.shoulder_right_x = synchedPosesStruct.poses_3d[i][9 * 4 + 0];
+                    bodyStruct.shoulder_right_y = synchedPosesStruct.poses_3d[i][9 * 4 + 1];
+                    bodyStruct.shoulder_right_z = zCorrection(synchedPosesStruct.poses_3d[i][9 * 4 + 2]);
+                    bodyStruct.shoulder_right_conf = synchedPosesStruct.poses_3d[i][9 * 4 + 3];
+                    bodyStruct.elbow_right_x = synchedPosesStruct.poses_3d[i][10 * 4 + 0];
+                    bodyStruct.elbow_right_y = synchedPosesStruct.poses_3d[i][10 * 4 + 1];
+                    bodyStruct.elbow_right_z = zCorrection(synchedPosesStruct.poses_3d[i][10 * 4 + 2]);
+                    bodyStruct.elbow_right_conf = synchedPosesStruct.poses_3d[i][10 * 4 + 3];
+                    bodyStruct.wrist_right_x = synchedPosesStruct.poses_3d[i][11 * 4 + 0];
+                    bodyStruct.wrist_right_y = synchedPosesStruct.poses_3d[i][11 * 4 + 1];
+                    bodyStruct.wrist_right_z = zCorrection(synchedPosesStruct.poses_3d[i][11 * 4 + 2]);
+                    bodyStruct.wrist_right_conf = synchedPosesStruct.poses_3d[i][11 * 4 + 3];
+                    bodyStruct.hip_right_x = synchedPosesStruct.poses_3d[i][12 * 4 + 0];
+                    bodyStruct.hip_right_y = synchedPosesStruct.poses_3d[i][12 * 4 + 1];
+                    bodyStruct.hip_right_z = zCorrection(synchedPosesStruct.poses_3d[i][12 * 4 + 2]);
+                    bodyStruct.hip_right_conf = synchedPosesStruct.poses_3d[i][12 * 4 + 3];
+                    bodyStruct.knee_right_x = synchedPosesStruct.poses_3d[i][13 * 4 + 0];
+                    bodyStruct.knee_right_y = synchedPosesStruct.poses_3d[i][13 * 4 + 1];
+                    bodyStruct.knee_right_z = zCorrection(synchedPosesStruct.poses_3d[i][13 * 4 + 2]);
+                    bodyStruct.knee_right_conf = synchedPosesStruct.poses_3d[i][13 * 4 + 3];
+                    bodyStruct.ankle_right_x = synchedPosesStruct.poses_3d[i][14 * 4 + 0];
+                    bodyStruct.ankle_right_y = synchedPosesStruct.poses_3d[i][14 * 4 + 1];
+                    bodyStruct.ankle_right_z = zCorrection(synchedPosesStruct.poses_3d[i][14 * 4 + 2]);
+                    bodyStruct.ankle_right_conf = synchedPosesStruct.poses_3d[i][14 * 4 + 3];
+                    bodyStruct.eye_left_x = synchedPosesStruct.poses_3d[i][15 * 4 + 0];
+                    bodyStruct.eye_left_y = synchedPosesStruct.poses_3d[i][15 * 4 + 1];
+                    bodyStruct.eye_left_z = zCorrection(synchedPosesStruct.poses_3d[i][15 * 4 + 2]);
+                    bodyStruct.eye_left_conf = synchedPosesStruct.poses_3d[i][15 * 4 + 3];
+                    bodyStruct.ear_left_x = synchedPosesStruct.poses_3d[i][16 * 4 + 0];
+                    bodyStruct.ear_left_y = synchedPosesStruct.poses_3d[i][16 * 4 + 1];
+                    bodyStruct.ear_left_z = zCorrection(synchedPosesStruct.poses_3d[i][16 * 4 + 2]);
+                    bodyStruct.ear_left_conf = synchedPosesStruct.poses_3d[i][16 * 4 + 3];
+                    bodyStruct.eye_right_x = synchedPosesStruct.poses_3d[i][17 * 4 + 0];
+                    bodyStruct.eye_right_y = synchedPosesStruct.poses_3d[i][17 * 4 + 1];
+                    bodyStruct.eye_right_z = zCorrection(synchedPosesStruct.poses_3d[i][17 * 4 + 2]);
+                    bodyStruct.eye_right_conf = synchedPosesStruct.poses_3d[i][17 * 4 + 3];
+                    bodyStruct.ear_right_x = synchedPosesStruct.poses_3d[i][18 * 4 + 0];
+                    bodyStruct.ear_right_y = synchedPosesStruct.poses_3d[i][18 * 4 + 1];
+                    bodyStruct.ear_right_z = zCorrection(synchedPosesStruct.poses_3d[i][18 * 4 + 2]);
+                    bodyStruct.ear_right_conf = synchedPosesStruct.poses_3d[i][18 * 4 + 3];
 
                     //auto to2D = [](float x) -> int16_t {
                     //    std::cerr << "to2D: value = " << x << std::endl << std::flush;
@@ -835,82 +842,82 @@ void OakdXlinkReader::NextFrame() {
 
 
 
-                    bodyStruct.neck_2d_x = to2D(posesStruct.poses_2d[i][0 * 3 + 0]);
-                    bodyStruct.neck_2d_y = to2Dy(posesStruct.poses_2d[i][0 * 3 + 1]);
+                    bodyStruct.neck_2d_x = to2D(synchedPosesStruct.poses_2d[i][0 * 3 + 0]);
+                    bodyStruct.neck_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][0 * 3 + 1]);
                     bodyStruct.neck_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.neck_2d_y,bodyStruct.neck_2d_x));
-                    bodyStruct.neck_2d_conf = posesStruct.poses_2d[i][0 * 3 + 2];
-                    bodyStruct.nose_2d_x = to2D(posesStruct.poses_2d[i][1 * 3 + 0]);
-                    bodyStruct.nose_2d_y = to2Dy(posesStruct.poses_2d[i][1 * 3 + 1]);
+                    bodyStruct.neck_2d_conf = synchedPosesStruct.poses_2d[i][0 * 3 + 2];
+                    bodyStruct.nose_2d_x = to2D(synchedPosesStruct.poses_2d[i][1 * 3 + 0]);
+                    bodyStruct.nose_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][1 * 3 + 1]);
                     bodyStruct.nose_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.nose_2d_y,bodyStruct.nose_2d_x));
-                    bodyStruct.nose_2d_conf = posesStruct.poses_2d[i][1 * 3 + 2];
-                    bodyStruct.pelvis_2d_x = to2D(posesStruct.poses_2d[i][2 * 3 + 0]);
-                    bodyStruct.pelvis_2d_y = to2Dy(posesStruct.poses_2d[i][2 * 3 + 1]);
+                    bodyStruct.nose_2d_conf = synchedPosesStruct.poses_2d[i][1 * 3 + 2];
+                    bodyStruct.pelvis_2d_x = to2D(synchedPosesStruct.poses_2d[i][2 * 3 + 0]);
+                    bodyStruct.pelvis_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][2 * 3 + 1]);
                     bodyStruct.pelvis_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.pelvis_2d_y,bodyStruct.pelvis_2d_x));
-                    bodyStruct.pelvis_2d_conf = posesStruct.poses_2d[i][2 * 3 + 2];
-                    bodyStruct.shoulder_left_2d_x = to2D(posesStruct.poses_2d[i][3 * 3 + 0]);
-                    bodyStruct.shoulder_left_2d_y = to2Dy(posesStruct.poses_2d[i][3 * 3 + 1]);
+                    bodyStruct.pelvis_2d_conf = synchedPosesStruct.poses_2d[i][2 * 3 + 2];
+                    bodyStruct.shoulder_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][3 * 3 + 0]);
+                    bodyStruct.shoulder_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][3 * 3 + 1]);
                     bodyStruct.shoulder_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.shoulder_left_2d_y,bodyStruct.shoulder_left_2d_x));
-                    bodyStruct.shoulder_left_2d_conf = posesStruct.poses_2d[i][3 * 3 + 2];
-                    bodyStruct.elbow_left_2d_x = to2D(posesStruct.poses_2d[i][4 * 3 + 0]);
-                    bodyStruct.elbow_left_2d_y = to2Dy(posesStruct.poses_2d[i][4 * 3 + 1]);
+                    bodyStruct.shoulder_left_2d_conf = synchedPosesStruct.poses_2d[i][3 * 3 + 2];
+                    bodyStruct.elbow_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][4 * 3 + 0]);
+                    bodyStruct.elbow_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][4 * 3 + 1]);
                     bodyStruct.elbow_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.elbow_left_2d_y,bodyStruct.elbow_left_2d_x));
-                    bodyStruct.elbow_left_2d_conf = posesStruct.poses_2d[i][4 * 3 + 2];
-                    bodyStruct.wrist_left_2d_x = to2D(posesStruct.poses_2d[i][5 * 3 + 0]);
-                    bodyStruct.wrist_left_2d_y = to2Dy(posesStruct.poses_2d[i][5 * 3 + 1]);
+                    bodyStruct.elbow_left_2d_conf = synchedPosesStruct.poses_2d[i][4 * 3 + 2];
+                    bodyStruct.wrist_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][5 * 3 + 0]);
+                    bodyStruct.wrist_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][5 * 3 + 1]);
                     bodyStruct.wrist_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.wrist_left_2d_y,bodyStruct.wrist_left_2d_x));
-                    bodyStruct.wrist_left_2d_conf = posesStruct.poses_2d[i][5 * 3 + 2];
-                    bodyStruct.hip_left_2d_x = to2D(posesStruct.poses_2d[i][6 * 3 + 0]);
-                    bodyStruct.hip_left_2d_y = to2Dy(posesStruct.poses_2d[i][6 * 3 + 1]);
+                    bodyStruct.wrist_left_2d_conf = synchedPosesStruct.poses_2d[i][5 * 3 + 2];
+                    bodyStruct.hip_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][6 * 3 + 0]);
+                    bodyStruct.hip_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][6 * 3 + 1]);
                     bodyStruct.hip_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.hip_left_2d_y,bodyStruct.hip_left_2d_x));
-                    bodyStruct.hip_left_2d_conf = posesStruct.poses_2d[i][6 * 3 + 2];
-                    bodyStruct.knee_left_2d_x = to2D(posesStruct.poses_2d[i][7 * 3 + 0]);
-                    bodyStruct.knee_left_2d_y = to2Dy(posesStruct.poses_2d[i][7 * 3 + 1]);
+                    bodyStruct.hip_left_2d_conf = synchedPosesStruct.poses_2d[i][6 * 3 + 2];
+                    bodyStruct.knee_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][7 * 3 + 0]);
+                    bodyStruct.knee_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][7 * 3 + 1]);
                     bodyStruct.knee_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.knee_left_2d_y,bodyStruct.knee_left_2d_x));
-                    bodyStruct.knee_left_2d_conf = posesStruct.poses_2d[i][7 * 3 + 2];
-                    bodyStruct.ankle_left_2d_x = to2D(posesStruct.poses_2d[i][8 * 3 + 0]);
-                    bodyStruct.ankle_left_2d_y = to2Dy(posesStruct.poses_2d[i][8 * 3 + 1]);
+                    bodyStruct.knee_left_2d_conf = synchedPosesStruct.poses_2d[i][7 * 3 + 2];
+                    bodyStruct.ankle_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][8 * 3 + 0]);
+                    bodyStruct.ankle_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][8 * 3 + 1]);
                     bodyStruct.ankle_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ankle_left_2d_y,bodyStruct.ankle_left_2d_x));
-                    bodyStruct.ankle_left_2d_conf = posesStruct.poses_2d[i][8 * 3 + 2];
-                    bodyStruct.shoulder_right_2d_x = to2D(posesStruct.poses_2d[i][9 * 3 + 0]);
-                    bodyStruct.shoulder_right_2d_y = to2Dy(posesStruct.poses_2d[i][9 * 3 + 1]);
+                    bodyStruct.ankle_left_2d_conf = synchedPosesStruct.poses_2d[i][8 * 3 + 2];
+                    bodyStruct.shoulder_right_2d_x = to2D(synchedPosesStruct.poses_2d[i][9 * 3 + 0]);
+                    bodyStruct.shoulder_right_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][9 * 3 + 1]);
                     bodyStruct.shoulder_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.shoulder_right_2d_y,bodyStruct.shoulder_right_2d_x));
-                    bodyStruct.shoulder_right_2d_conf = posesStruct.poses_2d[i][9 * 3 + 2];
-                    bodyStruct.elbow_right_2d_x = to2D(posesStruct.poses_2d[i][10 * 3 + 0]);
-                    bodyStruct.elbow_right_2d_y = to2Dy(posesStruct.poses_2d[i][10 * 3 + 1]);
+                    bodyStruct.shoulder_right_2d_conf = synchedPosesStruct.poses_2d[i][9 * 3 + 2];
+                    bodyStruct.elbow_right_2d_x = to2D(synchedPosesStruct.poses_2d[i][10 * 3 + 0]);
+                    bodyStruct.elbow_right_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][10 * 3 + 1]);
                     bodyStruct.elbow_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.elbow_right_2d_y,bodyStruct.elbow_right_2d_x));
-                    bodyStruct.elbow_right_2d_conf = posesStruct.poses_2d[i][10 * 3 + 2];
-                    bodyStruct.wrist_right_2d_x = to2D(posesStruct.poses_2d[i][11 * 3 + 0]);
-                    bodyStruct.wrist_right_2d_y = to2Dy(posesStruct.poses_2d[i][11 * 3 + 1]);
+                    bodyStruct.elbow_right_2d_conf = synchedPosesStruct.poses_2d[i][10 * 3 + 2];
+                    bodyStruct.wrist_right_2d_x = to2D(synchedPosesStruct.poses_2d[i][11 * 3 + 0]);
+                    bodyStruct.wrist_right_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][11 * 3 + 1]);
                     bodyStruct.wrist_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.wrist_right_2d_y,bodyStruct.wrist_right_2d_x));
-                    bodyStruct.wrist_right_2d_conf = posesStruct.poses_2d[i][11 * 3 + 2];
-                    bodyStruct.hip_right_2d_x = to2D(posesStruct.poses_2d[i][12 * 3 + 0]);
-                    bodyStruct.hip_right_2d_y = to2Dy(posesStruct.poses_2d[i][12 * 3 + 1]);
+                    bodyStruct.wrist_right_2d_conf = synchedPosesStruct.poses_2d[i][11 * 3 + 2];
+                    bodyStruct.hip_right_2d_x = to2D(synchedPosesStruct.poses_2d[i][12 * 3 + 0]);
+                    bodyStruct.hip_right_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][12 * 3 + 1]);
                     bodyStruct.hip_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.hip_right_2d_y,bodyStruct.hip_right_2d_x));
-                    bodyStruct.hip_right_2d_conf = posesStruct.poses_2d[i][12 * 3 + 2];
-                    bodyStruct.knee_right_2d_x = to2D(posesStruct.poses_2d[i][13 * 3 + 0]);
-                    bodyStruct.knee_right_2d_y = to2Dy(posesStruct.poses_2d[i][13 * 3 + 1]);
+                    bodyStruct.hip_right_2d_conf = synchedPosesStruct.poses_2d[i][12 * 3 + 2];
+                    bodyStruct.knee_right_2d_x = to2D(synchedPosesStruct.poses_2d[i][13 * 3 + 0]);
+                    bodyStruct.knee_right_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][13 * 3 + 1]);
                     bodyStruct.knee_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.knee_right_2d_y,bodyStruct.knee_right_2d_x));
-                    bodyStruct.knee_right_2d_conf = posesStruct.poses_2d[i][13 * 3 + 2];
-                    bodyStruct.ankle_right_2d_x = to2D(posesStruct.poses_2d[i][14 * 3 + 0]);
-                    bodyStruct.ankle_right_2d_y = to2Dy(posesStruct.poses_2d[i][14 * 3 + 1]);
+                    bodyStruct.knee_right_2d_conf = synchedPosesStruct.poses_2d[i][13 * 3 + 2];
+                    bodyStruct.ankle_right_2d_x = to2D(synchedPosesStruct.poses_2d[i][14 * 3 + 0]);
+                    bodyStruct.ankle_right_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][14 * 3 + 1]);
                     bodyStruct.ankle_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ankle_right_2d_y,bodyStruct.ankle_right_2d_x));
-                    bodyStruct.ankle_right_2d_conf = posesStruct.poses_2d[i][14 * 3 + 2];
-                    bodyStruct.eye_left_2d_x = to2D(posesStruct.poses_2d[i][15 * 3 + 0]);
-                    bodyStruct.eye_left_2d_y = to2Dy(posesStruct.poses_2d[i][15 * 3 + 1]);
+                    bodyStruct.ankle_right_2d_conf = synchedPosesStruct.poses_2d[i][14 * 3 + 2];
+                    bodyStruct.eye_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][15 * 3 + 0]);
+                    bodyStruct.eye_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][15 * 3 + 1]);
                     bodyStruct.eye_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.eye_left_2d_y,bodyStruct.eye_left_2d_x));
-                    bodyStruct.eye_left_2d_conf = posesStruct.poses_2d[i][15 * 3 + 2];
-                    bodyStruct.ear_left_2d_x = to2D(posesStruct.poses_2d[i][16 * 3 + 0]);
-                    bodyStruct.ear_left_2d_y = to2Dy(posesStruct.poses_2d[i][16 * 3 + 1]);
+                    bodyStruct.eye_left_2d_conf = synchedPosesStruct.poses_2d[i][15 * 3 + 2];
+                    bodyStruct.ear_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][16 * 3 + 0]);
+                    bodyStruct.ear_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][16 * 3 + 1]);
                     bodyStruct.ear_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ear_left_2d_y,bodyStruct.ear_left_2d_x));
-                    bodyStruct.ear_left_2d_conf = posesStruct.poses_2d[i][16 * 3 + 2];
-                    bodyStruct.eye_right_2d_x = to2D(posesStruct.poses_2d[i][17 * 3 + 0]);
-                    bodyStruct.eye_right_2d_y = to2Dy(posesStruct.poses_2d[i][17 * 3 + 1]);
+                    bodyStruct.ear_left_2d_conf = synchedPosesStruct.poses_2d[i][16 * 3 + 2];
+                    bodyStruct.eye_right_2d_x = to2D(synchedPosesStruct.poses_2d[i][17 * 3 + 0]);
+                    bodyStruct.eye_right_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][17 * 3 + 1]);
                     bodyStruct.eye_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.eye_right_2d_y,bodyStruct.eye_right_2d_x));
-                    bodyStruct.eye_right_2d_conf = posesStruct.poses_2d[i][17 * 3 + 2];
-                    bodyStruct.ear_right_2d_x = to2D(posesStruct.poses_2d[i][18 * 3 + 0]);
-                    bodyStruct.ear_right_2d_y = to2Dy(posesStruct.poses_2d[i][18 * 3 + 1]);
+                    bodyStruct.eye_right_2d_conf = synchedPosesStruct.poses_2d[i][17 * 3 + 2];
+                    bodyStruct.ear_right_2d_x = to2D(synchedPosesStruct.poses_2d[i][18 * 3 + 0]);
+                    bodyStruct.ear_right_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][18 * 3 + 1]);
                     bodyStruct.ear_right_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.ear_right_2d_y,bodyStruct.ear_right_2d_x));
-                    bodyStruct.ear_right_2d_conf = posesStruct.poses_2d[i][18 * 3 + 2];
+                    bodyStruct.ear_right_2d_conf = synchedPosesStruct.poses_2d[i][18 * 3 + 2];
 
                     //Now we find the depth value to use to mark where the detected human body is located, depends on confidence of 2D joints and the amount of stereo depth regions
                     u_int16_t medianPointDepth = 0;     //This will store the end depth value
@@ -1393,14 +1400,14 @@ void OakdXlinkReader::NextFrame() {
                     
                     memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
 
-                    // cv::Mat depthFrameColor;
-                    // // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
-                    // cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
-                    // cv::equalizeHist(depthFrameColor, depthFrameColor);
-                    // cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
-                    // rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
-                    // cv::imshow("depth", depthFrameColor);
-                    // cv::waitKey(1);
+                    cv::Mat depthFrameColor;
+                    // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
+                    cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
+                    cv::equalizeHist(depthFrameColor, depthFrameColor);
+                    cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
+                    rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
+                    cv::imshow("depth", depthFrameColor);
+                    cv::waitKey(1);
                 }
 
                 //Now that we have copied all memory to the frame we can push it back

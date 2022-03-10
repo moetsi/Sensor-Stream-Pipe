@@ -69,8 +69,8 @@ private:
   uint64_t start_time;
 
   //We use this dictionary to grab pairs of rgb and depth frames that caame from same point in time
-  struct color_and_depth { std::shared_ptr<dai::ImgFrame> rgb; std::shared_ptr<dai::ImgFrame> depth;};
-  std::unordered_map<int, color_and_depth> frames_dictionary;
+  struct color_poses_and_depth { std::shared_ptr<dai::ImgFrame> rgb; moetsi::ssp::human_pose_estimation::poses poses; std::shared_ptr<dai::ImgFrame> depth;};
+  std::unordered_map<int, color_poses_and_depth> frames_dictionary;
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
   //oakd info
