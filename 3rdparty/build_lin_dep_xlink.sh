@@ -171,9 +171,11 @@ function build_yaml_cpp {
 # https://github.com/zeromq/libzmq
 function build_libzmq {
     echo "Building libzmq"
-    git clone --depth 1 --branch v4.3.4 \
-        https://github.com/zeromq/libzmq.git
+    #git clone --depth 1 --branch v4.3.4 \
+    #    https://github.com/zeromq/libzmq.git
+    git clone https://github.com/zeromq/libzmq.git        
     pushd libzmq
+    git checkout f13f891c911b4e007efd0bf5bd1412874aebd24a 
     mkdir build && cd build
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
@@ -182,6 +184,7 @@ function build_libzmq {
         -DBUILD_TESTS=OFF -DWITH_TLS=ON \
         -DWITH_LIBSODIUM=ON \
         -DWITH_LIBSODIUM_STATIC=ON \
+        -DENABLE_DRAFTS=ON \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
         ..
     cmake --build . -j 16 --config Release --target install

@@ -202,15 +202,18 @@ function build_yaml_cpp {
 # https://github.com/zeromq/libzmq
 function build_libzmq {
     echo "Building libzmq"
-    git clone --depth 1 --branch v4.3.4 \
-        https://github.com/zeromq/libzmq.git || exit -1
+    #git clone --depth 1 --branch v4.3.4 \
+    #    https://github.com/zeromq/libzmq.git
+    git clone https://github.com/zeromq/libzmq.git        
     pushd libzmq
+    git checkout f13f891c911b4e007efd0bf5bd1412874aebd24a 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
         -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
         -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
         -DBUILD_TESTS=OFF \
+        -DENABLE_DRAFTS=ON \
         -DWITH_LIBSODIUM=OFF \
         .. || exit -1
     cmake --build . --config Release --target install 
