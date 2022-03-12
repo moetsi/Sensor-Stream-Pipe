@@ -79,6 +79,9 @@ std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
           std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
           //First we grab the amount of bodies
+          if (f.frame.size() < sizeof(int32_t)) {
+            continue;
+          }
           memcpy(&bodyCount, &f.frame[0], sizeof(int32_t));
           inplace_ntoh(bodyCount);
 

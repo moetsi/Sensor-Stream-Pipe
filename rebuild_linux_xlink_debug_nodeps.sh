@@ -15,5 +15,5 @@ rm -Rvf build_debug
 mkdir build_debug
 cd build_debug
 # -DASAN=ON 
-cmake -DCMAKE_BUILD_TYPE=Debug -DXLINK_ENABLED=ON -DLOCAL_DEP_BUILD_LINUX=ON .. || exit -1
+cmake -DCMAKE_BUILD_TYPE=Debug -DXLINK_ENABLED=ON -DLOCAL_DEP_BUILD_LINUX=ON -DASAN=ON .. || exit -1
 make -j24 || exit -1

@@ -23,9 +23,10 @@ DummyBodyReader::DummyBodyReader(YAML::Node config) {
   frame_template_.frame_type = FrameType::FrameTypeHumanPose; // 4;
   frame_template_.frame_data_type = FrameDataType::FrameDataTypeObjectHumanData; // 8;
 
-  int nhumans_ = config["nhumans"].as<int>();
-  int stopAt_ = config["stopat"].as<int>();
-  std::cerr << ((void*)this) << " nhumans_ = " << nhumans_ << " stopAt_ = " << stopAt_ << std::endl << std::flush;
+  nhumans_ = config["nhumans"].as<int>();
+  stopAt_ = config["stopat"].as<int>();
+  device_ = config["device"].as<int>();
+  std::cerr << ((void*)this) << " " << device_ << " nhumans_ = " << nhumans_ << " stopAt_ = " << stopAt_ << std::endl << std::flush;
 }
 
 DummyBodyReader::~DummyBodyReader() {
@@ -43,6 +44,7 @@ void DummyBodyReader::NextFrame() {
   s->frame_id = current_frame_counter_++;
   s->timestamps.push_back(capture_timestamp);
   s->frame = std::vector<uchar>();
+  s->device_id = device_;
   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
   std::cerr << ((void*)this) << " " << nhumans_  << " " << (sizeof(coco_human_t) * nhumans_ + sizeof(int32_t)) << std::endl << std::flush;
   s->frame.resize(sizeof(coco_human_t) * nhumans_ + sizeof(int32_t));

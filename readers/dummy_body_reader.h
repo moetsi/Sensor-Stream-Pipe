@@ -29,6 +29,7 @@ private:
   int counter_ = 0;
   int nhumans_ = 12; // technically this is a bug as for some reason thingsin the ctor are re-ctored WTF gcc=9.4.0/ubuntu20
   int stopAt_ = 10000000;
+  int device_ = 1;
   bool has_next_ = true;
 public:
   DummyBodyReader(YAML::Node config);

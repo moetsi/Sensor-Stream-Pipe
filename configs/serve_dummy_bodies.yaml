@@ -7,6 +7,7 @@ general:
     parameters:
       nhumans: 10
       stopat: 1000
+      device: 3
 video_encoder:
   4: #object-human
     type: "null"
