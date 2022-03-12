@@ -9,7 +9,7 @@
 
 namespace moetsi::ssp {
 
-DummyBodyReader::DummyBodyReader() {
+DummyBodyReader::DummyBodyReader(YAML::Node config) {
   current_frame_counter_ = 0;
 
   frame_template_.sensor_id = 0;
@@ -22,25 +22,33 @@ DummyBodyReader::DummyBodyReader() {
 
   frame_template_.frame_type = FrameType::FrameTypeHumanPose; // 4;
   frame_template_.frame_data_type = FrameDataType::FrameDataTypeObjectHumanData; // 8;
+
+  int nhumans_ = config["nhumans"].as<int>();
+  int stopAt_ = config["stopat"].as<int>();
+  std::cerr << ((void*)this) << " nhumans_ = " << nhumans_ << " stopAt_ = " << stopAt_ << std::endl << std::flush;
 }
 
 DummyBodyReader::~DummyBodyReader() {
 }
 
 void DummyBodyReader::NextFrame() {
-
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   std::this_thread::sleep_for(std::chrono::milliseconds(1024 / 100)); // 100 fps
   current_frame_.clear();
 
   uint64_t capture_timestamp = CurrentTimeMs();
   std::shared_ptr<FrameStruct> s =
       std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
   s->frame_id = current_frame_counter_++;
   s->timestamps.push_back(capture_timestamp);
   s->frame = std::vector<uchar>();
-  s->frame.resize(sizeof(coco_human_t) + sizeof(int32_t));
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
+  std::cerr << ((void*)this) << " " << nhumans_  << " " << (sizeof(coco_human_t) * nhumans_ + sizeof(int32_t)) << std::endl << std::flush;
+  s->frame.resize(sizeof(coco_human_t) * nhumans_ + sizeof(int32_t));
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   //here we will say we detected 1 body
-  int32_t bodyCount = 1;
+  int32_t bodyCount = (int32_t) nhumans_;
   coco_human_t bodyStruct;
 
   bodyStruct.Id = 1;
@@ -200,11 +208,19 @@ void DummyBodyReader::NextFrame() {
   bodyStruct.ear_right_conf = 1;
   inplace_hton(bodyCount);
   // std::cerr << "dummy: bodyCount after hton " << bodyCount << std::endl << std::flush;
+  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   memcpy(&s->frame[0], &bodyCount, sizeof(int32_t));
-  memcpy(&s->frame[4], &bodyStruct, sizeof(coco_human_t));
+  for (int i=0; i < nhumans_; ++i) {
+    ////std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    bodyStruct.Id = (i+1);
+    inplace_hton(bodyStruct.Id);
+    memcpy(&s->frame[4 + sizeof(coco_human_t)*i], &bodyStruct, sizeof(coco_human_t));
+    ///std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+  }
+  ////std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   current_frame_.push_back(s);
 
-  if (counter_ ++ > 1000) {
+  if (counter_ ++ > this->stopAt_) {
     has_next_ = false;
   }
 }

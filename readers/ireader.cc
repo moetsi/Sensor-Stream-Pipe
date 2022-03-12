@@ -158,7 +158,7 @@ std::shared_ptr<IReader> IReaderFactory(const std::string & config) {
       }
       return reader;
     } else if (reader_type == "dummybody") {
-        reader = std::make_shared<DummyBodyReader>();
+        reader = std::make_shared<DummyBodyReader>(general_parameters["frame_source"]["parameters"]);
         return reader;
     } else if (reader_type == "kinect") {
 #ifdef SSP_WITH_KINECT_SUPPORT

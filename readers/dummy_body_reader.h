@@ -23,38 +23,41 @@ namespace moetsi::ssp {
 
 class DummyBodyReader : public IReader {
 private:
-  int current_frame_counter_;
-
+  int current_frame_counter_ = 0;
   FrameStruct frame_template_;
-
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
   int counter_ = 0;
+  int nhumans_ = 12; // technically this is a bug as for some reason thingsin the ctor are re-ctored WTF gcc=9.4.0/ubuntu20
+  int stopAt_ = 10000000;
   bool has_next_ = true;
 public:
-  DummyBodyReader();
+  DummyBodyReader(YAML::Node config);
+  //DummyBodyReader() { std::cerr << "() constructor" << std::endl << std::flush; }
+  //DummyBodyReader(const DummyBodyReader &) { std::cerr << "& copy" << std::endl << std::flush; }
+  //DummyBodyReader(DummyBodyReader &&) { std::cerr << "&& copy" << std::endl << std::flush; }
 
   ~DummyBodyReader();
 
   /** @brief Get current frame data */
-  virtual std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
+  std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
 
   /** 
    * @brief Get frame types
    * \return a vector of FrameType, listing available data types 
    */
-  virtual std::vector<FrameType> GetType();
+  std::vector<FrameType> GetType();
 
   /**
    * @brief Check if there is a next frame
    * \return true if there is a next frame
    */
-  virtual bool HasNextFrame();
+  bool HasNextFrame();
 
   /** @brief Go to next frame */
-  virtual void NextFrame();
+  void NextFrame();
 
   /** @brief Reset this reader */
-  virtual void Reset();
+  void Reset();
 
   /** 
    * @brief Go to a given frame
@@ -66,13 +69,31 @@ public:
    * @brief Get current frame number
    * \return current frame number.
    */ 
-  virtual unsigned int GetCurrentFrameId();
+  unsigned int GetCurrentFrameId();
 
   /**
    * @brief Get indicative FPS in frame per second.
    * \return the FPS number
    */ 
-  virtual unsigned int GetFps();
+  unsigned int GetFps();
+
+/*
+    void Reset();
+
+  bool HasNextFrame();
+
+  void NextFrame();
+
+  std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
+
+  unsigned int GetCurrentFrameId();
+
+  virtual void GoToFrame(unsigned int frame_id);
+
+  unsigned int GetFps();
+
+  std::vector<FrameType> GetType();
+*/
 };
 
 } // namespace moetsi::ssp

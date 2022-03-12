@@ -4,6 +4,9 @@ general:
   port: 9999
   frame_source:
     type: "dummybody"
+    parameters:
+      nhumans: 10
+      stopat: 1000
 video_encoder:
   4: #object-human
     type: "null"

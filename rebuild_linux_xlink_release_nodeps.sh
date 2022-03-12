@@ -2,7 +2,7 @@
 
 source ./path-helpers-ubuntu20.sh
 
-#rm -Rvf build_release
+rm -Rvf build_release
 #cd 3rdparty
 #./build_lin_dep_xlink.sh || exit -1
 #cd ..

@@ -96,8 +96,14 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
 
         if (f.frame_type == FrameType::FrameTypeHumanPose)
         {
-          memcpy(&bodyStruct, &f.frame[4], sizeof(coco_human_t));
-          detectedBody = true;
+          std::cerr << f.frame.size() << std::endl << std::flush;
+          if (f.frame.size() < 4 + sizeof(coco_human_t)) {
+            std::cerr << "0 size frame -> skip " << std::endl << std::flush;
+            continue;
+          } else {
+            memcpy(&bodyStruct, &f.frame[4], sizeof(coco_human_t));
+            detectedBody = true;
+          }
         }
 
         cv::Mat img;

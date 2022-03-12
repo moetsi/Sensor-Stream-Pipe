@@ -99,7 +99,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
                 .as<std::string>()));
 
     } else if (reader_type == "dummybody") {
-      reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader());
+      reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader(general_parameters["frame_source"]["parameters"]));
     }
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
     else if (reader_type == "oakd_xlink") {
