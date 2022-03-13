@@ -34,7 +34,7 @@ DummyBodyReader::~DummyBodyReader() {
 
 void DummyBodyReader::NextFrame() {
   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-  std::this_thread::sleep_for(std::chrono::milliseconds(1024 / 100)); // 100 fps
+  std::this_thread::sleep_for(std::chrono::milliseconds(100)); // 10 fps
   current_frame_.clear();
 
   uint64_t capture_timestamp = CurrentTimeMs();
