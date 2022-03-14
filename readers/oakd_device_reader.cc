@@ -154,6 +154,7 @@ void OakdDeviceReader::SetOrResetInternals() {
     nn->out.link(nnXout->input);
 
     // Changing the IP address to the correct depthai format (const char*)
+    std::cerr << "ip_name = " << ip_name << std::endl << std::flush;
     char chText[48];
     ip_name = StringInterpolation(ip_name);
     ip_name.copy(chText, ip_name.size(), 0);
