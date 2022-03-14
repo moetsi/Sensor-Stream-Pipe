@@ -1400,14 +1400,14 @@ void OakdXlinkReader::NextFrame() {
                     
                     memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
 
-                    cv::Mat depthFrameColor;
-                    // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
-                    cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
-                    cv::equalizeHist(depthFrameColor, depthFrameColor);
-                    cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
-                    rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
-                    cv::imshow("depth", depthFrameColor);
-                    cv::waitKey(1);
+                    // cv::Mat depthFrameColor;
+                    // // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
+                    // cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
+                    // cv::equalizeHist(depthFrameColor, depthFrameColor);
+                    // cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
+                    // rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
+                    // cv::imshow("depth", depthFrameColor);
+                    // cv::waitKey(1);
                 }
 
                 //Now that we have copied all memory to the frame we can push it back
