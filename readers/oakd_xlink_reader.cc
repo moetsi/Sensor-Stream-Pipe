@@ -320,7 +320,7 @@ auto toSizeVector = [](auto v) -> SizeVector {
     return rv;
 };
 
-int findMedian(vector<u_int16_t> a,
+int findMedian(vector<uint16_t> a,
                   int n)
 {
   
@@ -357,11 +357,11 @@ int findMedian(vector<u_int16_t> a,
   
         // Value at index (N/2)th
         // is the median
-        return (u_int16_t)a[n / 2];
+        return (uint16_t)a[n / 2];
     }
 }
 
-vector<u_int16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int xPoint, int yPoint, int roiRadius)
+vector<uint16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int xPoint, int yPoint, int roiRadius)
 {
     //Region square radius
     int regionRadius = roiRadius;
@@ -379,7 +379,7 @@ vector<u_int16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int x
 
     cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax));
     cv::Mat croppedDepth = frameDepthMat(myROI);
-    std::vector<u_int16_t> nonZeroDepthValues;
+    std::vector<uint16_t> nonZeroDepthValues;
     int limit = croppedDepth.rows * croppedDepth.cols;
     if (!croppedDepth.isContinuous())
     {
@@ -392,7 +392,7 @@ vector<u_int16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int x
         // std::cerr << "ROI 2 - i: " << i  << "   |  *ptr value: " << *ptr  << std::endl << std::flush;
         if(*ptr != 0)
         {
-            nonZeroDepthValues.push_back((u_int16_t)(*ptr));
+            nonZeroDepthValues.push_back((uint16_t)(*ptr));
         }
         
     }
@@ -920,7 +920,7 @@ void OakdXlinkReader::NextFrame() {
                     bodyStruct.ear_right_2d_conf = synchedPosesStruct.poses_2d[i][18 * 3 + 2];
 
                     //Now we find the depth value to use to mark where the detected human body is located, depends on confidence of 2D joints and the amount of stereo depth regions
-                    u_int16_t medianPointDepth = 0;     //This will store the end depth value
+                    uint16_t medianPointDepth = 0;     //This will store the end depth value
                     bool foundGoodDepth = false;        //This will be used to stop the conditionals when good depth is found
                     int usedXPoint;                     //This will save what x point was used (for visualization purposes)
                     int usedYPoint;                     //This will save what y point was used (for visualization purposes)
@@ -1354,7 +1354,7 @@ void OakdXlinkReader::NextFrame() {
                     //     // then go full torso, shoulder shoulder hip hip, entire thing
                     // cv::Rect myROI2(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax ));
                     // cv::Mat croppedDepth2 = frameDepthMat(myROI2);
-                    // std::vector<u_int16_t> nonZeroDepthValues;
+                    // std::vector<uint16_t> nonZeroDepthValues;
                     // // ushort table[];
                     // int limit = croppedDepth2.rows * croppedDepth2.cols;
                     // ushort* ptr = reinterpret_cast<ushort*>(croppedDepth2.data);
@@ -1369,10 +1369,10 @@ void OakdXlinkReader::NextFrame() {
                     //     // std::cerr << "ROI 2 - i: " << i  << "   |  *ptr value: " << *ptr  << std::endl << std::flush;
                     //     if(*ptr != 0)
                     //     {
-                    //         nonZeroDepthValues.push_back((u_int16_t)(*ptr));
+                    //         nonZeroDepthValues.push_back((uint16_t)(*ptr));
                     //     }
                     // }
-                    // u_int16_t pointDepth2 = 0;
+                    // uint16_t pointDepth2 = 0;
                     // if (nonZeroDepthValues.size() > 0)
                     //     pointDepth2 = findMedian(nonZeroDepthValues, nonZeroDepthValues.size());
 
@@ -1400,14 +1400,14 @@ void OakdXlinkReader::NextFrame() {
                     
                     memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
 
-                    cv::Mat depthFrameColor;
-                    // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
-                    cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
-                    cv::equalizeHist(depthFrameColor, depthFrameColor);
-                    cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
-                    rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
-                    cv::imshow("depth", depthFrameColor);
-                    cv::waitKey(1);
+                    // cv::Mat depthFrameColor;
+                    // // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
+                    // cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
+                    // cv::equalizeHist(depthFrameColor, depthFrameColor);
+                    // cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
+                    // rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
+                    // cv::imshow("depth", depthFrameColor);
+                    // cv::waitKey(1);
                 }
 
                 //Now that we have copied all memory to the frame we can push it back

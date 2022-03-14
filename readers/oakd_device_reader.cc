@@ -214,7 +214,7 @@ auto toSizeVector = [](auto v) -> SizeVector {
     }
     return rv;
 };
-int findMedianDevice(vector<u_int16_t> a,
+int findMedianDevice(vector<uint16_t> a,
                   int n)
 {
   
@@ -251,10 +251,10 @@ int findMedianDevice(vector<u_int16_t> a,
   
         // Value at index (N/2)th
         // is the median
-        return (u_int16_t)a[n / 2];
+        return (uint16_t)a[n / 2];
     }
 }
-vector<u_int16_t> returnVectorOfNonZeroValuesInRoiDevice(cv::Mat &frameDepthMat, int xPoint, int yPoint, int roiRadius)
+vector<uint16_t> returnVectorOfNonZeroValuesInRoiDevice(cv::Mat &frameDepthMat, int xPoint, int yPoint, int roiRadius)
 {
     //Region square radius
     int regionRadius = roiRadius;
@@ -272,7 +272,7 @@ vector<u_int16_t> returnVectorOfNonZeroValuesInRoiDevice(cv::Mat &frameDepthMat,
 
     cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax));
     cv::Mat croppedDepth = frameDepthMat(myROI);
-    std::vector<u_int16_t> nonZeroDepthValues;
+    std::vector<uint16_t> nonZeroDepthValues;
     int limit = croppedDepth.rows * croppedDepth.cols;
     if (!croppedDepth.isContinuous())
     {
@@ -285,7 +285,7 @@ vector<u_int16_t> returnVectorOfNonZeroValuesInRoiDevice(cv::Mat &frameDepthMat,
         // std::cerr << "ROI 2 - i: " << i  << "   |  *ptr value: " << *ptr  << std::endl << std::flush;
         if(*ptr != 0)
         {
-            nonZeroDepthValues.push_back((u_int16_t)(*ptr));
+            nonZeroDepthValues.push_back((uint16_t)(*ptr));
         }
         
     }
@@ -718,7 +718,7 @@ void OakdDeviceReader::NextFrame() {
                     bodyStruct.ear_right_2d_conf = posesStruct.poses_2d[i][18 * 3 + 2];
 
                     //Now we find the depth value to use to mark where the detected human body is located, depends on confidence of 2D joints and the amount of stereo depth regions
-                    u_int16_t medianPointDepth = 0;     //This will store the end depth value
+                    uint16_t medianPointDepth = 0;     //This will store the end depth value
                     bool foundGoodDepth = false;        //This will be used to stop the conditionals when good depth is found
                     int usedXPoint;                     //This will save what x point was used (for visualization purposes)
                     int usedYPoint;                     //This will save what y point was used (for visualization purposes)
