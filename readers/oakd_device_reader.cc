@@ -70,7 +70,7 @@ OakdDeviceReader::OakdDeviceReader(YAML::Node config) {
     frame_template_.frame_id = 0;
     frame_template_.message_type = SSPMessageType::MessageTypeDefault; 
 
-    std::string ip_name = config["ip"].as<std::string>();
+    ip_name = config["ip"].as<std::string>();
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     try {
