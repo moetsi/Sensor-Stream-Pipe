@@ -202,11 +202,11 @@ function build_yaml_cpp {
 # https://github.com/zeromq/libzmq
 function build_libzmq {
     echo "Building libzmq"
-    #git clone --depth 1 --branch v4.3.4 \
-    #    https://github.com/zeromq/libzmq.git
-    git clone https://github.com/zeromq/libzmq.git        
+    git clone --depth 1 --branch v4.3.4 \
+        https://github.com/zeromq/libzmq.git
+    #git clone https://github.com/zeromq/libzmq.git        
     pushd libzmq
-    git checkout f13f891c911b4e007efd0bf5bd1412874aebd24a 
+    #git checkout f13f891c911b4e007efd0bf5bd1412874aebd24a 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
         -G "Visual Studio 16 2019" -A "x64" \
