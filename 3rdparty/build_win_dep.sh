@@ -213,7 +213,6 @@ function build_libzmq {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
         -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
         -DBUILD_TESTS=OFF \
-        -DENABLE_DRAFTS=ON \
         -DWITH_LIBSODIUM=OFF \
         .. || exit -1
     cmake --build . --config Release --target install 
