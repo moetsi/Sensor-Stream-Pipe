@@ -191,6 +191,8 @@ void OakdDeviceReader::SetOrResetInternals() {
     // qRgb = device->getOutputQueue("rgb", 4, false);                                      
     qDepth = device->getOutputQueue("depth", 10, false);    
     qNn = device->getOutputQueue("nn", 10, false);
+
+    start_time = CurrentTimeMs();
 }
 
 OakdDeviceReader::~OakdDeviceReader() {
@@ -312,8 +314,8 @@ void OakdDeviceReader::NextFrame() {
             //Increment counter and grab time
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
-            // auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-            // std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
+            auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+            std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
 
             // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
 

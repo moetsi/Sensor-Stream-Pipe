@@ -6,7 +6,7 @@ general:
   frame_source:
     type: "oakd_device"
     parameters:
-      ip: "192.168.10.216"
+      ip: "192.168.10.42"
       deviceid: 1
       stream_color: False
       stream_depth: False
