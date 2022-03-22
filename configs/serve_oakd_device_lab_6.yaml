@@ -8,8 +8,8 @@ general:
     parameters:
       ip: "192.168.10.205"
       deviceid: 4
-      stream_color: False
-      stream_depth: False
+      stream_color: True
+      stream_depth: True
       stream_bodies: True
       rgb_resolution: 1080
       rgb_preview_size_y: 256
