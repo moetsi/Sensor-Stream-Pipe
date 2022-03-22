@@ -68,4 +68,6 @@ void SetupLogging(std::string &level, std::string &file);
                        AV_ERROR_MAX_STRING_SIZE, errnum)
 #endif
 
+/// *** #error TODO load yaml from string or path ~ LoadFile -> Load
+
 }

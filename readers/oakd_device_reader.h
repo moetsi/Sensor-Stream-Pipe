@@ -55,6 +55,9 @@ namespace moetsi::ssp {
 
 using namespace InferenceEngine;
 //DONE OPENVINO HEADERS
+#ifndef MAGIC
+#define MAGIC 0.84381
+#endif
 
 class OakdDeviceReader : public IReader {
 private:
@@ -102,9 +105,16 @@ private:
   double input_scale = 256.0 / 720.0;
   float fx = 984.344;
 
+  double scale_multiplier1 = MAGIC;
+  double scale_multiplier2 = MAGIC;
+  double xmagic = MAGIC;
+  int sz_x = 256;
+  int sz_y = 384;
+
   //openvino info
   // *** const file_name_t input_model = "../models/human-pose-estimation-3d-0001.xml";
-  const std::string input_blob = "@{REL}/models/human-pose-estimation-3d-0001.blob";
+  // const 
+  std::string input_blob = "@{REL}/models/human-pose-estimation-3d-0001.blob";
   // *** const file_name_t input_image_path= "../models/pointing_middle_of_view.jpg";
   const std::string device_name = "CPU";
   std::shared_ptr<Core> ie;

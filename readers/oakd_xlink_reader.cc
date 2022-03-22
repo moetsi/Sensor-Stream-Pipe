@@ -34,47 +34,10 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     stream_depth = config["stream_depth"].as<bool>();
     stream_bodies = config["stream_bodies"].as<bool>();
     fps = config["streaming_rate"].as<unsigned int>();
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    rgb_res = config["rgb_resolution"].as<unsigned int>();
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    if (rgb_res == 1080)
-        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
-    else if (rgb_res == 4000)
-        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_4_K;
-    else if (rgb_res == 12000)
-        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_12_MP;
-    else if (rgb_res == 13000)
-        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_13_MP;
-    else
-        rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    rgb_dai_preview_y = config["rgb_preview_size_y"].as<unsigned int>();
-    rgb_dai_preview_x = config["rgb_preview_size_x"].as<unsigned int>();
-    rgb_dai_fps = config["rgb_fps"].as<unsigned int>();
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    depth_res = config["depth_resolution"].as<unsigned int>();
-    if (depth_res == 720)
-        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
-    else if (depth_res == 800)
-        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_800_P;
-    else if (depth_res == 400)
-        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_400_P;
-    else if (depth_res == 480)
-        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_480_P;
-    else
-        depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;        
-    depth_dai_preview_y = config["depth_preview_size_y"].as<unsigned int>();
-    depth_dai_preview_x = config["depth_preview_size_x"].as<unsigned int>();
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    depth_dai_fps = config["depth_fps"].as<unsigned int>();
-    depth_dai_sf = config["depth_spatial_filter"].as<bool>();
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    depth_dai_sf_hfr = config["depth_spatial_hole_filling_radius"].as<unsigned int>();
-    depth_dai_sf_num_it = config["depth_spatial_filter_num_it"].as<unsigned int>();
-    depth_dai_df = config["depth_decimation_factor"].as<unsigned int>();
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
-    // Now set up frame template that is consistent across data types
+
+    Init(config, states[0], 0);
+    Init(config, states[1], 1);
+
     current_frame_counter_ = 0;
     frame_template_.stream_id = RandomString(16);
     frame_template_.device_id = config["deviceid"].as<unsigned int>();
@@ -84,7 +47,6 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     frame_template_.message_type = SSPMessageType::MessageTypeDefault; // 0;
 
     ip_name = config["ip"].as<std::string>();
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
 #ifndef _WIN32    
     std::string rel = "../../"; 
@@ -98,17 +60,97 @@ OakdXlinkReader::OakdXlinkReader(YAML::Node config) {
     model_path = config["model"].as<std::string>();
     model_path = StringInterpolation(env, model_path);
 
+    model_path2 = model_path;
+    try {
+        model_path2 = config["model2"].as<std::string>();
+        model_path2 = StringInterpolation(env, model_path2);
+    } catch(std::exception & e) {
+        std::cerr << e.what() << std::endl << std::flush;
+    }
+
+    //double scale_multiplier1 = MAGIC;
+    //double scale_multiplier2 = MAGIC;
+    //double xmagic = MAGIC;
+    //int sz_x = 256;
+    //int sz_y = 384;
+    //bool compute_alt = false;
+    //double scale_multiplier1_alt = MAGIC;
+    //double scale_multiplier2_alt = MAGIC;
+    //double xmagic_alt;
+    //int sz_x_alt = 256;
+    //int sz_y_alt = 384;
+
+    try {
+        scale_multiplier1 = config["scale_multiplier1"].as<double>();
+        scale_multiplier2 = config["scale_multiplier2"].as<double>();
+        xmagic = config["xmagic"].as<double>();
+        sz_x = config["sz_x"].as<int>();
+        sz_y = config["sz_y"].as<int>();
+        compute_alt = config["compute_alt"].as<bool>();
+        scale_multiplier1_alt = config["scale_multiplier1_alt"].as<double>();
+        scale_multiplier2_alt = config["scale_multiplier2_alt"].as<double>();
+        xmagic_alt = config["xmagic_alt"].as<double>();
+        sz_x_alt = config["sz_x_alt"].as<int>();
+        sz_y_alt = config["sz_y_alt"].as<int>();        
+    } catch(std::exception & e) {
+        std::cerr << e.what() << std::endl << std::flush;
+    }
+
     try {
         failed = true;
-        SetOrResetInternals();
+        SetOrReset();
+        SetOrResetState(states[0], 0);
+        SetOrResetState(states[1], 1);
         failed = false;
     } catch(std::exception & e) {
         std::cerr << e.what() << std::endl << std::flush;
     }
 }
 
-void OakdXlinkReader::SetOrResetInternals() {
-    ResetStateAndMisc();
+void OakdXlinkReader::Init(YAML::Node config, std::shared_ptr<State> &st, int n) {
+    ResetState(st);
+
+    st->rgb_res = config["rgb_resolution"].as<unsigned int>();
+    if (st->rgb_res == 1080)
+        st->rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
+    else if (st->rgb_res == 4000)
+        st->rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_4_K;
+    else if (st->rgb_res == 12000)
+        st->rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_12_MP;
+    else if (st->rgb_res == 13000)
+        st->rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_13_MP;
+    else
+        st->rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
+
+    st->rgb_dai_preview_y = config["rgb_preview_size_y"].as<unsigned int>();
+    st->rgb_dai_preview_x = config["rgb_preview_size_x"].as<unsigned int>();
+    st->rgb_dai_fps = config["rgb_fps"].as<unsigned int>();
+
+    st->depth_res = config["depth_resolution"].as<unsigned int>();
+    if (st->depth_res == 720)
+        st->depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
+    else if (st->depth_res == 800)
+        st->depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_800_P;
+    else if (st->depth_res == 400)
+        st->depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_400_P;
+    else if (st->depth_res == 480)
+        st->depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_480_P;
+    else
+        st->depth_dai_res = dai::MonoCameraProperties::SensorResolution::THE_720_P;
+     
+    st->depth_dai_preview_y = config["depth_preview_size_y"].as<unsigned int>();
+    st->depth_dai_preview_x = config["depth_preview_size_x"].as<unsigned int>();
+    st->depth_dai_fps = config["depth_fps"].as<unsigned int>();
+    st->depth_dai_sf = config["depth_spatial_filter"].as<bool>();
+    st->depth_dai_sf_hfr = config["depth_spatial_hole_filling_radius"].as<unsigned int>();
+    st->depth_dai_sf_num_it = config["depth_spatial_filter_num_it"].as<unsigned int>();
+    st->depth_dai_df = config["depth_decimation_factor"].as<unsigned int>();
+}
+
+void OakdXlinkReader::SetOrReset() {
+    ResetVino();
+    auto st = states[0];
+
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Define source and output
@@ -128,32 +170,32 @@ void OakdXlinkReader::SetOrResetInternals() {
 
     // Color Properties
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
-    camRgb->setResolution(rgb_dai_res);
-    camRgb->setPreviewSize(rgb_dai_preview_x, rgb_dai_preview_y);
-    camRgb->setFps(rgb_dai_fps);
+    camRgb->setResolution(st->rgb_dai_res);
+    camRgb->setPreviewSize(st->rgb_dai_preview_x, st->rgb_dai_preview_y);
+    camRgb->setFps(st->rgb_dai_fps);
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
     camRgb->setInterleaved(false);
     // camRgb->setIspScale(2, 3); //this downscales from 1080p to 720p
 
     // Depth Properties
-    left->setResolution(depth_dai_res);
+    left->setResolution(st->depth_dai_res);
     left->setBoardSocket(dai::CameraBoardSocket::LEFT);
-    left->setFps(depth_dai_fps);
-    right->setResolution(depth_dai_res);
+    left->setFps(st->depth_dai_fps);
+    right->setResolution(st->depth_dai_res);
     right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
-    right->setFps(depth_dai_fps);
+    right->setFps(st->depth_dai_fps);
     stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
     stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
-    stereo->setOutputSize(depth_dai_preview_x, depth_dai_preview_y);
+    stereo->setOutputSize(st->depth_dai_preview_x, st->depth_dai_preview_y);
     stereo->setFocalLengthFromCalibration(true);
     auto oakdConfig = stereo->initialConfig.get();
-    oakdConfig.postProcessing.spatialFilter.enable = depth_dai_sf;
-    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = depth_dai_sf_hfr;
-    oakdConfig.postProcessing.spatialFilter.numIterations = depth_dai_sf_num_it;
-    oakdConfig.postProcessing.decimationFilter.decimationFactor = depth_dai_df;
+    oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
+    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = st->depth_dai_sf_hfr;
+    oakdConfig.postProcessing.spatialFilter.numIterations = st->depth_dai_sf_num_it;
+    oakdConfig.postProcessing.decimationFilter.decimationFactor = st->depth_dai_df;
     // oakdConfig.postProcessing.speckleFilter.enable = false;
     // oakdConfig.postProcessing.speckleFilter.speckleRange = 50;
     // oakdConfig.postProcessing.temporalFilter.enable = true;
@@ -223,8 +265,9 @@ void OakdXlinkReader::SetOrResetInternals() {
 
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
+}
+void OakdXlinkReader::SetOrResetState(const std::shared_ptr<State> &st, int n) {
     //Now setting up Body model
     // input_model = {"../models/human-pose-estimation-3d.xml"};
     // input_image_path = "../openvino/fart";
@@ -240,7 +283,11 @@ void OakdXlinkReader::SetOrResetInternals() {
     // Step 2. Read a model in OpenVINO Intermediate Representation (.xml and
     // .bin files) or ONNX (.onnx file) format
 
-    state->network = state->ie.ReadNetwork(model_path);
+    if (n > 0) {
+        st->network = st->ie.ReadNetwork(model_path2);
+    } else {
+        st->network = st->ie.ReadNetwork(model_path);
+    }
     //#ifndef _WIN32    
     //    network = ie.ReadNetwork("../../models/human-pose-estimation-3d-0001.xml");
     //#endif
@@ -249,7 +296,7 @@ void OakdXlinkReader::SetOrResetInternals() {
     //#endif
     // if (network.getOutputsInfo().size() != 1)
     //     throw std::logic_error("Sample supports topologies with 1 output only");
-    if (state->network.getInputsInfo().size() != 1)
+    if (st->network.getInputsInfo().size() != 1)
         throw std::logic_error("Sample supports topologies with 1 input only");
     // -----------------------------------------------------------------------------------------------------
 
@@ -257,32 +304,31 @@ void OakdXlinkReader::SetOrResetInternals() {
     // ---------------------------------------------
     // --------------------------- Prepare input blobs
     // -----------------------------------------------------
-    state->input_info = state->network.getInputsInfo().begin()->second;
-    state->input_name = state->network.getInputsInfo().begin()->first;
+    st->input_info = st->network.getInputsInfo().begin()->second;
+    st->input_name = st->network.getInputsInfo().begin()->first;
 
     /* Mark input as resizable by setting of a resize algorithm.
       * In this case we will be able to set an input blob of any shape to an
       * infer request. Resize and layout conversions are executed automatically
       * during inference */
     
-
-    state->input_info->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
+    st->input_info->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
     
-    state->input_info->setLayout(Layout::NHWC);
-    state->input_info->setPrecision(Precision::U8);
+    st->input_info->setLayout(Layout::NHWC);
+    st->input_info->setPrecision(Precision::U8);
     // --------------------------- Prepare output blobs
     // ----------------------------------------------------
-    if (state->network.getOutputsInfo().empty()) {
+    if (st->network.getOutputsInfo().empty()) {
         std::cerr << "Network outputs info is empty" << std::endl;
         return;
     }
-    state->features_output_info = state->network.getOutputsInfo()["features"];
-    state->heatmaps_output_info = state->network.getOutputsInfo()["heatmaps"];
-    state->pafs_output_info = state->network.getOutputsInfo()["pafs"];
+    st->features_output_info = st->network.getOutputsInfo()["features"];
+    st->heatmaps_output_info = st->network.getOutputsInfo()["heatmaps"];
+    st->pafs_output_info = st->network.getOutputsInfo()["pafs"];
 
-    state->features_output_info->setPrecision(Precision::FP32);
-    state->heatmaps_output_info->setPrecision(Precision::FP32);
-    state->pafs_output_info->setPrecision(Precision::FP32);
+    st->features_output_info->setPrecision(Precision::FP32);
+    st->heatmaps_output_info->setPrecision(Precision::FP32);
+    st->pafs_output_info->setPrecision(Precision::FP32);
 
     // // TODO needed? No because changed the actual input shape of the model directly
     // ICNNNetwork::InputShapes inputShape {{ "data", std::vector<size_t>{1,3,256,384} }};
@@ -292,7 +338,7 @@ void OakdXlinkReader::SetOrResetInternals() {
 
     // --------------------------- Step 4. Loading a model to the device
     // ------------------------------------------
-    state->executable_network = state->ie.LoadNetwork(state->network, "CPU");
+    st->executable_network = st->ie.LoadNetwork(st->network, "CPU");
     // -----------------------------------------------------------------------------------------------------
     start_time = CurrentTimeMs();
 }
@@ -376,7 +422,6 @@ vector<uint16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int xP
     int yPointMax   = (yPoint + regionRadius <= frameDepthMat.rows) ? yPoint + regionRadius : frameDepthMat.rows; //make sure the y max isn't more than amount of rows
     yPointMax   = (yPointMax >= 0) ? yPointMax : 0; //make sure the y max isn't less than 0
 
-
     cv::Rect myROI(cv::Point(xPointMin, yPointMin), cv::Point(xPointMax , yPointMax));
     cv::Mat croppedDepth = frameDepthMat(myROI);
     std::vector<uint16_t> nonZeroDepthValues;
@@ -400,11 +445,145 @@ vector<uint16_t> returnVectorOfNonZeroValuesInRoi(cv::Mat &frameDepthMat, int xP
 
 }
 
+struct moetsi::ssp::human_pose_estimation::poses OakdXlinkReader::getPosesAfterImageResize(int targetX, int targetY, const std::shared_ptr<State> &st, cv::Mat &image, bool isFlex)  {
+    struct moetsi::ssp::human_pose_estimation::poses posesStruct;
+    InferRequest infer_request = st->executable_network.CreateInferRequest();
+    cv::Mat image2;
+
+    std::cerr << image.size[0] << " x " << image.size[1] << std::endl << std::flush; 
+
+    double scale =  double(targetX) / image.size[1];
+    double scale2 = double(targetY) / image.size[0];
+    std::cerr << "scales= " << scale << ", " << scale2 << std::endl << std::flush;
+    cv::resize(image, image2, cv::Size(), scale, scale2, cv::INTER_LINEAR);
+    cv::Mat image3 = cv::Mat(image2, cv::Rect(0, 0, 
+                                                    image2.size[1] - (image2.size[1] % st->stride),
+                                                    image2.size[0]));
+
+    cv::Mat image4(image3.size[0], image3.size[1], CV_8UC3);
+    for (int i=0; i< image3.size[0]; ++i) {
+        for (int j=0; j< image3.size[1]; ++j) {
+            auto v = image3.at<cv::Vec3b>(i,j);
+            auto v2 = cv::Vec3b{ v[0], v[1], v[2] };
+            image4.at<cv::Vec3b>(i,j) = v2;
+        }
+    }
+
+    std::cerr << image4.size[0] << " x " << image4.size[1] << std::endl << std::flush; 
+    Blob::Ptr imgBlobX = wrapMat2Blob(image4);
+
+    infer_request.SetBlob(st->input_name, imgBlobX);  // infer_request accepts input blob of any size
+    
+    infer_request.Infer();
+
+    Blob::Ptr features_output = infer_request.GetBlob("features");
+    Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
+    Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
+
+    const SizeVector features_output_shape = st->features_output_info->getTensorDesc().getDims();
+    auto l = st->features_output_info->getTensorDesc().getLayout();
+    auto p = st->features_output_info->getTensorDesc().getPrecision(); 
+
+    const SizeVector heatmaps_output_shape = st->heatmaps_output_info->getTensorDesc().getDims();
+    const SizeVector pafs_output_shape = st->pafs_output_info->getTensorDesc().getDims();
+
+    std::cerr << dumpVec(features_output_shape) << std::endl << std::flush;
+    std::cerr << dumpVec(heatmaps_output_shape) << std::endl << std::flush;
+    std::cerr << dumpVec(pafs_output_shape) << std::endl << std::flush;
+
+    auto dumpVec = [](const SizeVector& vec) -> std::string {
+        if (vec.empty())
+            return "[]";
+        std::stringstream oss;
+        oss << "[" << vec[0];
+        for (size_t i = 1; i < vec.size(); i++)
+            oss << "," << vec[i];
+        oss << "]";
+        return oss.str();
+    };
+
+    InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);
+    InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);
+    InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);
+
+    InferenceEngine::LockedMemory<const void> features_outputMapped = features_moutput->rmap();
+    InferenceEngine::LockedMemory<const void> heatmaps_outputMapped = heatmaps_moutput->rmap();
+    InferenceEngine::LockedMemory<const void> pafs_outputMapped = pafs_moutput->rmap();
+
+    const float *features_result = features_outputMapped.as<float *>();
+    const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
+    const float *pafs_result = pafs_outputMapped.as<float *>();
+
+    // needed?
+    matrix3x4 R = matrix3x4{ { {     
+                0.1656794936,
+                0.0336560618,
+                -0.9856051821,
+                0.0
+            },
+            {
+                -0.09224101321,
+                0.9955650135,
+                0.01849052095,
+                0.0
+            },
+            {
+                0.9818563545,
+                0.08784972047,
+                0.1680491765,
+                0.0
+    } } };
+
+    int featureMapSize[] = { (int)features_output_shape[1], (int)features_output_shape[2], (int)features_output_shape[3] }; // { 57,32,48 }; 
+    cv::Mat featuresMat = cv::Mat(3, featureMapSize, CV_32FC1, const_cast<float*>(features_result));
+    int heatmapMatSize[] =  { (int)heatmaps_output_shape[1], (int)heatmaps_output_shape[2], (int)heatmaps_output_shape[3] }; // { 19,32,48 };
+    cv::Mat heatmapMat = cv::Mat(3, heatmapMatSize, CV_32FC1, const_cast<float*>(heatmaps_result));
+    int paf_mapMatSize[] =  { (int) pafs_output_shape[1], (int) pafs_output_shape[2], (int) pafs_output_shape[3] }; // {38,32,48};
+    cv::Mat paf_mapMat = cv::Mat(3, paf_mapMatSize, CV_32FC1, const_cast<float*>(pafs_result));
+
+    // double scale_multiplier1 = MAGIC;
+    // double scale_multiplier2 = MAGIC;
+    // double xmagic = MAGIC;
+    // int sz_x = 256;
+    // int sz_y = 384;
+    // bool compute_alt = false;
+    // double scale_multiplier1_alt = MAGIC;
+    // double scale_multiplier2_alt = MAGIC;
+    // double xmagic_alt;
+    // int sz_x_alt = 256;
+    // int sz_y_alt = 384;
+
+    auto input_scale2 = 256.0/720.0 * magic;
+    auto input_scale3 = 256.0/720.0;
+
+    if (!isFlex) {
+        // magic, magic, magic
+        // posesStruct = parse_poses(st->previous_poses_2d, st->common, R, featuresMat, heatmapMat, paf_mapMat, input_scale2, input_scale2, st->stride, st->fx, 1080, true, magic);
+        double is2 = 256.0/720.0 * scale_multiplier1;
+        double is3 = 256.0/720.0 * scale_multiplier2;
+        double mg = xmagic;
+        posesStruct = parse_poses(st->previous_poses_2d, st->common, R, featuresMat, heatmapMat, paf_mapMat, is2, is3, st->stride, st->fx, 1080, true, mg);
+    } else {
+        // 1, magic, 1
+        // posesStruct = parse_poses_flex(st->previous_poses_2d, st->common, R, featuresMat, heatmapMat, paf_mapMat, input_scale3, input_scale2, st->stride, st->fx, 1080, true, 1.0);
+        double is2 = 256.0/720.0 * scale_multiplier1_alt;
+        double is3 = 256.0/720.0 * scale_multiplier2_alt;
+        double mg = xmagic_alt;
+        posesStruct = parse_poses(st->previous_poses_2d, st->common, R, featuresMat, heatmapMat, paf_mapMat, is2, is3, st->stride, st->fx, 1080, true, mg);
+    }
+    return posesStruct;
+}
+
 void OakdXlinkReader::NextFrame() {
     for (int kk=0; kk<MAX_RETRIAL; ++kk) {
         try {
             if (failed) {
-                SetOrResetInternals();
+
+                SetOrReset();
+                SetOrResetState(states[0], 0);
+                SetOrResetState(states[1], 1);
+
+                // SetOrResetInternals();
                 failed = false;
             }
 
@@ -438,125 +617,87 @@ void OakdXlinkReader::NextFrame() {
                 {
                     auto testRgbSeqNum = rgbFromQueue->getSequenceNum();
                     struct moetsi::ssp::human_pose_estimation::poses posesStruct;
+                    struct moetsi::ssp::human_pose_estimation::poses posesStruct2;
                     // We run inference and parse poses on every received RGB to help with body tracking
                     try
                     {
-                        // --------------------------- Step 5. Create an infer request
-                        // -------------------------------------------------
-                        InferRequest infer_request = state->executable_network.CreateInferRequest();
-                        // -----------------------------------------------------------------------------------------------------
-
-                        // --------------------------- Step 6. Prepare input
                         // --------------------------------------------------------
-                        /* Read input image to a blob and set it to an infer request without resize
-                        * and layout conversions. */
+                        // Read input image to a blob and set it to an infer request without resize and layout conversions.
                         auto rgbCvMat = rgbFromQueue->getCvFrame();
                         auto &image = rgbCvMat;
-                        cv::Mat image2;
-                        // scale to 256 ~
-                        // std::cerr << "input_scale = " << input_scale << std::endl << std::flush;
-                        cv::resize(image, image2, cv::Size(), input_scale, input_scale, cv::INTER_LINEAR);
 
+                        // double scale_multiplier1 = MAGIC;
+                        // double scale_multiplier2 = MAGIC;
+                        // double xmagic = MAGIC;
+                        // int sz_x = 256;
+                        // int sz_y = 384;
+                        // bool compute_alt = false;
+                        // double scale_multiplier1_alt = MAGIC;
+                        // double scale_multiplier2_alt = MAGIC;
+                        // double xmagic_alt;
+                        // int sz_x_alt = 256;
+                        // int sz_y_alt = 384;
 
-
-                        // std::cerr << image2.size[0] << std::endl << std::flush; 
-                        // std::cerr << (image2.size[1] - (image2.size[1] % stride)) << std::endl << std::flush;  
-
-                        cv::Mat image3 = cv::Mat(image2, cv::Rect(0, 0, 
-                                                                        image2.size[1] - (image2.size[1] % stride),
-                                                                        image2.size[0]));
-
-
-
-                        cv::Mat image4(image3.size[0], image3.size[1], CV_8UC3);
-                        for (int i=0; i< image3.size[0]; ++i) {
-                            for (int j=0; j< image3.size[1]; ++j) {
-                                auto v = image3.at<cv::Vec3b>(i,j);
-                                auto v2 = cv::Vec3b{ v[0], v[1], v[2] }; // 0,1,2
-                                image4.at<cv::Vec3b>(i,j) = v2;
-                            }
+                        posesStruct =  getPosesAfterImageResize(
+                            // 256, 384, 
+                            sz_x, sz_y,
+                            states[0], image, false);
+                        if (compute_alt) {
+                            posesStruct2 = getPosesAfterImageResize(
+                                // 256, 448,
+                                sz_x_alt, sz_y_alt,
+                                states[1], image, true); 
                         }
+                        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+                        {
+                            int c = 0;
+                            for (auto & x : posesStruct.poses_2d) {
+                                std::cerr << x.size() << std::endl << std::flush;
+                                if (posesStruct2.poses_2d.size() > unsigned(c)) {
+                                    auto &y = posesStruct2.poses_2d[c];
+                                    std::cerr << y.size() << std::endl << std::flush;
 
-                        Blob::Ptr imgBlobX = wrapMat2Blob(image4);
+                                    if (x.size() == y.size()) {
+                                        std::cerr << "cmp" << std::endl << std::flush;
 
-                        infer_request.SetBlob(state->input_name, imgBlobX);  // infer_request accepts input blob of any size
+                                        for (unsigned k=0; k+2< x.size(); k += 3) {
+                                            std::cerr << "k=" << k << std::endl << std::flush;
+                                            std::cerr << x[k] << "," << x[k+1] << "," << x[k+2] << std::endl << std::flush;
+                                            std::cerr << y[k] << "," << y[k+1] << "," << y[k+2] << std::endl << std::flush;
+                                            std::cerr << (y[k]-x[k]) << "," << (y[k+1]-x[k+1]) << "," << (y[k+2]-x[k+2]) << std::endl << std::flush;
+                                        }
+                                    }
+                                }
+                                ++ c;
+                            }
 
-                        // -----------------------------------------------------------------------------------------------------
+                            c = 0;
+                            for (auto & x: posesStruct.poses_3d) {
+                                std::cerr << x.size() << std::endl << std::flush;
+                                if (posesStruct2.poses_3d.size() > unsigned(c)) {
+                                    auto &y = posesStruct2.poses_3d[c];
+                                    std::cerr << y.size() << std::endl << std::flush;
 
-                        // --------------------------- Step 7. Do inference
-                        // --------------------------------------------------------
-                        /* Running the request synchronously */
-                            infer_request.Infer();
-                        // ----------------------------------------------------------------------------------------------------
-                        // --------------------------- Step 8. Process output
-                        // ------------------------------------------------------
+                                    if (x.size() == y.size()) {
+                                        std::cerr << "cmp/3d" << std::endl << std::flush;
 
-                        Blob::Ptr features_output = infer_request.GetBlob("features");
-                        Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
-                        Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
+                                        for (unsigned k=0; k+3< x.size(); k += 4) {
+                                            std::cerr << "k=" << k << std::endl << std::flush;
+                                            std::cerr << x[k] << "," << x[k+1] << "," << x[k+2] << "," << x[k+3] << std::endl << std::flush;
+                                            std::cerr << y[k] << "," << y[k+1] << "," << y[k+2] << "," << y[k+3] << std::endl << std::flush;
+                                            std::cerr << (y[k]-x[k]) << "," << (y[k+1]-x[k+1]) << "," << (y[k+2]-x[k+2]) << "," << (y[k+3]-x[k+3]) << std::endl << std::flush;
+                                        }                                    
+                                    }
+                                }
+                                ++c;
+                            }
+#if 0
+                    posesStruct = posesStruct2;
+#endif
 
-                        const SizeVector features_output_shape = state->features_output_info->getTensorDesc().getDims();
-                        auto l = state->features_output_info->getTensorDesc().getLayout();
-                        auto p = state->features_output_info->getTensorDesc().getPrecision(); 
-                        // std::cerr << "lp " << l << " " << p << std::endl << std::flush;
-                        const SizeVector heatmaps_output_shape = state->heatmaps_output_info->getTensorDesc().getDims();
-                        const SizeVector pafs_output_shape = state->pafs_output_info->getTensorDesc().getDims();
 
-                        auto dumpVec = [](const SizeVector& vec) -> std::string {
-                            if (vec.empty())
-                                return "[]";
-                            std::stringstream oss;
-                            oss << "[" << vec[0];
-                            for (size_t i = 1; i < vec.size(); i++)
-                                oss << "," << vec[i];
-                            oss << "]";
-                            return oss.str();
-                        };
-
-                        InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);
-                        InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);
-                        InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);
-
-                        InferenceEngine::LockedMemory<const void> features_outputMapped = features_moutput->rmap();
-                        InferenceEngine::LockedMemory<const void> heatmaps_outputMapped = heatmaps_moutput->rmap();
-                        InferenceEngine::LockedMemory<const void> pafs_outputMapped = pafs_moutput->rmap();
-
-                        const float *features_result = features_outputMapped.as<float *>();
-                        const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
-                        const float *pafs_result = pafs_outputMapped.as<float *>();
-
-                        // needed?
-                        matrix3x4 R = matrix3x4{ { {     
-                                    0.1656794936,
-                                    0.0336560618,
-                                    -0.9856051821,
-                                    0.0
-                                },
-                                {
-                                    -0.09224101321,
-                                    0.9955650135,
-                                    0.01849052095,
-                                    0.0
-                                },
-                                {
-                                    0.9818563545,
-                                    0.08784972047,
-                                    0.1680491765,
-                                    0.0
-                        } } };
-
-                        int featureMapSize[] = { (int)features_output_shape[1], (int)features_output_shape[2], (int)features_output_shape[3] }; // { 57,32,48 }; 
-                        cv::Mat featuresMat = cv::Mat(3, featureMapSize, CV_32FC1, const_cast<float*>(features_result));
-                        int heatmapMatSize[] =  { (int)heatmaps_output_shape[1], (int)heatmaps_output_shape[2], (int)heatmaps_output_shape[3] }; // { 19,32,48 };
-                        cv::Mat heatmapMat = cv::Mat(3, heatmapMatSize, CV_32FC1, const_cast<float*>(heatmaps_result));
-                        int paf_mapMatSize[] =  { (int) pafs_output_shape[1], (int) pafs_output_shape[2], (int) pafs_output_shape[3] };  // {38,32,48};
-                        cv::Mat paf_mapMat = cv::Mat(3, paf_mapMatSize, CV_32FC1, const_cast<float*>(pafs_result));
-
-                        auto input_scale2 = 256.0/720.0 * magic; // * 0.84; //  /1.04065; // -> 0.8*1280/984 || *0.83;
-                        posesStruct = parse_poses(previous_poses_2d, common, R, 
-                            featuresMat, heatmapMat, paf_mapMat, input_scale2, stride, fx,
-                            1080 //1080
-                            , true); //true);
+                        }
+                        std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
                     } catch(...) {
                         std::cerr << "TRY/CATCH CATCH AFTER INFERENCE " << std::endl << std::flush;
                         return;
@@ -611,13 +752,18 @@ void OakdXlinkReader::NextFrame() {
 
             auto frameRgbOpenCv = synchedRgbFrame->getCvFrame();
             cv::resize(frameRgbOpenCv, frameRgbOpenCv, cv::Size(1280, 720), 0, 0, cv::INTER_NEAREST);
+
             // auto frameDepthOpenCv = synchedDepthFrame->getCvFrame();
             auto frameDepthMat = synchedDepthFrame->getFrame();
             cv::resize(frameDepthMat, frameDepthMat, cv::Size(1280, 720), 0, 0, cv::INTER_NEAREST);
 
-            // TODO FIXME x big/little endian hazard ~
+            auto sz1depth = frameDepthMat.size[1];
+            auto sz2depth = frameDepthMat.size[0];
 
-            //Color frame
+            std::cerr << sz1depth << " x " << sz2depth << std::endl << std::flush;
+
+            // TODO FIXME x big/little endian hazard ~
+            // Color frame
             std::shared_ptr<FrameStruct> rgbFrame =
                 std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
                 rgbFrame->sensor_id = 0; 
@@ -649,7 +795,7 @@ void OakdXlinkReader::NextFrame() {
             // convert the raw buffer to cv::Mat
             int32_t depthCols = frameDepthMat.cols;                                                        
             int32_t depthRows = frameDepthMat.rows;                                                        
-            size_t depthSize = depthCols*depthRows*sizeof(uint16_t); //  DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
+            size_t depthSize = depthCols*depthRows*sizeof(uint16_t); // DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
 
             depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        
 
@@ -682,7 +828,6 @@ void OakdXlinkReader::NextFrame() {
 
                 s->frame = std::vector<uchar>();
                 
-
                 std::cerr << "!!BODY COUNT: " << bodyCount << std::endl << std::flush; 
 
                 //Resize the frame to hold all the detected COCO bodies detected in this frame
@@ -699,12 +844,13 @@ void OakdXlinkReader::NextFrame() {
                     //Here we see the 2D joints detected of this body
                     //We grab the depth at the x,y location in the image
                     // synchedPosesStruct.poses_2d[i]; //how do I know what joints are being provided? (will need this for bodyStruct depth values)
-                    //depth value = (int)frameDepthMat.at<ushort>(yvalue,xvalue);
+                    // depth value = (int)frameDepthMat.at<ushort>(yvalue,xvalue);
 
                     //Create a COCO body Struct
                     coco_human_t bodyStruct;
                     bodyStruct.Id = synchedPosesStruct.poses_id[i];
                     std::cerr << "BODY: " << current_frame_counter_ << " # " <<  i << " ... " << bodyStruct.Id << std::endl << std::flush;
+
                     // Map of joints to array index
                     // neck 0 
                     // nose 1 
@@ -730,7 +876,7 @@ void OakdXlinkReader::NextFrame() {
                     // synchedPosesStruct.poses_3d [ {body number } ][ {body joint index}*4 + {0, 1, 2 ,3 for x, y, z, probability}]
 
                     auto zCorrection = [](float x) -> float {
-                        return x; // / 0.84381;
+                        return x;
                     };
 
                     bodyStruct.neck_x = synchedPosesStruct.poses_3d[i][0 * 4 + 0];
@@ -810,37 +956,22 @@ void OakdXlinkReader::NextFrame() {
                     bodyStruct.ear_right_z = zCorrection(synchedPosesStruct.poses_3d[i][18 * 4 + 2]);
                     bodyStruct.ear_right_conf = synchedPosesStruct.poses_3d[i][18 * 4 + 3];
 
-                    //auto to2D = [](float x) -> int16_t {
-                    //    std::cerr << "to2D: value = " << x << std::endl << std::flush;
-                    //    return std::min(std::max(0L, int64_t(x / magic)), 1280L - 1L);
-                    //};
-
-                    //auto to2Dy = [](float x) -> int16_t {
-                    //    std::cerr << "to2D/y: value = " << x << std::endl << std::flush;
-                    //    return std::min(std::max(0L, int64_t(x * magic)), 720L-1L); //  *0.84381); /// 0.84381);
-                    //};
-
-                    //auto to2Dd = [](float x) -> int16_t {
-                    //    std::cerr << "to2D/d: value = " << x << std::endl << std::flush;
-                    //    return int64_t(x); //  *0.84381); /// 0.84381);
-                    //};
-
-                    auto to2D = [](float x) -> int16_t {
+                    auto to2D = [sz1depth](float x) -> int16_t {
                         // std::cerr << "to2D: value = " << x << std::endl << std::flush;
-                        return std::min(std::max(int64_t(0L), int64_t(x )), int64_t(1280L - 1L));
+                        auto x2 = x;
+                        return std::min(std::max(int64_t(0L), int64_t(x2 )), int64_t(sz1depth - 1L)); // 1280
                     };
 
-                    auto to2Dy = [](float x) -> int16_t {
+                    auto to2Dy = [sz2depth](float x) -> int16_t {
                         // std::cerr << "to2D/y: value = " << x << std::endl << std::flush;
-                        return std::min(std::max(int64_t(0L), int64_t(x )), int64_t(720L-1L)); //  *0.84381); /// 0.84381);
+                        auto x2 = x;
+                        return std::min(std::max(int64_t(0L), int64_t(x2 )), int64_t(sz2depth-1L));
                     };
 
                     auto to2Dd = [](float x) -> int16_t {
                         // std::cerr << "to2D/d: value = " << x << std::endl << std::flush;
-                        return int64_t(x); //  *0.84381); /// 0.84381);
+                        return int64_t(x);
                     };
-
-
 
                     bodyStruct.neck_2d_x = to2D(synchedPosesStruct.poses_2d[i][0 * 3 + 0]);
                     bodyStruct.neck_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][0 * 3 + 1]);
@@ -868,10 +999,12 @@ void OakdXlinkReader::NextFrame() {
                     bodyStruct.wrist_left_2d_conf = synchedPosesStruct.poses_2d[i][5 * 3 + 2];
                     bodyStruct.hip_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][6 * 3 + 0]);
                     bodyStruct.hip_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][6 * 3 + 1]);
+                    std::cerr << bodyStruct.hip_left_2d_y << " " << bodyStruct.hip_left_2d_x << std::endl << std::flush;
                     bodyStruct.hip_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.hip_left_2d_y,bodyStruct.hip_left_2d_x));
                     bodyStruct.hip_left_2d_conf = synchedPosesStruct.poses_2d[i][6 * 3 + 2];
                     bodyStruct.knee_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][7 * 3 + 0]);
                     bodyStruct.knee_left_2d_y = to2Dy(synchedPosesStruct.poses_2d[i][7 * 3 + 1]);
+                    std::cerr << bodyStruct.knee_left_2d_y << " " << bodyStruct.knee_left_2d_x << std::endl << std::flush;
                     bodyStruct.knee_left_2d_depth = to2Dd(frameDepthMat.at<ushort>(bodyStruct.knee_left_2d_y,bodyStruct.knee_left_2d_x));
                     bodyStruct.knee_left_2d_conf = synchedPosesStruct.poses_2d[i][7 * 3 + 2];
                     bodyStruct.ankle_left_2d_x = to2D(synchedPosesStruct.poses_2d[i][8 * 3 + 0]);
@@ -1465,4 +1598,3 @@ void OakdXlinkReader::GoToFrame(unsigned int frame_id) {}
 unsigned int OakdXlinkReader::GetCurrentFrameId() {return current_frame_counter_;}
 
 }
-

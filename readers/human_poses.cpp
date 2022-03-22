@@ -902,11 +902,11 @@ namespace human_pose_estimation {
         }
     }
 
-    const float magic = 0.84381;
+    // ***> from now this will be a parameter - const float magic = 0.84381;
 
     parsed_poses parse_poses(
         std::vector<Pose> & previous_poses_2d, PoseCommon & common, 
-        const cv::Mat &features, const cv::Mat &heatmap, const cv::Mat &paf_map, float input_scale, int stride, float fx, bool is_video) {
+        const cv::Mat &features, const cv::Mat &heatmap, const cv::Mat &paf_map, float input_scale, float input_scale2, int stride, float fx, bool is_video, float magic) {
 
 #ifdef VERBOSE            
         std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -1199,10 +1199,10 @@ namespace human_pose_estimation {
 #ifdef VERBOSE
         std::cerr << "numerator:" << numerator << std::endl << std::flush; 
         std::cerr << "denominator:" << denominator << std::endl << std::flush; 
-        std::cerr << "fx = " << fx << " input_scale = " << input_scale << " stride = " << stride << std::endl << std::flush;
+        std::cerr << "fx = " << fx << " input_scale = " << input_scale2 << " stride = " << stride << std::endl << std::flush;
 #endif
 
-        std::vector<float> mean_2d_ { mean_2d[0], mean_2d[1], fx*input_scale / stride };
+        std::vector<float> mean_2d_ { mean_2d[0], mean_2d[1], fx*input_scale2 / stride };
         std::vector<float> mean_3d_ { mean_3d[0], mean_3d[1], 0};
         std::vector<float> translation{ numerator / denominator * mean_2d_[0] - mean_3d_[0], numerator / denominator * mean_2d_[1] - mean_3d_[1] , numerator / denominator * mean_2d_[2] - mean_3d_[2]};
 

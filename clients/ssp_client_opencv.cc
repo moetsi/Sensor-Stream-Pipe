@@ -424,9 +424,10 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
             {
               // project 3d points 
               float fx = 984.344;
-              auto project = [fx](float x, float y, float z) {
-                auto y1 = (fx * x / z)  + 1280/2; 
-                auto y2 = (-fx * y / z) + 720/2;
+              std::cerr << img.size[0] << " x " << img.size[1] << std::endl << std::flush;
+              auto project = [fx, &img](float x, float y, float z) {
+                auto y1 = (fx * x / z)  + img.size[1]/2; // 1280/2; 
+                auto y2 = (-fx * y / z) + img.size[0]/2; // 1080 // 720/2;
                 return std::make_tuple(y1, y2);
               };
               auto dist = [fx](float x, float y, float z) {
@@ -436,7 +437,8 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
               if (bodyStruct.neck_x != float(-1)) {
                 auto xy = project(bodyStruct.neck_y, bodyStruct.neck_z, -bodyStruct.neck_x);
                 circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
-                std::cerr << "neck: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+                std::cerr << "neck:    # " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+                std::cerr << "neck 2d: # " << bodyStruct.neck_2d_x << " " << bodyStruct.neck_2d_y << std::endl << std::flush;
               }
               if (bodyStruct.nose_x != float(-1)) {
                 auto xy = project(bodyStruct.nose_y, bodyStruct.nose_z, -bodyStruct.nose_x);
@@ -444,7 +446,8 @@ extern "C" SSP_EXPORT int ssp_client_opencv(int port)
                 circle( img, cv::Point(std::get<0>(xy), std::get<1>(xy)), markerRadius*2, blue, cv::FILLED, cv::LINE_8 );
                 showDistance(cv::Point(std::get<0>(xy), std::get<1>(xy)), blue, d);
                 showDistance(cv::Point(std::get<0>(xy), std::get<1>(xy)), red, bodyStruct.nose_2d_depth);
-                std::cerr << "nose: " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+                std::cerr << "nose:    # " << std::get<0>(xy) << " " << std::get<1>(xy) << std::endl << std::flush;
+                std::cerr << "nose 2d: # " << bodyStruct.nose_2d_x << " " << bodyStruct.nose_2d_y << std::endl << std::flush;
                 std::cerr << d << " vs. depth = " << bodyStruct.nose_2d_depth << std::endl << std::flush;
               }
               if (bodyStruct.shoulder_left_x != float(-1)) {

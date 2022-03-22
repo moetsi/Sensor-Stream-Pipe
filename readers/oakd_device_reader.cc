@@ -73,6 +73,27 @@ OakdDeviceReader::OakdDeviceReader(YAML::Node config) {
     ip_name = config["ip"].as<std::string>();
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
+    //double scale_multiplier1 = MAGIC;
+    //double scale_multiplier2 = MAGIC;
+    //double xmagic = MAGIC;
+    //int sz_x = 256;
+    //int sz_y = 384;
+    try {
+        input_blob = config["blob"].as<std::string>();
+    } catch(std::exception & e) {
+        std::cerr << e.what() << std::endl << std::flush;
+    }
+
+    try {
+        scale_multiplier1 = config["scale_multiplier1"].as<double>();
+        scale_multiplier2 = config["scale_multiplier2"].as<double>();
+        xmagic = config["xmagic"].as<double>();
+        sz_x = config["sz_x"].as<int>();
+        sz_y = config["sz_y"].as<int>();  
+    } catch(std::exception & e) {
+        std::cerr << e.what() << std::endl << std::flush;
+    }
+
     try {
         failed = true;
         SetOrResetInternals();
@@ -364,6 +385,12 @@ void OakdDeviceReader::NextFrame() {
                     int paf_mapMatSize[] =  { (int) pafs_output_shape[1], (int) pafs_output_shape[2], (int) pafs_output_shape[3] };  // {38,32,48};
                     cv::Mat paf_mapMat = cv::Mat(3, paf_mapMatSize, CV_32FC1, const_cast<float*>(pafs_result));
 
+
+                        std::cerr << dumpVec(features_output_shape) << std::endl << std::flush;
+                        std::cerr << dumpVec(heatmaps_output_shape) << std::endl << std::flush;
+                        std::cerr << dumpVec(pafs_output_shape) << std::endl << std::flush;
+
+
                     matrix3x4 R = matrix3x4{ { {     
                             0.1656794936,
                             0.0336560618,
@@ -385,9 +412,9 @@ void OakdDeviceReader::NextFrame() {
 
                     auto input_scale2 = input_scale * magic; // * 0.84; //  /1.04065; // -> 0.8*1280/984 || *0.83;
                     posesStruct = parse_poses(previous_poses_2d, common, R, 
-                        featuresMat, heatmapMat, paf_mapMat, input_scale2, stride, fx,
+                        featuresMat, heatmapMat, paf_mapMat, input_scale2, input_scale2, stride, fx,
                         1080 //1080
-                        , true); //true);
+                        , true, magic); //true);
 
                     } catch(...) {
                         std::cerr << "TRY/CATCH CATCH AFTER INFERENCE " << std::endl << std::flush;

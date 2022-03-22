@@ -190,7 +190,10 @@ inline int get_similarity(const PoseCommon & common, const Pose &a, const Pose &
             float dx2 = dx*dx;
             distance += dx2;
         }
-        float area = (a.bbox[1][0] - a.bbox[0][0])*(a.bbox[1][1] - a.bbox[0][1])*(a.bbox[1][2] - a.bbox[0][2]);
+        //std::cerr << "XX "<< a.bbox.size() << std::endl << std::flush;
+        //std::cerr << a.bbox[0].size() << std::endl << std::flush;
+        //std::cerr << a.bbox[1].size() << std::endl << std::flush;
+        float area = (a.bbox[1][0] - a.bbox[0][0])*(a.bbox[1][1] - a.bbox[0][1])*(a.bbox[1][1] - a.bbox[0][1]); // 2?
         float similarity = std::exp( - distance / (2.0 * (area + eps) * common.vars[kpt_id]));
         if (similarity > threashold) {
             ++ num_similar_kpt;
@@ -347,7 +350,7 @@ namespace human_pose_estimation {
     };
 
     parsed_poses parse_poses(std::vector<Pose> & previous_poses_2d, PoseCommon & common, 
-        const cv::Mat &features, const cv::Mat &heatmap, const cv::Mat &paf_map, float input_scale, int stride, float fx, bool is_video=false);
+        const cv::Mat &features, const cv::Mat &heatmap, const cv::Mat &paf_map, float input_scale, float input_scale2, int stride, float fx, bool is_video, float magic);
 }
 
 /* here we implement the following
@@ -402,13 +405,14 @@ namespace human_pose_estimation {
 
     inline poses parse_poses(std::vector<Pose> & previous_poses_2d, PoseCommon & common, // these two on the left are a state 
         const matrix3x4 &R, 
-        const cv::Mat &features, const cv::Mat &heatmap, const cv::Mat &paf_map, float input_scale, int stride, 
+        const cv::Mat &features, const cv::Mat &heatmap, const cv::Mat &paf_map, float input_scale, float input_scale2, int stride, 
         float fx, float frame_shape_1,
-        bool is_video=false) {
+        bool is_video,
+        float magic) {
 
         float nfx = fx;
         if (nfx < 0) nfx = 0.8 * frame_shape_1;
-        auto p = parse_poses(previous_poses_2d, common, features, heatmap, paf_map, input_scale, stride, nfx, is_video);
+        auto p = parse_poses(previous_poses_2d, common, features, heatmap, paf_map, input_scale, input_scale2, stride, nfx, is_video, magic);
 
         poses rv;
         rv.poses_2d = p.poses_2d_scaled;
@@ -442,6 +446,49 @@ namespace human_pose_estimation {
         rv.poses_id = p.ids;
         return rv;
     }
+
+    inline poses parse_poses_flex(std::vector<Pose> & previous_poses_2d, PoseCommon & common, // these two on the left are a state 
+        const matrix3x4 &R, 
+        const cv::Mat &features, const cv::Mat &heatmap, const cv::Mat &paf_map, float input_scale, float input_scale2, int stride, 
+        float fx, float frame_shape_1,
+        bool is_video, float magic) {
+
+        float nfx = fx;
+        if (nfx < 0) nfx = 0.8 * frame_shape_1;
+        auto p = parse_poses(previous_poses_2d, common, features, heatmap, paf_map, input_scale, input_scale2, stride, nfx, is_video, magic);
+
+        poses rv;
+        rv.poses_2d = p.poses_2d_scaled;
+
+        //int c = 0;
+        // ? mul by R ?
+        for (auto &l: p.translated_poses_3d) {
+#ifdef VERBOSE
+          std::cerr << " final[ ";
+          for (auto &ll: l) {
+            std::cerr << ll << " ";
+          }
+          std::cerr << " ]" << std::endl << std::flush;
+#endif
+
+          std::vector<float> lf;
+          for (int i=0; i<l.size(); i+=4) {
+
+            auto x = l[i];
+            auto y = l[i+1];
+            auto z = l[i+2];
+            std::vector<float> l2 { float(-z*0.01), float(x*0.01), float(-y*0.01), l[i+3] };
+            for (auto &ll2: l2) {
+              lf.push_back(ll2);
+            }
+          }
+          rv.poses_3d.push_back(lf);
+          //if (++c > 0) break;
+        }
+
+        rv.poses_id = p.ids;
+        return rv;
+    }    
 }
 
 } // moetsi::ssp

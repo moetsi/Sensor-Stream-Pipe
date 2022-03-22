@@ -53,8 +53,11 @@
 
 namespace moetsi::ssp { 
 
+#ifndef MAGIC
+#define MAGIC 0.84381
+#endif
+
 using namespace InferenceEngine;
-//DONE OPENVINO HEADERS
 
 class OakdXlinkReader : public IReader {
 private:
@@ -73,7 +76,8 @@ private:
   std::unordered_map<int, color_poses_and_depth> frames_dictionary;
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
-  //oakd info
+  const std::string device_name = "CPU";
+
   std::shared_ptr<dai::Pipeline> pipeline;
   std::shared_ptr<dai::node::ColorCamera> camRgb;
   std::shared_ptr<dai::node::MonoCamera> left;
@@ -94,15 +98,26 @@ private:
   float verticalFocalLengthPixels;
   float cameraHFOVInRadians;
 
-  int stride = 8;
-  double input_scale = 256.0 / 720.0;
-  float fx = 984.344;
-  
-  //openvino info
-  const file_name_t input_model = "../models/human-pose-estimation-3d-0001.xml";
-  const file_name_t input_image_path= "../models/pointing_middle_of_view.jpg";
-  const std::string device_name = "CPU";
+  double scale_multiplier1 = MAGIC;
+  double scale_multiplier2 = MAGIC;
+  double xmagic = MAGIC;
+  int sz_x = 256;
+  int sz_y = 384;
+  bool compute_alt = false;
+  double scale_multiplier1_alt = MAGIC;
+  double scale_multiplier2_alt = MAGIC;
+  double xmagic_alt;
+  int sz_x_alt = 256;
+  int sz_y_alt = 384;
+
   struct State {
+    //oakd info
+    int stride = 8;
+    double input_scale = 256.0 / 720.0;
+    float fx = 984.344;
+    //* int targetX = 256;
+    //* int targetY = 384;
+
     Core ie;
     CNNNetwork network;
     InputInfo::Ptr input_info;
@@ -113,13 +128,30 @@ private:
     std::string output_name;
     ExecutableNetwork executable_network;
     InferRequest infer_request;
+
+    unsigned int rgb_res;
+    dai::ColorCameraProperties::SensorResolution rgb_dai_res;    
+    unsigned int rgb_dai_preview_y;
+    unsigned int rgb_dai_preview_x;
+    unsigned int rgb_dai_fps;
+
+    unsigned int depth_res;
+    dai::MonoCameraProperties::SensorResolution depth_dai_res;
+    unsigned int depth_dai_preview_y;
+    unsigned int depth_dai_preview_x;
+    unsigned int depth_dai_fps;
+    bool depth_dai_sf;
+    unsigned int depth_dai_sf_hfr;
+    unsigned int depth_dai_sf_num_it;
+    unsigned int depth_dai_df;
+
+    std::vector<human_pose_estimation::Pose> previous_poses_2d;
+    human_pose_estimation::PoseCommon common;
   };
-  std::shared_ptr<State> state;
-
-  void ResetStateAndMisc() {
+  std::shared_ptr<State> states[2];
+  
+  void ResetVino() {
     cameraIntrinsics.clear();
-    state = std::make_shared<State>();
-
     std::shared_ptr<dai::Pipeline> pipeline_zero;
     pipeline = pipeline_zero;
     std::shared_ptr<dai::node::ColorCamera> camRgb_zero;
@@ -150,31 +182,45 @@ private:
     deviceCalib = deviceCalib_zero;
   }
 
-  std::vector<human_pose_estimation::Pose> previous_poses_2d;
-  human_pose_estimation::PoseCommon common;
+  void ResetState(std::shared_ptr<State> &st) {
+    if (!!st) {
+      auto st2 =  std::make_shared<State>();
 
-  void SetOrResetInternals();
+      st2->stride = st->stride;
+      st2->input_scale = st->input_scale;
+      st2->fx = st->fx;
+      //st2->targetX = st->targetX;
+      //st2->targetY = st->targetY;
+      st2->rgb_res = st->rgb_res;
+      st2->rgb_dai_res = st->rgb_dai_res;
+      st2->rgb_dai_preview_y = st->rgb_dai_preview_y;
+      st2->rgb_dai_preview_x = st->rgb_dai_preview_x;
+      st2->rgb_dai_fps = st->rgb_dai_fps;
+      st2->depth_res = st->depth_res;
+      st2->depth_dai_res = st->depth_dai_res;
+      st2->depth_dai_preview_y = st->depth_dai_preview_y;
+      st2->depth_dai_preview_x = st->depth_dai_preview_x;
+      st2->depth_dai_fps = st->depth_dai_fps;
+      st2->depth_dai_sf = st->depth_dai_sf;
+      st2->depth_dai_sf_hfr = st->depth_dai_sf_hfr;
+      st2->depth_dai_sf_num_it = st->depth_dai_sf_num_it;
+      st2->depth_dai_df = st->depth_dai_df;
+      st = st2;
+    } else {
+      st = std::make_shared<State>();
+    }
+  }
+
+  void Init(YAML::Node config, std::shared_ptr<State> &st, int n);
+  void SetOrReset();
+  void SetOrResetState(const std::shared_ptr<State> &st, int n);
+
+  struct moetsi::ssp::human_pose_estimation::poses getPosesAfterImageResize(int targetX, int targetY, const std::shared_ptr<State> &st, cv::Mat &image, bool isFlex);
 
   std::string ip_name;
   bool failed = { false };
-
-  unsigned int rgb_res; // = config["rgb_resolution"].as<unsigned int>();
-  dai::ColorCameraProperties::SensorResolution rgb_dai_res;    
-  unsigned int rgb_dai_preview_y; // = config["rgb_preview_size_y"].as<unsigned int>();
-  unsigned int rgb_dai_preview_x; // = config["rgb_preview_size_x"].as<unsigned int>();
-  unsigned int rgb_dai_fps; // = config["rgb_fps"].as<unsigned int>();
-
-  unsigned int depth_res; // = config["depth_resolution"].as<unsigned int>();
-  dai::MonoCameraProperties::SensorResolution depth_dai_res;
-  unsigned int depth_dai_preview_y; //  = config["depth_preview_size_y"].as<unsigned int>();
-  unsigned int depth_dai_preview_x; // = config["depth_preview_size_x"].as<unsigned int>();
-  unsigned int depth_dai_fps; // = config["depth_fps"].as<unsigned int>();
-  bool depth_dai_sf; // = config["depth_spatial_filter"].as<bool>();
-  unsigned int depth_dai_sf_hfr; // = config["depth_spatial_hole_filling_radius"].as<unsigned int>();
-  unsigned int depth_dai_sf_num_it; // = config["depth_spatial_filter_num_it"].as<unsigned int>();
-  unsigned int depth_dai_df; // = config["depth_decimation_factor"].as<unsigned int>();
-
   std::string model_path;
+  std::string model_path2;
 
 public:
   OakdXlinkReader(YAML::Node config);
