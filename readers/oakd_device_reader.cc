@@ -131,10 +131,12 @@ void OakdDeviceReader::SetOrResetInternals() {
     // # Only send metadata, we are only interested in timestamp, so we can sync
     // # depth frames with NN output
     // rgbOut = pipeline.create<dai::node::XLinkOut>();
+    controlIn = pipeline->create<dai::node::XLinkIn>();
     depthOut = pipeline->create<dai::node::XLinkOut>();
     nnXout = pipeline->create<dai::node::XLinkOut>();
 
     // rgbOut->setStreamName("rgb");
+    controlIn->setStreamName("control");
     depthOut->setStreamName("depth");
     nnXout->setStreamName("nn");
 
@@ -169,6 +171,7 @@ void OakdDeviceReader::SetOrResetInternals() {
     
     // Linking
     // camRgb->preview.link(rgbOut->input);
+    controlIn->out.link(camRgb->inputControl);
     camRgb->preview.link(nn->input);
     left->out.link(stereo->left);
     right->out.link(stereo->right);
@@ -195,6 +198,8 @@ void OakdDeviceReader::SetOrResetInternals() {
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
     deviceCalib = std::make_shared<dai::CalibrationHandler>(device->readCalibration());
     cameraIntrinsics = deviceCalib->getCameraIntrinsics(dai::CameraBoardSocket::RGB, 1280, 720);
+    auto lensPos = deviceCalib->getLensPosition(dai::CameraBoardSocket::RGB);
+    std::cerr << "LENS POSITION: " << (int)lensPos << std::endl << std::flush;  
     horizontalFocalLengthPixels = cameraIntrinsics[0][0];
     verticalFocalLengthPixels =  cameraIntrinsics[1][1];
     cameraHFOVInRadians = ((deviceCalib->getFov(dai::CameraBoardSocket::RGB) * pi) / 180.0) * (3840.0/4056.0); // Must scale for cropping: https://discordapp.com/channels/790680891252932659/924798503270625290/936746213691228260
@@ -213,6 +218,11 @@ void OakdDeviceReader::SetOrResetInternals() {
     // qRgb = device->getOutputQueue("rgb", 4, false);                                      
     qDepth = device->getOutputQueue("depth", 10, false);    
     qNn = device->getOutputQueue("nn", 10, false);
+    controlQueue = device->getInputQueue("control");
+
+    dai::CameraControl ctrl;
+    ctrl.setManualFocus(lensPos);
+    controlQueue->send(ctrl);
 
     start_time = CurrentTimeMs();
 }

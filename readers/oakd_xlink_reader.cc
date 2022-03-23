@@ -160,9 +160,11 @@ void OakdXlinkReader::SetOrReset() {
     right = pipeline->create<dai::node::MonoCamera>();
     stereo = pipeline->create<dai::node::StereoDepth>();
 
+    controlIn = pipeline->create<dai::node::XLinkIn>();
     rgbOut = pipeline->create<dai::node::XLinkOut>();
     depthOut = pipeline->create<dai::node::XLinkOut>();
 
+    controlIn->setStreamName("control");
     rgbOut->setStreamName("rgb");
     depthOut->setStreamName("depth");
 
@@ -206,6 +208,7 @@ void OakdXlinkReader::SetOrReset() {
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
 
     // Linking
+    controlIn->out.link(camRgb->inputControl);
     camRgb->preview.link(rgbOut->input);
     left->out.link(stereo->left);
     right->out.link(stereo->right);
@@ -233,6 +236,9 @@ void OakdXlinkReader::SetOrReset() {
     deviceCalib = std::make_shared<dai::CalibrationHandler>(device->readCalibration());
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
     cameraIntrinsics = deviceCalib->getCameraIntrinsics(dai::CameraBoardSocket::RGB, 1280, 720);
+    auto lensPos = deviceCalib->getLensPosition(dai::CameraBoardSocket::RGB);
+    std::cerr << "LENS POSITION: " << (int)lensPos << std::endl << std::flush;  
+    // camRgb->initialControl.setManualFocus(lensPos);
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
     horizontalFocalLengthPixels = cameraIntrinsics[0][0];
     verticalFocalLengthPixels =  cameraIntrinsics[1][1];
@@ -261,7 +267,12 @@ void OakdXlinkReader::SetOrReset() {
     // Sets queues size and behavior
 
     qRgb = device->getOutputQueue("rgb", 4, false);                                      
-    qDepth = device->getOutputQueue("depth", 4, false);    
+    qDepth = device->getOutputQueue("depth", 4, false);
+    controlQueue = device->getInputQueue("control");
+
+    dai::CameraControl ctrl;
+    ctrl.setManualFocus(lensPos);
+    controlQueue->send(ctrl);
 
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Done opening");
@@ -1533,14 +1544,14 @@ void OakdXlinkReader::NextFrame() {
                     
                     memcpy(&s->frame[(i*sizeof(coco_human_t))+4], &bodyStruct, sizeof(coco_human_t));
 
-                    // cv::Mat depthFrameColor;
-                    // // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
-                    // cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
-                    // cv::equalizeHist(depthFrameColor, depthFrameColor);
-                    // cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
-                    // rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
-                    // cv::imshow("depth", depthFrameColor);
-                    // cv::waitKey(1);
+                    cv::Mat depthFrameColor;
+                    // cv::medianBlur(frameDepthMat, frameDepthMat, 25);
+                    cv::normalize(frameDepthMat, depthFrameColor, 255, 0, cv::NORM_INF, CV_8UC1);
+                    cv::equalizeHist(depthFrameColor, depthFrameColor);
+                    cv::applyColorMap(depthFrameColor, depthFrameColor, cv::COLORMAP_HOT);
+                    rectangle(depthFrameColor, cv::Point(usedXPoint - usedRadius, usedYPoint - usedRadius), cv::Point(usedXPoint + usedRadius, usedYPoint + usedRadius), cv::Scalar( 255, 0, 255 ), cv::FILLED, cv::LINE_8 );
+                    cv::imshow("depth", depthFrameColor);
+                    cv::waitKey(1);
                 }
 
                 //Now that we have copied all memory to the frame we can push it back

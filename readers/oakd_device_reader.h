@@ -83,11 +83,13 @@ private:
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
   std::shared_ptr<dai::node::StereoDepth> stereo;
+  std::shared_ptr<dai::node::XLinkIn> controlIn;
   std::shared_ptr<dai::node::NeuralNetwork> nn;
   std::shared_ptr<dai::node::XLinkOut> rgbOut;
   std::shared_ptr<dai::node::XLinkOut> depthOut;
   std::shared_ptr<dai::node::XLinkOut> nnXout;
 
+  std::shared_ptr<dai::DataInputQueue> controlQueue;
   std::shared_ptr<dai::DataOutputQueue> q;
   std::shared_ptr<dai::DataOutputQueue> qRgb;
   std::shared_ptr<dai::DataOutputQueue> qDepth;
