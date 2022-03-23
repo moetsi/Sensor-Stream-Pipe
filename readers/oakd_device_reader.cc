@@ -125,6 +125,7 @@ void OakdDeviceReader::SetOrResetInternals() {
     env["REL"] = rel;
     std::string model_blob_path = input_blob;
     model_blob_path = StringInterpolation(env, model_blob_path);
+    std::cerr << "blob path is " << model_blob_path << std::endl << std::flush;
     nn->setBlobPath(model_blob_path);
     
     // # Only send metadata, we are only interested in timestamp, so we can sync
@@ -410,11 +411,17 @@ void OakdDeviceReader::NextFrame() {
                             0.0
                     } } };
 
-                    auto input_scale2 = input_scale * magic; // * 0.84; //  /1.04065; // -> 0.8*1280/984 || *0.83;
-                    posesStruct = parse_poses(previous_poses_2d, common, R, 
-                        featuresMat, heatmapMat, paf_mapMat, input_scale2, input_scale2, stride, fx,
-                        1080 //1080
-                        , true, magic); //true);
+                    //auto input_scale2 = input_scale * magic;
+                    //posesStruct = parse_poses(previous_poses_2d, common, R, 
+                    //    featuresMat, heatmapMat, paf_mapMat, input_scale2, input_scale2, stride, fx, 1080, true, magic); 
+                    ////////////////////////////
+                    //scale_multiplier1 = config["scale_multiplier1"].as<double>();
+                    //scale_multiplier2 = config["scale_multiplier2"].as<double>();
+                    //xmagic = config["xmagic"].as<double>();
+
+                    auto is1 = input_scale * scale_multiplier1;
+                    auto is2 = input_scale * scale_multiplier2;
+                    posesStruct = parse_poses(previous_poses_2d, common, R, featuresMat, heatmapMat, paf_mapMat, is1, is2, stride, fx, 1080, true, xmagic);
 
                     } catch(...) {
                         std::cerr << "TRY/CATCH CATCH AFTER INFERENCE " << std::endl << std::flush;

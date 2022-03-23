@@ -1,0 +1,44 @@
+---
+general:
+  host: "localhost"
+  port: 9999
+  log_level: "debug"
+  frame_source:
+    type: "oakd_device"
+    parameters:
+      ip: "192.168.10.205"
+      deviceid: 4
+      stream_color: True
+      stream_depth: True
+      stream_bodies: True
+      rgb_resolution: 1080
+      rgb_preview_size_y: 256
+      rgb_preview_size_x: 448 
+      rgb_fps: 7
+      depth_resolution: 720
+      depth_preview_size_y: 512
+      depth_preview_size_x: 768
+      depth_fps: 7
+      depth_spatial_filter: True
+      depth_spatial_hole_filling_radius: 2
+      depth_spatial_filter_num_it: 1
+      depth_decimation_factor: 1
+      streaming_color_format: "COLOR_BGRA32"
+      streaming_color_resolution: "COLOR_RESOLUTION_720P"
+      streaming_depth_mode: "STEREO_DISPARITY"
+      streaming_depth_resolution: "STEREO_RESOLUTION_480P"
+      streaming_rate: "10"
+      model: "@{REL}/models/human-pose-estimation-3d.xml"
+      blob: "@{REL}/models/human-pose-estimation-3d.blob"    
+      scale_multiplier1: 1.0
+      scale_multiplier2: 1.0
+      xmagic: 1.0
+      sz_x: 256
+      sz_y: 448       
+video_encoder:
+  0: #color
+    type: "null"
+  1: #depth
+    type: "null"
+  4: #object-human
+    type: "null"
