@@ -72,7 +72,7 @@ function build_ffmpeg {
 function build_depthai {
     echo "Building Depthai-core"
     echo ${LOCAL_DIR}
-    git clone --depth 1 --branch develop \
+    git clone --depth 1 --branch master \
         https://github.com/luxonis/depthai-core.git
     pushd depthai-core
     git submodule update --init --recursive

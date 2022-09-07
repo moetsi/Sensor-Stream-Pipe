@@ -161,7 +161,6 @@ void OakdDeviceReader::SetOrResetInternals() {
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
     stereo->setOutputSize(depth_dai_preview_x, depth_dai_preview_y);
-    stereo->setFocalLengthFromCalibration(true);
     auto oakdConfig = stereo->initialConfig.get();
     oakdConfig.postProcessing.spatialFilter.enable = depth_dai_sf;
     oakdConfig.postProcessing.spatialFilter.holeFillingRadius = depth_dai_sf_hfr;
@@ -179,20 +178,21 @@ void OakdDeviceReader::SetOrResetInternals() {
     nn->out.link(nnXout->input);
 
     // Changing the IP address to the correct depthai format (const char*)
-    std::cerr << "ip_name = " << ip_name << std::endl << std::flush;
-    char chText[48];
-    ip_name = StringInterpolation(ip_name);
-    std::cerr << "ip_name/after interpolation = " << ip_name << std::endl << std::flush;
-    ip_name.copy(chText, ip_name.size(), 0);
-    chText[ip_name.size()] = '\0';
+    // std::cerr << "ip_name = " << ip_name << std::endl << std::flush;
+    // char chText[48];
+    // ip_name = StringInterpolation(ip_name);
+    // std::cerr << "ip_name/after interpolation = " << ip_name << std::endl << std::flush;
+    // ip_name.copy(chText, ip_name.size(), 0);
+    // chText[ip_name.size()] = '\0';
     //Which sensor
-    device_info = std::make_shared<dai::DeviceInfo>();
-    strcpy(device_info->desc.name, chText);
-    device_info->state = X_LINK_BOOTLOADER; 
-    device_info->desc.protocol = X_LINK_TCP_IP;
+    device_info = std::make_shared<dai::DeviceInfo>(ip_name);
+    // device_info = std::make_shared<dai::DeviceInfo>();
+    // strcpy(device_info->desc.name, chText);
+    // device_info->state = X_LINK_BOOTLOADER; 
+    // device_info->desc.protocol = X_LINK_TCP_IP;
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
-    std::shared_ptr<dai::Device> deviceZero;
-    device = deviceZero;
+    // std::shared_ptr<dai::Device> deviceZero;
+    // device = deviceZero;
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
     device = std::make_shared<dai::Device>(*pipeline, *device_info, true); // usb 2 mode   
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 

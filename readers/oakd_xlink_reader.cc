@@ -192,7 +192,6 @@ void OakdXlinkReader::SetOrReset() {
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
     stereo->setOutputSize(st->depth_dai_preview_x, st->depth_dai_preview_y);
-    stereo->setFocalLengthFromCalibration(true);
     auto oakdConfig = stereo->initialConfig.get();
     oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
     oakdConfig.postProcessing.spatialFilter.holeFillingRadius = st->depth_dai_sf_hfr;
@@ -216,18 +215,18 @@ void OakdXlinkReader::SetOrReset() {
 
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     // Changing the IP address to the correct depthai format (const char*)
-    char chText[48];
+    // char chText[48];
     // std::string ip_name = config["ip"].as<std::string>();
-    ip_name = StringInterpolation(ip_name);
-    ip_name.copy(chText, ip_name.size(), 0);
-    chText[ip_name.size()] = '\0';
+    // ip_name = StringInterpolation(ip_name);
+    // ip_name.copy(chText, ip_name.size(), 0);
+    // chText[ip_name.size()] = '\0';
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     //Which sensor
-    device_info = std::make_shared<dai::DeviceInfo>();
-    strcpy(device_info->desc.name, chText);
-    std::cerr << "device_info->desc.name = " << device_info->desc.name << std::endl << std::flush;
-    device_info->state = X_LINK_BOOTLOADER; 
-    device_info->desc.protocol = X_LINK_TCP_IP;
+    device_info = std::make_shared<dai::DeviceInfo>(ip_name);
+    // strcpy(device_info->desc.name, chText);
+    // std::cerr << "device_info->desc.name = " << device_info->desc.name << std::endl << std::flush;
+    // device_info->state = X_LINK_BOOTLOADER; 
+    // device_info->desc.protocol = X_LINK_TCP_IP;
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;  
 
  

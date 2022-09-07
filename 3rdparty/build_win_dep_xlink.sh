@@ -122,7 +122,7 @@ function build_depthai {
     #    https://github.com/luxonis/depthai-core.git
     ###git clone --depth 1 \
     ###    https://github.com/luxonis/depthai-core.git 
-    git clone --depth 1 --branch develop \
+    git clone --depth 1 --branch master \
         https://github.com/luxonis/depthai-core.git               
     pushd depthai-core
     git submodule update --init --recursive
