@@ -62,7 +62,7 @@ struct AVCodecParametersDeleter {
 };
 
 struct AVCodecParametersNullDeleter {
-  void operator()(AVCodecParameters *ptr) const { }
+  void operator()(AVCodecParameters *ptr) const {  }
 };
 
 struct SwsContextDeleter {
@@ -73,7 +73,7 @@ struct SwsContextDeleter {
 };
 
 struct AVCodecDeleter {
-  void operator()(AVCodec *ptr) const {}
+  void operator()(AVCodec *ptr) const {  }
 };
 
 struct AVIOContextDeleter {

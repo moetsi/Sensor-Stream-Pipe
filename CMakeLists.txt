@@ -3,6 +3,8 @@ project(ssp)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=1)
+# add_compile_options("-Wall" "-Wextra" "-Wshadow" "-Wno-unused-result" "-Wabi-tag")
 
 option(LIBOPENH264_ENABLED "Enable libh264 codec" ON)
 

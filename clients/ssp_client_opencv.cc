@@ -56,14 +56,23 @@ using namespace moetsi::ssp;
 
 
 
-extern "C" SSP_EXPORT int ssp_client_opencv(int port)
+extern "C" SSP_EXPORT int ssp_client_opencv(int port, std::string hostname)
 {
   av_log_set_level(AV_LOG_QUIET);
 
   try {
-    NetworkReader reader(port);
 
-    reader.init();
+    NetworkReader reader(port);
+    // If the hostname is not provided in the command line, then it defaults to 0 so it should bind instead of connect
+    if (stoi(hostname) == 0)
+    {
+      reader.init();
+    }
+    // If the hostname is not 0, then the hostname was provided in the command line and it should connect instead of bind
+    else
+    {
+      reader.init(hostname);
+    }
 
     std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
@@ -644,21 +653,23 @@ int main(int argc, char *argv[]) {
   srand(time(NULL));
     
   if (argc < 2) {
-    std::cerr << "Usage: ssp_client_opencv <port> (<log level>) (<log file>)"
+    std::cerr << "Usage: ssp_client_opencv <port> <host> (<log level>) (<log file>)"
               << std::endl;
     return 1;
   }
+  std::string hostname = "0";
   std::string log_level = "debug";
   std::string log_file = "";
-
   if (argc > 2)
-    log_level = argv[2];
+    hostname = argv[2];
   if (argc > 3)
-    log_file = argv[3];
+    log_level = argv[3];
+  if (argc > 4)
+    log_file = argv[4];
 
   int port = std::stoi(argv[1]);
     
-  return ssp_client_opencv(port);
+  return ssp_client_opencv(port, hostname);
 }
 #endif
 
