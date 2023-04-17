@@ -302,10 +302,14 @@ if (XLINK_ENABLED)
     # If not found disable DepthAI support
     if (depthai_FOUND)
         message(STATUS "Setting SSP_WITH_DEPTHAI_SUPPORT to ON")
+        # This is the new OpenVINO API approach that we have not converted to
+        find_package(OpenVINO REQUIRED)
+        message(STATUS "Found OpenVINO: ${OpenVINO_DIR}")
+        # This is the old OpenVINO API approach
         find_package(ngraph REQUIRED)
         find_package(InferenceEngine CONFIG REQUIRED)
         include_directories(${InferenceEngine_INCLUDE_DIRS})
-        include_directories(${InferenceEngine_INCLUDE_DIRS}/../samples/cpp/common/utils/include)
+        message(STATUS "Found InferenceEngine: ${InferenceEngine_INCLUDE_DIRS}")
         add_definitions(-DSSP_WITH_DEPTHAI_SUPPORT=1)
         include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include)
         include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include/depthai-shared/3rdparty)
@@ -431,7 +435,8 @@ endif ()
 
 if (XLINK_ENABLED)
   target_link_libraries(ssp PRIVATE depthai::opencv)
-  target_link_libraries(ssp PRIVATE ${InferenceEngine_LIBRARIES} ${NGRAPH_LIBRARIES})
+  # target_link_libraries(ssp PRIVATE ${InferenceEngine_LIBRARIES} ${NGRAPH_LIBRARIES})
+  target_link_libraries(ssp PRIVATE openvino::runtime)
 endif ()
 
 #############################
@@ -452,6 +457,18 @@ add_library(ssp_plugin ${PLUGIN_TYPE}
 target_compile_definitions(ssp_plugin PRIVATE SSP_PLUGIN)
 target_link_libraries(ssp_plugin ssp)
 
+add_library(raas_plugin SHARED
+    clients/ssp_client_raas.cc
+)
+target_link_libraries(raas_plugin ssp)
+add_custom_command(
+  TARGET raas_plugin
+  POST_BUILD
+  COMMAND ${CMAKE_SOURCE_DIR}/cmake/raas_package_for_unity.sh raas_plugin
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMENT "Packaging libraries for Unity3D RaaS usage"
+)
+
 if (IOS)
   # Pack all the needed libraries for Unity3D iOS usage
   # Usage:
@@ -464,6 +481,9 @@ endif()
 
 add_executable(ssp_client_opencv clients/ssp_client_opencv.cc)
 target_link_libraries(ssp_client_opencv ssp)
+
+add_executable(ssp_client_raas_playground clients/ssp_client_raas_playground.cc)
+target_link_libraries(ssp_client_raas_playground ssp)
 
 add_executable(ssp_client_body_logger clients/ssp_client_body_logger.cc)
 target_link_libraries(ssp_client_body_logger ssp)

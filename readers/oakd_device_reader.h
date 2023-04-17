@@ -42,12 +42,12 @@
     #define imread_t               cv::imread
     #define ClassificationResult_t ClassificationResult
 #endif
-#include <samples/classification_results.h>
-#include <inference_engine.hpp>
+#include "classification_results.h"
+#include "openvino/openvino.hpp"
 #include <iterator>
 #include <memory>
-#include <samples/common.hpp>
-#include <samples/ocv_common.hpp>
+#include "common.hpp"
+#include "ocv_common.hpp"
 #include <string>
 #include <vector>
 
