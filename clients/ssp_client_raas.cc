@@ -13,16 +13,17 @@
 #include "../readers/network_reader.h"
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
+#include <backward.hpp> // Add this include for backward-cpp
+
 
 #ifdef _WIN32
 #include <io.h>
-#define SSP_EXPORT __declspec(dllexport)
 #else
 #include <unistd.h>
-#define SSP_EXPORT
 #endif 
 
 #include <zmq.hpp>
+#include <fstream>
 
 using namespace moetsi::ssp;
 
@@ -42,14 +43,39 @@ struct DeviceMessage {
   int sensor_data_count;
 };
 
-// For passing errors to C#
-typedef void(*ErrorCallback)(const char* error_message);
-ErrorCallback errorCallback = nullptr;
+std::ofstream error_log_file;
 
 // State variables to store message data and handle threading
 std::unordered_map<int, std::tuple<std::chrono::system_clock::time_point, SensorData*, int>> device_message_dictionary;
 std::mutex device_message_dictionary_mutex;
-std::atomic<bool> stop_thread{false};
+
+void log_exception(const std::exception &e, const std::string &location) {
+    std::ostringstream log_message;
+
+    // Log the date and time
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+    log_message << "[" << std::put_time(std::localtime(&now_time_t), "%Y-%m-%d %H:%M:%S") << "] ";
+
+    // Log the error type and message
+    log_message << "Exception thrown at " << location << ": ";
+    log_message << typeid(e).name() << " - " << e.what() << "\n";
+
+    // Log the stack trace
+    backward::StackTrace st;
+    st.load_here(32);
+    backward::Printer p;
+    p.snippet = true;
+    p.object = true;
+    p.address = true;
+    p.print(st, log_message);
+
+    // Log the message to spdlog and the error_log_file
+    spdlog::error(log_message.str());
+    if (error_log_file.is_open()) {
+        error_log_file << log_message.str() << std::endl;
+    }
+}
 
 void start_ssp_client_raas() {
   try {
@@ -65,7 +91,7 @@ void start_ssp_client_raas() {
     coco_human_t bodyStruct;
 
     while (reader.HasNextFrame()) {
-
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
       coco_human_t bodyStruct;
 
       reader.NextFrame();
@@ -108,26 +134,32 @@ void start_ssp_client_raas() {
     }
 
   } catch (std::exception &e) {
-    spdlog::error(e.what());
-    if (errorCallback != nullptr) {
-      errorCallback(e.what());
-    }
+    log_exception(e, "start_ssp_client_raas");
   }
 
 }
 
-#ifdef _WIN32
-#define DLL_EXPORT __declspec(dllexport)
-#else
-#define DLL_EXPORT __attribute__((visibility("default")))
-#endif
-
 extern "C" {
+  #ifdef _WIN32
+  #define DLL_EXPORT __declspec(dllexport)
+  #else
+  #define DLL_EXPORT __attribute__((visibility("default")))
+  #endif
 
-  DLL_EXPORT void set_error_callback(ErrorCallback callback) {
-    errorCallback = callback;
+  DLL_EXPORT int return_four() {
+    return 6;
   }
-    
+
+  DLL_EXPORT void open_error_log_file(const char* file_path) {
+    error_log_file.open(file_path, std::ios_base::out | std::ios_base::app);
+  }
+
+  DLL_EXPORT void close_error_log_file() {
+    if (error_log_file.is_open()) {
+      error_log_file.close();
+    }
+  }
+
   DLL_EXPORT void start_ssp_client_raas_c_wrapper() {
     start_ssp_client_raas();
   }
@@ -163,7 +195,4 @@ extern "C" {
       device_message_dictionary.clear();
   }
 
-  DLL_EXPORT void stop_ssp_client_raas() {
-    stop_thread = true;
-  }
 }
