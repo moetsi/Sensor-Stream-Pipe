@@ -464,7 +464,7 @@ target_link_libraries(raas_plugin ssp)
 add_custom_command(
   TARGET raas_plugin
   POST_BUILD
-  COMMAND ${CMAKE_SOURCE_DIR}/cmake/raas_package_for_unity.sh raas_plugin
+  COMMAND ${CMAKE_SOURCE_DIR}/cmake/raas_package_for_unity.sh "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}"
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMENT "Packaging libraries for Unity3D RaaS usage"
 )

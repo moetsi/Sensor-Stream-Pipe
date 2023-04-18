@@ -8,7 +8,7 @@ general:
     parameters:
       ip: "192.168.10.43"
       deviceid: 1
-      stream_color: True
+      stream_color: False
       stream_depth: False
       stream_bodies: True
       rgb_resolution: 1080
