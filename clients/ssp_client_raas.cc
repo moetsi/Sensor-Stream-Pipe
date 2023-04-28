@@ -188,7 +188,7 @@ extern "C" {
   }
 
   DLL_EXPORT void start_ssp_client_raas_c_wrapper() {
-    kill_thread = true;
+    kill_thread = false;
     static std::shared_ptr<Runner> runner = std::make_shared<Runner>();
   }
 
