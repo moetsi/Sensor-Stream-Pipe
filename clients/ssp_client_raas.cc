@@ -40,7 +40,7 @@ struct SensorData {
 struct DeviceMessage {
   int device_id;
   double timestamp;
-  std::shared_ptr<SensorData[]> sensor_data; // Use a shared_ptr instead of a raw pointer
+  SensorData* sensor_data;
   int sensor_data_count;
 };
 
@@ -79,12 +79,14 @@ void log_exception(const std::exception &e, const std::string &location) {
     if (error_log_file.is_open()) {
         error_log_file << log_message.str() << std::endl;
     }
-}struct DeviceMessage {
-  int device_id;
-  double timestamp;
-  std::shared_ptr<SensorData[]> sensor_data; // Use a shared_ptr instead of a raw pointer
-  int sensor_data_count;
-};
+}
+
+void start_ssp_client_raas() {
+  try {
+
+
+    // We connect to port 9002 on local host which is the RaaS consumer port
+    NetworkReader reader(9002);
     reader.init("127.0.0.1");
 
     std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
@@ -120,12 +122,8 @@ void log_exception(const std::exception &e, const std::string &location) {
             std::vector<SensorData> dummy_sensor_data_vector{dummy_sensor_data};
 
             std::unique_lock<std::mutex> lock(device_message_dictionary_mutex);
-            auto& device_message_entry = device_message_dictistruct DeviceMessage {
-  int device_id;
-  double timestamp;
-  std::shared_ptr<SensorData[]> sensor_data; // Use a shared_ptr instead of a raw pointer
-  int sensor_data_count;
-};
+            auto& device_message_entry = device_message_dictionary[device_id];
+            std::get<0>(device_message_entry) = now;
 
             // Allocate memory for the sensor_data array using shared_ptr
             auto sensor_data_array = std::shared_ptr<SensorData[]>(new SensorData[dummy_sensor_data_vector.size()]);
@@ -173,13 +171,7 @@ extern "C" {
 
   DLL_EXPORT void stop_ssp_client_raas_c_wrapper() {
   kill_thread = true;
-  }
-
-  DLL_EXPORT void cleanup_sensor_data(DeviceMessage* messages, int message_count) {
-    for (int i = 0; i < message_count; i++) {
-      delete[] messages[i].sensor_data;
-    }
-  }
+}
 
   DLL_EXPORT int return_four() {
     return 7;
