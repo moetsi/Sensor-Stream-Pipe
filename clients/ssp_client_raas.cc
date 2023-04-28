@@ -148,6 +148,7 @@ struct Runner {
   std::thread t;
 
   Runner() {
+    kill_thread = false;
     t = std::thread([this]() {
       start_ssp_client_raas();
     });
@@ -174,7 +175,7 @@ extern "C" {
 }
 
   DLL_EXPORT int return_four() {
-    return 4;
+    return 6;
   }
 
   DLL_EXPORT void open_error_log_file(const char* file_path) {
@@ -188,8 +189,13 @@ extern "C" {
   }
 
   DLL_EXPORT void start_ssp_client_raas_c_wrapper() {
-    kill_thread = false;
-    static std::shared_ptr<Runner> runner = std::make_shared<Runner>();
+      static std::shared_ptr<Runner> runner;
+
+      if (runner) {
+          runner.reset(); // Release the previous instance of Runner
+      }
+
+      runner = std::make_shared<Runner>(); // Create a new instance of Runner
   }
 
   DLL_EXPORT int return_new_messages_count() {
