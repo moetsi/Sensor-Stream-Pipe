@@ -1,9 +1,11 @@
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
+#include <fstream>
 #include <iostream>
-#include <map>
+#include <memory>
 #include <mutex>
-#include <string>
+#include <sstream>
 #include <thread>
 #include <tuple>
 #include <unordered_map>
@@ -44,6 +46,9 @@ struct DeviceMessage {
 };
 
 std::ofstream error_log_file;
+
+// Atomic flag to control the Runner thread
+std::atomic_bool kill_thread(false);
 
 // State variables to store message data and handle threading
 std::unordered_map<int, std::tuple<std::chrono::system_clock::time_point, SensorData*, int>> device_message_dictionary;
@@ -90,7 +95,7 @@ void start_ssp_client_raas() {
     int32_t bodyCount;
     coco_human_t bodyStruct;
 
-    while (reader.HasNextFrame()) {
+    while (!kill_thread && reader.HasNextFrame()) {
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
       coco_human_t bodyStruct;
 
@@ -136,8 +141,26 @@ void start_ssp_client_raas() {
   } catch (std::exception &e) {
     log_exception(e, "start_ssp_client_raas");
   }
-
 }
+
+// Runner struct to manage the thread and its associated resources
+struct Runner {
+  std::thread t;
+
+  Runner() {
+    t = std::thread([this]() {
+      start_ssp_client_raas();
+    });
+  }
+
+  ~Runner() {
+    kill_thread = true;
+    if (t.joinable()) {
+      t.join();
+    }
+  }
+
+};
 
 extern "C" {
   #ifdef _WIN32
@@ -146,8 +169,12 @@ extern "C" {
   #define DLL_EXPORT __attribute__((visibility("default")))
   #endif
 
+  DLL_EXPORT void stop_ssp_client_raas_c_wrapper() {
+  kill_thread = true;
+}
+
   DLL_EXPORT int return_four() {
-    return 6;
+    return 4;
   }
 
   DLL_EXPORT void open_error_log_file(const char* file_path) {
@@ -161,7 +188,8 @@ extern "C" {
   }
 
   DLL_EXPORT void start_ssp_client_raas_c_wrapper() {
-    start_ssp_client_raas();
+    kill_thread = true;
+    static std::shared_ptr<Runner> runner = std::make_shared<Runner>();
   }
 
   DLL_EXPORT int return_new_messages_count() {
