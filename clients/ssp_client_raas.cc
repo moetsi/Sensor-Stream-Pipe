@@ -17,12 +17,11 @@
 #include "../utils/image_converter.h"
 #include <backward.hpp> // Add this include for backward-cpp
 
-
 #ifdef _WIN32
 #include <io.h>
 #else
 #include <unistd.h>
-#endif 
+#endif
 
 #include <zmq.hpp>
 #include <fstream>
@@ -41,7 +40,7 @@ struct SensorData {
 struct DeviceMessage {
   int device_id;
   double timestamp;
-  SensorData* sensor_data;
+  std::shared_ptr<SensorData[]> sensor_data; // Use a shared_ptr instead of a raw pointer
   int sensor_data_count;
 };
 
@@ -51,7 +50,7 @@ std::ofstream error_log_file;
 std::atomic_bool kill_thread(false);
 
 // State variables to store message data and handle threading
-std::unordered_map<int, std::tuple<std::chrono::system_clock::time_point, SensorData*, int>> device_message_dictionary;
+std::unordered_map<int, std::tuple<std::chrono::system_clock::time_point, std::shared_ptr<SensorData[]>, int>> device_message_dictionary;
 std::mutex device_message_dictionary_mutex;
 
 void log_exception(const std::exception &e, const std::string &location) {
@@ -80,14 +79,12 @@ void log_exception(const std::exception &e, const std::string &location) {
     if (error_log_file.is_open()) {
         error_log_file << log_message.str() << std::endl;
     }
-}
-
-void start_ssp_client_raas() {
-  try {
-
-
-    // We connect to port 9002 on local host which is the RaaS consumer port
-    NetworkReader reader(9002);
+}struct DeviceMessage {
+  int device_id;
+  double timestamp;
+  std::shared_ptr<SensorData[]> sensor_data; // Use a shared_ptr instead of a raw pointer
+  int sensor_data_count;
+};
     reader.init("127.0.0.1");
 
     std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
@@ -123,12 +120,16 @@ void start_ssp_client_raas() {
             std::vector<SensorData> dummy_sensor_data_vector{dummy_sensor_data};
 
             std::unique_lock<std::mutex> lock(device_message_dictionary_mutex);
-            auto& device_message_entry = device_message_dictionary[device_id];
-            std::get<0>(device_message_entry) = now;
+            auto& device_message_entry = device_message_dictistruct DeviceMessage {
+  int device_id;
+  double timestamp;
+  std::shared_ptr<SensorData[]> sensor_data; // Use a shared_ptr instead of a raw pointer
+  int sensor_data_count;
+};
 
-            // Allocate memory for the sensor_data array
-            SensorData* sensor_data_array = new SensorData[dummy_sensor_data_vector.size()];
-            std::copy(dummy_sensor_data_vector.begin(), dummy_sensor_data_vector.end(), sensor_data_array);
+            // Allocate memory for the sensor_data array using shared_ptr
+            auto sensor_data_array = std::shared_ptr<SensorData[]>(new SensorData[dummy_sensor_data_vector.size()]);
+            std::copy(dummy_sensor_data_vector.begin(), dummy_sensor_data_vector.end(), sensor_data_array.get());
             std::get<1>(device_message_entry) = sensor_data_array;
             std::get<2>(device_message_entry) = dummy_sensor_data_vector.size();  // Store the sensor_data_count
             lock.unlock();
@@ -172,10 +173,16 @@ extern "C" {
 
   DLL_EXPORT void stop_ssp_client_raas_c_wrapper() {
   kill_thread = true;
-}
+  }
+
+  DLL_EXPORT void cleanup_sensor_data(DeviceMessage* messages, int message_count) {
+    for (int i = 0; i < message_count; i++) {
+      delete[] messages[i].sensor_data;
+    }
+  }
 
   DLL_EXPORT int return_four() {
-    return 6;
+    return 7;
   }
 
   DLL_EXPORT void open_error_log_file(const char* file_path) {
@@ -204,29 +211,29 @@ extern "C" {
   }
 
   DLL_EXPORT void return_new_messages(DeviceMessage* messages) {
-      std::lock_guard<std::mutex> lock(device_message_dictionary_mutex);
-      int index = 0;
+    std::lock_guard<std::mutex> lock(device_message_dictionary_mutex);
+    int index = 0;
 
-      for (const auto& device_message_pair : device_message_dictionary) {
-          int device_id = device_message_pair.first;
-          auto time_and_data = device_message_pair.second;
+    for (const auto& device_message_pair : device_message_dictionary) {
+      int device_id = device_message_pair.first;
+      auto time_point = std::get<0>(device_message_pair.second);
+      auto sensor_data_shared_ptr = std::get<1>(device_message_pair.second);
+      int sensor_data_count = std::get<2>(device_message_pair.second);
 
-          messages[index].device_id = device_id;
-          messages[index].timestamp = std::chrono::duration<double>(std::get<0>(time_and_data).time_since_epoch()).count();
+      messages[index].device_id = device_id;
+      messages[index].timestamp = std::chrono::duration<double>(time_point.time_since_epoch()).count();
+      messages[index].sensor_data_count = sensor_data_count;
 
-          const auto& sensor_data_array = std::get<1>(time_and_data);
-          int sensor_data_count = std::get<2>(time_and_data);
-          messages[index].sensor_data_count = sensor_data_count;
-          messages[index].sensor_data = new SensorData[sensor_data_count];
-          memcpy(messages[index].sensor_data, sensor_data_array, sizeof(SensorData) * sensor_data_count);
+      // Allocate memory for the sensor_data array
+      messages[index].sensor_data = new SensorData[sensor_data_count];
 
-          // Delete the allocated memory for sensor_data_array
-          delete[] sensor_data_array;
+      // Copy data from shared_ptr to the sensor_data array
+      std::copy(sensor_data_shared_ptr.get(), sensor_data_shared_ptr.get() + sensor_data_count, messages[index].sensor_data);
 
-          index++;
-      }
+      index++;
+    }
 
-      device_message_dictionary.clear();
+    device_message_dictionary.clear();
   }
 
 }
