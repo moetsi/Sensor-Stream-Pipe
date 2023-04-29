@@ -4,11 +4,11 @@ general:
   port: 9999
   log_level: "debug"
   frame_source:
-    type: "oakd_xlink"
+    type: "oakd_xlink_full"
     parameters:
       ip: "192.168.10.43"
       deviceid: 1
-      stream_color: False
+      stream_color: True
       stream_depth: False
       stream_bodies: True
       rgb_resolution: 1080

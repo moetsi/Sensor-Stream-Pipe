@@ -1,24 +1,24 @@
 ---
 general:
   host: "localhost"
-  port: 9999
+  port: 9001
   log_level: "debug"
   frame_source:
     type: "oakd_xlink"
     parameters:
-      ip: "192.168.10.43"
-      deviceid: 1
+      ip: "192.168.10.44"
+      deviceid: 2
       stream_color: False
       stream_depth: False
       stream_bodies: True
       rgb_resolution: 1080
       rgb_preview_size_y: 256
       rgb_preview_size_x: 384 
-      rgb_fps: 10
+      rgb_fps: 9
       depth_resolution: 720
       depth_preview_size_y: 512
       depth_preview_size_x: 768
-      depth_fps: 10
+      depth_fps: 9
       depth_spatial_filter: True
       depth_spatial_hole_filling_radius: 2
       depth_spatial_filter_num_it: 1

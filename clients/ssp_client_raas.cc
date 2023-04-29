@@ -174,7 +174,7 @@ extern "C" {
 }
 
   DLL_EXPORT int return_four() {
-    return 7;
+    return 4;
   }
 
   DLL_EXPORT void open_error_log_file(const char* file_path) {

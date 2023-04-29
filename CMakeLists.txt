@@ -378,13 +378,13 @@ set(SOURCE_FILES
 # Checking for XLINK_ENABLED and if exists adding readers
 if (UNIX)
   if (XLINK_ENABLED)
-    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h readers/oakd_device_reader.cc readers/oakd_device_reader.h readers/human_poses.cpp readers/human_poses.h)
+    list(APPEND SOURCE_FILES readers/oakd_xlink_full_reader.cc readers/oakd_xlink_full_reader.h readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h readers/oakd_device_reader.cc readers/oakd_device_reader.h readers/human_poses.cpp readers/human_poses.h)
   endif ()
 endif ()
 
 if (WIN32)
   if (XLINK_ENABLED)
-    list(APPEND SOURCE_FILES readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h readers/oakd_device_reader.cc readers/oakd_device_reader.h  readers/human_poses.cpp readers/human_poses.h)
+    list(APPEND SOURCE_FILES readers/oakd_xlink_full_reader.cc readers/oakd_xlink_full_reader.h readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h readers/oakd_device_reader.cc readers/oakd_device_reader.h  readers/human_poses.cpp readers/human_poses.h)
     add_compile_options("/Zc:preprocessor")
   endif ()
 endif ()
@@ -435,7 +435,7 @@ endif ()
 
 if (XLINK_ENABLED)
   target_link_libraries(ssp PRIVATE depthai::opencv)
-  # target_link_libraries(ssp PRIVATE ${InferenceEngine_LIBRARIES} ${NGRAPH_LIBRARIES})
+  target_link_libraries(ssp PRIVATE ${InferenceEngine_LIBRARIES} ${NGRAPH_LIBRARIES})
   target_link_libraries(ssp PRIVATE openvino::runtime)
 endif ()
 

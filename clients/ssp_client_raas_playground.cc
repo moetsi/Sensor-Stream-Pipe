@@ -1,5 +1,5 @@
 /**
- * \file ssp_client_opencv.cc @brief OpenCV based ssp client client
+ * \file ssp_client_full.cc @brief OpenCV based ssp client client
  */
 // Created by amourao on 26-06-2019.
 
@@ -72,15 +72,23 @@ std::unordered_map<int, std::tuple<std::chrono::system_clock::time_point, Sensor
 std::mutex device_message_dictionary_mutex;
 std::atomic<bool> stop_thread{false};
 
-extern "C" SSP_EXPORT int ssp_client_opencv(int port, std::string hostname)
+extern "C" SSP_EXPORT int ssp_client_full(int port, std::string hostname)
 {
   av_log_set_level(AV_LOG_QUIET);
 
   try {
 
-    // We connect to port 9002 on local host which is the RaaS consumer port
-    NetworkReader reader(9002);
-    reader.init("127.0.0.1");
+    NetworkReader reader(port);
+    // If the hostname is not provided in the command line, then it defaults to 0 so it should bind instead of connect
+    if (stoi(hostname) == 0)
+    {
+      reader.init();
+    }
+    // If the hostname is not 0, then the hostname was provided in the command line and it should connect instead of bind
+    else
+    {
+      reader.init(hostname);
+    }
 
     std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
@@ -143,7 +151,7 @@ int main(int argc, char *argv[]) {
   srand(time(NULL));
     
   if (argc < 2) {
-    std::cerr << "Usage: ssp_client_opencv <port> <host> (<log level>) (<log file>)"
+    std::cerr << "Usage: ssp_client_full <port> <host> (<log level>) (<log file>)"
               << std::endl;
     return 1;
   }
@@ -159,8 +167,6 @@ int main(int argc, char *argv[]) {
 
   int port = std::stoi(argv[1]);
     
-  return ssp_client_opencv(port, hostname);
+  return ssp_client_full(port, hostname);
 }
 #endif
-
-

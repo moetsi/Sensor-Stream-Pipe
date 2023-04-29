@@ -17,6 +17,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #include "../readers/iphone_reader.h"
+￼
+
 #endif
 #endif
 
@@ -41,6 +43,7 @@
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
 #include "../readers/oakd_xlink_reader.h"
 #include "../readers/oakd_device_reader.h"
+#include "../readers/oakd_xlink_full_reader.h"
 #include "depthai/depthai.hpp"
 #endif
 
@@ -61,21 +64,18 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
   av_log_set_level(AV_LOG_QUIET);
 
   try {
+    // Initialize the socket to communicate with the client
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_PUSH);
 
-    //void *context = nullptr;
-    //void *requester = nullptr;
-    //context = zmq_ctx_new();
-    //requester = zmq_socket(context, ZMQ_PUSH);
     // Do not accumulate packets if no client is connected
     socket.set(zmq::sockopt::immediate, true);
 
     // Do not keep packets if there is network congestion
     // socket.set(zmq::sockopt::conflate, true);
 
+    // Initialize the parameters of the codec
     std::string codec_parameters_file = std::string(filename);
-
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
 
     YAML::Node general_parameters = codec_parameters["general"];
@@ -108,6 +108,9 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
     else if (reader_type == "oakd_device") {
       reader = std::unique_ptr<OakdDeviceReader>(new OakdDeviceReader(general_parameters["frame_source"]["parameters"]));
     }
+    else if (reader_type == "oakd_xlink_full") {
+      reader = std::unique_ptr<OakdXlinkFullReader>(new OakdXlinkFullReader(general_parameters["frame_source"]["parameters"]));
+    }    
 #endif
      else if (reader_type == "video") {
       std::string path =
