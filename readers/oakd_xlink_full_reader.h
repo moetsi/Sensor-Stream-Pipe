@@ -57,7 +57,7 @@ namespace moetsi::ssp {
 #define MAGIC 0.84381
 #endif
 
-using namespace InferenceEngine;
+// using namespace InferenceEngine;
 
 class OakdXlinkFullReader : public IReader {
 private:
@@ -120,16 +120,16 @@ private:
     //* int targetX = 256;
     //* int targetY = 384;
 
-    Core ie;
-    CNNNetwork network;
-    InputInfo::Ptr input_info;
+    InferenceEngine::Core ie;
+    InferenceEngine::CNNNetwork network;
+    InferenceEngine::InputInfo::Ptr input_info;
     std::string input_name;
-    DataPtr features_output_info;
-    DataPtr heatmaps_output_info;
-    DataPtr pafs_output_info;
+    InferenceEngine::DataPtr features_output_info;
+    InferenceEngine::DataPtr heatmaps_output_info;
+    InferenceEngine::DataPtr pafs_output_info;
     std::string output_name;
-    ExecutableNetwork executable_network;
-    InferRequest infer_request;
+    InferenceEngine::ExecutableNetwork executable_network;
+    InferenceEngine::InferRequest infer_request;
 
     unsigned int rgb_res;
     dai::ColorCameraProperties::SensorResolution rgb_dai_res;    
