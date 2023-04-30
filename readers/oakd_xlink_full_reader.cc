@@ -267,62 +267,84 @@ void OakdXlinkFullReader::SetOrResetState(const std::shared_ptr<State> &st, int 
     // Step 2. Read a model in OpenVINO Intermediate Representation (.xml and
     // .bin files) or ONNX (.onnx file) format
 
+    // if (n > 0) {                                                                             ****
+    //     st->network = st->ie.ReadNetwork(model_path2);
+    // } else {
+    //     st->network = st->ie.ReadNetwork(model_path);
+    // }
+
     if (n > 0) {
-        st->network = st->ie.ReadNetwork(model_path2);
+        st->model = st->ie2.read_model(model_path2);
     } else {
-        st->network = st->ie.ReadNetwork(model_path);
+        st->model = st->ie2.read_model(model_path);
     }
+    printInputAndOutputsInfo(*(st->model));
     //#ifndef _WIN32    
     //    network = ie.ReadNetwork("../../models/human-pose-estimation-3d-0001.xml");
     //#endif
     //#ifdef _WIN32    
     //    network = ie.ReadNetwork("../../../models/human-pose-estimation-3d-0001.xml");
     //#endif
-    // if (network.getOutputsInfo().size() != 1)
+    // if (network.getOutputsInfo().size() != 1)                                                ****
     //     throw std::logic_error("Sample supports topologies with 1 output only");
-    if (st->network.getInputsInfo().size() != 1)
-        throw std::logic_error("Sample supports topologies with 1 input only");
+
+    if (st->model->get_parameters().size() != 1) {
+        throw std::logic_error("Model must have only one input");
+    }
     // -----------------------------------------------------------------------------------------------------
 
     // --------------------------- Step 3. Configure input & output
     // ---------------------------------------------
     // --------------------------- Prepare input blobs
     // -----------------------------------------------------
-    st->input_info = st->network.getInputsInfo().begin()->second;
-    st->input_name = st->network.getInputsInfo().begin()->first;
+    // input_info = network.getInputsInfo().begin()->second;                                    ****                                    
+    // input_name = network.getInputsInfo().begin()->first;
 
     /* Mark input as resizable by setting of a resize algorithm.
       * In this case we will be able to set an input blob of any shape to an
       * infer request. Resize and layout conversions are executed automatically
       * during inference */
+
     
-    st->input_info->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
+    ov::preprocess::PrePostProcessor ppp = ov::preprocess::PrePostProcessor(st->model);
     
-    st->input_info->setLayout(Layout::NHWC);
-    st->input_info->setPrecision(Precision::U8);
+    // st->input_info->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);                     ****                            
+    ppp.input().preprocess().resize(ov::preprocess::ResizeAlgorithm::RESIZE_LINEAR);
+    
+    // st->input_info->setLayout(Layout::NHWC);                                                 ****
+    const ov::Layout tensor_layout{"NHWC"};
+    ppp.input().tensor().set_layout(tensor_layout);
+    // st->input_info->setPrecision(Precision::U8);                                             ****
+    ov::element::Type input_type = ov::element::u8;
+    ppp.input().tensor().set_element_type(input_type);
+
     // --------------------------- Prepare output blobs
     // ----------------------------------------------------
-    if (st->network.getOutputsInfo().empty()) {
-        std::cerr << "Network outputs info is empty" << std::endl;
-        return;
+    // if (st->network.getOutputsInfo().empty()) {                                              ****
+    //     std::cerr << "Network outputs info is empty" << std::endl;
+    //     return;
+    // }
+    // st->features_output_info = st->network.getOutputsInfo()["features"];                     ****
+    // st->heatmaps_output_info = st->network.getOutputsInfo()["heatmaps"];
+    // st->pafs_output_info = st->network.getOutputsInfo()["pafs"];
+
+    // st->features_output_info->setPrecision(Precision::FP32);                                 ****
+    // st->heatmaps_output_info->setPrecision(Precision::FP32);
+    // st->pafs_output_info->setPrecision(Precision::FP32);
+
+    // We are setting the outputs of the network to be FP32
+    for (const ov::Output<ov::Node>& out : st->model->outputs()) {
+        ppp.output(out.get_any_name()).tensor().set_element_type(ov::element::f32);
+        std::cerr << "!!! OUTPUT NAME !!!!" << std::endl << std::flush;
+        std::cerr << out.get_any_name() << std::endl << std::flush;
     }
-    st->features_output_info = st->network.getOutputsInfo()["features"];
-    st->heatmaps_output_info = st->network.getOutputsInfo()["heatmaps"];
-    st->pafs_output_info = st->network.getOutputsInfo()["pafs"];
-
-    st->features_output_info->setPrecision(Precision::FP32);
-    st->heatmaps_output_info->setPrecision(Precision::FP32);
-    st->pafs_output_info->setPrecision(Precision::FP32);
-
-    // // TODO needed? No because changed the actual input shape of the model directly
-    // ICNNNetwork::InputShapes inputShape {{ "data", std::vector<size_t>{1,3,256,384} }};
-    // network.reshape(inputShape); 
 
     // -----------------------------------------------------------------------------------------------------
 
     // --------------------------- Step 4. Loading a model to the device
     // ------------------------------------------
-    st->executable_network = st->ie.LoadNetwork(st->network, "CPU");
+    // st->executable_network = st->ie.LoadNetwork(st->network, "CPU");                         ****
+    st->compiled_model = st->ie2.compile_model(st->model, "CPU");
     // -----------------------------------------------------------------------------------------------------
     start_time = CurrentTimeMs();
 }
@@ -431,7 +453,8 @@ vector<uint16_t> returnVectorOfNonZeroValuesInRoiXlinkFull(cv::Mat &frameDepthMa
 
 struct moetsi::ssp::human_pose_estimation::poses OakdXlinkFullReader::getPosesAfterImageResize(int targetX, int targetY, const std::shared_ptr<State> &st, cv::Mat &image, bool isFlex)  {
     struct moetsi::ssp::human_pose_estimation::poses posesStruct;
-    InferRequest infer_request = st->executable_network.CreateInferRequest();
+    // InferRequest infer_request = st->executable_network.CreateInferRequest();                ****
+    ov::InferRequest infer_request = st->compiled_model.create_infer_request();
     cv::Mat image2;
 
     std::cerr << image.size[0] << " x " << image.size[1] << std::endl << std::flush; 
@@ -454,23 +477,37 @@ struct moetsi::ssp::human_pose_estimation::poses OakdXlinkFullReader::getPosesAf
     }
 
     std::cerr << image4.size[0] << " x " << image4.size[1] << std::endl << std::flush; 
-    Blob::Ptr imgBlobX = wrapMat2Blob(image4);
+    // Blob::Ptr imgBlobX = wrapMat2Blob(image4);                                               ****
+    ov::Tensor imgBlobX = wrapMat2Tensor(image4);
 
-    infer_request.SetBlob(st->input_name, imgBlobX);  // infer_request accepts input blob of any size
+    // infer_request.SetBlob(st->input_name, imgBlobX);                                         ****
+    infer_request.set_input_tensor(imgBlobX);
+
     
-    infer_request.Infer();
+    // infer_request.Infer();                                                                   ****
+    infer_request.infer();
 
-    Blob::Ptr features_output = infer_request.GetBlob("features");
-    Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
-    Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
+    // Blob::Ptr features_output = infer_request.GetBlob("features");                           ****
+    // Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
+    // Blob::Ptr pafs_output = infer_request.GetBlob("pafs");
 
-    const SizeVector features_output_shape = st->features_output_info->getTensorDesc().getDims();
-    auto l = st->features_output_info->getTensorDesc().getLayout();
-    auto p = st->features_output_info->getTensorDesc().getPrecision(); 
+    const ov::Tensor& features_output = infer_request.get_tensor("features");
+    const ov::Tensor& heatmaps_output = infer_request.get_tensor("heatmaps");
+    const ov::Tensor& pafs_output = infer_request.get_tensor("pafs");
 
-    const SizeVector heatmaps_output_shape = st->heatmaps_output_info->getTensorDesc().getDims();
-    const SizeVector pafs_output_shape = st->pafs_output_info->getTensorDesc().getDims();
+    // It seemed like this was all used to check the sizes of output
+    // const SizeVector features_output_shape = st->features_output_info->getTensorDesc().getDims();
+    // auto l = st->features_output_info->getTensorDesc().getLayout();
+    // auto p = st->features_output_info->getTensorDesc().getPrecision(); 
 
+    // const SizeVector heatmaps_output_shape = st->heatmaps_output_info->getTensorDesc().getDims();
+    // const SizeVector pafs_output_shape = st->pafs_output_info->getTensorDesc().getDims();
+
+    const ov::Shape features_output_shape = features_output.get_shape();
+    const ov::Shape heatmaps_output_shape = heatmaps_output.get_shape();
+    const ov::Shape pafs_output_shape = pafs_output.get_shape();
+
+    std::cerr << "!!!! PRINTING SHAPE OF OUTPUTS !!!!" << std::endl << std::flush;
     std::cerr << dumpVec(features_output_shape) << std::endl << std::flush;
     std::cerr << dumpVec(heatmaps_output_shape) << std::endl << std::flush;
     std::cerr << dumpVec(pafs_output_shape) << std::endl << std::flush;
@@ -486,17 +523,22 @@ struct moetsi::ssp::human_pose_estimation::poses OakdXlinkFullReader::getPosesAf
         return oss.str();
     };
 
-    InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);
-    InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);
-    InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);
+    // InferenceEngine::MemoryBlob::CPtr features_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(features_output);  ****
+    // InferenceEngine::MemoryBlob::CPtr heatmaps_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(heatmaps_output);  ****
+    // InferenceEngine::MemoryBlob::CPtr pafs_moutput = InferenceEngine::as<InferenceEngine::MemoryBlob>(pafs_output);          ****
 
-    InferenceEngine::LockedMemory<const void> features_outputMapped = features_moutput->rmap();
-    InferenceEngine::LockedMemory<const void> heatmaps_outputMapped = heatmaps_moutput->rmap();
-    InferenceEngine::LockedMemory<const void> pafs_outputMapped = pafs_moutput->rmap();
+    // InferenceEngine::LockedMemory<const void> features_outputMapped = features_moutput->rmap();                              ****
+    // InferenceEngine::LockedMemory<const void> heatmaps_outputMapped = heatmaps_moutput->rmap();
+    // InferenceEngine::LockedMemory<const void> pafs_outputMapped = pafs_moutput->rmap();
 
-    const float *features_result = features_outputMapped.as<float *>();
-    const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
-    const float *pafs_result = pafs_outputMapped.as<float *>();
+    // const float *features_result = features_outputMapped.as<float *>();                                                      ****
+    // const float *heatmaps_result = heatmaps_outputMapped.as<float *>();
+    // const float *pafs_result = pafs_outputMapped.as<float *>();
+
+    // Access tensor data directly
+    const float* features_result = features_output.data<float>();
+    const float* heatmaps_result = heatmaps_output.data<float>();
+    const float* pafs_result = pafs_output.data<float>();
 
     // needed?
     matrix3x4 R = matrix3x4{ { {     

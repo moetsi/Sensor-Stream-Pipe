@@ -50,6 +50,7 @@
 #include "ocv_common.hpp"
 #include <string>
 #include <vector>
+#include "args_helper.hpp"
 
 namespace moetsi::ssp { 
 
@@ -120,16 +121,20 @@ private:
     //* int targetX = 256;
     //* int targetY = 384;
 
-    InferenceEngine::Core ie;
-    InferenceEngine::CNNNetwork network;
-    InferenceEngine::InputInfo::Ptr input_info;
-    std::string input_name;
-    InferenceEngine::DataPtr features_output_info;
-    InferenceEngine::DataPtr heatmaps_output_info;
-    InferenceEngine::DataPtr pafs_output_info;
-    std::string output_name;
-    InferenceEngine::ExecutableNetwork executable_network;
-    InferenceEngine::InferRequest infer_request;
+    // InferenceEngine::Core ie;
+    // InferenceEngine::CNNNetwork network;
+    // InferenceEngine::InputInfo::Ptr input_info;
+    // std::string input_name;
+    // InferenceEngine::DataPtr features_output_info;
+    // InferenceEngine::DataPtr heatmaps_output_info;
+    // InferenceEngine::DataPtr pafs_output_info;
+    // std::string output_name;
+    // InferenceEngine::ExecutableNetwork executable_network;
+    // InferenceEngine::InferRequest infer_request;
+
+    ov::Core ie2;
+    std::shared_ptr<ov::Model> model;
+    ov::CompiledModel compiled_model;
 
     unsigned int rgb_res;
     dai::ColorCameraProperties::SensorResolution rgb_dai_res;    
