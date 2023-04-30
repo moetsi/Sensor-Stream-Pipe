@@ -317,6 +317,8 @@ void OakdXlinkFullReader::SetOrResetState(const std::shared_ptr<State> &st, int 
     // st->input_info->setPrecision(Precision::U8);                                             ****
     ov::element::Type input_type = ov::element::u8;
     ppp.input().tensor().set_element_type(input_type);
+    // set model layout
+    ppp.input().model().set_layout("NCHW");
 
     // --------------------------- Prepare output blobs
     // ----------------------------------------------------
@@ -344,6 +346,9 @@ void OakdXlinkFullReader::SetOrResetState(const std::shared_ptr<State> &st, int 
     // --------------------------- Step 4. Loading a model to the device
     // ------------------------------------------
     // st->executable_network = st->ie.LoadNetwork(st->network, "CPU");                         ****
+    // Apply preprocessing modifying the original 'model'
+    st->model = ppp.build();
+    // Loading a model to the device
     st->compiled_model = st->ie2.compile_model(st->model, "CPU");
     // -----------------------------------------------------------------------------------------------------
     start_time = CurrentTimeMs();
@@ -454,7 +459,9 @@ vector<uint16_t> returnVectorOfNonZeroValuesInRoiXlinkFull(cv::Mat &frameDepthMa
 struct moetsi::ssp::human_pose_estimation::poses OakdXlinkFullReader::getPosesAfterImageResize(int targetX, int targetY, const std::shared_ptr<State> &st, cv::Mat &image, bool isFlex)  {
     struct moetsi::ssp::human_pose_estimation::poses posesStruct;
     // InferRequest infer_request = st->executable_network.CreateInferRequest();                ****
+    std::cerr << "RIGHT BEFORE CREATING INFER REQUEST" << std::endl << std::flush;
     ov::InferRequest infer_request = st->compiled_model.create_infer_request();
+    std::cerr << "RIGHT AFTER CREATING INFER REQUEST" << std::endl << std::flush;
     cv::Mat image2;
 
     std::cerr << image.size[0] << " x " << image.size[1] << std::endl << std::flush; 
@@ -476,16 +483,35 @@ struct moetsi::ssp::human_pose_estimation::poses OakdXlinkFullReader::getPosesAf
         }
     }
 
-    std::cerr << image4.size[0] << " x " << image4.size[1] << std::endl << std::flush; 
+    std::cerr << image4.size[0] << " x " << image4.size[1] << std::endl << std::flush;
     // Blob::Ptr imgBlobX = wrapMat2Blob(image4);                                               ****
-    ov::Tensor imgBlobX = wrapMat2Tensor(image4);
+    std::cerr << "RIGHT BEFORE CREATING WARP 2 TENSOR" << std::endl << std::flush;
+    ov::Tensor imgBlobX = wrapMat2Tensor(image);
+    std::cerr << "RIGHT AFTER CREATING WRAP 2 TENSOR" << std::endl << std::flush;
 
     // infer_request.SetBlob(st->input_name, imgBlobX);                                         ****
-    infer_request.set_input_tensor(imgBlobX);
+    try
+    {
+        infer_request.set_input_tensor(0, imgBlobX);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+    
+    std::cerr << "RIGHT AFTER SET INPUT TENSOR" << std::endl << std::flush;
 
     
-    // infer_request.Infer();                                                                   ****
-    infer_request.infer();
+    try
+    {
+        // infer_request.Infer();                                                                   ****
+        infer_request.infer();
+        std::cerr << "ACHIEVED INFERENCE" << std::endl << std::flush;
+    }
+    catch(...) {
+        std::cerr << "TRY/CATCH CATCH AFTER REAL INFERENCE" << std::endl << std::flush;
+    }
 
     // Blob::Ptr features_output = infer_request.GetBlob("features");                           ****
     // Blob::Ptr heatmaps_output = infer_request.GetBlob("heatmaps");
@@ -663,7 +689,7 @@ void OakdXlinkFullReader::NextFrame() {
                         // double xmagic_alt;
                         // int sz_x_alt = 256;
                         // int sz_y_alt = 384;
-
+                        std::cerr << "RIGHT BEFORE GET POSES AFTER IMAGE RESIZE" << framesASecond << std::endl << std::flush;
                         posesStruct =  getPosesAfterImageResize(
                             // 256, 384, 
                             sz_x, sz_y,
@@ -674,6 +700,7 @@ void OakdXlinkFullReader::NextFrame() {
                                 sz_x_alt, sz_y_alt,
                                 states[1], image, true); 
                         }
+                        std::cerr << "RIGHT AFTER GET POSES AFTER IMAGE RESIZE" << framesASecond << std::endl << std::flush;
                         std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
                         {
                             int c = 0;
