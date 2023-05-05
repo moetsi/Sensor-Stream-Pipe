@@ -256,7 +256,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
           }
         }
         if (reader->HasNextFrame()) {
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;         
+//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;         
           reader->NextFrame();
         } else {
  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;           

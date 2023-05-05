@@ -12,8 +12,8 @@ general:
       stream_depth: False
       stream_bodies: True
       rgb_resolution: 1080
-      rgb_preview_size_y: 256
-      rgb_preview_size_x: 384 
+      rgb_preview_size_y: 960
+      rgb_preview_size_x: 1632 
       rgb_fps: 10
       depth_resolution: 720
       depth_preview_size_y: 512
@@ -28,7 +28,8 @@ general:
       streaming_depth_mode: "STEREO_DISPARITY"
       streaming_depth_resolution: "STEREO_RESOLUTION_480P"
       streaming_rate: "10"
-      model: "@{REL}/models/human-pose-estimation-3d-0001.xml"
+      model_detection: "@{REL}/models/person-detection-retail-0013-4-shave.blob"
+      model_reid: "@{REL}/models/person-reidentification-retail-0288-4-shave.blob"
 video_encoder:
   0: #color
     type: "null"
