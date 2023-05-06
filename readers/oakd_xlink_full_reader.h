@@ -204,6 +204,8 @@ private:
   std::string model_reid_path;
   std::string model_reid_path2;
 
+  std::vector<std::vector<float>> reid_results;
+
 public:
   OakdXlinkFullReader(YAML::Node config);
 

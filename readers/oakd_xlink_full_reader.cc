@@ -23,7 +23,7 @@ namespace moetsi::ssp {
 using namespace human_pose_estimation;
 
 // Calculate cosine distance between two vectors
-float cosDist(const std::vector<float>& a, const std::vector<float>& b) {
+float cos_dist(const std::vector<float>& a, const std::vector<float>& b) {
     float dotProduct = 0.0;
     float normA = 0.0;
     float normB = 0.0;
@@ -36,7 +36,7 @@ float cosDist(const std::vector<float>& a, const std::vector<float>& b) {
 }
 
 // Normalize frame and bounding box
-cv::Rect frameNorm(const cv::Mat& frame, const std::vector<float>& bbox) {
+cv::Rect frame_norm(const cv::Mat& frame, const std::vector<float>& bbox) {
     int xMin = std::max(static_cast<int>(bbox[0] * frame.cols), 0);
     int yMin = std::max(static_cast<int>(bbox[1] * frame.rows), 0);
     int xMax = std::min(static_cast<int>(bbox[2] * frame.cols), frame.cols - 1);
@@ -58,7 +58,7 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
             throw std::runtime_error("Invalid message name: " + name);
         }
 
-        std::cerr << "SEQ Number for " << name << " is " << seq << std::endl << std::flush;
+        // std::cerr << "SEQ Number for " << name << " is " << seq << std::endl << std::flush;
 
         std::string seq_str = std::to_string(seq);
         if (msgs.find(seq_str) == msgs.end()) {
@@ -73,9 +73,7 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
         } else {
             msgs[seq_str][name] = msg;
             if (name == "detection") {
-                std::cerr << "MADE it to detection size" << std::endl << std::flush;
                 msgs[seq_str]["len"] = std::make_shared<size_t>(std::static_pointer_cast<dai::ImgDetections>(msg)->detections.size());
-                std::cerr << "MADE it past detection size - size is: " << msgs[seq_str]["len"] << std::endl << std::flush;
             }
         }
     } catch (const std::exception &e) {
@@ -95,15 +93,10 @@ std::unordered_map<std::string, std::shared_ptr<void>> TwoStageHostSeqSync::get_
 
             if (it.second.find("color") != it.second.end() && it.second.find("len") != it.second.end() && it.second.find("recognition") != it.second.end()) {
                 try {
-                    std::cerr << "Fart 1" << std::endl << std::flush;
                     size_t len = *std::static_pointer_cast<size_t>(it.second["len"]);
-                    std::cerr << "Fart 2" << std::endl << std::flush;
                     std::vector<std::shared_ptr<dai::NNData>> recognition_vec = *std::static_pointer_cast<std::vector<std::shared_ptr<dai::NNData>>>(it.second["recognition"]);
-                    std::cerr << "Fart 3" << std::endl << std::flush;
                     if (len == recognition_vec.size()) {
-                        std::cerr << "Fart 4" << std::endl << std::flush;
                         std::unordered_map<std::string, std::shared_ptr<void>> synced_msgs = it.second;
-                        std::cerr << "Fart 5" << std::endl << std::flush;
                         for (const std::string& rm : seq_remove) {
                             msgs.erase(rm);
                         }
@@ -333,7 +326,7 @@ void OakdXlinkFullReader::SetOrReset() {
                 cfg = ImageManipConfig()
                 correct_bb(det)
                 cfg.setCropRect(det.xmin, det.ymin, det.xmax, det.ymax)
-                node.warn(f"Sending {i + 1}. person det. Seq {img_seq}. Det {det.xmin}, {det.ymin}, {det.xmax}, {det.ymax}")
+                # node.warn(f"Sending {i + 1}. person det. Seq {img_seq}. Det {det.xmin}, {det.ymin}, {det.xmax}, {det.ymax}")
                 cfg.setResize(128, 256)
                 cfg.setKeepAspectRatio(False)
                 node.io['manip_cfg'].send(cfg)
@@ -434,10 +427,7 @@ void OakdXlinkFullReader::NextFrame() {
             }
 
             current_frame_.clear();
-            //Increment counter and grab time
-            current_frame_counter_++;
-            uint64_t capture_timestamp = CurrentTimeMs();
-            auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+ 
             // std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
 
             if (queues["rgb"]->has()) {
@@ -467,11 +457,51 @@ void OakdXlinkFullReader::NextFrame() {
             if (msgs.empty()) {
                 return;
             }
+           //Increment counter and grab time
+            current_frame_counter_++;
+            uint64_t capture_timestamp = CurrentTimeMs();
+            auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+            auto fps_string = std::to_string(framesASecond);
 
             cv::Mat frameRgbOpenCv = std::static_pointer_cast<dai::ImgFrame>(msgs["color"])->getCvFrame();
             auto detections = std::static_pointer_cast<dai::ImgDetections>(msgs["detection"])->detections;
             auto recognitions = std::static_pointer_cast<std::vector<std::shared_ptr<dai::NNData>>>(msgs["recognition"]);
-            cv::imshow("COLOR", frameRgbOpenCv);
+
+
+            cv::putText(frameRgbOpenCv, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 0, 0), 8);
+            cv::putText(frameRgbOpenCv, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(255, 255, 255), 2);
+
+            for (size_t i = 0; i < detections.size(); ++i) {
+                auto detection = detections[i];
+                auto bbox = frame_norm(frameRgbOpenCv, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
+
+                auto reid_result = (*recognitions)[i]->getFirstLayerFp16();
+
+                bool found = false;
+                int reid_id;
+                for (size_t j = 0; j < reid_results.size(); ++j) {
+                    auto dist = cos_dist(reid_result, reid_results[j]);
+                    if (dist > 0.7) {
+                        reid_results[j] = reid_result;
+                        reid_id = j;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    reid_results.push_back(reid_result);
+                    reid_id = reid_results.size() - 1;
+                }
+
+                cv::rectangle(frameRgbOpenCv, cv::Point(bbox.x, bbox.y), cv::Point(bbox.x + bbox.width, bbox.y + bbox.height), cv::Scalar(10, 245, 10), 2);
+                int y = (bbox.y + bbox.y + bbox.height) / 2;
+                std::string person_text = "Person reid " + std::to_string(reid_id);
+                cv::putText(frameRgbOpenCv, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
+                cv::putText(frameRgbOpenCv, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
+            }
+
+            cv::imshow("Camera", frameRgbOpenCv);
             cv::waitKey(1);
 
             // Color frame
