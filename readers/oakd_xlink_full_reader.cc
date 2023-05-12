@@ -489,7 +489,7 @@ void OakdXlinkFullReader::NextFrame() {
                 uint64_t capture_timestamp = CurrentTimeMs();
                 auto framesASecond = (float)current_recognition_frame_counter_/((float)(capture_timestamp - start_time)*.001);
                 auto fps_string = std::to_string(framesASecond);
-                std::cerr << "recognition fps: " << fps_string << std::endl << std::flush;
+                // std::cerr << "recognition fps: " << fps_string << std::endl << std::flush;
                 // std::cerr << "recognition seq num: " << seq << std::endl << std::flush;
             }
             // for (auto& it : queues) {
