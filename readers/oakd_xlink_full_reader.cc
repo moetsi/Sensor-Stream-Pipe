@@ -118,6 +118,11 @@ std::unordered_map<std::string, std::shared_ptr<void>> TwoStageHostSeqSync::get_
 
 OakdXlinkFullReader::OakdXlinkFullReader(YAML::Node config) {
 
+    outputFile = std::ofstream("output.txt");
+    std::streambuf* coutbuf = std::cout.rdbuf(); // save old buf
+    // std::cout.rdbuf(outputFile.rdbuf()); // redirect std::cout to output.txt
+
+
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Starting to open");
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
@@ -132,6 +137,9 @@ OakdXlinkFullReader::OakdXlinkFullReader(YAML::Node config) {
     Init(config, states[1], 1);
 
     current_frame_counter_ = 0;
+    current_rgb_frame_counter_ = 0;
+    current_detection_frame_counter_ = 0;
+    current_recognition_frame_counter_ = 0;
     frame_template_.stream_id = RandomString(16);
     frame_template_.device_id = config["deviceid"].as<unsigned int>();
     frame_template_.scene_desc = "oakd";
@@ -236,9 +244,18 @@ void OakdXlinkFullReader::SetOrReset() {
     camRgb->setInterleaved(false);
     camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
+
+    // camRgbManip = pipeline->create<dai::node::ImageManip>();
+    // camRgbManip-> initialConfig.setResize(408, 240);
+    // camRgbManip->initialConfig.setFrameType(dai::ImgFrame::Type::BGR888p);
+    // camRgb->preview.link(camRgbManip->inputImage);
+
     rgbOut = pipeline->create<dai::node::XLinkOut>();
+    // Here I will take the camRgb frames and downscale them before sending them out
+
     rgbOut->setStreamName("rgb");
-    camRgb->preview.link(rgbOut->input);
+    // camRgbManip->out.link(rgbOut->input);
+    // camRgb->preview.link(rgbOut->input);
 
     // Color Properties
     camRgb->setFps(st->rgb_dai_fps);
@@ -249,6 +266,7 @@ void OakdXlinkFullReader::SetOrReset() {
     person_det_manip->initialConfig.setResize(544, 320); // This seems to downscale it by 1/3 (544x320)
     person_det_manip->initialConfig.setFrameType(dai::ImgFrame::Type::RGB888p);
     camRgb->preview.link(person_det_manip->inputImage);
+    // person_det_manip->out.link(rgbOut->input);
 
     // Person detection nn setup
     cout << "Creating Person Detection Neural Network..." << endl;
@@ -261,6 +279,7 @@ void OakdXlinkFullReader::SetOrReset() {
     person_det_xout = pipeline->create<dai::node::XLinkOut>();
     person_det_xout->setStreamName("detection");
     person_nn->out.link(person_det_xout->input);
+    person_nn->passthrough.link(rgbOut->input);
 
     // // We set up the script node that takes the detections from the nn and
     // // sets the ImageManipConfig on the device to send to the recognition_manip to cro
@@ -384,7 +403,12 @@ void OakdXlinkFullReader::SetOrReset() {
     std::cerr << "Trying to create pipeline" << std::endl << std::flush;  
     device_info = std::make_shared<dai::DeviceInfo>(ip_name);
     device = std::make_shared<dai::Device>(*pipeline, *device_info, true); // usb 2 mode
-                     
+    std::cerr << "Created pipeline" << std::endl << std::flush;  
+
+    // Capture the log output
+    // std::ofstream outputFile("output.txt");
+    // std::cout.rdbuf(outputFile.rdbuf());
+
     // Connect to device and start pipeline
     std::cerr << "Connected cameras: " << std::endl << std::flush;        
     std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;                     
@@ -396,11 +420,13 @@ void OakdXlinkFullReader::SetOrReset() {
 
     // Set up the output queues
     for (const auto &name : {"rgb", "detection", "recognition"}) {
-        queues[name] = device->getOutputQueue(name);
+        queues[name] = device->getOutputQueue(name, 10, true);
     }
 
     spdlog::debug("Done opening");
 
+    // Close the file
+    // outputFile.close();
 }
 void OakdXlinkFullReader::SetOrResetState(const std::shared_ptr<State> &st, int n) {
 
@@ -409,8 +435,9 @@ void OakdXlinkFullReader::SetOrResetState(const std::shared_ptr<State> &st, int 
 
 OakdXlinkFullReader::~OakdXlinkFullReader() {
 
-}
 
+
+}
 void OakdXlinkFullReader::NextFrame() {
     for (int kk=0; kk<MAX_RETRIAL; ++kk) {
         try {
@@ -430,25 +457,47 @@ void OakdXlinkFullReader::NextFrame() {
  
             // std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
 
-            if (queues["rgb"]->has()) {
                 // std::cerr << "rgb" << std::endl << std::flush;
+            if (queues["rgb"]->has()) {
                 auto rgb_message = queues["rgb"]->get();
+                int64_t seq = std::static_pointer_cast<dai::ImgFrame>(rgb_message)->getSequenceNum();
                 sync.add_msg(rgb_message, "color");
+                current_rgb_frame_counter_++;
+                uint64_t capture_timestamp = CurrentTimeMs();
+                auto framesASecond = (float)current_rgb_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+                auto fps_string = std::to_string(framesASecond);
+                std::cerr << "color fps: " << fps_string << std::endl << std::flush;
+                // std::cerr << "color seq num: " << seq << std::endl << std::flush;
             }
             if (queues["detection"]->has()) {
-                // std::cerr << "detection" << std::endl << std::flush;
-                sync.add_msg(queues["detection"]->get(), "detection");
+                // std::cerr << "detection" << std::endl << std::flush;q
+                auto det_message = queues["detection"]->get();
+                sync.add_msg(det_message, "detection");
+                int64_t seq = std::static_pointer_cast<dai::ImgDetections>(det_message)->getSequenceNum();
+                current_detection_frame_counter_++;
+                uint64_t capture_timestamp = CurrentTimeMs();
+                auto framesASecond = (float)current_detection_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+                auto fps_string = std::to_string(framesASecond);
+                std::cerr << "detection fps: " << fps_string << std::endl << std::flush;
+                // std::cerr << "detection seq num: " << seq << std::endl << std::flush;
             }
             if (queues["recognition"]->has()) {
-                // std::cerr << "recognition" << std::endl << std::flush;
-                sync.add_msg(queues["recognition"]->get(), "recognition");
+                auto rec_message = queues["recognition"]->get();
+                sync.add_msg(rec_message, "recognition");
+                int64_t seq = std::static_pointer_cast<dai::NNData>(rec_message)->getSequenceNum();
+                current_recognition_frame_counter_++;
+                uint64_t capture_timestamp = CurrentTimeMs();
+                auto framesASecond = (float)current_recognition_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+                auto fps_string = std::to_string(framesASecond);
+                std::cerr << "recognition fps: " << fps_string << std::endl << std::flush;
+                // std::cerr << "recognition seq num: " << seq << std::endl << std::flush;
             }
             // for (auto& it : queues) {
             //     const std::string& name = it.first;
             //     std::shared_ptr<dai::DataOutputQueue>& q = it.second;
             //     std::cerr << "QUEUE " << name << std::endl << std::flush;
             //     if (q->has()) {
-            //         std::cerr << "Q HAS" << std::endl << std::flush;
+            //         std::cerr << "Q HAS" << std::endl << std::flush;            cv::Mat frameRgbOpenCv = std::static_pointer_cast<dai::ImgFrame>(msgs["color"])->getCvFrame();
             //         sync.add_msg(q->get(), name);
             //     }
             // }
@@ -464,16 +513,21 @@ void OakdXlinkFullReader::NextFrame() {
             auto fps_string = std::to_string(framesASecond);
 
             cv::Mat frameRgbOpenCv = std::static_pointer_cast<dai::ImgFrame>(msgs["color"])->getCvFrame();
+            // resizing frames
+            cv::Mat resizedFrame;
+            cv::Size size(1632, 960); 
+            cv::resize(frameRgbOpenCv, resizedFrame, size); // resize image
+
             auto detections = std::static_pointer_cast<dai::ImgDetections>(msgs["detection"])->detections;
             auto recognitions = std::static_pointer_cast<std::vector<std::shared_ptr<dai::NNData>>>(msgs["recognition"]);
 
 
-            cv::putText(frameRgbOpenCv, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 0, 0), 8);
-            cv::putText(frameRgbOpenCv, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(255, 255, 255), 2);
+            cv::putText(resizedFrame, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 0, 0), 8);
+            cv::putText(resizedFrame, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(255, 255, 255), 2);
 
             for (size_t i = 0; i < detections.size(); ++i) {
                 auto detection = detections[i];
-                auto bbox = frame_norm(frameRgbOpenCv, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
+                auto bbox = frame_norm(resizedFrame, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
 
                 auto reid_result = (*recognitions)[i]->getFirstLayerFp16();
 
@@ -494,14 +548,14 @@ void OakdXlinkFullReader::NextFrame() {
                     reid_id = reid_results.size() - 1;
                 }
 
-                cv::rectangle(frameRgbOpenCv, cv::Point(bbox.x, bbox.y), cv::Point(bbox.x + bbox.width, bbox.y + bbox.height), cv::Scalar(10, 245, 10), 2);
+                cv::rectangle(resizedFrame, cv::Point(bbox.x, bbox.y), cv::Point(bbox.x + bbox.width, bbox.y + bbox.height), cv::Scalar(10, 245, 10), 2);
                 int y = (bbox.y + bbox.y + bbox.height) / 2;
                 std::string person_text = "Person reid " + std::to_string(reid_id);
-                cv::putText(frameRgbOpenCv, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
-                cv::putText(frameRgbOpenCv, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
+                cv::putText(resizedFrame, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
+                cv::putText(resizedFrame, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
             }
 
-            cv::imshow("Camera", frameRgbOpenCv);
+            cv::imshow("Camera", resizedFrame);
             cv::waitKey(1);
 
             // Color frame
@@ -514,15 +568,15 @@ void OakdXlinkFullReader::NextFrame() {
             rgbFrame->timestamps.push_back(capture_timestamp);
 
             // convert the raw buffer to cv::Mat
-            int32_t colorCols = frameRgbOpenCv.cols;                                                        
-            int32_t colorRows = frameRgbOpenCv.rows;                                                        
+            int32_t colorCols = resizedFrame.cols;                                                        
+            int32_t colorRows = resizedFrame.rows;                                                        
             size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
 
             rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        
 
             memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       
             memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       
-            memcpy(&rgbFrame->frame[8], (unsigned char*)(frameRgbOpenCv.data), colorSize);
+            memcpy(&rgbFrame->frame[8], (unsigned char*)(resizedFrame.data), colorSize);
 
             //Depth frame
             // std::shared_ptr<FrameStruct> depthFrame =
@@ -546,6 +600,7 @@ void OakdXlinkFullReader::NextFrame() {
 
             // if (stream_depth)
             //     current_frame_.push_back(depthFrame);
+            outputFile.close();
               
 
         } catch(std::exception &e) {

@@ -65,6 +65,7 @@ namespace moetsi::ssp {
 
 // using namespace InferenceEngine;
 
+
 class TwoStageHostSeqSync {
 public:
     void add_msg(const std::shared_ptr<void>& msg, const std::string& name);
@@ -77,9 +78,16 @@ private:
 class OakdXlinkFullReader : public IReader {
 private:
 
+  std::ofstream outputFile;
+
   bool stream_rgb = false;
   bool stream_depth = false;
   bool stream_bodies = false;
+
+  // Used for node fps debugging
+  int current_rgb_frame_counter_;
+  int current_detection_frame_counter_;
+  int current_recognition_frame_counter_;
 
   int current_frame_counter_;
   unsigned int fps;
@@ -95,6 +103,7 @@ private:
 
   std::shared_ptr<dai::Pipeline> pipeline;
   std::shared_ptr<dai::node::ColorCamera> camRgb;
+  std::shared_ptr<dai::node::ImageManip> camRgbManip;
   std::shared_ptr<dai::node::XLinkOut> rgbOut;
 
   std::shared_ptr<dai::node::ImageManip> person_det_manip;
