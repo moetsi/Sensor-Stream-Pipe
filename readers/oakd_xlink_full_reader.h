@@ -64,15 +64,19 @@
 namespace moetsi::ssp { 
 
 // using namespace InferenceEngine;
-
+struct MessageData {
+    std::shared_ptr<void> color;
+    std::shared_ptr<void> detection;
+    std::vector<std::shared_ptr<dai::NNData>> recognitions;
+};
 
 class TwoStageHostSeqSync {
 public:
     void add_msg(const std::shared_ptr<void>& msg, const std::string& name);
-    std::unordered_map<std::string, std::shared_ptr<void>> get_msgs();
+    MessageData get_msgs();
 
 private:
-    std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<void>>> msgs;
+    std::unordered_map<int64_t, MessageData> msgs;
 };
 
 class OakdXlinkFullReader : public IReader {

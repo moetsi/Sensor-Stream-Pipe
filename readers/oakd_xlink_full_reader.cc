@@ -58,22 +58,16 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
             throw std::runtime_error("Invalid message name: " + name);
         }
 
-        // std::cerr << "SEQ Number for " << name << " is " << seq << std::endl << std::flush;
-
-        std::string seq_str = std::to_string(seq);
-        if (msgs.find(seq_str) == msgs.end()) {
-            msgs[seq_str] = {};
-        }
+        // Look up the sequence only once
+        auto& msgData = msgs[seq];
 
         if (name == "recognition") {
-            if (msgs[seq_str].find("recognition") == msgs[seq_str].end()) {
-                msgs[seq_str]["recognition"] = std::make_shared<std::vector<std::shared_ptr<dai::NNData>>>();
-            }
-            std::static_pointer_cast<std::vector<std::shared_ptr<dai::NNData>>>(msgs[seq_str]["recognition"])->push_back(std::static_pointer_cast<dai::NNData>(msg));
+            msgData.recognitions.push_back(std::static_pointer_cast<dai::NNData>(msg));
         } else {
-            msgs[seq_str][name] = msg;
-            if (name == "detection") {
-                msgs[seq_str]["len"] = std::make_shared<size_t>(std::static_pointer_cast<dai::ImgDetections>(msg)->detections.size());
+            if(name == "color") {
+                msgData.color = msg;
+            } else if(name == "detection") {
+                msgData.detection = msg;
             }
         }
     } catch (const std::exception &e) {
@@ -83,37 +77,35 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
     }
 }
 
-std::unordered_map<std::string, std::shared_ptr<void>> TwoStageHostSeqSync::get_msgs() {
+MessageData TwoStageHostSeqSync::get_msgs() {
     try {
-        std::vector<std::string> seq_remove;
+        for (auto it = msgs.begin(); it != msgs.end(); ) {
+            if (it->second.color && it->second.detection && it->second.recognitions.size() == std::static_pointer_cast<dai::ImgDetections>(it->second.detection)->detections.size()) {
+                MessageData synced_msgs = std::move(it->second);
+                int64_t lowestSyncSeq = it->first;
+                it = msgs.erase(it);
 
-        for (auto& it : msgs) {
-
-            seq_remove.push_back(it.first);
-
-            if (it.second.find("color") != it.second.end() && it.second.find("len") != it.second.end() && it.second.find("recognition") != it.second.end()) {
-                try {
-                    size_t len = *std::static_pointer_cast<size_t>(it.second["len"]);
-                    std::vector<std::shared_ptr<dai::NNData>> recognition_vec = *std::static_pointer_cast<std::vector<std::shared_ptr<dai::NNData>>>(it.second["recognition"]);
-                    if (len == recognition_vec.size()) {
-                        std::unordered_map<std::string, std::shared_ptr<void>> synced_msgs = it.second;
-                        for (const std::string& rm : seq_remove) {
-                            msgs.erase(rm);
-                        }
-
-                        return synced_msgs;
+                // Erase all messages with sequence number less than the lowest sequence number of synchronized messages
+                for (auto it = msgs.begin(); it != msgs.end(); ) {
+                    if (it->first < lowestSyncSeq) {
+                        it = msgs.erase(it);
+                    } else {
+                        ++it;
                     }
-                } catch (const std::exception &e) {
-                    std::cerr << "Error in get_msgs: " << e.what() << std::endl;
                 }
+
+                return synced_msgs;
+            } else {
+                ++it;
             }
         }
-        return {}; // No synced messages
+        return MessageData{}; // No synced messages
     } catch (const std::exception &e) {
-        std::cerr << "Error in add_msg: " << e.what() << std::endl;
+        std::cerr << "Error in get_msgs: " << e.what() << std::endl;
     } catch (...) {
-        std::cerr << "Unknown error in add_msg" << std::endl;
+        std::cerr << "Unknown error in get_msgs" << std::endl;
     }
+    return MessageData{}; // No synced messages
 }
 
 OakdXlinkFullReader::OakdXlinkFullReader(YAML::Node config) {
@@ -503,7 +495,7 @@ void OakdXlinkFullReader::NextFrame() {
             // }
 
             auto msgs = sync.get_msgs();
-            if (msgs.empty()) {
+            if (!msgs.color || !msgs.detection || msgs.recognitions.empty()) {
                 return;
             }
            //Increment counter and grab time
@@ -512,14 +504,14 @@ void OakdXlinkFullReader::NextFrame() {
             auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
             auto fps_string = std::to_string(framesASecond);
 
-            cv::Mat frameRgbOpenCv = std::static_pointer_cast<dai::ImgFrame>(msgs["color"])->getCvFrame();
+            cv::Mat frameRgbOpenCv = std::static_pointer_cast<dai::ImgFrame>(msgs.color)->getCvFrame();
             // resizing frames
             cv::Mat resizedFrame;
             cv::Size size(1632, 960); 
             cv::resize(frameRgbOpenCv, resizedFrame, size); // resize image
 
-            auto detections = std::static_pointer_cast<dai::ImgDetections>(msgs["detection"])->detections;
-            auto recognitions = std::static_pointer_cast<std::vector<std::shared_ptr<dai::NNData>>>(msgs["recognition"]);
+            auto detections = std::static_pointer_cast<dai::ImgDetections>(msgs.detection)->detections;
+            auto& recognitions = msgs.recognitions;
 
 
             cv::putText(resizedFrame, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 0, 0), 8);
@@ -529,7 +521,7 @@ void OakdXlinkFullReader::NextFrame() {
                 auto detection = detections[i];
                 auto bbox = frame_norm(resizedFrame, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
 
-                auto reid_result = (*recognitions)[i]->getFirstLayerFp16();
+                auto reid_result = (recognitions)[i]->getFirstLayerFp16();
 
                 bool found = false;
                 int reid_id;
