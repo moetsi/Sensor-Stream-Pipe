@@ -14,7 +14,7 @@ general:
       rgb_resolution: 1080
       rgb_preview_size_y: 960
       rgb_preview_size_x: 1632 
-      rgb_fps: 9
+      rgb_fps: 10
       depth_resolution: 720
       depth_preview_size_y: 512
       depth_preview_size_x: 768

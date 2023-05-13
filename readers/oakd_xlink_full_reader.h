@@ -112,7 +112,7 @@ private:
 
   std::shared_ptr<dai::node::ImageManip> person_det_manip;
 
-  std::shared_ptr<dai::node::MobileNetDetectionNetwork> person_nn;
+  std::shared_ptr<dai::node::MobileNetSpatialDetectionNetwork> person_nn;
   std::shared_ptr<dai::node::XLinkOut> person_det_xout;
   std::shared_ptr<dai::node::Script> image_manip_script;
 
@@ -123,7 +123,7 @@ private:
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
   std::shared_ptr<dai::node::StereoDepth> stereo;
-  std::shared_ptr<dai::node::XLinkOut> depthOut;
+  // std::shared_ptr<dai::node::XLinkOut> depthOut;
 
   std::shared_ptr<dai::DeviceInfo> device_info;
   std::shared_ptr<dai::Device> device;
@@ -174,7 +174,7 @@ private:
     std::shared_ptr<dai::node::XLinkOut> rgbOut_zero;
     rgbOut = rgbOut_zero;
     std::shared_ptr<dai::node::XLinkOut> depthOut_zero;
-    depthOut = depthOut_zero;
+    // depthOut = depthOut_zero;
     std::shared_ptr<dai::DeviceInfo> device_info_zero;
     device_info = device_info_zero;
     std::shared_ptr<dai::Device> device_zero;

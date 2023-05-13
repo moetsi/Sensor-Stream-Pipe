@@ -51,7 +51,7 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
         if (name == "color") {
             seq = std::static_pointer_cast<dai::ImgFrame>(msg)->getSequenceNum();
         } else if (name == "detection") {
-            seq = std::static_pointer_cast<dai::ImgDetections>(msg)->getSequenceNum();
+            seq = std::static_pointer_cast<dai::SpatialImgDetections>(msg)->getSequenceNum();
         } else if (name == "recognition") {
             seq = std::static_pointer_cast<dai::NNData>(msg)->getSequenceNum();
         } else {
@@ -80,7 +80,7 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
 MessageData TwoStageHostSeqSync::get_msgs() {
     try {
         for (auto it = msgs.begin(); it != msgs.end(); ) {
-            if (it->second.color && it->second.detection && it->second.recognitions.size() == std::static_pointer_cast<dai::ImgDetections>(it->second.detection)->detections.size()) {
+            if (it->second.color && it->second.detection && it->second.recognitions.size() == std::static_pointer_cast<dai::SpatialImgDetections>(it->second.detection)->detections.size()) {
                 MessageData synced_msgs = std::move(it->second);
                 int64_t lowestSyncSeq = it->first;
                 it = msgs.erase(it);
@@ -253,6 +253,37 @@ void OakdXlinkFullReader::SetOrReset() {
     camRgb->setFps(st->rgb_dai_fps);
     camRgb->setPreviewNumFramesPool(10);
 
+    // Stereo Depth setup
+    left = pipeline->create<dai::node::MonoCamera>();
+    right = pipeline->create<dai::node::MonoCamera>();
+    stereo = pipeline->create<dai::node::StereoDepth>();
+    left->out.link(stereo->left);
+    right->out.link(stereo->right);
+    // depthOut = pipeline->create<dai::node::XLinkOut>();
+    // depthOut->setStreamName("depth");
+    // stereo->depth.link(depthOut->input);
+ 
+    // Depth Properties
+    left->setResolution(st->depth_dai_res);
+    left->setBoardSocket(dai::CameraBoardSocket::LEFT);
+    left->setFps(st->depth_dai_fps);
+    right->setResolution(st->depth_dai_res);
+    right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+    right->setFps(st->depth_dai_fps);
+    stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
+    // stereo->initialConfig.setConfidenceThreshold(255);
+    // stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+    stereo->setSubpixel(true);
+    stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
+    stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
+    // stereo->setOutputSize(st->depth_dai_preview_x, st->depth_dai_preview_y);
+    // auto oakdConfig = stereo->initialConfig.get();
+    // oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
+    // oakdConfig.postProcessing.spatialFilter.holeFillingRadius = st->depth_dai_sf_hfr;
+    // oakdConfig.postProcessing.spatialFilter.numIterations = st->depth_dai_sf_num_it;
+    // oakdConfig.postProcessing.decimationFilter.decimationFactor = st->depth_dai_df;
+    // stereo->initialConfig.set(oakdConfig);
+
     // ImageManip will resize the frame before sending it to the person detection NN node
     person_det_manip = pipeline->create<dai::node::ImageManip>();
     person_det_manip->initialConfig.setResize(544, 320); // This seems to downscale it by 1/3 (544x320)
@@ -261,11 +292,16 @@ void OakdXlinkFullReader::SetOrReset() {
     // person_det_manip->out.link(rgbOut->input);
 
     // Person detection nn setup
-    cout << "Creating Person Detection Neural Network..." << endl;
-    person_nn = pipeline->create<dai::node::MobileNetDetectionNetwork>();
+    cout << "Creating Person Detection Spatial Neural Network..." << endl;
+    person_nn = pipeline->create<dai::node::MobileNetSpatialDetectionNetwork>();
     person_nn->setConfidenceThreshold(0.5);
+    person_nn->setBoundingBoxScaleFactor(0.25);
+    person_nn->setDepthLowerThreshold(50);
+    person_nn->setDepthUpperThreshold(12000);
     person_nn->setBlobPath(model_detection_path);
+    // Link the manip output and the depth output to the person detection nn
     person_det_manip->out.link(person_nn->input);
+    stereo->depth.link(person_nn->inputDepth);
 
     // Send person detections to the host (for bounding boxes)
     person_det_xout = pipeline->create<dai::node::XLinkOut>();
@@ -286,7 +322,10 @@ void OakdXlinkFullReader::SetOrReset() {
     def add_msg(msg, name, seq = None):
         global msgs
         if seq is None:
-            seq = msg.getSequenceNum()
+            seq = msg.getSequenceNum()                for (size_t j = 0; j < reid_results.size(); ++j) {
+                    auto dist = cos_dist(reid_result, reid_results[j]);
+                    if (dist > 0.7) {
+                        reid_results[j] = reid_result;
         seq = str(seq)
         # node.warn(f"New msg {name}, seq {seq}")
         # Each seq number has it's own dict of msgs
@@ -359,37 +398,6 @@ void OakdXlinkFullReader::SetOrReset() {
     recognition_nn_xout = pipeline->create<dai::node::XLinkOut>();
     recognition_nn_xout->setStreamName("recognition");
     recognition_nn->out.link(recognition_nn_xout->input);
-
-    // // Stereo Depth setup
-    // left = pipeline->create<dai::node::MonoCamera>();
-    // right = pipeline->create<dai::node::MonoCamera>();
-    // stereo = pipeline->create<dai::node::StereoDepth>();
-    // depthOut = pipeline->create<dai::node::XLinkOut>();
-    // depthOut->setStreamName("depth");
-    // left->out.link(stereo->left);
-    // right->out.link(stereo->right);
-    // stereo->depth.link(depthOut->input);
- 
-    // // Depth Properties
-    // left->setResolution(st->depth_dai_res);
-    // left->setBoardSocket(dai::CameraBoardSocket::LEFT);
-    // left->setFps(st->depth_dai_fps);
-    // right->setResolution(st->depth_dai_res);
-    // right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
-    // right->setFps(st->depth_dai_fps);
-    // stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
-    // stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
-    // stereo->setSubpixel(true);
-    // stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
-    // stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
-    // stereo->setOutputSize(st->depth_dai_preview_x, st->depth_dai_preview_y);
-    // auto oakdConfig = stereo->initialConfig.get();
-    // oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
-    // oakdConfig.postProcessing.spatialFilter.holeFillingRadius = st->depth_dai_sf_hfr;
-    // oakdConfig.postProcessing.spatialFilter.numIterations = st->depth_dai_sf_num_it;
-    // oakdConfig.postProcessing.decimationFilter.decimationFactor = st->depth_dai_df;
-    // stereo->initialConfig.set(oakdConfig);
-
 
     //Select which device through ip address and create pipeline
     std::cerr << "Trying to create pipeline" << std::endl << std::flush;  
@@ -465,7 +473,7 @@ void OakdXlinkFullReader::NextFrame() {
                 // std::cerr << "detection" << std::endl << std::flush;q
                 auto det_message = queues["detection"]->get();
                 sync.add_msg(det_message, "detection");
-                int64_t seq = std::static_pointer_cast<dai::ImgDetections>(det_message)->getSequenceNum();
+                int64_t seq = std::static_pointer_cast<dai::SpatialImgDetections>(det_message)->getSequenceNum();
                 current_detection_frame_counter_++;
                 uint64_t capture_timestamp = CurrentTimeMs();
                 auto framesASecond = (float)current_detection_frame_counter_/((float)(capture_timestamp - start_time)*.001);
@@ -484,15 +492,6 @@ void OakdXlinkFullReader::NextFrame() {
                 // std::cerr << "recognition fps: " << fps_string << std::endl << std::flush;
                 // std::cerr << "recognition seq num: " << seq << std::endl << std::flush;
             }
-            // for (auto& it : queues) {
-            //     const std::string& name = it.first;
-            //     std::shared_ptr<dai::DataOutputQueue>& q = it.second;
-            //     std::cerr << "QUEUE " << name << std::endl << std::flush;
-            //     if (q->has()) {
-            //         std::cerr << "Q HAS" << std::endl << std::flush;            cv::Mat frameRgbOpenCv = std::static_pointer_cast<dai::ImgFrame>(msgs["color"])->getCvFrame();
-            //         sync.add_msg(q->get(), name);
-            //     }
-            // }
 
             auto msgs = sync.get_msgs();
             if (!msgs.color || !msgs.detection || msgs.recognitions.empty()) {
@@ -510,7 +509,7 @@ void OakdXlinkFullReader::NextFrame() {
             cv::Size size(1632, 960); 
             cv::resize(frameRgbOpenCv, resizedFrame, size); // resize image
 
-            auto detections = std::static_pointer_cast<dai::ImgDetections>(msgs.detection)->detections;
+            auto detections = std::static_pointer_cast<dai::SpatialImgDetections>(msgs.detection)->detections;
             auto& recognitions = msgs.recognitions;
 
 
@@ -542,9 +541,15 @@ void OakdXlinkFullReader::NextFrame() {
 
                 cv::rectangle(resizedFrame, cv::Point(bbox.x, bbox.y), cv::Point(bbox.x + bbox.width, bbox.y + bbox.height), cv::Scalar(10, 245, 10), 2);
                 int y = (bbox.y + bbox.y + bbox.height) / 2;
+                auto depth_x = std::to_string(detection.spatialCoordinates.x/1000.0f);
+                auto depth_y = std::to_string(detection.spatialCoordinates.y/1000.0f);
+                auto depth_z = std::to_string(detection.spatialCoordinates.z/1000.0f);
+                std::string depth_text = "Depth: " + depth_x + ", " + depth_y + ", " + depth_z;
                 std::string person_text = "Person reid " + std::to_string(reid_id);
                 cv::putText(resizedFrame, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
                 cv::putText(resizedFrame, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
+                cv::putText(resizedFrame, depth_text, cv::Point(bbox.x, y + 30), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
+                cv::putText(resizedFrame, depth_text, cv::Point(bbox.x, y + 30), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
             }
 
             cv::imshow("Camera", resizedFrame);
