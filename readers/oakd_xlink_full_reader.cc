@@ -5,6 +5,7 @@
 
 #include "oakd_xlink_full_reader.h"
 #include "human_poses.h"
+
 // Closer-in minimum depth, disparity range is doubled (from 95 to 190):
 // static std::atomic<bool> extended_disparity{false};
 // // Better accuracy for longer distance, fractional disparity 32-levels:
@@ -50,8 +51,10 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
         int64_t seq;
         if (name == "color") {
             seq = std::static_pointer_cast<dai::ImgFrame>(msg)->getSequenceNum();
-        } else if (name == "detection") {
+        } else if (name == "person_detection") {
             seq = std::static_pointer_cast<dai::SpatialImgDetections>(msg)->getSequenceNum();
+        } else if (name == "face_detection") {
+            seq = std::static_pointer_cast<dai::NNData>(msg)->getSequenceNum();
         } else if (name == "recognition") {
             seq = std::static_pointer_cast<dai::NNData>(msg)->getSequenceNum();
         } else {
@@ -66,8 +69,10 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
         } else {
             if(name == "color") {
                 msgData.color = msg;
-            } else if(name == "detection") {
-                msgData.detection = msg;
+            } else if(name == "person_detection") {
+                msgData.person_detection = msg;
+            } else if(name == "face_detection") {
+                msgData.face_detection = msg;
             }
         }
     } catch (const std::exception &e) {
@@ -77,28 +82,32 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
     }
 }
 
+// TO-DO: Fix so only the lower seq num keys get deleted
 MessageData TwoStageHostSeqSync::get_msgs() {
     try {
-        for (auto it = msgs.begin(); it != msgs.end(); ) {
-            if (it->second.color && it->second.detection && it->second.recognitions.size() == std::static_pointer_cast<dai::SpatialImgDetections>(it->second.detection)->detections.size()) {
+        std::vector<int64_t> eraseKeys;  // To hold keys that should be erased after iteration
+        for (auto it = msgs.begin(); it != msgs.end(); ++it) {
+            // Check if all required messages exist for this sequence number
+            if (!it->second.color || !it->second.person_detection || !it->second.face_detection) continue;
+
+            // Cast the person_detection message to SpatialImgDetections
+            auto spatialImgDetPtr = std::static_pointer_cast<dai::SpatialImgDetections>(it->second.person_detection);
+            if (!spatialImgDetPtr) throw std::runtime_error("Failed to cast message to SpatialImgDetections");
+
+            // Check if messages are synchronized
+            if (spatialImgDetPtr->detections.size() == 0 || 
+                it->second.recognitions.size() == spatialImgDetPtr->detections.size()) {
                 MessageData synced_msgs = std::move(it->second);
-                int64_t lowestSyncSeq = it->first;
-                it = msgs.erase(it);
-
-                // Erase all messages with sequence number less than the lowest sequence number of synchronized messages
-                for (auto it = msgs.begin(); it != msgs.end(); ) {
-                    if (it->first < lowestSyncSeq) {
-                        it = msgs.erase(it);
-                    } else {
-                        ++it;
-                    }
-                }
-
-                return synced_msgs;
-            } else {
-                ++it;
+                eraseKeys.push_back(it->first);
+                return synced_msgs;  // Return the synchronized messages
             }
         }
+
+        // Erase all keys that were marked for erasure
+        for (const auto& key : eraseKeys) {
+            msgs.erase(key);
+        }
+
         return MessageData{}; // No synced messages
     } catch (const std::exception &e) {
         std::cerr << "Error in get_msgs: " << e.what() << std::endl;
@@ -109,11 +118,6 @@ MessageData TwoStageHostSeqSync::get_msgs() {
 }
 
 OakdXlinkFullReader::OakdXlinkFullReader(YAML::Node config) {
-
-    outputFile = std::ofstream("output.txt");
-    std::streambuf* coutbuf = std::cout.rdbuf(); // save old buf
-    // std::cout.rdbuf(outputFile.rdbuf()); // redirect std::cout to output.txt
-
 
     // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     spdlog::debug("Starting to open");
@@ -150,15 +154,30 @@ OakdXlinkFullReader::OakdXlinkFullReader(YAML::Node config) {
 
     std::map<std::string,std::string> env;
     env["REL"] = rel;
-    model_detection_path = config["model_detection"].as<std::string>();
-    model_detection_path = StringInterpolation(env, model_detection_path);
-    std::cerr << "detection path is " << model_detection_path << std::endl << std::flush;
-    model_detection_path2 = model_detection_path;
+    model_person_detection_path = config["model_person_detection"].as<std::string>();
+    model_person_detection_path = StringInterpolation(env, model_person_detection_path);
+    std::cerr << "person detection path is " << model_person_detection_path << std::endl << std::flush;
+    model_person_detection_path2 = model_person_detection_path;
 
     model_reid_path = config["model_reid"].as<std::string>();
     model_reid_path = StringInterpolation(env, model_reid_path);
     std::cerr << "reid path is " << model_reid_path << std::endl << std::flush;
     model_reid_path2 = model_reid_path;
+
+    model_face_detection_path = config["model_face_detection"].as<std::string>();
+    model_face_detection_path = StringInterpolation(env, model_face_detection_path);
+    std::cerr << "face detection path is " << model_face_detection_path << std::endl << std::flush;
+    model_face_detection_path2 = model_face_detection_path;
+
+    model_face_detection_proc_path = config["model_face_detection_proc"].as<std::string>();
+    model_face_detection_proc_path = StringInterpolation(env, model_face_detection_proc_path);
+    std::cerr << "face detection processing path is " << model_face_detection_proc_path << std::endl << std::flush;
+    model_face_detection_proc_path2 = model_face_detection_proc_path;
+
+    model_depth_diff_path = config["model_depth_diff"].as<std::string>();
+    model_depth_diff_path = StringInterpolation(env, model_depth_diff_path);
+    std::cerr << "face detection processing path is " << model_depth_diff_path << std::endl << std::flush;
+    model_depth_diff_path2 = model_depth_diff_path;
 
     try {
         failed = true;
@@ -189,7 +208,9 @@ void OakdXlinkFullReader::Init(YAML::Node config, std::shared_ptr<State> &st, in
         st->rgb_dai_res = dai::ColorCameraProperties::SensorResolution::THE_1080_P;
 
     st->rgb_dai_preview_y = config["rgb_preview_size_y"].as<unsigned int>();
+    rgb_dai_preview_y = config["rgb_preview_size_y"].as<unsigned int>();
     st->rgb_dai_preview_x = config["rgb_preview_size_x"].as<unsigned int>();
+    rgb_dai_preview_x = config["rgb_preview_size_x"].as<unsigned int>();
     st->rgb_dai_fps = config["rgb_fps"].as<unsigned int>();
 
     st->depth_res = config["depth_resolution"].as<unsigned int>();
@@ -259,10 +280,7 @@ void OakdXlinkFullReader::SetOrReset() {
     stereo = pipeline->create<dai::node::StereoDepth>();
     left->out.link(stereo->left);
     right->out.link(stereo->right);
-    // depthOut = pipeline->create<dai::node::XLinkOut>();
-    // depthOut->setStreamName("depth");
-    // stereo->depth.link(depthOut->input);
- 
+
     // Depth Properties
     left->setResolution(st->depth_dai_res);
     left->setBoardSocket(dai::CameraBoardSocket::LEFT);
@@ -271,7 +289,7 @@ void OakdXlinkFullReader::SetOrReset() {
     right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
     right->setFps(st->depth_dai_fps);
     stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
-    // stereo->initialConfig.setConfidenceThreshold(255);
+    // stereo->initialConfig.setConfidenceThreshold(250);
     // stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
@@ -279,53 +297,112 @@ void OakdXlinkFullReader::SetOrReset() {
     // stereo->setOutputSize(st->depth_dai_preview_x, st->depth_dai_preview_y);
     // auto oakdConfig = stereo->initialConfig.get();
     // oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
+    // oakdConfig.postProcessing.speckleFilter.speckleRange = 60;
+    // oakdConfig.postProcessing.temporalFilter.enable = true;
+
     // oakdConfig.postProcessing.spatialFilter.holeFillingRadius = st->depth_dai_sf_hfr;
     // oakdConfig.postProcessing.spatialFilter.numIterations = st->depth_dai_sf_num_it;
+    // oakdConfig.postProcessing.thresholdFilter.minRange = 700;
+    // oakdConfig.postProcessing.thresholdFilter.maxRange = 12000;
+    // oakdConfig.censusTransform.enableMeanMode = true;
+    // oakdConfig.costMatching.linearEquationParameters.alpha = 0;
+    // oakdConfig.costMatching.linearEquationParameters.beta = 2;
     // oakdConfig.postProcessing.decimationFilter.decimationFactor = st->depth_dai_df;
+
     // stereo->initialConfig.set(oakdConfig);
 
-    // ImageManip will resize the frame before sending it to the person detection NN node
+    // person_det_manip will resize the frame before sending it to the person detection NN node
     person_det_manip = pipeline->create<dai::node::ImageManip>();
     person_det_manip->initialConfig.setResize(544, 320); // This seems to downscale it by 1/3 (544x320)
     person_det_manip->initialConfig.setFrameType(dai::ImgFrame::Type::RGB888p);
     camRgb->preview.link(person_det_manip->inputImage);
-    // person_det_manip->out.link(rgbOut->input);
+
+    // // face_det_manip will resize the frame before sending it to the face detection NN node
+    face_det_manip = pipeline->create<dai::node::ImageManip>();
+    face_det_manip->initialConfig.setResizeThumbnail(640, 360);
+    face_det_manip->initialConfig.setFrameType(dai::ImgFrame::Type::RGB888p);
+    camRgb->preview.link(face_det_manip->inputImage);
 
     // Person detection nn setup
     cout << "Creating Person Detection Spatial Neural Network..." << endl;
     person_nn = pipeline->create<dai::node::MobileNetSpatialDetectionNetwork>();
-    person_nn->setConfidenceThreshold(0.5);
+    // person_nn->setConfidenceThreshold(200);
     person_nn->setBoundingBoxScaleFactor(0.25);
     person_nn->setDepthLowerThreshold(50);
     person_nn->setDepthUpperThreshold(12000);
-    person_nn->setBlobPath(model_detection_path);
+    person_nn->setBlobPath(model_person_detection_path);
     // Link the manip output and the depth output to the person detection nn
     person_det_manip->out.link(person_nn->input);
     stereo->depth.link(person_nn->inputDepth);
 
+    // Face detection nn setup
+    cout << "Creating Face Detection Neural Network..." << endl;
+    face_nn = pipeline->create<dai::node::NeuralNetwork>();
+    face_nn->setBlobPath(model_face_detection_path);
+    face_det_manip->out.link(face_nn->input);
+    // Link the face detection nn to the processing nn
+    cout << "Creating Face Detection Processing Neural Network..." << endl;
+    face_post_proc_nn = pipeline->create<dai::node::NeuralNetwork>();
+    face_post_proc_nn->setBlobPath(model_face_detection_proc_path);
+    face_nn->out.link(face_post_proc_nn->input);
+
+    // Depth control frame and new depth frame script setup
+    depth_control_script = pipeline->create<dai::node::Script>();
+    stereo->depth.link(depth_control_script->inputs["depth_in"]);
+    depth_control_script->setScript(R"(
+        import time
+
+        control_depth = node.io['depth_in'].get()
+        current_time = time.time()
+
+        # we wait an arbitrary 5 seconds for the depth to stabilize
+        while time.time() - current_time < 8:
+            time.sleep(0.001) # Avoid lazy looping
+            control_depth = node.io['depth_in'].get()
+
+        while True:
+            time.sleep(0.001) # Avoid lazy looping
+            new_depth = node.io['depth_in'].get()
+            node.io['depth_control'].send(control_depth)
+            node.io['depth_new'].send(new_depth)
+        )");
+
+    // Depth diff nn setup
+    cout << "Creating Depth Diff Neural Network..." << endl;
+    depth_diff_nn = pipeline->create<dai::node::NeuralNetwork>();
+    depth_diff_nn->setBlobPath(model_depth_diff_path);
+    depth_control_script->outputs["depth_control"].link(depth_diff_nn->inputs["input1"]);
+    depth_control_script->outputs["depth_new"].link(depth_diff_nn->inputs["input2"]);
+    depth_diff_xout = pipeline->create<dai::node::XLinkOut>();
+    depth_diff_xout->setStreamName("depth_diff");
+    depth_diff_nn->out.link(depth_diff_xout->input);
+
+    // // Send face detections to the host (for bounding boxes)
+    face_det_xout = pipeline->create<dai::node::XLinkOut>();
+    face_det_xout->setStreamName("face_detection");
+    // face_det_post_proc_script->outputs["out"].link(face_det_xout->input);
+    face_post_proc_nn->out.link(face_det_xout->input);
+
     // Send person detections to the host (for bounding boxes)
     person_det_xout = pipeline->create<dai::node::XLinkOut>();
-    person_det_xout->setStreamName("detection");
+    person_det_xout->setStreamName("person_detection");
     person_nn->out.link(person_det_xout->input);
     person_nn->passthrough.link(rgbOut->input);
 
     // // We set up the script node that takes the detections from the nn and
     // // sets the ImageManipConfig on the device to send to the recognition_manip to cro
-    image_manip_script = pipeline->create<dai::node::Script>();
-    camRgb->preview.link(image_manip_script->inputs["preview"]);
-    person_nn->out.link(image_manip_script->inputs["dets_in"]);
+    person_image_manip_for_reid_nn_script = pipeline->create<dai::node::Script>();
+    camRgb->preview.link(person_image_manip_for_reid_nn_script->inputs["preview"]);
+    person_nn->out.link(person_image_manip_for_reid_nn_script->inputs["person_dets_in"]);
     // Only sending metadata for syncing with color frames
-    person_nn->passthrough.link(image_manip_script->inputs["passthrough"]);
-    image_manip_script->setScript(R"(
+    // person_nn->passthrough.link(person_image_manip_for_reid_nn_script->inputs["passthrough"]);
+    person_image_manip_for_reid_nn_script->setScript(R"(
     import time
     msgs = dict()
     def add_msg(msg, name, seq = None):
         global msgs
         if seq is None:
-            seq = msg.getSequenceNum()                for (size_t j = 0; j < reid_results.size(); ++j) {
-                    auto dist = cos_dist(reid_result, reid_results[j]);
-                    if (dist > 0.7) {
-                        reid_results[j] = reid_result;
+            seq = msg.getSequenceNum()
         seq = str(seq)
         # node.warn(f"New msg {name}, seq {seq}")
         # Each seq number has it's own dict of msgs
@@ -360,11 +437,10 @@ void OakdXlinkFullReader::SetOrReset() {
         preview = node.io['preview'].tryGet()
         if preview is not None:
             add_msg(preview, 'preview')
-        dets = node.io['dets_in'].tryGet()
+        dets = node.io['person_dets_in'].tryGet()
         if dets is not None:
             # TODO: in 2.18.0.0 use dets.getSequenceNum()
-            passthrough = node.io['passthrough'].get()
-            seq = passthrough.getSequenceNum()
+            seq = dets.getSequenceNum()
             add_msg(dets, 'dets', seq)
         sync_msgs = get_msgs()
         if sync_msgs is not None:
@@ -386,8 +462,8 @@ void OakdXlinkFullReader::SetOrReset() {
     recognition_manip = pipeline->create<dai::node::ImageManip>();
     recognition_manip->initialConfig.setResize(128, 256);
     recognition_manip->setWaitForConfigInput(true);
-    image_manip_script->outputs["manip_cfg"].link(recognition_manip->inputConfig);
-    image_manip_script->outputs["manip_img"].link(recognition_manip->inputImage);
+    person_image_manip_for_reid_nn_script->outputs["manip_cfg"].link(recognition_manip->inputConfig);
+    person_image_manip_for_reid_nn_script->outputs["manip_img"].link(recognition_manip->inputImage);
     
     
     cout << "Creating Recognition Neural Network..." << endl;
@@ -400,14 +476,17 @@ void OakdXlinkFullReader::SetOrReset() {
     recognition_nn->out.link(recognition_nn_xout->input);
 
     //Select which device through ip address and create pipeline
+    // auto deviceInfoVec = dai::Device::getAllAvailableDevices();
+    // Now we print all available devices
+    // std::cerr << "Available devices: " << std::endl << std::flush;
+    // for(const auto& deviceInfo : deviceInfoVec) {
+    //     std::cerr << "Device info: " << deviceInfo.getMxId() << std::endl << std::flush;
+    // }
+
     std::cerr << "Trying to create pipeline" << std::endl << std::flush;  
     device_info = std::make_shared<dai::DeviceInfo>(ip_name);
     device = std::make_shared<dai::Device>(*pipeline, *device_info, true); // usb 2 mode
     std::cerr << "Created pipeline" << std::endl << std::flush;  
-
-    // Capture the log output
-    // std::ofstream outputFile("output.txt");
-    // std::cout.rdbuf(outputFile.rdbuf());
 
     // Connect to device and start pipeline
     std::cerr << "Connected cameras: " << std::endl << std::flush;        
@@ -419,14 +498,12 @@ void OakdXlinkFullReader::SetOrReset() {
     std::cerr << endl;
 
     // Set up the output queues
-    for (const auto &name : {"rgb", "detection", "recognition"}) {
+    for (const auto &name : {"rgb", "face_detection", "depth_diff", "person_detection", "recognition"}) {
         queues[name] = device->getOutputQueue(name, 10, true);
     }
 
     spdlog::debug("Done opening");
 
-    // Close the file
-    // outputFile.close();
 }
 void OakdXlinkFullReader::SetOrResetState(const std::shared_ptr<State> &st, int n) {
 
@@ -435,10 +512,48 @@ void OakdXlinkFullReader::SetOrResetState(const std::shared_ptr<State> &st, int 
 
 OakdXlinkFullReader::~OakdXlinkFullReader() {
 
-
-
 }
+
+// Function to process the inference output
+std::vector<std::vector<float>> postprocess(const dai::NNData& inference, int x_width, int y_width) {
+
+    // Get inference results as a 1D float vector
+    std::vector<float> dets = inference.getLayerFp16("dets");
+
+    // Get number of valid faces
+    int nb_valid_faces = inference.getLayerInt32("dets@shape")[0];
+    // std::cerr << "nb_valid_faces: " << nb_valid_faces << std::endl << std::flush;
+
+    // Convert the 1D float vector to a 2D float vector
+    std::vector<std::vector<float>> faces(nb_valid_faces, std::vector<float>(15));
+    for(int i = 0; i < nb_valid_faces; ++i) {
+        for(int j = 0; j < 15; ++j) {
+            faces[i][j] = dets[i*15+j];
+        }
+    }
+
+    // Replace (x2,y2) by (w,h)
+    for(auto& face : faces) {
+        face[2] -= face[0];
+        face[3] -= face[1];
+    }
+
+    // Scale the coordinates with the padded size
+    for(auto& face : faces) {
+        for(int i = 0; i < 14; ++i) {
+            face[i] *= ((i % 2 == 0) ? x_width : y_width);
+        }
+    }
+
+    return faces;
+}
+bool showed_once = false;
+bool showed_once2 = false;
+bool showed_once3 = false;
+
 void OakdXlinkFullReader::NextFrame() {
+
+
     for (int kk=0; kk<MAX_RETRIAL; ++kk) {
         try {
             if (failed) {
@@ -449,54 +564,168 @@ void OakdXlinkFullReader::NextFrame() {
 
                 // SetOrResetInternals();
                 failed = false;
-
-        
             }
 
             current_frame_.clear();
  
             // std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
+            if (queues["depth_diff"]->has()) {
+                int width = 544;
+                int height = 320;
+                // std::cerr << "color detection" << std::endl << std::flush;
+                auto depth_diff_message = queues["depth_diff"]->get<dai::NNData>();
+                std::vector<float> depth_diff_data = depth_diff_message->getFirstLayerFp16();
+                // std::cerr << "depth diff data size: " << depth_diff_data.size() << std::endl << std::flush;
 
-                // std::cerr << "rgb" << std::endl << std::flush;
-            if (queues["rgb"]->has()) {
-                auto rgb_message = queues["rgb"]->get();
-                int64_t seq = std::static_pointer_cast<dai::ImgFrame>(rgb_message)->getSequenceNum();
-                sync.add_msg(rgb_message, "color");
-                current_rgb_frame_counter_++;
-                uint64_t capture_timestamp = CurrentTimeMs();
-                auto framesASecond = (float)current_rgb_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-                auto fps_string = std::to_string(framesASecond);
-                std::cerr << "color fps: " << fps_string << std::endl << std::flush;
-                // std::cerr << "color seq num: " << seq << std::endl << std::flush;
+                
+                // if (!showed_once) {
+                //     showed_once = true;
+
+                //     std::cerr << "depth diff data size: " << depth_diff_data.size() << std::endl << std::flush;
+                //     std::cerr << "height times width: " << std::to_string(height*width) << std::endl << std::flush;
+                //     std::cerr << "the the largest depth_diff_data value is: ";
+                //     float max = 0;
+                //     for (const auto& value : depth_diff_data) {
+                //         if (value > max) {
+                //             max = value;
+                //         }
+                //     }
+                //     std::cerr << std::to_string(max) << " ";
+                //     std::cerr << std::endl; 
+                // }
+
+
+                // Chatgpt ATTEMPT
+                // Convert your data to Mat
+                cv::Mat depth_diff_mat(height, width, CV_32F, depth_diff_data.data());
+                depth_diff_mat.convertTo(depth_diff_mat, CV_8U, 255.0);
+                // cv::normalize(depth_diff_mat, depth_diff_mat, 255, 0, cv::NORM_INF, CV_8UC1);
+
+                // Normalizing the image to range 0 - 255 from 65535
+
+                // From depthai examples
+                // cv::Mat depth_diff_img = cv::Mat(height, width, CV_8UC1);
+
+                    
+                // for(int i = 0; i < width*height; i++) {
+                //     auto depth_reading_in_fp16 = depth_diff_data.data()[i];
+                //     depth_diff_img.data[i] = (uint8_t)(depth_reading_in_fp16 * 255.0f / 65535.0f);
+                //     depth_diff_img.data[i] = depth_reading_in_fp16;
+                // }
+                // if (!showed_once2) {
+
+                //     for(int i = 0; i < width*height; i++) {
+                //         if(i < 1632) {
+                //             std::cerr << std::to_string(depth_diff_img.data[i]) << ", ";
+                //         }
+                //     }
+                //     std::cerr << std::endl;
+                // }
+                // showed_once2 = true;
+                    // std::cerr << "The size of depth_diff_img.data is: " << std::to_string(depth_diff_img.dataend - depth_diff_img.datastart) << std::endl << std::flush;
+                // cv::Mat img(height, width, CV_32F);
+                // for (int i = 0; i < height; ++i) {
+                //     for (int j = 0; j < width; ++j) {
+                //         img.at<float>(i, j) = depth_diff_data[i * width + j];
+                //     }
+                // }
+                // if (!showed_once2) {
+                //     showed_once2 = true;
+                //     // We are going to display every 1000th pixel in img.data
+                //     std::cerr << "img.data: ";
+                //     for (int i = 0; i < height*width; i += 1000) {
+                //         std::cerr << std::to_string(img.data[i]) << ", ";
+                //     }
+                // }
+
+
+                // cv::Mat depthFrameColor;
+                // cv::normalize(img, img, 0, 1, cv::NORM_MINMAX);
+                // cv::equalizeHist(depth_diff_img, depth_diff_img);
+                // cv::normalize(depth_diff_img, depth_diff_img, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                // if (!showed_once3) {
+                //     for(int i = 0; i < width*height; i++) {
+                //         if(i < 1632) {
+                //             std::cerr << std::to_string(depth_diff_img.data[i]) << ", ";
+                //         }
+                //     }
+                //     std::cerr << std::endl;
+                //     std::cerr << "The size of depth_diff_img.data is: " << std::to_string(depth_diff_img.dataend - depth_diff_img.datastart) << std::endl << std::flush;
+                // }
+                showed_once3 = true;
+
+                cv::namedWindow("Depth Difference Image", cv::WINDOW_NORMAL);
+                cv::imshow("Depth Difference Image", depth_diff_mat);
+                cv::waitKey(1);
+                // cv::applyColorMap(depth_diff_img, depth_diff_img, cv::COLORMAP_HOT);
+                // cv::applyColorMap(depth_diff_img, depth_diff_img, cv::COLORMAP_JET);
+
+                // Create a window
+                // Show image
+                // Wait for a keystroke in the window
             }
-            if (queues["detection"]->has()) {
-                // std::cerr << "detection" << std::endl << std::flush;q
-                auto det_message = queues["detection"]->get();
-                sync.add_msg(det_message, "detection");
-                int64_t seq = std::static_pointer_cast<dai::SpatialImgDetections>(det_message)->getSequenceNum();
-                current_detection_frame_counter_++;
-                uint64_t capture_timestamp = CurrentTimeMs();
-                auto framesASecond = (float)current_detection_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-                auto fps_string = std::to_string(framesASecond);
-                std::cerr << "detection fps: " << fps_string << std::endl << std::flush;
-                // std::cerr << "detection seq num: " << seq << std::endl << std::flush;
+
+           // std::cerr << "rgb" << std::endl << std::flush;
+            if (queues["rgb"]->has()) {
+                // std::cerr << "color detection" << std::endl << std::flush;
+                auto rgb_message = queues["rgb"]->get();
+                sync.add_msg(rgb_message, "color");
+                // int64_t seq = std::static_pointer_cast<dai::ImgFrame>(rgb_message)->getSequenceNum();
+                // std::cerr << "color seq num: " << seq << std::endl << std::flush;
+
+                // current_rgb_frame_counter_++;
+                // uint64_t capture_timestamp = CurrentTimeMs();
+                // auto framesASecond = (float)current_rgb_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+                // auto fps_string = std::to_string(framesASecond);
+                // std::cerr << "color fps: " << fps_string << std::endl << std::flush;
+            }
+            if (queues["person_detection"]->has()) {
+                // std::cerr << "person detection" << std::endl << std::flush;
+                auto det_message = queues["person_detection"]->get();
+                sync.add_msg(det_message, "person_detection");
+                // int64_t seq = std::static_pointer_cast<dai::SpatialImgDetections>(det_message)->getSequenceNum();
+                // std::cerr << "person detection seq num: " << seq << std::endl << std::flush;
+
+                // current_detection_frame_counter_++;
+                // uint64_t capture_timestamp = CurrentTimeMs();
+                // auto framesASecond = (float)current_detection_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+                // auto fps_string = std::to_string(framesASecond);
+                // std::cerr << "person detection fps: " << fps_string << std::endl << std::flush;
+            }
+            if (queues["face_detection"]->has()) {
+                // std::cerr << "face detection" << std::endl << std::flush;
+                auto det_message = queues["face_detection"]->get<dai::NNData>();
+                sync.add_msg(det_message, "face_detection");
+                // int64_t seq = std::static_pointer_cast<dai::NNData>(det_message)->getSequenceNum();
+                // std::cerr << "face detection seq num: " << seq << std::endl << std::flush;
+
+                // int64_t seq = std::static_pointer_cast<dai::SpatialImgDetections>(det_message)->getSequenceNum();
+                // current_detection_frame_counter_++;
+                // uint64_t capture_timestamp = CurrentTimeMs();
+                // auto framesASecond = (float)current_detection_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+                // auto fps_string = std::to_string(framesASecond);
+                // std::cerr << "face detection fps: " << fps_string << std::endl << std::flush;
             }
             if (queues["recognition"]->has()) {
+                // std::cerr << "person recognition" << std::endl << std::flush;
                 auto rec_message = queues["recognition"]->get();
                 sync.add_msg(rec_message, "recognition");
-                int64_t seq = std::static_pointer_cast<dai::NNData>(rec_message)->getSequenceNum();
-                current_recognition_frame_counter_++;
-                uint64_t capture_timestamp = CurrentTimeMs();
-                auto framesASecond = (float)current_recognition_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-                auto fps_string = std::to_string(framesASecond);
-                // std::cerr << "recognition fps: " << fps_string << std::endl << std::flush;
+                // int64_t seq = std::static_pointer_cast<dai::NNData>(rec_message)->getSequenceNum();
                 // std::cerr << "recognition seq num: " << seq << std::endl << std::flush;
+
+                // current_recognition_frame_counter_++;
+                // uint64_t capture_timestamp = CurrentTimeMs();
+                // auto framesASecond = (float)current_recognition_frame_counter_/((float)(capture_timestamp - start_time)*.001);
+                // auto fps_string = std::to_string(framesASecond);
+                // std::cerr << "recognition fps: " << fps_string << std::endl << std::flush;
             }
 
             auto msgs = sync.get_msgs();
-            if (!msgs.color || !msgs.detection || msgs.recognitions.empty()) {
+            if (!msgs.color) {
                 return;
             }
+
+            // std::cerr << "Got all messages" << std::endl << std::flush;
            //Increment counter and grab time
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
@@ -509,15 +738,17 @@ void OakdXlinkFullReader::NextFrame() {
             cv::Size size(1632, 960); 
             cv::resize(frameRgbOpenCv, resizedFrame, size); // resize image
 
-            auto detections = std::static_pointer_cast<dai::SpatialImgDetections>(msgs.detection)->detections;
+            auto person_detections = std::static_pointer_cast<dai::SpatialImgDetections>(msgs.person_detection)->detections;
+            auto face_detections = std::static_pointer_cast<dai::NNData>(msgs.face_detection);
+            auto faces = postprocess(*face_detections, rgb_dai_preview_x, rgb_dai_preview_y);
             auto& recognitions = msgs.recognitions;
-
 
             cv::putText(resizedFrame, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 0, 0), 8);
             cv::putText(resizedFrame, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(255, 255, 255), 2);
 
-            for (size_t i = 0; i < detections.size(); ++i) {
-                auto detection = detections[i];
+            // Person detections bounding boxes, depth and reid labeling
+            for (size_t i = 0; i < person_detections.size(); ++i) {
+                auto detection = person_detections[i];
                 auto bbox = frame_norm(resizedFrame, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
 
                 auto reid_result = (recognitions)[i]->getFirstLayerFp16();
@@ -550,6 +781,18 @@ void OakdXlinkFullReader::NextFrame() {
                 cv::putText(resizedFrame, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
                 cv::putText(resizedFrame, depth_text, cv::Point(bbox.x, y + 30), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
                 cv::putText(resizedFrame, depth_text, cv::Point(bbox.x, y + 30), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
+            }
+
+            // Face detections bounding boxes
+            for(const auto &face : faces) {
+                // Extract bounding box coordinates
+                int x = static_cast<int>(face[0]);
+                int y = static_cast<int>(face[1]);
+                int w = static_cast<int>(face[2]);
+                int h = static_cast<int>(face[3]);
+
+                // Draw bounding box for each face
+                cv::rectangle(resizedFrame, cv::Point(x, y), cv::Point(x + w, y + h), cv::Scalar(0, 255, 0), 2);
             }
 
             cv::imshow("Camera", resizedFrame);
@@ -597,8 +840,6 @@ void OakdXlinkFullReader::NextFrame() {
 
             // if (stream_depth)
             //     current_frame_.push_back(depthFrame);
-            outputFile.close();
-              
 
         } catch(std::exception &e) {
             std::cerr << "FAILED ON NEXTFRAME" << std::endl;

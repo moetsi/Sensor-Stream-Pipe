@@ -16,8 +16,8 @@ general:
       rgb_preview_size_x: 1632 
       rgb_fps: 10
       depth_resolution: 720
-      depth_preview_size_y: 512
-      depth_preview_size_x: 768
+      depth_preview_size_y: 320
+      depth_preview_size_x: 544
       depth_fps: 10
       depth_spatial_filter: True
       depth_spatial_hole_filling_radius: 2
@@ -28,7 +28,10 @@ general:
       streaming_depth_mode: "STEREO_DISPARITY"
       streaming_depth_resolution: "STEREO_RESOLUTION_480P"
       streaming_rate: "10"
-      model_detection: "@{REL}/models/person-detection-retail-0013-4-shave.blob"
+      model_person_detection: "@{REL}/models/person-detection-retail-0013-4-shave.blob"
+      model_face_detection: "@{REL}/models/face_detection_yunet_360x640_sh4.blob"
+      model_face_detection_proc: "@{REL}/models/postproc_yunet_top50_th60_360x640_sh4.blob"
+      model_depth_diff: "@{REL}/models/diff_images_simplified_openvino_2021.4_4shave.blob"
       model_reid: "@{REL}/models/person-reidentification-retail-0288-4-shave.blob"
 video_encoder:
   0: #color

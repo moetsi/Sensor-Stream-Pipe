@@ -241,7 +241,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
 
           std::shared_ptr<IEncoder> frameEncoder =
               encoders[unsigned(frameStruct->frame_type)];
-              // std::cerr << "ft = " << unsigned(frameStruct->frame_type) << std::endl << std::endl;
+              std::cerr << "ft = " << unsigned(frameStruct->frame_type) << std::endl << std::endl;
           if (!!frameEncoder) {
             frameEncoder->AddFrameStruct(frameStruct);
             if (frameEncoder->HasNextPacket()) {
@@ -252,14 +252,14 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
               frameEncoder->NextPacket();
             }
           } else {
-            // std::cerr << "skip!" << std::endl << std::flush;
+            std::cerr << "skip!" << std::endl << std::flush;
           }
         }
         if (reader->HasNextFrame()) {
-//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;         
+//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
           reader->NextFrame();
         } else {
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;           
+//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
           reader->Reset();
         }
       }

@@ -17,7 +17,7 @@
 #include <cassert>
 #include <memory>
 #include <stdexcept>
-
+#include "nlohmann/json.hpp"
 #include "../utils/logger.h"
 
 #include <cereal/archives/binary.hpp>
@@ -60,13 +60,15 @@
 #include <string>
 #include <vector>
 #include "args_helper.hpp"
+#include "fp16/fp16.h"
 
 namespace moetsi::ssp { 
 
 // using namespace InferenceEngine;
 struct MessageData {
     std::shared_ptr<void> color;
-    std::shared_ptr<void> detection;
+    std::shared_ptr<void> person_detection;
+    std::shared_ptr<void> face_detection;
     std::vector<std::shared_ptr<dai::NNData>> recognitions;
 };
 
@@ -82,8 +84,6 @@ private:
 class OakdXlinkFullReader : public IReader {
 private:
 
-  std::ofstream outputFile;
-
   bool stream_rgb = false;
   bool stream_depth = false;
   bool stream_bodies = false;
@@ -98,32 +98,42 @@ private:
   FrameStruct frame_template_;
   uint64_t start_time;
 
-  //We use this dictionary to grab pairs of rgb and depth frames that caame from same point in time
-  struct color_poses_and_depth { std::shared_ptr<dai::ImgFrame> rgb; moetsi::ssp::human_pose_estimation::poses poses; std::shared_ptr<dai::ImgFrame> depth;};
-  std::unordered_map<int, color_poses_and_depth> frames_dictionary;
+  unsigned int rgb_dai_preview_y;
+  unsigned int rgb_dai_preview_x;
+
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
 
   const std::string device_name = "CPU";
 
   std::shared_ptr<dai::Pipeline> pipeline;
   std::shared_ptr<dai::node::ColorCamera> camRgb;
-  std::shared_ptr<dai::node::ImageManip> camRgbManip;
+  // std::shared_ptr<dai::node::ImageManip> camRgbManip;
   std::shared_ptr<dai::node::XLinkOut> rgbOut;
-
-  std::shared_ptr<dai::node::ImageManip> person_det_manip;
-
-  std::shared_ptr<dai::node::MobileNetSpatialDetectionNetwork> person_nn;
-  std::shared_ptr<dai::node::XLinkOut> person_det_xout;
-  std::shared_ptr<dai::node::Script> image_manip_script;
-
-  std::shared_ptr<dai::node::ImageManip> recognition_manip;
-  std::shared_ptr<dai::node::NeuralNetwork> recognition_nn;
-  std::shared_ptr<dai::node::XLinkOut> recognition_nn_xout;
-  
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
   std::shared_ptr<dai::node::StereoDepth> stereo;
   // std::shared_ptr<dai::node::XLinkOut> depthOut;
+
+  std::shared_ptr<dai::node::ImageManip> person_det_manip;
+  std::shared_ptr<dai::node::MobileNetSpatialDetectionNetwork> person_nn;
+  std::shared_ptr<dai::node::XLinkOut> person_det_xout;
+
+  std::shared_ptr<dai::node::ImageManip> face_det_manip;
+  std::shared_ptr<dai::node::NeuralNetwork> face_nn;
+  std::shared_ptr<dai::node::NeuralNetwork> face_post_proc_nn;
+  // std::shared_ptr<dai::node::Script> face_det_post_proc_script;
+  std::shared_ptr<dai::node::XLinkOut> face_det_xout;
+  // std::shared_ptr<dai::node::XLinkOut> face_det_manip_xout;
+
+  std::shared_ptr<dai::node::Script> depth_control_script;
+  std::shared_ptr<dai::node::NeuralNetwork> depth_diff_nn;
+  std::shared_ptr<dai::node::XLinkOut> depth_diff_xout;
+
+
+  std::shared_ptr<dai::node::ImageManip> recognition_manip;
+  std::shared_ptr<dai::node::Script> person_image_manip_for_reid_nn_script;
+  std::shared_ptr<dai::node::NeuralNetwork> recognition_nn;
+  std::shared_ptr<dai::node::XLinkOut> recognition_nn_xout; 
 
   std::shared_ptr<dai::DeviceInfo> device_info;
   std::shared_ptr<dai::Device> device;
@@ -212,8 +222,14 @@ private:
 
   std::string ip_name;
   bool failed = { false };
-  std::string model_detection_path;
-  std::string model_detection_path2;
+  std::string model_person_detection_path;
+  std::string model_person_detection_path2;
+  std::string model_face_detection_path;
+  std::string model_face_detection_path2;
+  std::string model_face_detection_proc_path;
+  std::string model_face_detection_proc_path2;
+  std::string model_depth_diff_path;
+  std::string model_depth_diff_path2;
   std::string model_reid_path;
   std::string model_reid_path2;
 
