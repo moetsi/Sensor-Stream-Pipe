@@ -85,30 +85,46 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
 // TO-DO: Fix so only the lower seq num keys get deleted
 MessageData TwoStageHostSeqSync::get_msgs() {
     try {
-        std::vector<int64_t> eraseKeys;  // To hold keys that should be erased after iteration
-        for (auto it = msgs.begin(); it != msgs.end(); ++it) {
-            // Check if all required messages exist for this sequence number
-            if (!it->second.color || !it->second.person_detection || !it->second.face_detection) continue;
+        int64_t maxSyncSeq = INT64_MIN;   // Store max seq number having synchronized messages
+        std::unordered_map<int64_t, MessageData>::iterator maxSyncSeqIt;
 
-            // Cast the person_detection message to SpatialImgDetections
+        // Iterate over the container and identify the maximum synchronized sequence.
+        for (auto it = msgs.begin(); it != msgs.end();) {
+            if (!it->second.color || !it->second.person_detection || !it->second.face_detection) {
+                ++it;
+                continue;
+            }
+
             auto spatialImgDetPtr = std::static_pointer_cast<dai::SpatialImgDetections>(it->second.person_detection);
             if (!spatialImgDetPtr) throw std::runtime_error("Failed to cast message to SpatialImgDetections");
 
-            // Check if messages are synchronized
-            if (spatialImgDetPtr->detections.size() == 0 || 
+            if (spatialImgDetPtr->detections.size() == 0 ||
                 it->second.recognitions.size() == spatialImgDetPtr->detections.size()) {
-                MessageData synced_msgs = std::move(it->second);
-                eraseKeys.push_back(it->first);
-                return synced_msgs;  // Return the synchronized messages
+
+                if (it->first > maxSyncSeq) {
+                    maxSyncSeq = it->first;
+                    maxSyncSeqIt = it;
+                }
+            }
+
+            // Check if current sequence number is less than maxSyncSeq, if yes erase it.
+            if (it->first < maxSyncSeq) {
+                it = msgs.erase(it);
+            } else {
+                ++it;
             }
         }
 
-        // Erase all keys that were marked for erasure
-        for (const auto& key : eraseKeys) {
-            msgs.erase(key);
+        // If no synced messages were found, return an empty MessageData
+        if (maxSyncSeq == INT64_MIN) {
+            return MessageData{};
         }
 
-        return MessageData{}; // No synced messages
+        // Extract the synced messages and erase the entry from the container
+        MessageData synced_msgs = std::move(maxSyncSeqIt->second);
+        msgs.erase(maxSyncSeqIt);
+
+        return synced_msgs;
     } catch (const std::exception &e) {
         std::cerr << "Error in get_msgs: " << e.what() << std::endl;
     } catch (...) {
@@ -288,13 +304,13 @@ void OakdXlinkFullReader::SetOrReset() {
     right->setResolution(st->depth_dai_res);
     right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
     right->setFps(st->depth_dai_fps);
-    stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
+    stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
     // stereo->initialConfig.setConfidenceThreshold(250);
-    // stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+    stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
-    // stereo->setOutputSize(st->depth_dai_preview_x, st->depth_dai_preview_y);
+    stereo->setOutputSize(st->depth_dai_preview_x, st->depth_dai_preview_y);
     // auto oakdConfig = stereo->initialConfig.get();
     // oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
     // oakdConfig.postProcessing.speckleFilter.speckleRange = 60;
@@ -499,7 +515,7 @@ void OakdXlinkFullReader::SetOrReset() {
 
     // Set up the output queues
     for (const auto &name : {"rgb", "face_detection", "depth_diff", "person_detection", "recognition"}) {
-        queues[name] = device->getOutputQueue(name, 10, true);
+        queues[name] = device->getOutputQueue(name, 10, false);
     }
 
     spdlog::debug("Done opening");
@@ -576,86 +592,53 @@ void OakdXlinkFullReader::NextFrame() {
                 auto depth_diff_message = queues["depth_diff"]->get<dai::NNData>();
                 std::vector<float> depth_diff_data = depth_diff_message->getFirstLayerFp16();
                 // std::cerr << "depth diff data size: " << depth_diff_data.size() << std::endl << std::flush;
-
                 
-                // if (!showed_once) {
-                //     showed_once = true;
-
-                //     std::cerr << "depth diff data size: " << depth_diff_data.size() << std::endl << std::flush;
-                //     std::cerr << "height times width: " << std::to_string(height*width) << std::endl << std::flush;
-                //     std::cerr << "the the largest depth_diff_data value is: ";
-                //     float max = 0;
-                //     for (const auto& value : depth_diff_data) {
-                //         if (value > max) {
-                //             max = value;
-                //         }
-                //     }
-                //     std::cerr << std::to_string(max) << " ";
-                //     std::cerr << std::endl; 
-                // }
-
+                // Now we go through depth_diff data and for any values between -1500 and 1500 we set it to 0
+                for (int i = 0; i < depth_diff_data.size(); i++) {
+                    if (depth_diff_data[i] > -800 && depth_diff_data[i] < 800) {
+                        depth_diff_data[i] = 0;
+                    }
+                }
 
                 // Chatgpt ATTEMPT
                 // Convert your data to Mat
                 cv::Mat depth_diff_mat(height, width, CV_32F, depth_diff_data.data());
                 depth_diff_mat.convertTo(depth_diff_mat, CV_8U, 255.0);
-                // cv::normalize(depth_diff_mat, depth_diff_mat, 255, 0, cv::NORM_INF, CV_8UC1);
 
-                // Normalizing the image to range 0 - 255 from 65535
+                // Now we make a quick lamda function to output the MEDIAN value of pixels in depth_diff_mat
+                // auto findMedian = [](const cv::Mat& image) {
+                //     // Get the number of pixels
+                //     int totalPixels = image.rows * image.cols;
 
-                // From depthai examples
-                // cv::Mat depth_diff_img = cv::Mat(height, width, CV_8UC1);
+                //     // Create a temporary copy of the image data
+                //     cv::Mat tempImage = image.clone();
 
-                    
-                // for(int i = 0; i < width*height; i++) {
-                //     auto depth_reading_in_fp16 = depth_diff_data.data()[i];
-                //     depth_diff_img.data[i] = (uint8_t)(depth_reading_in_fp16 * 255.0f / 65535.0f);
-                //     depth_diff_img.data[i] = depth_reading_in_fp16;
-                // }
-                // if (!showed_once2) {
+                //     // Reshape the temporary image to a single column
+                //     tempImage = tempImage.reshape(1, totalPixels);
 
-                //     for(int i = 0; i < width*height; i++) {
-                //         if(i < 1632) {
-                //             std::cerr << std::to_string(depth_diff_img.data[i]) << ", ";
-                //         }
-                //     }
-                //     std::cerr << std::endl;
-                // }
-                // showed_once2 = true;
-                    // std::cerr << "The size of depth_diff_img.data is: " << std::to_string(depth_diff_img.dataend - depth_diff_img.datastart) << std::endl << std::flush;
-                // cv::Mat img(height, width, CV_32F);
-                // for (int i = 0; i < height; ++i) {
-                //     for (int j = 0; j < width; ++j) {
-                //         img.at<float>(i, j) = depth_diff_data[i * width + j];
-                //     }
-                // }
-                // if (!showed_once2) {
-                //     showed_once2 = true;
-                //     // We are going to display every 1000th pixel in img.data
-                //     std::cerr << "img.data: ";
-                //     for (int i = 0; i < height*width; i += 1000) {
-                //         std::cerr << std::to_string(img.data[i]) << ", ";
-                //     }
-                // }
+                //     // Sort the pixels in ascending order
+                //     cv::sort(tempImage, tempImage, cv::SORT_ASCENDING);
+
+                //     // Calculate the median pixel value
+                //     int medianIndex = totalPixels / 2;
+                //     uchar medianValue = tempImage.at<uchar>(medianIndex);
+
+                //     return medianValue;
+                // };
+
+                // uchar medianValue = findMedian(depth_diff_mat);
+
+                // Print the median pixel value
+                // std::cout << "Median Pixel Value: " << static_cast<int>(medianValue) << std::endl;
 
 
-                // cv::Mat depthFrameColor;
-                // cv::normalize(img, img, 0, 1, cv::NORM_MINMAX);
-                // cv::equalizeHist(depth_diff_img, depth_diff_img);
-                // cv::normalize(depth_diff_img, depth_diff_img, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                // if (!showed_once3) {
-                //     for(int i = 0; i < width*height; i++) {
-                //         if(i < 1632) {
-                //             std::cerr << std::to_string(depth_diff_img.data[i]) << ", ";
-                //         }
-                //     }
-                //     std::cerr << std::endl;
-                //     std::cerr << "The size of depth_diff_img.data is: " << std::to_string(depth_diff_img.dataend - depth_diff_img.datastart) << std::endl << std::flush;
-                // }
-                showed_once3 = true;
+                // Now we normalize
+                cv::Mat depth_diff_mat_normalized;
+                cv::normalize(depth_diff_mat, depth_diff_mat_normalized, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                // Now we colorize
 
                 cv::namedWindow("Depth Difference Image", cv::WINDOW_NORMAL);
-                cv::imshow("Depth Difference Image", depth_diff_mat);
+                cv::imshow("Depth Difference Image", depth_diff_mat_normalized);
                 cv::waitKey(1);
                 // cv::applyColorMap(depth_diff_img, depth_diff_img, cv::COLORMAP_HOT);
                 // cv::applyColorMap(depth_diff_img, depth_diff_img, cv::COLORMAP_JET);

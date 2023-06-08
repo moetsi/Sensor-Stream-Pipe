@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include "nlohmann/json.hpp"
 #include "../utils/logger.h"
+#include <algorithm>
 
 #include <cereal/archives/binary.hpp>
 
