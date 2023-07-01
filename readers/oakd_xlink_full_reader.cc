@@ -295,7 +295,7 @@ void OakdXlinkFullReader::SetOrReset() {
     right = pipeline->create<dai::node::MonoCamera>();
     stereo = pipeline->create<dai::node::StereoDepth>();
     left->out.link(stereo->left);
-    right->out.link(stereo->right);
+    right->out.link(stereo->right); 
 
     // Depth Properties
     left->setResolution(st->depth_dai_res);
@@ -311,21 +311,21 @@ void OakdXlinkFullReader::SetOrReset() {
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
     stereo->setOutputSize(st->depth_dai_preview_x, st->depth_dai_preview_y);
-    // auto oakdConfig = stereo->initialConfig.get();
-    // oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
-    // oakdConfig.postProcessing.speckleFilter.speckleRange = 60;
-    // oakdConfig.postProcessing.temporalFilter.enable = true;
+    auto oakdConfig = stereo->initialConfig.get();
+    oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
+    oakdConfig.postProcessing.speckleFilter.speckleRange = 60;
+    oakdConfig.postProcessing.temporalFilter.enable = true;
 
-    // oakdConfig.postProcessing.spatialFilter.holeFillingRadius = st->depth_dai_sf_hfr;
-    // oakdConfig.postProcessing.spatialFilter.numIterations = st->depth_dai_sf_num_it;
-    // oakdConfig.postProcessing.thresholdFilter.minRange = 700;
-    // oakdConfig.postProcessing.thresholdFilter.maxRange = 12000;
-    // oakdConfig.censusTransform.enableMeanMode = true;
-    // oakdConfig.costMatching.linearEquationParameters.alpha = 0;
-    // oakdConfig.costMatching.linearEquationParameters.beta = 2;
-    // oakdConfig.postProcessing.decimationFilter.decimationFactor = st->depth_dai_df;
+    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = st->depth_dai_sf_hfr;
+    oakdConfig.postProcessing.spatialFilter.numIterations = st->depth_dai_sf_num_it;
+    oakdConfig.postProcessing.thresholdFilter.minRange = 700;
+    oakdConfig.postProcessing.thresholdFilter.maxRange = 12000;
+    oakdConfig.censusTransform.enableMeanMode = true;
+    oakdConfig.costMatching.linearEquationParameters.alpha = 0;
+    oakdConfig.costMatching.linearEquationParameters.beta = 2;
+    oakdConfig.postProcessing.decimationFilter.decimationFactor = st->depth_dai_df;
 
-    // stereo->initialConfig.set(oakdConfig);
+    stereo->initialConfig.set(oakdConfig);
 
     // person_det_manip will resize the frame before sending it to the person detection NN node
     person_det_manip = pipeline->create<dai::node::ImageManip>();
@@ -421,7 +421,9 @@ void OakdXlinkFullReader::SetOrReset() {
             seq = msg.getSequenceNum()
         seq = str(seq)
         # node.warn(f"New msg {name}, seq {seq}")
-        # Each seq number has it's own dict of msgs
+        # Each seq number has it's own dict of msgs, "preview" and "dets"
+        # seq: {preview: msg, dets: msg}
+        # If we have both msgs, we can send them to the device (happens in get_msgs)
         if seq not in msgs:
             msgs[seq] = dict()
         msgs[seq][name] = msg
@@ -515,7 +517,7 @@ void OakdXlinkFullReader::SetOrReset() {
 
     // Set up the output queues
     for (const auto &name : {"rgb", "face_detection", "depth_diff", "person_detection", "recognition"}) {
-        queues[name] = device->getOutputQueue(name, 10, false);
+        queues[name] = device->getOutputQueue(name, 25, true);
     }
 
     spdlog::debug("Done opening");
@@ -595,9 +597,10 @@ void OakdXlinkFullReader::NextFrame() {
                 
                 // Now we go through depth_diff data and for any values between -1500 and 1500 we set it to 0
                 for (int i = 0; i < depth_diff_data.size(); i++) {
-                    if (depth_diff_data[i] > -800 && depth_diff_data[i] < 800) {
+                    if (depth_diff_data[i] > -500 && depth_diff_data[i] < 500) {
                         depth_diff_data[i] = 0;
                     }
+                    
                 }
 
                 // Chatgpt ATTEMPT

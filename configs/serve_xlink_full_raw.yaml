@@ -14,11 +14,11 @@ general:
       rgb_resolution: 1080
       rgb_preview_size_y: 960
       rgb_preview_size_x: 1632 
-      rgb_fps: 8
+      rgb_fps: 7
       depth_resolution: 720
       depth_preview_size_y: 320
       depth_preview_size_x: 544
-      depth_fps: 8
+      depth_fps: 7
       depth_spatial_filter: True
       depth_spatial_hole_filling_radius: 2
       depth_spatial_filter_num_it: 1
