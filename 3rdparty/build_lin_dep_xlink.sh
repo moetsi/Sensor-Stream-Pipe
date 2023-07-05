@@ -28,6 +28,9 @@ function install_nasm {
     fi
 }
 
+
+# There is an issue with this command. It requires sudo in order to finish installation
+# If don't use sudo for installation build_ffmpeg will fail
 function build_openh264 {
     # https://github.com/AkillesAILimited/openh264
     echo "building libopenh264"
@@ -270,9 +273,9 @@ function build_opencv {
         -DBUILD_opencv_stitching:BOOL=OFF \
         -DBUILD_opencv_superres:BOOL=OFF \
         -DBUILD_opencv_ts:BOOL=OFF \
-        -DBUILD_opencv_video:BOOL=OFF \
-        -DBUILD_opencv_videoio:BOOL=OFF \
-        -DBUILD_opencv_videostab:BOOL=OFF \
+        -DBUILD_opencv_video:BOOL=ON \
+        -DBUILD_opencv_videoio:BOOL=ON \
+        -DBUILD_opencv_videostab:BOOL=ON \
         -DBUILD_opencv_world:BOOL=OFF \
         -DBUILD_JAVA=OFF \
         -DBUILD_PACKAGE=OFF \
@@ -305,11 +308,10 @@ pushd tmp
 export LOCAL_DIR=`pwd`/local.ssp
 mkdir -p ${LOCAL_DIR}
 
-install_nasm
 build_openh264
 build_ffmpeg
-
 build_opencv
+install_nasm
 build_cereal
 build_spdlog
 build_zdepth

@@ -392,7 +392,7 @@ if (UNIX)
       readers/human_poses.cpp
       readers/human_poses.h
     )
-    file(GLOB_RECURSE TRACKER_FILES utils/tracker/*.cc utils/tracker/*.h utils/tracker/*.hpp)
+    file(GLOB_RECURSE TRACKER_FILES tracker/*.cc tracker/*.cpp tracker/*.h tracker/*.hpp)
     list(APPEND SOURCE_FILES ${TRACKER_FILES})
   endif ()
 endif ()

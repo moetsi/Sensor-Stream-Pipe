@@ -15,8 +15,8 @@
 #include <vector>
 
 #include <openvino/openvino.hpp>
-#include "utils/slog.hpp"
-#include "utils/args_helper.hpp"
+#include "slog.hpp"
+#include "args_helper.hpp"
 
 #ifndef UNUSED
 #ifdef _WIN32

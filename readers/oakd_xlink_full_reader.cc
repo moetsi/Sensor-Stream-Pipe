@@ -6,9 +6,6 @@
 #include "oakd_xlink_full_reader.h"
 #include "human_poses.h"
 
-// header files needed for the tracker
-// #include "../utils/tracker/include/tracker.hpp"
-
 // Closer-in minimum depth, disparity range is doubled (from 95 to 190):
 // static std::atomic<bool> extended_disparity{false};
 // // Better accuracy for longer distance, fractional disparity 32-levels:
@@ -257,6 +254,7 @@ void OakdXlinkFullReader::SetOrReset() {
     ResetVino();
     auto st = states[0];
 
+    // 0. We initialize the tracker
     // 1. The pipeline is created and the nodes are added to it.
     // 2. The properties of the nodes are set.
     // 3. The nodes are linked.
@@ -264,7 +262,18 @@ void OakdXlinkFullReader::SetOrReset() {
     // 5. The output queue is created to receive the frames from the output.
     // 6. The input queue is created to send the control messages.
     // 7. The focus is set to manual and the value is set to 130.
-    // 8. The control message is sent to the input queue. 
+    // 8. The control message is sent to the input queue.
+
+    // 
+    // Tracker set up
+    //
+
+    // We keep track of info 
+    params.drop_forgotten_tracks = false;
+    params.max_num_objects_in_track = -1;
+
+    // Initialize tracker
+    tracker = std::make_unique<PedestrianTracker>(params);
 
     // Define source and output
     pipeline = std::make_shared<dai::Pipeline>();

@@ -13,7 +13,7 @@
 
 #include <opencv2/core.hpp>
 
-#include <core.hpp>
+#include "core.hpp"
 
 ///
 /// \brief The DetectionLogEntry struct

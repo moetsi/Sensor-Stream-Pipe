@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 
-#include "utils/image_utils.h"
+#include "../include/utils/image_utils.h"
 
 cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE resizeMode,
                        cv::InterpolationFlags interpolationMode, cv::Rect* roi, cv::Scalar BorderConstant) {

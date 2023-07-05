@@ -3,8 +3,8 @@
 //
 
 #include <limits>
-#include "utils/performance_metrics.hpp"
-#include "utils/slog.hpp"
+#include "../include/utils/performance_metrics.hpp"
+#include "../include/utils/slog.hpp"
 
 // timeWindow defines the length of the timespan over which the 'current fps' value is calculated
 PerformanceMetrics::PerformanceMetrics(Duration timeWindow)

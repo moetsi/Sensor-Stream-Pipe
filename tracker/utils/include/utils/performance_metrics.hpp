@@ -14,7 +14,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "utils/ocv_common.hpp"
+#include "ocv_common.hpp"
 
 class PerformanceMetrics {
 public:

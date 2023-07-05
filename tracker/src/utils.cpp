@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "utils.hpp"
+#include "../include/utils.hpp"
 
 #include <stddef.h>
 
@@ -13,10 +13,10 @@
 
 #include <opencv2/imgproc.hpp>
 
-#include <utils/slog.hpp>
+#include "../utils/include/utils/slog.hpp"
 
-#include "core.hpp"
-#include "logging.hpp"
+#include "../include/core.hpp"
+#include "../include/logging.hpp"
 
 namespace {
 template <typename StreamType, typename EndlType>

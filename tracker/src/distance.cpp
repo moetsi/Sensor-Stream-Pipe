@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "distance.hpp"
+#include "../include/distance.hpp"
 
 #include <stddef.h>
 
 #include <cmath>
 #include <vector>
 
-#include "logging.hpp"
+#include "../include/logging.hpp"
 
 CosDistance::CosDistance(const cv::Size& descriptor_size) : descriptor_size_(descriptor_size) {
     PT_CHECK(descriptor_size.area() != 0);

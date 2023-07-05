@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "utils/args_helper.hpp"
-#include "utils/slog.hpp"
+#include "../include/utils/args_helper.hpp"
+#include "../include/utils/slog.hpp"
 
 #ifdef _WIN32
 #include "w_dirent.hpp"

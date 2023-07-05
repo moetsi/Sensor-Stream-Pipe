@@ -11,7 +11,7 @@
 
 #include <opencv2/core.hpp>
 
-#include "utils/performance_metrics.hpp"
+#include "performance_metrics.hpp"
 
 enum class read_type { efficient, safe };
 

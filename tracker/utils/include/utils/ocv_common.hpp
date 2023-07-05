@@ -10,10 +10,11 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/videoio.hpp>
 #include <openvino/openvino.hpp>
 
-#include "utils/common.hpp"
-#include "utils/shared_tensor_allocator.hpp"
+#include "common.hpp"
+#include "shared_tensor_allocator.hpp"
 
 /**
 * @brief Get cv::Mat value in the correct format.

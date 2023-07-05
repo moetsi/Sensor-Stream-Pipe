@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "tracker.hpp"
+#include "../include/tracker.hpp"
 
 #include <stdlib.h>
 
@@ -20,13 +20,13 @@
 
 #include <opencv2/imgproc.hpp>
 
-#include <utils/kuhn_munkres.hpp>
-#include <utils/ocv_common.hpp>
+#include "../utils/include/utils/kuhn_munkres.hpp"
+#include "../utils/include/utils/ocv_common.hpp"
 
-#include "core.hpp"
-#include "descriptor.hpp"
-#include "distance.hpp"
-#include "utils.hpp"
+#include "../include/core.hpp"
+#include "../include/descriptor.hpp"
+#include "../include/distance.hpp"
+#include "../include/utils.hpp"
 
 namespace {
 cv::Point Center(const cv::Rect& rect) {

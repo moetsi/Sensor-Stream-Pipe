@@ -30,12 +30,13 @@
 
 //Header for making dummy bodies
 #include "dummy_body_reader.h"
-
 #include "human_poses.h"
 
 //Depth AI header
 #include "depthai/depthai.hpp"
-//Done Depth AI header
+
+// header files needed for the tracker
+#include "../tracker/include/tracker.hpp"
 
 // OPENVINO HEADERS
 /**
@@ -143,6 +144,10 @@ private:
 
   TwoStageHostSeqSync sync;
   std::vector<std::vector<float>> results;
+
+  // Tracker variables
+  TrackerParams params;
+  std::unique_ptr<PedestrianTracker> tracker;
 
   struct State {
     //oakd info

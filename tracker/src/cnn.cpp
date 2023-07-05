@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "cnn.hpp"
+#include "../include/cnn.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -15,9 +15,9 @@
 
 #include <openvino/openvino.hpp>
 
-#include <utils/common.hpp>
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
+#include "../utils/include/utils/common.hpp"
+#include "../utils/include/utils/ocv_common.hpp"
+#include "../utils/include/utils/slog.hpp"
 
 BaseModel::BaseModel(const Config& config, const ov::Core& core, const std::string& device_name)
     : config(config),

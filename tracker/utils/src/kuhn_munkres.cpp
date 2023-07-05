@@ -6,7 +6,7 @@
 #include <limits>
 #include <vector>
 
-#include <utils/kuhn_munkres.hpp>
+#include "../include/utils/kuhn_munkres.hpp"
 
 KuhnMunkres::KuhnMunkres(bool greedy) : n_(), greedy_(greedy) {}
 

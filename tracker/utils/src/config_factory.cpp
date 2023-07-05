@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 
-#include "utils/config_factory.h"
+#include "../include/utils/config_factory.h"
 
 #include <set>
 #include <string>
@@ -23,7 +23,7 @@
 
 #include <openvino/runtime/intel_gpu/properties.hpp>
 
-#include "utils/args_helper.hpp"
+#include "../include/utils/args_helper.hpp"
 
 std::set<std::string> ModelConfig::getDevices() {
     if (devices.empty()) {
