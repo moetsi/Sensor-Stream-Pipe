@@ -378,7 +378,22 @@ set(SOURCE_FILES
 # Checking for XLINK_ENABLED and if exists adding readers
 if (UNIX)
   if (XLINK_ENABLED)
-    list(APPEND SOURCE_FILES readers/oakd_xlink_full_reader.cc readers/slog.hpp readers/slog.cpp readers/args_helper.hpp readers/args_helper.cpp readers/oakd_xlink_full_reader.h readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h readers/oakd_device_reader.cc readers/oakd_device_reader.h readers/human_poses.cpp readers/human_poses.h)
+    list(APPEND SOURCE_FILES
+      readers/oakd_xlink_full_reader.cc
+      readers/slog.hpp
+      readers/slog.cpp
+      readers/args_helper.hpp
+      readers/args_helper.cpp
+      readers/oakd_xlink_full_reader.h
+      readers/oakd_xlink_reader.cc
+      readers/oakd_xlink_reader.h
+      readers/oakd_device_reader.cc
+      readers/oakd_device_reader.h
+      readers/human_poses.cpp
+      readers/human_poses.h
+    )
+    file(GLOB_RECURSE TRACKER_FILES utils/tracker/*.cc utils/tracker/*.h utils/tracker/*.hpp)
+    list(APPEND SOURCE_FILES ${TRACKER_FILES})
   endif ()
 endif ()
 

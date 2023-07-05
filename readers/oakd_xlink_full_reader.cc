@@ -6,6 +6,9 @@
 #include "oakd_xlink_full_reader.h"
 #include "human_poses.h"
 
+// header files needed for the tracker
+// #include "../utils/tracker/include/tracker.hpp"
+
 // Closer-in minimum depth, disparity range is doubled (from 95 to 190):
 // static std::atomic<bool> extended_disparity{false};
 // // Better accuracy for longer distance, fractional disparity 32-levels:
