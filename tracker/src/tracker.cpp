@@ -386,7 +386,8 @@ void PedestrianTracker::UpdateLostTracks(const std::set<size_t>& track_ids) {
 void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& input_detections, uint64_t timestamp) {
     if (prev_timestamp_ != std::numeric_limits<uint64_t>::max())
         PT_CHECK_LT(prev_timestamp_, timestamp);
-
+    
+    // TODO: Instead of frame we need to provide frame size (Last because used for visualization)
     if (frame_size_ == cv::Size(0, 0)) {
         frame_size_ = frame.size();
     } else {
@@ -398,6 +399,8 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
         obj.timestamp = timestamp;
     }
 
+    // TODO: Instead of computing descriptors_fast, pull from the input detections
+    // Must update ComputeFastDescriptors to return what is already associated with detections
     std::vector<cv::Mat> descriptors_fast;
     ComputeFastDesciptors(frame, detections, &descriptors_fast);
 
@@ -457,13 +460,17 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
             }
         }
 
+        // TODO: Figure out what AddNewTracks needs frame for, and how to remove dependency
         AddNewTracks(frame, detections, descriptors_fast, unmatched_detections);
         UpdateLostTracks(unmatched_tracks);
 
         for (size_t id : active_tracks) {
+            // TODO: Figure out if out of frame means entirely or a little bit
+            // We are currently updating bounding boxes to be always in frame on person det script node
             EraseTrackIfBBoxIsOutOfFrame(id);
         }
     } else {
+        // TODO: Figure out what AddNewTracks needs frame for, and how to remove dependency
         AddNewTracks(frame, detections, descriptors_fast);
         UpdateLostTracks(active_tracks);
     }

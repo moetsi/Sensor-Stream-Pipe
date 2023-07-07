@@ -7,6 +7,7 @@
 #include <atomic>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <cmath>
 #include <opencv2/opencv.hpp>
@@ -68,10 +69,11 @@ namespace moetsi::ssp {
 
 // using namespace InferenceEngine;
 struct MessageData {
-    std::shared_ptr<void> color;
-    std::shared_ptr<void> person_detection;
+    std::shared_ptr<dai::ImgFrame> color;
+    std::shared_ptr<dai::SpatialImgDetections> person_detection;
     std::shared_ptr<void> face_detection;
     std::vector<std::shared_ptr<dai::NNData>> recognitions;
+    std::vector<std::shared_ptr<cv::Mat>> fast_descriptions;
 };
 
 class TwoStageHostSeqSync {
@@ -116,10 +118,9 @@ private:
   std::shared_ptr<dai::node::StereoDepth> stereo;
   // std::shared_ptr<dai::node::XLinkOut> depthOut;
 
-  std::shared_ptr<dai::node::ImageManip> person_det_manip;
-  std::shared_ptr<dai::node::MobileNetSpatialDetectionNetwork> person_nn;
-  std::shared_ptr<dai::node::XLinkOut> person_det_xout;
-
+  // FACE DETECTION
+  unsigned int rgb_face_det_nn_in_x_res = 640;
+  unsigned int rgb_face_det_nn_in_y_res = 360;
   std::shared_ptr<dai::node::ImageManip> face_det_manip;
   std::shared_ptr<dai::node::NeuralNetwork> face_nn;
   std::shared_ptr<dai::node::NeuralNetwork> face_post_proc_nn;
@@ -127,15 +128,30 @@ private:
   std::shared_ptr<dai::node::XLinkOut> face_det_xout;
   // std::shared_ptr<dai::node::XLinkOut> face_det_manip_xout;
 
+  // PERSON DETECTION
+  unsigned int rgb_person_det_nn_in_x_res = 544;
+  unsigned int rgb_person_det_nn_in_y_res = 320;
+  std::shared_ptr<dai::node::ImageManip> person_det_manip;
+  std::shared_ptr<dai::node::MobileNetSpatialDetectionNetwork> person_nn;
+  std::shared_ptr<dai::node::XLinkOut> person_det_xout;
+  // Strong Recognition
+  unsigned int rgb_person_reid_strong_nn_in_x_res = 128;
+  unsigned int rgb_person_reid_strong_nn_in_y_res = 256;
+  std::shared_ptr<dai::node::Script> person_config_manip_for_reid_nn_script;
+  std::shared_ptr<dai::node::ImageManip> recognition_manip;
+  std::shared_ptr<dai::node::NeuralNetwork> recognition_nn;
+  std::shared_ptr<dai::node::XLinkOut> recognition_nn_xout;
+  // Fast descriptors (resize)
+  unsigned int rgb_person_reid_fast_nn_in_x_res = 16;
+  unsigned int rgb_person_reid_fast_nn_in_y_res = 32;
+  std::shared_ptr<dai::node::Script> person_config_manip_for_fast_desc_script;
+  std::shared_ptr<dai::node::ImageManip> fast_desc_manip;
+  std::shared_ptr<dai::node::XLinkOut> fast_desc_xout;
+
+  // DEPTH DIFF SECTION
   std::shared_ptr<dai::node::Script> depth_control_script;
   std::shared_ptr<dai::node::NeuralNetwork> depth_diff_nn;
   std::shared_ptr<dai::node::XLinkOut> depth_diff_xout;
-
-
-  std::shared_ptr<dai::node::ImageManip> recognition_manip;
-  std::shared_ptr<dai::node::Script> person_image_manip_for_reid_nn_script;
-  std::shared_ptr<dai::node::NeuralNetwork> recognition_nn;
-  std::shared_ptr<dai::node::XLinkOut> recognition_nn_xout; 
 
   std::shared_ptr<dai::DeviceInfo> device_info;
   std::shared_ptr<dai::Device> device;

@@ -37,11 +37,11 @@ float cos_dist(const std::vector<float>& a, const std::vector<float>& b) {
 }
 
 // Normalize frame and bounding box
-cv::Rect frame_norm(const cv::Mat& frame, const std::vector<float>& bbox) {
-    int xMin = std::max(static_cast<int>(bbox[0] * frame.cols), 0);
-    int yMin = std::max(static_cast<int>(bbox[1] * frame.rows), 0);
-    int xMax = std::min(static_cast<int>(bbox[2] * frame.cols), frame.cols - 1);
-    int yMax = std::min(static_cast<int>(bbox[3] * frame.rows), frame.rows - 1);
+cv::Rect frame_norm(const int frame_cols, const int frame_rows, const std::vector<float>& bbox) {
+    int xMin = std::max(static_cast<int>(bbox[0] * frame_cols), 0);
+    int yMin = std::max(static_cast<int>(bbox[1] * frame_rows), 0);
+    int xMax = std::min(static_cast<int>(bbox[2] * frame_cols), frame_cols - 1);
+    int yMax = std::min(static_cast<int>(bbox[3] * frame_rows), frame_rows - 1);
 
     return cv::Rect(cv::Point(xMin, yMin), cv::Point(xMax, yMax));
 }
@@ -57,6 +57,8 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
             seq = std::static_pointer_cast<dai::NNData>(msg)->getSequenceNum();
         } else if (name == "recognition") {
             seq = std::static_pointer_cast<dai::NNData>(msg)->getSequenceNum();
+        } else if (name == "fast_desc") {
+            seq = std::static_pointer_cast<dai::ImgFrame>(msg)->getSequenceNum();
         } else {
             throw std::runtime_error("Invalid message name: " + name);
         }
@@ -66,11 +68,16 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
 
         if (name == "recognition") {
             msgData.recognitions.push_back(std::static_pointer_cast<dai::NNData>(msg));
+        }
+        else if (name == "fast_desc") {
+            cv::Mat frame = std::static_pointer_cast<dai::ImgFrame>(msg)->getCvFrame();
+            std::shared_ptr<cv::Mat> frame_ptr = std::make_shared<cv::Mat>(frame);
+            msgData.fast_descriptions.push_back(frame_ptr);
         } else {
             if(name == "color") {
-                msgData.color = msg;
+                msgData.color = std::static_pointer_cast<dai::ImgFrame>(msg);
             } else if(name == "person_detection") {
-                msgData.person_detection = msg;
+                msgData.person_detection = std::static_pointer_cast<dai::SpatialImgDetections>(msg);
             } else if(name == "face_detection") {
                 msgData.face_detection = msg;
             }
@@ -99,8 +106,8 @@ MessageData TwoStageHostSeqSync::get_msgs() {
             if (!spatialImgDetPtr) throw std::runtime_error("Failed to cast message to SpatialImgDetections");
 
             if (spatialImgDetPtr->detections.size() == 0 ||
-                it->second.recognitions.size() == spatialImgDetPtr->detections.size()) {
-
+                (spatialImgDetPtr->detections.size() ==  it->second.recognitions.size() &&
+                 spatialImgDetPtr->detections.size() == it->second.fast_descriptions.size())) {
                 if (it->first > maxSyncSeq) {
                     maxSyncSeq = it->first;
                     maxSyncSeqIt = it;
@@ -339,22 +346,40 @@ void OakdXlinkFullReader::SetOrReset() {
 
     stereo->initialConfig.set(oakdConfig);
 
-    // person_det_manip will resize the frame before sending it to the person detection NN node
-    person_det_manip = pipeline->create<dai::node::ImageManip>();
-    person_det_manip->initialConfig.setResize(544, 320); // This seems to downscale it by 1/3 (544x320)
-    person_det_manip->initialConfig.setFrameType(dai::ImgFrame::Type::RGB888p);
-    camRgb->preview.link(person_det_manip->inputImage);
-
+    // FACE DETECTION SECTION
+    // 
     // // face_det_manip will resize the frame before sending it to the face detection NN node
     face_det_manip = pipeline->create<dai::node::ImageManip>();
-    face_det_manip->initialConfig.setResizeThumbnail(640, 360);
+    face_det_manip->initialConfig.setResizeThumbnail(rgb_face_det_nn_in_x_res, rgb_face_det_nn_in_y_res);
     face_det_manip->initialConfig.setFrameType(dai::ImgFrame::Type::RGB888p);
     camRgb->preview.link(face_det_manip->inputImage);
 
-    // Person detection nn setup
+    // Face detection nn setup
+    cout << "Creating Face Detection Neural Network..." << endl;
+    face_nn = pipeline->create<dai::node::NeuralNetwork>();
+    face_nn->setBlobPath(model_face_detection_path);
+    face_det_manip->out.link(face_nn->input);
+    // Link the face detection nn to the post processing nn
+    cout << "Creating Face Detection Processing Neural Network..." << endl;
+    face_post_proc_nn = pipeline->create<dai::node::NeuralNetwork>();
+    face_post_proc_nn->setBlobPath(model_face_detection_proc_path);
+    face_nn->out.link(face_post_proc_nn->input);
+
+    // // Send face detections to the host (for bounding boxes)
+    face_det_xout = pipeline->create<dai::node::XLinkOut>();
+    face_det_xout->setStreamName("face_detection");
+    face_post_proc_nn->out.link(face_det_xout->input);
+
+    // PERSON DETECTION SECTION
+    // person_det_manip will resize the frame before sending it to the person detection NN node
+    person_det_manip = pipeline->create<dai::node::ImageManip>();
+    person_det_manip->initialConfig.setResize(rgb_person_det_nn_in_x_res, rgb_person_det_nn_in_y_res); // requied for nn (544, 320)
+    person_det_manip->initialConfig.setFrameType(dai::ImgFrame::Type::RGB888p);
+    camRgb->preview.link(person_det_manip->inputImage);
+
+    // Person detection spatial nn setup
     cout << "Creating Person Detection Spatial Neural Network..." << endl;
     person_nn = pipeline->create<dai::node::MobileNetSpatialDetectionNetwork>();
-    // person_nn->setConfidenceThreshold(200);
     person_nn->setBoundingBoxScaleFactor(0.25);
     person_nn->setDepthLowerThreshold(50);
     person_nn->setDepthUpperThreshold(12000);
@@ -363,17 +388,166 @@ void OakdXlinkFullReader::SetOrReset() {
     person_det_manip->out.link(person_nn->input);
     stereo->depth.link(person_nn->inputDepth);
 
-    // Face detection nn setup
-    cout << "Creating Face Detection Neural Network..." << endl;
-    face_nn = pipeline->create<dai::node::NeuralNetwork>();
-    face_nn->setBlobPath(model_face_detection_path);
-    face_det_manip->out.link(face_nn->input);
-    // Link the face detection nn to the processing nn
-    cout << "Creating Face Detection Processing Neural Network..." << endl;
-    face_post_proc_nn = pipeline->create<dai::node::NeuralNetwork>();
-    face_post_proc_nn->setBlobPath(model_face_detection_proc_path);
-    face_nn->out.link(face_post_proc_nn->input);
+    // Send person detections to the host (for bounding boxes)
+    person_det_xout = pipeline->create<dai::node::XLinkOut>();
+    person_det_xout->setStreamName("person_detection");
+    person_nn->out.link(person_det_xout->input);
+    person_nn->passthrough.link(rgbOut->input);
 
+    // Set up the person reid strong config manip node for the person reid strong nn
+    person_config_manip_for_reid_nn_script = pipeline->create<dai::node::Script>();
+    camRgb->preview.link(person_config_manip_for_reid_nn_script->inputs["preview"]);
+    person_nn->out.link(person_config_manip_for_reid_nn_script->inputs["person_dets_in"]);
+    // We create the script including the variables we need for reid size
+    std::ostringstream reid_config_script;
+    reid_config_script << R"(
+    import time
+    msgs = dict()
+    def add_msg(msg, name, seq = None):
+        global msgs
+        if seq is None:
+            seq = msg.getSequenceNum()
+        seq = str(seq)
+        if seq not in msgs:
+            msgs[seq] = dict()
+        msgs[seq][name] = msg
+        if 15 < len(msgs):
+            node.warn(f"Removing first element! len {len(msgs)}")
+            msgs.popitem()
+    def get_msgs():
+        global msgs
+        seq_remove = []
+        for seq, syncMsgs in msgs.items():
+            seq_remove.append(seq)
+            if len(syncMsgs) == 2:
+                for rm in seq_remove:
+                    del msgs[rm]
+                return syncMsgs
+        return None
+    def correct_bb(bb):
+        if bb.xmin < 0: bb.xmin = 0.001
+        if bb.ymin < 0: bb.ymin = 0.001
+        if bb.xmax > 1: bb.xmax = 0.999
+        if bb.ymax > 1: bb.ymax = 0.999
+        return bb
+    while True:
+        time.sleep(0.001)
+        preview = node.io['preview'].tryGet()
+        if preview is not None:
+            add_msg(preview, 'preview')
+        dets = node.io['person_dets_in'].tryGet()
+        if dets is not None:
+            seq = dets.getSequenceNum()
+            add_msg(dets, 'dets', seq)
+        sync_msgs = get_msgs()
+        if sync_msgs is not None:
+            img = sync_msgs['preview']
+            dets = sync_msgs['dets']
+            dets_seq = dets.getSequenceNum()
+            img_seq = img.getSequenceNum()
+            for i, det in enumerate(dets.detections):
+                cfg = ImageManipConfig()
+                correct_bb(det)
+                cfg.setCropRect(det.xmin, det.ymin, det.xmax, det.ymax)
+                cfg.setResize()";
+    reid_config_script << std::to_string(rgb_person_reid_strong_nn_in_x_res) << ", " << std::to_string(rgb_person_reid_strong_nn_in_y_res) << ")";
+    reid_config_script << R"(
+                cfg.setKeepAspectRatio(False)
+                node.io['manip_cfg'].send(cfg)
+                node.io['manip_img'].send(img))";
+    person_config_manip_for_reid_nn_script->setScript(reid_config_script.str());
+
+    // Take in the configs from the person strong reid config manip node
+    recognition_manip = pipeline->create<dai::node::ImageManip>();
+    recognition_manip->initialConfig.setResize(rgb_person_reid_strong_nn_in_x_res, rgb_person_reid_strong_nn_in_y_res);
+    recognition_manip->setWaitForConfigInput(true);
+    person_config_manip_for_reid_nn_script->outputs["manip_cfg"].link(recognition_manip->inputConfig);
+    person_config_manip_for_reid_nn_script->outputs["manip_img"].link(recognition_manip->inputImage);
+    
+    cout << "Creating Recognition Neural Network..." << endl;
+    recognition_nn = pipeline->create<dai::node::NeuralNetwork>();
+    recognition_nn->setBlobPath(model_reid_path);
+    recognition_manip->out.link(recognition_nn->input);
+
+    recognition_nn_xout = pipeline->create<dai::node::XLinkOut>();
+    recognition_nn_xout->setStreamName("recognition");
+    recognition_nn->out.link(recognition_nn_xout->input);
+
+    //  Person reid fast config manip node for the person reid fast descriptor
+    person_config_manip_for_fast_desc_script = pipeline->create<dai::node::Script>();
+    camRgb->preview.link(person_config_manip_for_fast_desc_script->inputs["preview"]);
+    person_nn->out.link(person_config_manip_for_fast_desc_script->inputs["person_dets_in"]);
+    // We create the script including the variables we need for reid size
+    std::ostringstream fast_desc_script;
+    fast_desc_script << R"(
+    import time
+    msgs = dict()
+    def add_msg(msg, name, seq = None):
+        global msgs
+        if seq is None:
+            seq = msg.getSequenceNum()
+        seq = str(seq)
+        if seq not in msgs:
+            msgs[seq] = dict()
+        msgs[seq][name] = msg
+        if 15 < len(msgs):
+            node.warn(f"Removing first element! len {len(msgs)}")
+            msgs.popitem()
+    def get_msgs():
+        global msgs
+        seq_remove = []
+        for seq, syncMsgs in msgs.items():
+            seq_remove.append(seq)
+            if len(syncMsgs) == 2:
+                for rm in seq_remove:
+                    del msgs[rm]
+                return syncMsgs
+        return None
+    def correct_bb(bb):
+        if bb.xmin < 0: bb.xmin = 0.001
+        if bb.ymin < 0: bb.ymin = 0.001
+        if bb.xmax > 1: bb.xmax = 0.999
+        if bb.ymax > 1: bb.ymax = 0.999
+        return bb
+    while True:
+        time.sleep(0.001)
+        preview = node.io['preview'].tryGet()
+        if preview is not None:
+            add_msg(preview, 'preview')
+        dets = node.io['person_dets_in'].tryGet()
+        if dets is not None:
+            seq = dets.getSequenceNum()
+            add_msg(dets, 'dets', seq)
+        sync_msgs = get_msgs()
+        if sync_msgs is not None:
+            img = sync_msgs['preview']
+            dets = sync_msgs['dets']
+            dets_seq = dets.getSequenceNum()
+            img_seq = img.getSequenceNum()
+            for i, det in enumerate(dets.detections):
+                cfg = ImageManipConfig()
+                correct_bb(det)
+                cfg.setCropRect(det.xmin, det.ymin, det.xmax, det.ymax)
+                cfg.setResize()";
+    fast_desc_script << std::to_string(rgb_person_reid_fast_nn_in_x_res) << ", " << std::to_string(rgb_person_reid_fast_nn_in_y_res) << ")";
+    fast_desc_script << R"(
+                cfg.setKeepAspectRatio(False)
+                node.io['manip_cfg'].send(cfg)
+                node.io['manip_img'].send(img))";
+    person_config_manip_for_fast_desc_script->setScript(fast_desc_script.str());
+
+    // Take in the configs from the config manip node
+    fast_desc_manip = pipeline->create<dai::node::ImageManip>();
+    fast_desc_manip->initialConfig.setResize(rgb_person_reid_fast_nn_in_x_res, rgb_person_reid_fast_nn_in_y_res);
+    fast_desc_manip->setWaitForConfigInput(true);
+    person_config_manip_for_fast_desc_script->outputs["manip_cfg"].link(fast_desc_manip->inputConfig);
+    person_config_manip_for_fast_desc_script->outputs["manip_img"].link(fast_desc_manip->inputImage);
+
+    fast_desc_xout = pipeline->create<dai::node::XLinkOut>();
+    fast_desc_xout->setStreamName("fast_desc");
+    fast_desc_manip->out.link(fast_desc_xout->input);
+
+    // DEPTH CONTROL SECTION
     // Depth control frame and new depth frame script setup
     depth_control_script = pipeline->create<dai::node::Script>();
     stereo->depth.link(depth_control_script->inputs["depth_in"]);
@@ -405,106 +579,6 @@ void OakdXlinkFullReader::SetOrReset() {
     depth_diff_xout->setStreamName("depth_diff");
     depth_diff_nn->out.link(depth_diff_xout->input);
 
-    // // Send face detections to the host (for bounding boxes)
-    face_det_xout = pipeline->create<dai::node::XLinkOut>();
-    face_det_xout->setStreamName("face_detection");
-    // face_det_post_proc_script->outputs["out"].link(face_det_xout->input);
-    face_post_proc_nn->out.link(face_det_xout->input);
-
-    // Send person detections to the host (for bounding boxes)
-    person_det_xout = pipeline->create<dai::node::XLinkOut>();
-    person_det_xout->setStreamName("person_detection");
-    person_nn->out.link(person_det_xout->input);
-    person_nn->passthrough.link(rgbOut->input);
-
-    // // We set up the script node that takes the detections from the nn and
-    // // sets the ImageManipConfig on the device to send to the recognition_manip to cro
-    person_image_manip_for_reid_nn_script = pipeline->create<dai::node::Script>();
-    camRgb->preview.link(person_image_manip_for_reid_nn_script->inputs["preview"]);
-    person_nn->out.link(person_image_manip_for_reid_nn_script->inputs["person_dets_in"]);
-    // Only sending metadata for syncing with color frames
-    // person_nn->passthrough.link(person_image_manip_for_reid_nn_script->inputs["passthrough"]);
-    person_image_manip_for_reid_nn_script->setScript(R"(
-    import time
-    msgs = dict()
-    def add_msg(msg, name, seq = None):
-        global msgs
-        if seq is None:
-            seq = msg.getSequenceNum()
-        seq = str(seq)
-        # node.warn(f"New msg {name}, seq {seq}")
-        # Each seq number has it's own dict of msgs, "preview" and "dets"
-        # seq: {preview: msg, dets: msg}
-        # If we have both msgs, we can send them to the device (happens in get_msgs)
-        if seq not in msgs:
-            msgs[seq] = dict()
-        msgs[seq][name] = msg
-        # To avoid freezing (not necessary for this ObjDet model)
-        if 15 < len(msgs):
-            node.warn(f"Removing first element! len {len(msgs)}")
-            msgs.popitem() # Remove first element
-    def get_msgs():
-        global msgs
-        seq_remove = [] # Arr of sequence numbers to get deleted
-        for seq, syncMsgs in msgs.items():
-            seq_remove.append(seq) # Will get removed from dict if we find synced msgs pair
-            # node.warn(f"Checking sync {seq}")
-            # Check if we have both detections and color frame with this sequence number
-            if len(syncMsgs) == 2: # 1 frame, 1 detection
-                for rm in seq_remove:
-                    del msgs[rm]
-                # node.warn(f"synced {seq}. Removed older sync values. len {len(msgs)}")
-                return syncMsgs # Returned synced msgs
-        return None
-    def correct_bb(bb):
-        if bb.xmin < 0: bb.xmin = 0.001
-        if bb.ymin < 0: bb.ymin = 0.001
-        if bb.xmax > 1: bb.xmax = 0.999
-        if bb.ymax > 1: bb.ymax = 0.999
-        return bb
-    while True:
-        time.sleep(0.001) # Avoid lazy looping
-        preview = node.io['preview'].tryGet()
-        if preview is not None:
-            add_msg(preview, 'preview')
-        dets = node.io['person_dets_in'].tryGet()
-        if dets is not None:
-            # TODO: in 2.18.0.0 use dets.getSequenceNum()
-            seq = dets.getSequenceNum()
-            add_msg(dets, 'dets', seq)
-        sync_msgs = get_msgs()
-        if sync_msgs is not None:
-            img = sync_msgs['preview']
-            dets = sync_msgs['dets']
-            dets_seq = dets.getSequenceNum()
-            img_seq = img.getSequenceNum()
-            for i, det in enumerate(dets.detections):
-                cfg = ImageManipConfig()
-                correct_bb(det)
-                cfg.setCropRect(det.xmin, det.ymin, det.xmax, det.ymax)
-                # node.warn(f"Sending {i + 1}. person det. Seq {img_seq}. Det {det.xmin}, {det.ymin}, {det.xmax}, {det.ymax}")
-                cfg.setResize(128, 256)
-                cfg.setKeepAspectRatio(False)
-                node.io['manip_cfg'].send(cfg)
-                node.io['manip_img'].send(img)
-    )");
-
-    recognition_manip = pipeline->create<dai::node::ImageManip>();
-    recognition_manip->initialConfig.setResize(128, 256);
-    recognition_manip->setWaitForConfigInput(true);
-    person_image_manip_for_reid_nn_script->outputs["manip_cfg"].link(recognition_manip->inputConfig);
-    person_image_manip_for_reid_nn_script->outputs["manip_img"].link(recognition_manip->inputImage);
-    
-    
-    cout << "Creating Recognition Neural Network..." << endl;
-    recognition_nn = pipeline->create<dai::node::NeuralNetwork>();
-    recognition_nn->setBlobPath(model_reid_path);
-    recognition_manip->out.link(recognition_nn->input);
-
-    recognition_nn_xout = pipeline->create<dai::node::XLinkOut>();
-    recognition_nn_xout->setStreamName("recognition");
-    recognition_nn->out.link(recognition_nn_xout->input);
-
     //Select which device through ip address and create pipeline
     // auto deviceInfoVec = dai::Device::getAllAvailableDevices();
     // Now we print all available devices
@@ -528,7 +602,7 @@ void OakdXlinkFullReader::SetOrReset() {
     std::cerr << endl;
 
     // Set up the output queues
-    for (const auto &name : {"rgb", "face_detection", "depth_diff", "person_detection", "recognition"}) {
+    for (const auto &name : {"rgb", "face_detection", "depth_diff", "person_detection", "recognition", "fast_desc"}) {
         queues[name] = device->getOutputQueue(name, 25, true);
     }
 
@@ -569,6 +643,9 @@ std::vector<std::vector<float>> postprocess(const dai::NNData& inference, int x_
     }
 
     // Scale the coordinates with the padded size
+    // This is not working correctly, as you move to edges of rgb the face is off
+    // TODO: This is probably because of the thumbnail resize imagemanip performed for the face detection nnf
+    // TODO: We are not scaling back to the original image size correctly 
     for(auto& face : faces) {
         for(int i = 0; i < 14; ++i) {
             face[i] *= ((i % 2 == 0) ? x_width : y_width);
@@ -577,9 +654,6 @@ std::vector<std::vector<float>> postprocess(const dai::NNData& inference, int x_
 
     return faces;
 }
-bool showed_once = false;
-bool showed_once2 = false;
-bool showed_once3 = false;
 
 void OakdXlinkFullReader::NextFrame() {
 
@@ -595,57 +669,47 @@ void OakdXlinkFullReader::NextFrame() {
                 // SetOrResetInternals();
                 failed = false;
             }
-
             current_frame_.clear();
- 
-            // std::cerr << "FRAMES A SECOND: " << framesASecond << std::endl << std::flush;
+
+            if (queues["rgb"]->has()) {
+                auto rgb_message = queues["rgb"]->get();
+                sync.add_msg(rgb_message, "color");
+            }
+            if (queues["person_detection"]->has()) {
+                auto det_message = queues["person_detection"]->get();
+                sync.add_msg(det_message, "person_detection");
+            }
+            if (queues["recognition"]->has()) {
+                auto rec_message = queues["recognition"]->get();
+                sync.add_msg(rec_message, "recognition");
+            }
+            if (queues["fast_desc"]->has()) {
+                auto det_fast_desc_message = queues["fast_desc"]->get();
+                sync.add_msg(det_fast_desc_message, "fast_desc");
+            }
+            if (queues["face_detection"]->has()) {
+                auto det_message = queues["face_detection"]->get<dai::NNData>();
+                sync.add_msg(det_message, "face_detection");
+            }
             if (queues["depth_diff"]->has()) {
                 int width = 544;
                 int height = 320;
-                // std::cerr << "color detection" << std::endl << std::flush;
                 auto depth_diff_message = queues["depth_diff"]->get<dai::NNData>();
                 std::vector<float> depth_diff_data = depth_diff_message->getFirstLayerFp16();
                 // std::cerr << "depth diff data size: " << depth_diff_data.size() << std::endl << std::flush;
                 
                 // Now we go through depth_diff data and for any values between -1500 and 1500 we set it to 0
+                // TODO: This is a hack to get rid of the noise in the depth diff image
+                // TODO: We should probably do this in the model
                 for (int i = 0; i < depth_diff_data.size(); i++) {
                     if (depth_diff_data[i] > -500 && depth_diff_data[i] < 500) {
                         depth_diff_data[i] = 0;
                     }
                     
                 }
-
-                // Chatgpt ATTEMPT
                 // Convert your data to Mat
                 cv::Mat depth_diff_mat(height, width, CV_32F, depth_diff_data.data());
                 depth_diff_mat.convertTo(depth_diff_mat, CV_8U, 255.0);
-
-                // Now we make a quick lamda function to output the MEDIAN value of pixels in depth_diff_mat
-                // auto findMedian = [](const cv::Mat& image) {
-                //     // Get the number of pixels
-                //     int totalPixels = image.rows * image.cols;
-
-                //     // Create a temporary copy of the image data
-                //     cv::Mat tempImage = image.clone();
-
-                //     // Reshape the temporary image to a single column
-                //     tempImage = tempImage.reshape(1, totalPixels);
-
-                //     // Sort the pixels in ascending order
-                //     cv::sort(tempImage, tempImage, cv::SORT_ASCENDING);
-
-                //     // Calculate the median pixel value
-                //     int medianIndex = totalPixels / 2;
-                //     uchar medianValue = tempImage.at<uchar>(medianIndex);
-
-                //     return medianValue;
-                // };
-
-                // uchar medianValue = findMedian(depth_diff_mat);
-
-                // Print the median pixel value
-                // std::cout << "Median Pixel Value: " << static_cast<int>(medianValue) << std::endl;
-
 
                 // Now we normalize
                 cv::Mat depth_diff_mat_normalized;
@@ -655,75 +719,59 @@ void OakdXlinkFullReader::NextFrame() {
                 cv::namedWindow("Depth Difference Image", cv::WINDOW_NORMAL);
                 cv::imshow("Depth Difference Image", depth_diff_mat_normalized);
                 cv::waitKey(1);
-                // cv::applyColorMap(depth_diff_img, depth_diff_img, cv::COLORMAP_HOT);
-                // cv::applyColorMap(depth_diff_img, depth_diff_img, cv::COLORMAP_JET);
 
-                // Create a window
-                // Show image
-                // Wait for a keystroke in the window
             }
 
-           // std::cerr << "rgb" << std::endl << std::flush;
-            if (queues["rgb"]->has()) {
-                // std::cerr << "color detection" << std::endl << std::flush;
-                auto rgb_message = queues["rgb"]->get();
-                sync.add_msg(rgb_message, "color");
-                // int64_t seq = std::static_pointer_cast<dai::ImgFrame>(rgb_message)->getSequenceNum();
-                // std::cerr << "color seq num: " << seq << std::endl << std::flush;
-
-                // current_rgb_frame_counter_++;
-                // uint64_t capture_timestamp = CurrentTimeMs();
-                // auto framesASecond = (float)current_rgb_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-                // auto fps_string = std::to_string(framesASecond);
-                // std::cerr << "color fps: " << fps_string << std::endl << std::flush;
-            }
-            if (queues["person_detection"]->has()) {
-                // std::cerr << "person detection" << std::endl << std::flush;
-                auto det_message = queues["person_detection"]->get();
-                sync.add_msg(det_message, "person_detection");
-                // int64_t seq = std::static_pointer_cast<dai::SpatialImgDetections>(det_message)->getSequenceNum();
-                // std::cerr << "person detection seq num: " << seq << std::endl << std::flush;
-
-                // current_detection_frame_counter_++;
-                // uint64_t capture_timestamp = CurrentTimeMs();
-                // auto framesASecond = (float)current_detection_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-                // auto fps_string = std::to_string(framesASecond);
-                // std::cerr << "person detection fps: " << fps_string << std::endl << std::flush;
-            }
-            if (queues["face_detection"]->has()) {
-                // std::cerr << "face detection" << std::endl << std::flush;
-                auto det_message = queues["face_detection"]->get<dai::NNData>();
-                sync.add_msg(det_message, "face_detection");
-                // int64_t seq = std::static_pointer_cast<dai::NNData>(det_message)->getSequenceNum();
-                // std::cerr << "face detection seq num: " << seq << std::endl << std::flush;
-
-                // int64_t seq = std::static_pointer_cast<dai::SpatialImgDetections>(det_message)->getSequenceNum();
-                // current_detection_frame_counter_++;
-                // uint64_t capture_timestamp = CurrentTimeMs();
-                // auto framesASecond = (float)current_detection_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-                // auto fps_string = std::to_string(framesASecond);
-                // std::cerr << "face detection fps: " << fps_string << std::endl << std::flush;
-            }
-            if (queues["recognition"]->has()) {
-                // std::cerr << "person recognition" << std::endl << std::flush;
-                auto rec_message = queues["recognition"]->get();
-                sync.add_msg(rec_message, "recognition");
-                // int64_t seq = std::static_pointer_cast<dai::NNData>(rec_message)->getSequenceNum();
-                // std::cerr << "recognition seq num: " << seq << std::endl << std::flush;
-
-                // current_recognition_frame_counter_++;
-                // uint64_t capture_timestamp = CurrentTimeMs();
-                // auto framesASecond = (float)current_recognition_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-                // auto fps_string = std::to_string(framesASecond);
-                // std::cerr << "recognition fps: " << fps_string << std::endl << std::flush;
-            }
-
+            // Now we check if all messages have come in for a given color (it checks if all messages have the same sequence number)
             auto msgs = sync.get_msgs();
             if (!msgs.color) {
+                // If we don't have a color message returned in the sync, we don't have all the messages
                 return;
             }
 
-            // std::cerr << "Got all messages" << std::endl << std::flush;
+            // Now that we have the messages for a given rgb frame, we can process them for the tracker algo
+            // We grab the rgb frame as a cv::Mat
+            auto frame = msgs.color->getCvFrame();
+            std::cerr << "RGB Synched Seq Num: " << msgs.color->getSequenceNum() << std::endl << std::flush;
+            // First we grab the timestamp of the rgb frame
+            auto timestamp = msgs.color->getTimestamp();
+            uint64_t epoch_time = std::chrono::duration_cast<std::chrono::milliseconds>(timestamp.time_since_epoch()).count();
+            
+            // This will store all the TrackedObject detections
+            TrackedObjects detections;
+
+            // We grab the detections that we must turn into TrackedObject
+            auto person_detections = msgs.person_detection->detections;
+
+            // The seq_num will be used as the frame_idx for the TrackedObject
+            auto seq_num = msgs.person_detection->getSequenceNum();
+
+            // Now we prepare the person detections to meet tracker requirements of TrackedObject
+            for (size_t i = 0; i < person_detections.size(); ++i) {
+                // We create a TrackedObject for each person detection
+                TrackedObject obj;
+
+                // We grab the detection for ease of reading
+                auto detection = person_detections[i];
+
+                // We set the frame_idx to the seq number of the person detection
+                obj.frame_idx = seq_num;
+
+                // We set the confidence of the TrackedObject
+                obj.confidence = detection.confidence;
+
+                // Now we set the rect of the TrackedObject
+                auto bbox = frame_norm(rgb_person_det_nn_in_x_res, rgb_person_det_nn_in_y_res, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
+                obj.rect = bbox;
+
+                // If the bounding box is greater than 0 we add to detections (we removed label flags from example)
+                if (obj.rect.area() > 0 ) {
+                    detections.emplace_back(obj);
+                }
+            }
+            
+            // tracker->Process(frame, detections, epoch_time);
+            
            //Increment counter and grab time
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
@@ -736,9 +784,10 @@ void OakdXlinkFullReader::NextFrame() {
             cv::Size size(1632, 960); 
             cv::resize(frameRgbOpenCv, resizedFrame, size); // resize image
 
-            auto person_detections = std::static_pointer_cast<dai::SpatialImgDetections>(msgs.person_detection)->detections;
+            // commented out because already done above
+            // auto person_detections = std::static_pointer_cast<dai::SpatialImgDetections>(msgs.person_detection)->detections;
             auto face_detections = std::static_pointer_cast<dai::NNData>(msgs.face_detection);
-            auto faces = postprocess(*face_detections, rgb_dai_preview_x, rgb_dai_preview_y);
+            auto faces = postprocess(*face_detections, resizedFrame.cols, resizedFrame.rows);
             auto& recognitions = msgs.recognitions;
 
             cv::putText(resizedFrame, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 0, 0), 8);
@@ -747,7 +796,7 @@ void OakdXlinkFullReader::NextFrame() {
             // Person detections bounding boxes, depth and reid labeling
             for (size_t i = 0; i < person_detections.size(); ++i) {
                 auto detection = person_detections[i];
-                auto bbox = frame_norm(resizedFrame, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
+                auto bbox = frame_norm(1632, 960, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
 
                 auto reid_result = (recognitions)[i]->getFirstLayerFp16();
 
