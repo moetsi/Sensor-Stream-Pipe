@@ -37,7 +37,10 @@
 #include "depthai/depthai.hpp"
 
 // header files needed for the tracker
-#include "../tracker/include/tracker.hpp"
+#include "tracker.hpp"
+#include "descriptor.hpp"
+#include "distance.hpp"
+#include "utils/ocv_common.hpp"
 
 // OPENVINO HEADERS
 /**
@@ -128,6 +131,12 @@ private:
   std::shared_ptr<dai::node::XLinkOut> face_det_xout;
   // std::shared_ptr<dai::node::XLinkOut> face_det_manip_xout;
 
+  // Testing for sequence numbers
+  std::shared_ptr<dai::node::Script> log_image_manip_input_script;
+  std::shared_ptr<dai::node::Script> log_person_nn_input_script;
+  std::shared_ptr<dai::node::Script> log_person_nn_input_depth_script;
+  std::shared_ptr<dai::node::Script> log_person_nn_output_script;
+
   // PERSON DETECTION
   unsigned int rgb_person_det_nn_in_x_res = 544;
   unsigned int rgb_person_det_nn_in_y_res = 320;
@@ -135,6 +144,7 @@ private:
   std::shared_ptr<dai::node::MobileNetSpatialDetectionNetwork> person_nn;
   std::shared_ptr<dai::node::XLinkOut> person_det_xout;
   // Strong Recognition
+  cv::Size strong_descriptor_size = cv::Size(1,256);
   unsigned int rgb_person_reid_strong_nn_in_x_res = 128;
   unsigned int rgb_person_reid_strong_nn_in_y_res = 256;
   std::shared_ptr<dai::node::Script> person_config_manip_for_reid_nn_script;
@@ -147,6 +157,8 @@ private:
   std::shared_ptr<dai::node::Script> person_config_manip_for_fast_desc_script;
   std::shared_ptr<dai::node::ImageManip> fast_desc_manip;
   std::shared_ptr<dai::node::XLinkOut> fast_desc_xout;
+  // Tracking
+  std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
 
   // DEPTH DIFF SECTION
   std::shared_ptr<dai::node::Script> depth_control_script;

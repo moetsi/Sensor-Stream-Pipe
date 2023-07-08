@@ -11,7 +11,7 @@
 #include <dirent.h>
 #endif
 
-#include <gflags/gflags.h>
+// #include <gflags/gflags.h>
 
 #include <sys/stat.h>
 #include <map>
@@ -48,23 +48,25 @@ void readInputFilesArguments(std::vector<std::string>& files, const std::string&
     }
 }
 
-void parseInputFilesArguments(std::vector<std::string>& files) {
-    std::vector<std::string> args = gflags::GetArgvs();
-    bool readArguments = false;
-    for (size_t i = 0; i < args.size(); i++) {
-        if (args.at(i) == "-i" || args.at(i) == "--i") {
-            readArguments = true;
-            continue;
-        }
-        if (!readArguments) {
-            continue;
-        }
-        if (args.at(i).c_str()[0] == '-') {
-            break;
-        }
-        readInputFilesArguments(files, args.at(i));
-    }
-}
+// Don't use gflags::GetArgvs() so will not install library for it so commented out
+
+// void parseInputFilesArguments(std::vector<std::string>& files) {
+//     std::vector<std::string> args = gflags::GetArgvs();
+//     bool readArguments = false;
+//     for (size_t i = 0; i < args.size(); i++) {
+//         if (args.at(i) == "-i" || args.at(i) == "--i") {
+//             readArguments = true;
+//             continue;
+//         }
+//         if (!readArguments) {
+//             continue;
+//         }
+//         if (args.at(i).c_str()[0] == '-') {
+//             break;
+//         }
+//         readInputFilesArguments(files, args.at(i));
+//     }
+// }
 
 std::vector<std::string> split(const std::string& s, char delim) {
     std::vector<std::string> result;

@@ -103,8 +103,7 @@ private:
     VectorCNN handler;
 
 public:
-    Descriptor(const ModelConfigTracker& config, const ov::Core& core, const std::string& deviceName)
-        : handler(config, core, deviceName) {}
+    Descriptor(const int descriptor_length) : handler(descriptor_length) {}
 
     ///
     /// \brief Descriptor size getter.

@@ -363,6 +363,12 @@ private:
                                 std::set<size_t>* unmatched_detections,
                                 std::set<std::tuple<size_t, size_t, float>>* matches);
 
+    void ComputeFastDescriptorsUsingAttachedDescriptors(const TrackedObjects& detections,
+                                                        std::vector<cv::Mat>* descriptors_fast);
+
+    void ComputeStrongDescriptorsUsingAttachedDescriptors(const TrackedObjects& detections,
+                                                 std::vector<cv::Mat>* descriptors_strong);
+
     void ComputeFastDesciptors(const cv::Mat& frame,
                                const TrackedObjects& detections,
                                std::vector<cv::Mat>* descriptors);

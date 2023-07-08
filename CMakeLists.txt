@@ -380,8 +380,6 @@ if (UNIX)
   if (XLINK_ENABLED)
     list(APPEND SOURCE_FILES
       readers/oakd_xlink_full_reader.cc
-      readers/slog.hpp
-      readers/slog.cpp
       readers/args_helper.hpp
       readers/args_helper.cpp
       readers/oakd_xlink_full_reader.h
@@ -394,6 +392,9 @@ if (UNIX)
     )
     file(GLOB_RECURSE TRACKER_FILES tracker/*.cc tracker/*.cpp tracker/*.h tracker/*.hpp)
     list(APPEND SOURCE_FILES ${TRACKER_FILES})
+    # Search for tracker header files in these folders
+    include_directories(tracker/include)
+    include_directories(tracker/utils/include)
   endif ()
 endif ()
 

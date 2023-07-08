@@ -81,9 +81,9 @@ protected:
     ov::Shape output_shape;
 };
 
-class VectorCNN : public BaseModel {
+class VectorCNN {
 public:
-    VectorCNN(const ModelConfigTracker& config, const ov::Core& core, const std::string& deviceName);
+    VectorCNN(const int descriptor_length);
 
     void Compute(const cv::Mat& image, cv::Mat* vector) const;
     void Compute(const std::vector<cv::Mat>& images,

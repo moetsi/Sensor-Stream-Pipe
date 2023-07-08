@@ -383,11 +383,31 @@ void PedestrianTracker::UpdateLostTracks(const std::set<size_t>& track_ids) {
     }
 }
 
+void PedestrianTracker::ComputeFastDescriptorsUsingAttachedDescriptors(const TrackedObjects& detections,
+                                                                       std::vector<cv::Mat>* descriptors_fast) {
+    PT_CHECK(descriptors_fast);
+    descriptors_fast->clear();
+    descriptors_fast->reserve(detections.size());
+    for (const auto& det : detections) {
+        descriptors_fast->emplace_back(det.fast_descriptor);
+    }
+}
+
+void PedestrianTracker::ComputeStrongDescriptorsUsingAttachedDescriptors(const TrackedObjects& detections,
+                                                 std::vector<cv::Mat>* descriptors_strong) {
+    PT_CHECK(descriptors_strong);
+    descriptors_strong->clear();
+    descriptors_strong->reserve(detections.size());
+    for (const auto& det : detections) {
+        descriptors_strong->emplace_back(det.strong_descriptor);
+    }
+}
+
 void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& input_detections, uint64_t timestamp) {
     if (prev_timestamp_ != std::numeric_limits<uint64_t>::max())
         PT_CHECK_LT(prev_timestamp_, timestamp);
     
-    // TODO: Instead of frame we need to provide frame size (Last because used for visualization)
+    // TODO: Need to remove this
     if (frame_size_ == cv::Size(0, 0)) {
         frame_size_ = frame.size();
     } else {
@@ -399,10 +419,10 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
         obj.timestamp = timestamp;
     }
 
-    // TODO: Instead of computing descriptors_fast, pull from the input detections
-    // Must update ComputeFastDescriptors to return what is already associated with detections
+    // Changed from old function to new function
     std::vector<cv::Mat> descriptors_fast;
-    ComputeFastDesciptors(frame, detections, &descriptors_fast);
+    // ComputeFastDesciptors(frame, detections, &descriptors_fast);
+    ComputeFastDescriptorsUsingAttachedDescriptors(detections, &descriptors_fast);
 
     auto active_tracks = active_track_ids_;
 
@@ -434,6 +454,7 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
             last_det.rect = tracks_.at(track_id).predicted_rect;
 
             if (conf > params_.aff_thr_fast) {
+                // TODO: Figure out why AppendToTrack needs frame
                 AppendToTrack(frame, track_id, detections[det_id], descriptors_fast[det_id], cv::Mat());
                 unmatched_detections.erase(det_id);
             } else {
@@ -558,24 +579,25 @@ std::vector<float> PedestrianTracker::ComputeDistances(const cv::Mat& frame,
     std::map<size_t, size_t> det_to_batch_ids;
     std::map<size_t, size_t> track_to_batch_ids;
 
-    std::vector<cv::Mat> images;
+    // std::vector<cv::Mat> images;
     std::vector<cv::Mat> descriptors;
     for (size_t i = 0; i < track_and_det_ids.size(); i++) {
         size_t track_id = track_and_det_ids[i].first;
         size_t det_id = track_and_det_ids[i].second;
 
         if (tracks_.at(track_id).descriptor_strong.empty()) {
-            images.push_back(tracks_.at(track_id).last_image);
+            // images.push_back(tracks_.at(track_id).last_image);
             descriptors.push_back(cv::Mat());
             track_to_batch_ids[track_id] = descriptors.size() - 1;
         }
 
-        images.push_back(frame(detections[det_id].rect));
+        // images.push_back(frame(detections[det_id].rect));
         descriptors.push_back(cv::Mat());
         det_to_batch_ids[det_id] = descriptors.size() - 1;
     }
 
-    descriptor_strong_->Compute(images, &descriptors);
+    // descriptor_strong_->Compute(images, &descriptors);
+    ComputeStrongDescriptorsUsingAttachedDescriptors(detections, &descriptors);
 
     std::vector<cv::Mat> descriptors1;
     std::vector<cv::Mat> descriptors2;

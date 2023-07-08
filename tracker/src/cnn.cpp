@@ -80,10 +80,8 @@ void BaseModel::InferBatch(const std::vector<cv::Mat>& frames,
     }
 }
 
-VectorCNN::VectorCNN(const Config& config, const ov::Core& core, const std::string& deviceName)
-    : BaseModel(config, core, deviceName) {
-    Load();
-    result_size = std::accumulate(std::next(output_shape.begin(), 1), output_shape.end(), 1, std::multiplies<int>());
+VectorCNN::VectorCNN(const int descriptor_length) {
+    result_size = descriptor_length;
 }
 
 void VectorCNN::Compute(const cv::Mat& frame, cv::Mat* vector) const {
@@ -113,5 +111,5 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
             tensor_wrapper.copyTo(vectors->back());
         }
     };
-    InferBatch(images, results_fetcher);
+    // InferBatch(images, results_fetcher);
 }
