@@ -20,8 +20,11 @@ struct TrackedObject {
     int64_t frame_idx;  ///< Frame index where object was detected (-1 if N/A).
     int object_id;  ///< Unique object identifier (-1 if N/A).
     uint64_t timestamp;  ///< Timestamp in milliseconds.
-    cv::Mat fast_descriptor;
-    cv::Mat strong_descriptor;
+    cv::Mat fast_descriptor; //this already exists and is computed
+    cv::Mat strong_descriptor; //this already exists and is already computed
+    float center_x; // this is the x coordinate of the center of the detection
+    float center_y; // this is the y coordinate of the center of the detection
+    float center_z; // this is the z coordinate of the center of the detection
 
     ///
     /// \brief Default constructor.

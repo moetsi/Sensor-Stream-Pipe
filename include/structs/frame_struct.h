@@ -40,7 +40,9 @@ enum class FrameType: short {
     /** Confidence levels */
     FrameTypeConfidence = 3,
     /** Human pose */
-    FrameTypeHumanPose = 4
+    FrameTypeHumanPose = 4,
+    //** Detection */
+    FrameTypeDetection = 5
 };
 
 /**
@@ -114,10 +116,25 @@ enum class FrameDataType: short {
     /** Human Data */
     FrameDataTypeObjectHumanData = 8,
 
+    // 9 for OAKD cv::Mat
+
     /** OAKD cv::Mat */
     FrameDataTypeCvMat = 9,
+
+    // 10 for OAKD cv::Mat, disparity
+
     /** OAKD cv::Mat, disparity */
-    FrameDataTypeCvDisparity = 10
+    FrameDataTypeCvDisparity = 10,
+
+    // 11 for OAKD cv::Mat StereoDepth sub-pixel
+
+    //OAKD cv::Mat StereoDepth sub-pixel
+    FrameDataTypeDepthAIStereoDepth = 11,
+
+    // 12 for Spatial Detections
+
+    /** Spatial Detections */
+    FrameDataTypeTrackedObjects = 12
 }; 
 
 /**

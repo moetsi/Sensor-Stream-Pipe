@@ -40,6 +40,8 @@ extern "C" {
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
 
+#include "../structs/detection_struct.h"
+
 // imshow not available on iOS/iPhone Simulator
 #if __APPLE__
   #include <TargetConditionals.h>
@@ -93,11 +95,11 @@ extern "C" SSP_EXPORT int ssp_client_full(int port, std::string hostname)
     std::unordered_map<std::string, std::shared_ptr<IDecoder>> decoders;
 
     int32_t bodyCount;
-    coco_human_t bodyStruct;
+    detection_struct_t bodyStruct;
 
     while (reader.HasNextFrame()) {
 
-      coco_human_t bodyStruct;
+      detection_struct_t bodyStruct;
 
       reader.NextFrame();
       std::vector<FrameStruct> f_list = reader.GetCurrentFrame();
@@ -105,9 +107,9 @@ extern "C" SSP_EXPORT int ssp_client_full(int port, std::string hostname)
 
         std::string decoder_id = f.stream_id + std::to_string(f.sensor_id);
 
-        if (f.frame_type == FrameType::FrameTypeHumanPose)
+        if (f.frame_type == FrameType::FrameTypeDetection)
         {
-          if (f.frame.size() < 4 + sizeof(coco_human_t)) {
+          if (f.frame.size() < 4 + sizeof(detection_struct_t)) {
 
             std::cerr << "0 size frame -> skip " << std::endl << std::flush;
             continue;

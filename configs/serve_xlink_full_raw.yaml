@@ -38,5 +38,5 @@ video_encoder:
     type: "null"
   1: #depth
     type: "null"
-  4: #object-human
+  5: #detections
     type: "null"

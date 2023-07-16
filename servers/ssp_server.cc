@@ -41,8 +41,6 @@
 #include "../readers/dummy_body_reader.h"
 
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
-#include "../readers/oakd_xlink_reader.h"
-#include "../readers/oakd_device_reader.h"
 #include "../readers/oakd_xlink_full_reader.h"
 #include "depthai/depthai.hpp"
 #endif
@@ -102,15 +100,9 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
       reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader(general_parameters["frame_source"]["parameters"]));
     }
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
-    else if (reader_type == "oakd_xlink") {
-      reader = std::unique_ptr<OakdXlinkReader>(new OakdXlinkReader(general_parameters["frame_source"]["parameters"]));
-    }
-    else if (reader_type == "oakd_device") {
-      reader = std::unique_ptr<OakdDeviceReader>(new OakdDeviceReader(general_parameters["frame_source"]["parameters"]));
-    }
     else if (reader_type == "oakd_xlink_full") {
       reader = std::unique_ptr<OakdXlinkFullReader>(new OakdXlinkFullReader(general_parameters["frame_source"]["parameters"]));
-    }    
+    }
 #endif
      else if (reader_type == "video") {
       std::string path =
@@ -241,7 +233,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
 
           std::shared_ptr<IEncoder> frameEncoder =
               encoders[unsigned(frameStruct->frame_type)];
-              std::cerr << "ft = " << unsigned(frameStruct->frame_type) << std::endl << std::endl;
+              // std::cerr << "ft = " << unsigned(frameStruct->frame_type) << std::endl << std::endl;
           if (!!frameEncoder) {
             frameEncoder->AddFrameStruct(frameStruct);
             if (frameEncoder->HasNextPacket()) {
@@ -252,7 +244,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
               frameEncoder->NextPacket();
             }
           } else {
-            std::cerr << "skip!" << std::endl << std::flush;
+            // std::cerr << "skip!" << std::endl << std::flush;
           }
         }
         if (reader->HasNextFrame()) {

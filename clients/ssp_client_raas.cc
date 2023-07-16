@@ -16,6 +16,8 @@
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
 #include <backward.hpp> // Add this include for backward-cpp
+#include "../structs/body_struct.h"
+#include "../structs/detection_struct.h"
 
 #ifdef _WIN32
 #include <io.h>

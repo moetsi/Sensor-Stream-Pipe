@@ -39,6 +39,7 @@ extern "C" {
 #include "../readers/network_reader.h"
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
+#include "../structs/body_struct.h"
 
 // imshow not available on iOS/iPhone Simulator
 #if __APPLE__

@@ -39,6 +39,8 @@ extern "C" {
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
 
+#include "../structs/body_struct.h"
+
 using namespace moetsi::ssp;
 
 // imshow not available on iOS/iPhone Simulator

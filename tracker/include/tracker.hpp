@@ -21,6 +21,8 @@
 #include "logging.hpp"
 #include "utils.hpp"
 
+#include "../../structs/detection_struct.h"
+
 class IDescriptorDistance;
 class IImageDescriptor;
 
@@ -282,6 +284,12 @@ public:
     TrackedObjects TrackedDetections() const;
 
     ///
+    /// \brief Get most recent detections.
+    /// \return Most recent detections.
+    ///
+    std::vector<moetsi::ssp::detection_struct_t> GetMostRecentDetections() const;
+
+    ///
     /// \brief Draws active tracks on a given frame.
     /// \param[in] frame Colored image (CV_8UC3).
     /// \return Colored image with drawn active tracks.
@@ -451,6 +459,9 @@ private:
 
     // All tracks.
     std::unordered_map<size_t, Track> tracks_;
+
+    // Detected tracks from last processed frame.
+    std::vector<size_t> detected_track_ids_;
 
     // Previous frame image.
     cv::Size prev_frame_size_;

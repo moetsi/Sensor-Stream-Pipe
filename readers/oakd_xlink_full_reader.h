@@ -41,6 +41,7 @@
 #include "descriptor.hpp"
 #include "distance.hpp"
 #include "utils/ocv_common.hpp"
+// #include "monitor/presenter.h"
 
 // OPENVINO HEADERS
 /**
@@ -61,11 +62,11 @@
 #include "openvino/openvino.hpp"
 #include <iterator>
 #include <memory>
-#include "common.hpp"
-#include "ocv_common.hpp"
+#include "utils/common.hpp"
+#include "utils/ocv_common.hpp"
 #include <string>
 #include <vector>
-#include "args_helper.hpp"
+#include "utils/args_helper.hpp"
 #include "fp16/fp16.h"
 
 namespace moetsi::ssp { 
@@ -114,12 +115,10 @@ private:
 
   std::shared_ptr<dai::Pipeline> pipeline;
   std::shared_ptr<dai::node::ColorCamera> camRgb;
-  // std::shared_ptr<dai::node::ImageManip> camRgbManip;
   std::shared_ptr<dai::node::XLinkOut> rgbOut;
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
   std::shared_ptr<dai::node::StereoDepth> stereo;
-  // std::shared_ptr<dai::node::XLinkOut> depthOut;
 
   // FACE DETECTION
   unsigned int rgb_face_det_nn_in_x_res = 640;
@@ -127,9 +126,7 @@ private:
   std::shared_ptr<dai::node::ImageManip> face_det_manip;
   std::shared_ptr<dai::node::NeuralNetwork> face_nn;
   std::shared_ptr<dai::node::NeuralNetwork> face_post_proc_nn;
-  // std::shared_ptr<dai::node::Script> face_det_post_proc_script;
   std::shared_ptr<dai::node::XLinkOut> face_det_xout;
-  // std::shared_ptr<dai::node::XLinkOut> face_det_manip_xout;
 
   // Testing for sequence numbers
   std::shared_ptr<dai::node::Script> log_image_manip_input_script;
@@ -159,6 +156,8 @@ private:
   std::shared_ptr<dai::node::XLinkOut> fast_desc_xout;
   // Tracking
   std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+  // Visualization
+  LazyVideoWriter videoWriter{"", 7.0, 4294967295};
 
   // DEPTH DIFF SECTION
   std::shared_ptr<dai::node::Script> depth_control_script;
@@ -218,7 +217,6 @@ private:
     std::shared_ptr<dai::node::XLinkOut> rgbOut_zero;
     rgbOut = rgbOut_zero;
     std::shared_ptr<dai::node::XLinkOut> depthOut_zero;
-    // depthOut = depthOut_zero;
     std::shared_ptr<dai::DeviceInfo> device_info_zero;
     device_info = device_info_zero;
     std::shared_ptr<dai::Device> device_zero;

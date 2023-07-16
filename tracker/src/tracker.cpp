@@ -215,6 +215,24 @@ const std::set<size_t>& PedestrianTracker::active_track_ids() const {
     return active_track_ids_;
 }
 
+// Returns a vector of detection_struct_t of most recent TrackedObject of tracks in detected_track_ids_
+std::vector<moetsi::ssp::detection_struct_t> PedestrianTracker::GetMostRecentDetections() const {
+    std::vector<moetsi::ssp::detection_struct_t> most_recent_detections;
+    for (auto track_id : detected_track_ids_) {
+        if (tracks_.find(track_id) != tracks_.end()) {
+            auto last_det = tracks_.at(track_id).objects.back();
+            moetsi::ssp::detection_struct_t det;
+            det.track_id = track_id;
+            det.center_x = last_det.center_x;
+            det.center_y = last_det.center_y;
+            det.center_z = last_det.center_z;
+            det.detection_label = "person";
+            most_recent_detections.push_back(det);
+        }
+    }
+    return most_recent_detections;
+}
+
 // Returns detection log which is used for tracks saving.
 DetectionLog PedestrianTracker::GetDetectionLog(const bool valid_only) const {
     return ConvertTracksToDetectionLog(all_tracks(valid_only));
@@ -395,17 +413,27 @@ void PedestrianTracker::ComputeFastDescriptorsUsingAttachedDescriptors(const Tra
 
 void PedestrianTracker::ComputeStrongDescriptorsUsingAttachedDescriptors(const TrackedObjects& detections,
                                                  std::vector<cv::Mat>* descriptors_strong) {
+
+    std::cerr << "ComputeStrongDescriptorsUsingAttachedDescriptors detections size: " << detections.size() << std::endl;
     PT_CHECK(descriptors_strong);
     descriptors_strong->clear();
     descriptors_strong->reserve(detections.size());
     for (const auto& det : detections) {
         descriptors_strong->emplace_back(det.strong_descriptor);
     }
+    std::cerr << "descriptors_strong[0] is empty: " << (*descriptors_strong)[0].empty() << std::endl;
+    std::cerr << "descriptors_strong size: " << descriptors_strong->size() << std::endl;
 }
 
 void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& input_detections, uint64_t timestamp) {
+    // we clear out detected_track_ids_
+    detected_track_ids_.clear();
+
     if (prev_timestamp_ != std::numeric_limits<uint64_t>::max())
-        PT_CHECK_LT(prev_timestamp_, timestamp);
+    {
+        // PT_CHECK_LT(prev_timestamp_, timestamp);
+    }
+        
     
     // TODO: Need to remove this
     if (frame_size_ == cv::Size(0, 0)) {
@@ -443,6 +471,7 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
         if (distance_strong_) {
             std::vector<std::pair<size_t, size_t>> reid_track_and_det_ids = GetTrackToDetectionIds(matches);
             is_matching_to_track = StrongMatching(frame, detections, reid_track_and_det_ids);
+            std::cerr << "StrongMatching called" << std::endl;
         }
 
         for (const auto& match : matches) {
@@ -576,46 +605,81 @@ std::vector<float> PedestrianTracker::ComputeDistances(const cv::Mat& frame,
                                                        const TrackedObjects& detections,
                                                        const std::vector<std::pair<size_t, size_t>>& track_and_det_ids,
                                                        std::map<size_t, cv::Mat>* det_id_to_descriptor) {
+    // Map objects to store batch IDs for each detection and track.
     std::map<size_t, size_t> det_to_batch_ids;
     std::map<size_t, size_t> track_to_batch_ids;
 
     // std::vector<cv::Mat> images;
+
+    // Vector to store descriptors of each detection and track.
     std::vector<cv::Mat> descriptors;
+
+    // Loop through all pairs of track and detection IDs.
     for (size_t i = 0; i < track_and_det_ids.size(); i++) {
+        // Extract track and detection IDs from each pair.
         size_t track_id = track_and_det_ids[i].first;
         size_t det_id = track_and_det_ids[i].second;
 
+        // If the strong descriptor of the current track is empty...
         if (tracks_.at(track_id).descriptor_strong.empty()) {
             // images.push_back(tracks_.at(track_id).last_image);
+
+            // Add a new empty cv::Mat to the descriptors vector.
             descriptors.push_back(cv::Mat());
+            // Store the current index of the descriptors vector as the batch ID for the current track.
             track_to_batch_ids[track_id] = descriptors.size() - 1;
         }
 
-        // images.push_back(frame(detections[det_id].rect));
+        // Regardless of the condition above, add a new empty cv::Mat to the descriptors vector.
         descriptors.push_back(cv::Mat());
+        // Store the current index of the descriptors vector as the batch ID for the current detection.
         det_to_batch_ids[det_id] = descriptors.size() - 1;
     }
 
     // descriptor_strong_->Compute(images, &descriptors);
+    // Populate the descriptors vector with actual strong descriptors from the tracked objects.
     ComputeStrongDescriptorsUsingAttachedDescriptors(detections, &descriptors);
 
+    // Vectors to store the descriptors to compute distances between.
     std::vector<cv::Mat> descriptors1;
     std::vector<cv::Mat> descriptors2;
+
+    // now we print what is in det_id_to_descriptor but instead of printing the mat we check if it is empty
+    std::cerr << "det_id_to_descriptor size: " << det_id_to_descriptor->size() << std::endl;
+    for (auto it = det_id_to_descriptor->begin(); it != det_id_to_descriptor->end(); ++it) {
+        std::cerr << "det_id_to_descriptor[" << it->first << "] is empty: " << it->second.empty() << std::endl;
+    }
+
+    // Loop through all pairs of track and detection IDs again.
     for (size_t i = 0; i < track_and_det_ids.size(); i++) {
+        // Extract track and detection IDs from each pair.
         size_t track_id = track_and_det_ids[i].first;
         size_t det_id = track_and_det_ids[i].second;
 
+        // If the strong descriptor of the current track is empty...
         if (tracks_.at(track_id).descriptor_strong.empty()) {
+            // Assign the corresponding descriptor from the descriptors vector to the track's descriptor_strong.
             tracks_.at(track_id).descriptor_strong = descriptors[track_to_batch_ids[track_id]].clone();
         }
+
+        // Assign the corresponding descriptor from the descriptors vector to the det_id_to_descriptor map.
         (*det_id_to_descriptor)[det_id] = descriptors[det_to_batch_ids[det_id]];
 
+        // Push the current detection's descriptor to the descriptors1 vector.
         descriptors1.push_back(descriptors[det_to_batch_ids[det_id]]);
+        // Push the current track's strong descriptor to the descriptors2 vector.
         descriptors2.push_back(tracks_.at(track_id).descriptor_strong);
     }
+    std::cerr << "descriptors1[0] is empty: " << descriptors1[0].empty() << std::endl;
+    std::cerr << "descriptors2[0] is empty: " << descriptors2[0].empty() << std::endl;
+    std::cerr << "descriptors1 size: " << descriptors1.size() << std::endl;
+    std::cerr << "descriptors2 size: " << descriptors2.size() << std::endl;
 
+
+    // Compute the distances between corresponding descriptors in descriptors1 and descriptors2.
     std::vector<float> distances = distance_strong_->Compute(descriptors1, descriptors2);
 
+    // Return the computed distances.
     return distances;
 }
 
@@ -641,6 +705,7 @@ std::map<size_t, std::pair<bool, cv::Mat>> PedestrianTracker::StrongMatching(
     std::map<size_t, std::pair<bool, cv::Mat>> is_matching;
 
     if (track_and_det_ids.size() == 0) {
+        std::cerr << "track_and_det_ids.size() == 0" << std::endl;
         return is_matching;
     }
 
@@ -665,6 +730,12 @@ std::map<size_t, std::pair<bool, cv::Mat>> PedestrianTracker::StrongMatching(
 
         is_matching[track_id] = std::pair<bool, cv::Mat>(is_detection_matching, det_ids_to_descriptors[det_id]);
     }
+    // Now we print what is in is_matching and if the cv::Mat is empty
+    for (auto it = is_matching.begin(); it != is_matching.end(); ++it) {
+        std::cerr << "is_matching[" << it->first << "].first: " << it->second.first << std::endl;
+        std::cerr << "is_matching[" << it->first << "].second is empty: " << it->second.second.empty() << std::endl;
+    }
+    std::cerr << "is_matching size: " << is_matching.size() << std::endl;
     return is_matching;
 }
 
@@ -688,21 +759,60 @@ void PedestrianTracker::AddNewTracks(const cv::Mat& frame,
     }
 }
 
+// void PedestrianTracker::AddNewTrack(const cv::Mat& frame,
+//                                     const TrackedObject& detection,
+//                                     const cv::Mat& descriptor_fast,
+//                                     const cv::Mat& descriptor_strong) {
+//     auto detection_with_id = detection;
+//     detection_with_id.object_id = tracks_counter_;
+//     tracks_.emplace(std::pair<size_t, Track>(
+//         tracks_counter_,
+//         Track({detection_with_id}, frame(detection.rect).clone(), descriptor_fast.clone(), descriptor_strong.clone())));
+
+//    // After Track is created and emplaced, checking whether descriptor_strong is empty or not
+//     if (descriptor_strong.empty()) {
+//         std::cerr << "new track - descriptor_strong is EMPTY" << std::endl;
+//     } else {
+//         std::cerr << "new track - descriptor_strong is NOT EMPTY" << std::endl;
+//     }
+
+
+//     for (size_t id : active_track_ids_) {
+//         tracks_dists_.emplace(std::pair<size_t, size_t>(id, tracks_counter_), std::numeric_limits<float>::max());
+//     }
+
+//     active_track_ids_.insert(tracks_counter_);
+//     tracks_counter_++;
+// }
+
 void PedestrianTracker::AddNewTrack(const cv::Mat& frame,
                                     const TrackedObject& detection,
                                     const cv::Mat& descriptor_fast,
                                     const cv::Mat& descriptor_strong) {
+    // Create a copy of the detection and set the object_id
     auto detection_with_id = detection;
     detection_with_id.object_id = tracks_counter_;
-    tracks_.emplace(std::pair<size_t, Track>(
-        tracks_counter_,
-        Track({detection_with_id}, frame(detection.rect).clone(), descriptor_fast.clone(), descriptor_strong.clone())));
-
+    
+    // Create a new Track
+    Track newTrack({detection_with_id}, 
+                   frame(detection.rect).clone(), 
+                   descriptor_fast.clone(), 
+                   detection.strong_descriptor.clone());
+    
+    // Add the new Track to the tracks_ map
+    tracks_.emplace(std::pair<size_t, Track>(tracks_counter_, std::move(newTrack)));
+    
+    // Update the distances and active track IDs
     for (size_t id : active_track_ids_) {
         tracks_dists_.emplace(std::pair<size_t, size_t>(id, tracks_counter_), std::numeric_limits<float>::max());
     }
-
+    
     active_track_ids_.insert(tracks_counter_);
+
+    // We add the id to the detected track ids
+    detected_track_ids_.push_back(tracks_counter_);
+
+    // Increment the tracks counter
     tracks_counter_++;
 }
 
@@ -712,6 +822,9 @@ void PedestrianTracker::AppendToTrack(const cv::Mat& frame,
                                       const cv::Mat& descriptor_fast,
                                       const cv::Mat& descriptor_strong) {
     PT_CHECK(!IsTrackForgotten(track_id));
+
+    // We add the id to the detected track ids
+    detected_track_ids_.push_back(track_id);
 
     auto detection_with_id = detection;
     detection_with_id.object_id = track_id;

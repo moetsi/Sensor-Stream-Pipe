@@ -281,6 +281,7 @@ void OakdXlinkFullReader::SetOrReset() {
 
     // Initialize tracker
     tracker = std::make_unique<PedestrianTracker>(params);
+    // cv::Size graphSize = cv::Size(static_cast<int>(frame.cols / 4), 60);
 
     std::shared_ptr<IImageDescriptor> descriptor_fast =
     std::make_shared<ResizedImageDescriptor>(cv::Size(16, 32), cv::InterpolationFlags::INTER_LINEAR);
@@ -738,6 +739,8 @@ void OakdXlinkFullReader::NextFrame() {
                 failed = false;
             }
             current_frame_.clear();
+            current_frame_counter_++;
+            uint64_t capture_timestamp = CurrentTimeMs();
 
             if (queues["rgb"]->has()) {
                 auto rgb_message = queues["rgb"]->get();
@@ -815,6 +818,8 @@ void OakdXlinkFullReader::NextFrame() {
 
             // The seq_num will be used as the frame_idx for the TrackedObject
             auto seq_num = msgs.person_detection->getSequenceNum();
+            auto detection_timestamp = msgs.person_detection->getTimestamp();
+            uint64_t detection_epoch_time = std::chrono::duration_cast<std::chrono::milliseconds>(detection_timestamp.time_since_epoch()).count();
 
             // Now we prepare the person detections to meet tracker requirements of TrackedObject
             for (size_t i = 0; i < person_detections.size(); ++i) {
@@ -830,12 +835,18 @@ void OakdXlinkFullReader::NextFrame() {
                 // We set the confidence of the TrackedObject
                 obj.confidence = detection.confidence;
 
+                // Now we set the center coordinates of the TrackedObject
+                obj.center_x = detection.spatialCoordinates.x;
+                obj.center_y = detection.spatialCoordinates.y;
+                obj.center_z = detection.spatialCoordinates.z;
+
                 // Now we set the strong and fast descriptors
                 std::vector<float> reid_result = (recognitions)[i]->getFirstLayerFp16();
                 cv::Mat strong_desc(reid_result.size(), 1, CV_32F, reid_result.data());
                 obj.strong_descriptor = strong_desc;
                 std::shared_ptr<cv::Mat> fast_desc = fast_descs[i];
                 obj.fast_descriptor = *fast_desc;
+
                 // Now we set the rect of the TrackedObject
                 auto bbox = frame_norm(rgb_person_det_nn_in_x_res, rgb_person_det_nn_in_y_res, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
                 obj.rect = bbox;
@@ -845,8 +856,11 @@ void OakdXlinkFullReader::NextFrame() {
                     detections.emplace_back(obj);
                 }
             }
+            // std:cerr << "Detections size: " << detections.size() << std::endl << std::flush;
             
             tracker->Process(frame, detections, epoch_time);
+
+            auto recent_detections = tracker->GetMostRecentDetections();
 
             // Drawing colored "worms" (tracks).
             frame = tracker->DrawActiveTracks(frame);
@@ -870,24 +884,50 @@ void OakdXlinkFullReader::NextFrame() {
                                    cv::Scalar(0, 0, 255),
                                    2);
             }
-            presenter.drawGraphs(frame);
-            metrics.update(startTime, frame, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            // presenter.drawGraphs(frame);
+            // metrics.update(startTime, frame, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             videoWriter.write(frame);
-            if (should_show) {
+            if (true) {
+                cv::namedWindow("dbg", cv::WINDOW_NORMAL);
                 cv::imshow("dbg", frame);
-                char k = cv::waitKey(delay);
+                char k = cv::waitKey(1);
                 if (k == 27)
                     break;
-                presenter.handleKey(k);
+                // presenter.handleKey(k);
             }
 
-            if (should_save_det_log && (seq_num % 100 == 0)) {
+            if (true && (seq_num % 100 == 0)) {
                 DetectionLog log = tracker->GetDetectionLog(true);
-                SaveDetectionLogToTrajFile(detlog_out, log);
+                // SaveDetectionLogToTrajFile(detlog_out, log);
             }
             startTime = std::chrono::steady_clock::now();
-            
+
+            if (stream_bodies)
+            {
+                // Detections frame
+                std::shared_ptr<FrameStruct> detections_frame_struct = 
+                    std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+                
+                detections_frame_struct->sensor_id = 0;
+                detections_frame_struct->frame_type = FrameType::FrameTypeDetection;
+                detections_frame_struct-> frame_data_type = FrameDataType::FrameDataTypeTrackedObjects;
+                detections_frame_struct->frame_id = seq_num;
+                detections_frame_struct->timestamps.push_back(detection_epoch_time);
+                
+                // We make the frame the size of the number of detections and an int to hold the number of detections
+                int32_t num_detections = recent_detections.size();
+                detections_frame_struct->frame = std::vector<uchar>();
+                detections_frame_struct->frame.resize(sizeof(detection_struct_t) * num_detections + sizeof(int32_t));
+
+                // Now we memcopy into detections_frame_struct->frame first the number of detections then the detection_struct_ts
+                memcpy(detections_frame_struct->frame.data(), &num_detections, sizeof(int32_t));
+                memcpy(detections_frame_struct->frame.data() + sizeof(int32_t), recent_detections.data(), sizeof(detection_struct_t) * num_detections);
+                
+                // Now we push the frame into the current frame
+                current_frame_.push_back(detections_frame_struct);
+            }
+
 
         // //    THIS IS ALL COMMENTED OUT STARTS
         //       //Increment counter and grab time
@@ -1038,7 +1078,7 @@ std::vector<FrameType> OakdXlinkFullReader::GetType() {
     if (stream_depth)
         types.push_back(FrameType::FrameTypeDepth);
     if (stream_bodies)
-        types.push_back(FrameType::FrameTypeHumanPose); // 4;
+        types.push_back(FrameType::FrameTypeDetection); // 5
 
     return types;
 
