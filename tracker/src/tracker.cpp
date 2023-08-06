@@ -226,7 +226,7 @@ std::vector<moetsi::ssp::detection_struct_t> PedestrianTracker::GetMostRecentDet
             det.center_x = last_det.center_x;
             det.center_y = last_det.center_y;
             det.center_z = last_det.center_z;
-            det.detection_label = "person";
+            det.detection_label = 1;
             most_recent_detections.push_back(det);
         }
     }
