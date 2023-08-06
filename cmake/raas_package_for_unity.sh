@@ -24,6 +24,20 @@ esac
 find "${CMAKE_SOURCE_DIR}/3rdparty/" -type f \( -iname "*.so" -o -iname "*.a" -o -iname "*.dylib" -o -iname "*.dll" \) \
   -exec cp '{}' "$RAAS_UNITY_PLUGIN_DIR" ';'
 
+# Determine the lib directory based on the platform
+case "$(uname -s)" in
+    CYGWIN*|MINGW*|MSYS*|*_NT*) LIB_DIR="${CMAKE_BINARY_DIR}/lib/Release";;
+    *) LIB_DIR="${CMAKE_BINARY_DIR}/lib";;
+esac
+
 # Find and copy all libraries from the 'build_release/lib' directory
-find "${CMAKE_BINARY_DIR}/lib" -type f -iname "*.${SHARED_LIB_EXT}" \
-  -exec cp '{}' "$RAAS_UNITY_PLUGIN_DIR" ';'
+find "$LIB_DIR" -type f -iname "*.${SHARED_LIB_EXT}" -exec cp '{}' "$RAAS_UNITY_PLUGIN_DIR" ';'
+
+# Determine the bin directory based on the platform
+case "$(uname -s)" in
+    CYGWIN*|MINGW*|MSYS*|*_NT*) BIN_DIR="${CMAKE_BINARY_DIR}/bin/Release";;
+    *) BIN_DIR="${CMAKE_BINARY_DIR}/bin";;
+esac
+
+# Find and copy 'raas_plugin' from the 'bin' directory
+find "$BIN_DIR" -type f -iname "raas_plugin*" -exec cp '{}' "$RAAS_UNITY_PLUGIN_DIR" ';'

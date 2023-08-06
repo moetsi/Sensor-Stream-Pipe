@@ -53,15 +53,23 @@ elseif (APPLE)
 elseif (WIN32)
   if (LOCAL_DEP_BUILD_WINDOWS)
   message(STATUS "please make sure you have gone to 3rdpary and run build_win_dep.sh")
+  if (WIN32)
+    message("Windows use this and download 2022.3: https://docs.openvino.ai/2023.0/openvino_docs_install_guides_installing_openvino_from_archive_windows.html")
+    message("You will need to run C:/Program Files (x86)/Intel/openvino_2022/setupvars.bat")
+    message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
+  endif ()
   FetchContent_Declare(
     ssp_dep
     SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/tmp/local.ssp
   )
   else ()
     if (XLINK_ENABLED)
-      message("Remember to compile with OpenVINO you will need to run 'C:/Program Files (x86)/Intel/openvino_2021/bin/setupvars.bat' (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
-      message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
-      FetchContent_Declare(
+      if (WIN32)
+        message("Windows use this and download 2022.3: https://docs.openvino.ai/2023.0/openvino_docs_install_guides_installing_openvino_from_archive_windows.html")
+        message("You will need to run C:/Program Files (x86)/Intel/openvino_2022/setupvars.bat")
+        message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
+      endif ()
+        FetchContent_Declare(
         ssp_dep
         # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161452_ssp_windep_xlink_enabled.tar.gz
         # URL_HASH MD5=fe027d0a694c2c0447d8f29ea2812362
@@ -303,13 +311,18 @@ if (XLINK_ENABLED)
     if (depthai_FOUND)
         message(STATUS "Setting SSP_WITH_DEPTHAI_SUPPORT to ON")
         # This is the new OpenVINO API approach that we have not converted to
+
+        # We have to define where to look for the OPENVINO package on windows (C:/Intel/openvino_NAMEOFFOLDER)
+        if (WIN32)
+          set(OpenVINO_DIR "C:/Program Files (x86)/Intel/openvino_2022/runtime/cmake")
+        endif()
         find_package(OpenVINO REQUIRED)
         message(STATUS "Found OpenVINO: ${OpenVINO_DIR}")
         # This is the old OpenVINO API approach
-        find_package(ngraph REQUIRED)
-        find_package(InferenceEngine CONFIG REQUIRED)
-        include_directories(${InferenceEngine_INCLUDE_DIRS})
-        message(STATUS "Found InferenceEngine: ${InferenceEngine_INCLUDE_DIRS}")
+        # find_package(ngraph REQUIRED)
+        # find_package(InferenceEngine CONFIG REQUIRED)
+        # include_directories(${InferenceEngine_INCLUDE_DIRS})
+        # message(STATUS "Found InferenceEngine: ${InferenceEngine_INCLUDE_DIRS}")
         add_definitions(-DSSP_WITH_DEPTHAI_SUPPORT=1)
         include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include)
         include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include/depthai-shared/3rdparty)
@@ -396,8 +409,27 @@ endif ()
 
 if (WIN32)
   if (XLINK_ENABLED)
-    list(APPEND SOURCE_FILES readers/oakd_xlink_full_reader.cc readers/slog.hpp readers/slog.cpp readers/args_helper.hpp readers/args_helper.cpp readers/oakd_xlink_full_reader.h readers/oakd_xlink_reader.cc readers/oakd_xlink_reader.h readers/oakd_device_reader.cc readers/oakd_device_reader.h  readers/human_poses.cpp readers/human_poses.h)
-    add_compile_options("/Zc:preprocessor")
+    list(APPEND SOURCE_FILES
+      readers/oakd_xlink_full_reader.cc
+      readers/oakd_xlink_full_reader.h
+      readers/human_poses.cpp
+      readers/human_poses.h
+      
+    )
+    file(GLOB_RECURSE TRACKER_FILES tracker/*.cc tracker/*.cpp tracker/*.h tracker/*.hpp)
+    list(APPEND SOURCE_FILES ${TRACKER_FILES})
+    # Search for tracker header files in these folders
+    include_directories(tracker/include)
+    include_directories(tracker/utils/include)
+    # We have to use exact includes in windows
+    include_directories("C:/Program Files (x86)/Intel/openvino_2022/runtime/include/ie")
+    include_directories("C:/Program Files (x86)/Intel/openvino_2022/runtime/include")
+    # We need to copy the dll in windows
+    file(GLOB OPENVINO_DLLS
+         "C:/Program Files (x86)/Intel/openvino_2022/runtime/bin/intel64/Release/*.dll")
+    file(COPY ${OPENVINO_DLLS}
+         DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
+    add_compile_options("/Zc:preprocessor") 
   endif ()
 endif ()
 # Done with adjusting for XLINK_ENABLED

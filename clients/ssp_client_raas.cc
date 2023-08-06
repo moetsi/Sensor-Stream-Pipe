@@ -15,7 +15,6 @@
 #include "../readers/network_reader.h"
 #include "../utils/video_utils.h"
 #include "../utils/image_converter.h"
-#include <backward.hpp> // Add this include for backward-cpp
 #include "../structs/body_struct.h"
 #include "../structs/detection_struct.h"
 
@@ -54,34 +53,6 @@ std::atomic_bool kill_thread(false);
 // State variables to store message data and handle threading
 std::unordered_map<int, std::tuple<std::chrono::system_clock::time_point, std::shared_ptr<SensorData[]>, int>> device_message_dictionary;
 std::mutex device_message_dictionary_mutex;
-
-void log_exception(const std::exception &e, const std::string &location) {
-    std::ostringstream log_message;
-
-    // Log the date and time
-    auto now = std::chrono::system_clock::now();
-    std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
-    log_message << "[" << std::put_time(std::localtime(&now_time_t), "%Y-%m-%d %H:%M:%S") << "] ";
-
-    // Log the error type and message
-    log_message << "Exception thrown at " << location << ": ";
-    log_message << typeid(e).name() << " - " << e.what() << "\n";
-
-    // Log the stack trace
-    backward::StackTrace st;
-    st.load_here(32);
-    backward::Printer p;
-    p.snippet = true;
-    p.object = true;
-    p.address = true;
-    p.print(st, log_message);
-
-    // Log the message to spdlog and the error_log_file
-    spdlog::error(log_message.str());
-    if (error_log_file.is_open()) {
-        error_log_file << log_message.str() << std::endl;
-    }
-}
 
 void start_ssp_client_raas() {
   try {
@@ -140,7 +111,8 @@ void start_ssp_client_raas() {
     }
 
   } catch (std::exception &e) {
-    log_exception(e, "start_ssp_client_raas");
+    std::cerr << "Exception caught in start_ssp_client_raas: "
+              << typeid(e).name() << " - " << e.what() << std::endl;
   }
 }
 

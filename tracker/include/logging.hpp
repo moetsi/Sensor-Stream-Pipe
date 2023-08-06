@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <details/ie_exception.hpp>
+#include "details/ie_exception.hpp"
 
 #define PT_CHECK(cond) CV_Assert(cond);
 
