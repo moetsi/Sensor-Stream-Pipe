@@ -20,7 +20,8 @@ struct detection_struct_t
   float center_x;
   float center_y;
   float center_z;
-  std::string detection_label;
+  int detection_label;
+    // 1 = spatial person detection
 };
 
 

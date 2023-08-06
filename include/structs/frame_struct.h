@@ -309,6 +309,13 @@ struct FrameStruct {
    */
   unsigned int frame_id;
 
+
+  /**
+   * Tiemstamp on the device when the frame of data was taken (would be of rgb capture not of spatial detectin time)
+   * Currently impelementing to work with Depthai device
+   */
+  uint64_t frame_device_timestamp;
+
   /** 
    * Use for logging and timing to understand processing speeds.
    * Times are in ns

@@ -913,6 +913,7 @@ void OakdXlinkFullReader::NextFrame() {
                 detections_frame_struct->frame_type = FrameType::FrameTypeDetection;
                 detections_frame_struct-> frame_data_type = FrameDataType::FrameDataTypeTrackedObjects;
                 detections_frame_struct->frame_id = seq_num;
+                detections_frame_struct->frame_device_timestamp = epoch_time;
                 detections_frame_struct->timestamps.push_back(detection_epoch_time);
                 
                 // We make the frame the size of the number of detections and an int to hold the number of detections
