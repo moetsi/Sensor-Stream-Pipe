@@ -18,19 +18,67 @@ function install_yasm {
     yasm --version
 }
 
+# function build_ffmpeg {
+#     echo "Building ffmpeg"
+
+#     export FFMPEG_NAME=ffmpeg-n4.3.2-162-g4bbcaf7559-win64-lgpl-shared-4.3
+#     curl -L -O \
+#       https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-03-31-12-39/${FFMPEG_NAME}.zip
+#     unzip -d ${LOCAL_DIR} ${FFMPEG_NAME}.zip
+
+#     mv ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
+#     return
+
+#     git clone --depth 1 --branch release/4.3 \
+#          https://git.ffmpeg.org/ffmpeg.git ffmpeg
+#     pushd ffmpeg
+
+#     ./configure --prefix=${LOCAL_DIR}/ffmpeg \
+#          --target-os=win64 --arch=x86_64 --toolchain=msvc \
+#          --disable-gpl \
+#          --enable-runtime-cpudetect \
+#          --enable-yasm \
+#          --enable-asm \
+#          --enable-w32threads \
+#          --disable-programs \
+#          --enable-cross-compile \
+#         #  --disable-ffserver \
+#         #  --disable-ffmpeg \
+#         #  --disable-ffplay \
+#         #  --disable-ffprobe
+#     make -j12
+#     make install
+#     popd
+# }
+
 function build_ffmpeg {
     echo "Building ffmpeg"
-
-    export FFMPEG_NAME=ffmpeg-n4.3.2-162-g4bbcaf7559-win64-lgpl-shared-4.3
-    curl -L -O \
-      https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-03-31-12-39/${FFMPEG_NAME}.zip
-    unzip -d ${LOCAL_DIR} ${FFMPEG_NAME}.zip
-
-    mv ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
+    #https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared.zip
+    #export FFMPEG_NAME=ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared
+    #curl -L -O \
+    #  https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/${FFMPEG_NAME}.zip
+    export FFMPEG_NAME=ffmpeg-n4.4-188-g404c9331dd-win64-lgpl-shared-4.4
+    cp ../$FFMPEG_NAME.zip .
+    pwd
+    FFMPEG_ZIP=$PWD/$FFMPEG_NAME.zip
+    pushd ${LOCAL_DIR}
+    pwd
+    rm -Rvf ffmpeg-n4.4-188-g404c9331dd-win64-lgpl-shared-4.4/
+    jar xvf $FFMPEG_ZIP
+    pwd
+    ls 
+    popd
+    unzip -uod ${LOCAL_DIR} ${FFMPEG_NAME}.zip 
+    #unzip dll boom with cygwin libraries versions
+    # /d/a/RaaSCL/RaaSCL/3rdparty/tmp/Sensor-Stream-Pipe/3rdparty
+    # ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared/
+    # => /d/a/RaaSCL/RaaSCL/3rdparty/tmp/Sensor-Stream-Pipe/3rdparty/tmp/local.ssp/ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared    
+    mv -v ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
     return
 
+    # a path of pain below ~
     git clone --depth 1 --branch release/4.3 \
-         https://git.ffmpeg.org/ffmpeg.git ffmpeg
+         https://git.ffmpeg.org/ffmpeg.git ffmpeg 
     pushd ffmpeg
 
     ./configure --prefix=${LOCAL_DIR}/ffmpeg \
@@ -41,17 +89,17 @@ function build_ffmpeg {
          --enable-asm \
          --enable-w32threads \
          --disable-programs \
-         --enable-cross-compile \
-        #  --disable-ffserver \
-        #  --disable-ffmpeg \
-        #  --disable-ffplay \
-        #  --disable-ffprobe
+         --disable-ffmpeg \
+         --disable-ffserver \
+         --disable-ffplay \
+         --disable-ffprobe
     make -j12
     make install
     popd
 }
 
 # Build minimal OpenCV : core imgproc
+# It seemed like openvino.dll needed tbb.dll so using opencv to build and hopefully can be used by openvino.dll
 function build_opencv {
     echo "Building opencv"
     curl -L -O \
@@ -90,9 +138,9 @@ function build_opencv {
         -DBUILD_opencv_stitching:BOOL=OFF \
         -DBUILD_opencv_superres:BOOL=OFF \
         -DBUILD_opencv_ts:BOOL=OFF \
-        -DBUILD_opencv_video:BOOL=OFF \
-        -DBUILD_opencv_videoio:BOOL=OFF \
-        -DBUILD_opencv_videostab:BOOL=OFF \
+        -DBUILD_opencv_video:BOOL=ON \
+        -DBUILD_opencv_videoio:BOOL=ON \
+        -DBUILD_opencv_videostab:BOOL=ON \
         -DBUILD_opencv_world:BOOL=OFF \
         -DBUILD_JAVA=OFF \
         -DBUILD_PACKAGE=OFF \
@@ -122,7 +170,7 @@ function build_depthai {
     #    https://github.com/luxonis/depthai-core.git
     ###git clone --depth 1 \
     ###    https://github.com/luxonis/depthai-core.git 
-    git clone --depth 1 --branch master \
+    git clone --depth 1 --branch main \
         https://github.com/luxonis/depthai-core.git               
     pushd depthai-core
     git submodule update --init --recursive
@@ -213,6 +261,48 @@ function build_yaml_cpp {
     popd
 }
 
+# # https://github.com/zeromq/libzmq
+# function build_libzmq {
+#     echo "Building libzmq"
+#     git clone --depth 1 --branch v4.3.4 \
+#         https://github.com/zeromq/libzmq.git
+#     #git clone https://github.com/zeromq/libzmq.git        
+#     pushd libzmq
+#     #git checkout f13f891c911b4e007efd0bf5bd1412874aebd24a 
+#     mkdir build && cd build
+#     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
+#         -G "Visual Studio 16 2019" -A x64 \
+#         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
+#         -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
+#         -DBUILD_TESTS=OFF -DWITH_TLS=ON -DZMQ_HAVE_IPC=OFF \
+#         -DWITH_LIBSODIUM=ON \
+#         -DWITH_LIBSODIUM_STATIC=ON \
+#         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+#         ..
+#     cmake --build . --config Release --target install -j16
+#     [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install -j16
+#     cd ..
+#     popd
+# }
+
+# # https://github.com/zeromq/cppzmq/
+# function build_cppzmq {
+#     echo "Building cppzmq"
+#     git clone --depth 1 --branch v4.7.1 \
+#         https://github.com/zeromq/cppzmq.git
+#     pushd cppzmq
+#     mkdir build && cd build
+#     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
+#         -G "Visual Studio 16 2019" -A x64 \
+#         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cppzmq \
+#         -DZeroMQ_DIR=${LOCAL_DIR}/libzmq/CMake \
+#         -DCPPZMQ_BUILD_TESTS=OFF \
+#         ..
+#     cmake --build . --config Release --target install -j16
+#     cd ..
+#     popd
+# }
+
 # https://github.com/zeromq/libzmq
 function build_libzmq {
     echo "Building libzmq"
@@ -223,16 +313,14 @@ function build_libzmq {
     #git checkout f13f891c911b4e007efd0bf5bd1412874aebd24a 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -A x64 \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
-        -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
-        -DBUILD_TESTS=OFF -DWITH_TLS=ON -DZMQ_HAVE_IPC=OFF \
-        -DWITH_LIBSODIUM=ON \
-        -DWITH_LIBSODIUM_STATIC=ON \
-        -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-        ..
-    cmake --build . --config Release --target install -j16
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install -j16
+        -DBUILD_SHARED=OFF -DBUILD_STATIC=ON -DZMQ_HAVE_IPC=OFF \
+        -DBUILD_TESTS=OFF \
+        -DWITH_LIBSODIUM=OFF \
+        .. || exit -1
+    cmake --build . --config Release --target install 
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install 
     cd ..
     popd
 }
@@ -241,16 +329,16 @@ function build_libzmq {
 function build_cppzmq {
     echo "Building cppzmq"
     git clone --depth 1 --branch v4.7.1 \
-        https://github.com/zeromq/cppzmq.git
+        https://github.com/zeromq/cppzmq.git || exit -1
     pushd cppzmq
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 16 2019" -A x64 \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cppzmq \
         -DZeroMQ_DIR=${LOCAL_DIR}/libzmq/CMake \
         -DCPPZMQ_BUILD_TESTS=OFF \
-        ..
-    cmake --build . --config Release --target install -j16
+        .. || exit -1
+    cmake --build . --config Release --target install 
     cd ..
     popd
 }
@@ -278,6 +366,24 @@ function build_k4a {
     popd
 }
 
+# OpenVINO is dependent on tbb.dll
+# Unfortunately the below builds tbb12.dll which does not work
+function build_tbb {
+    echo "Building TBB"
+    git clone --depth 1 \
+        https://github.com/oneapi-src/oneTBB.git
+    pushd oneTBB
+    mkdir build && cd build
+    cmake -G "Visual Studio 16 2019" -A x64  \
+        -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/tbb \
+        -DTBB_TEST=OFF \
+        ..
+    cmake --build . --config Release
+    cmake --install .
+    cd ..
+    popd
+}
+
 export SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd | sed -e 's,^/c/,c:/,')"
 
 echo "Cleaning tmp directory"
@@ -297,16 +403,17 @@ mkdir -p ${LOCAL_DIR}
 
 [ ${BUILD_DEBUG} ] && echo "Build Release+Debug version" || echo "Build only Release version"
 
-#install_yasm
-build_opencv
-build_depthai
-build_ffmpeg
-build_cereal
-build_spdlog
-build_zdepth
-build_yaml_cpp
-build_libzmq
-build_cppzmq
+build_tbb || exit -1
+install_yasm || exit -1
+build_ffmpeg || exit -1
+build_opencv || exit -1
+build_depthai || exit -1
+build_cereal || exit -1
+build_spdlog || exit -1
+build_zdepth || exit -1
+build_yaml_cpp || exit -1
+build_libzmq || exit -1
+build_cppzmq || exit -1
 # build_k4a
 
 # version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
