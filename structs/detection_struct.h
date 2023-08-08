@@ -16,6 +16,7 @@ namespace moetsi::ssp {
  */
 struct detection_struct_t
 {
+  uint64_t device_time;
   size_t track_id;
   float center_x;
   float center_y;

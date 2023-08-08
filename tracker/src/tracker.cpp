@@ -222,6 +222,7 @@ std::vector<moetsi::ssp::detection_struct_t> PedestrianTracker::GetMostRecentDet
         if (tracks_.find(track_id) != tracks_.end()) {
             auto last_det = tracks_.at(track_id).objects.back();
             moetsi::ssp::detection_struct_t det;
+            det.device_time = prev_timestamp_;
             det.track_id = track_id;
             det.center_x = last_det.center_x;
             det.center_y = last_det.center_y;
