@@ -915,6 +915,11 @@ void OakdXlinkFullReader::NextFrame() {
                 detections_frame_struct->frame_id = seq_num;
                 detections_frame_struct->frame_device_timestamp = epoch_time;
                 detections_frame_struct->timestamps.push_back(detection_epoch_time);
+
+                // Now we add the device_id to all the detection structs in recent_detections from detections_frame_struct.device_id
+                for (auto& detection : recent_detections) {
+                    detection.device_id = detections_frame_struct->sensor_id;
+                }
                 
                 // We make the frame the size of the number of detections and an int to hold the number of detections
                 int32_t num_detections = recent_detections.size();
@@ -978,13 +983,7 @@ void OakdXlinkFullReader::NextFrame() {
         //         cv::rectangle(resizedFrame, cv::Point(bbox.x, bbox.y), cv::Point(bbox.x + bbox.width, bbox.y + bbox.height), cv::Scalar(10, 245, 10), 2);
         //         int y = (bbox.y + bbox.y + bbox.height) / 2;
         //         auto depth_x = std::to_string(detection.spatialCoordinates.x/1000.0f);
-        //         auto depth_y = std::to_string(detection.spatialCoordinates.y/1000.0f);
-        //         auto depth_z = std::to_string(detection.spatialCoordinates.z/1000.0f);
-        //         std::string depth_text = "Depth: " + depth_x + ", " + depth_y + ", " + depth_z;
-        //         std::string person_text = "Person reid " + std::to_string(reid_id);
-        //         cv::putText(resizedFrame, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
-        //         cv::putText(resizedFrame, person_text, cv::Point(bbox.x, y), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
-        //         cv::putText(resizedFrame, depth_text, cv::Point(bbox.x, y + 30), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
+        //         auto depth_y = std::to_string(detection.spatialCoordinates.y/1000.0fdetections_frame_struct cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
         //         cv::putText(resizedFrame, depth_text, cv::Point(bbox.x, y + 30), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
         //     }
 
