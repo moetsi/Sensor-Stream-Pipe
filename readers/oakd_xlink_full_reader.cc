@@ -918,7 +918,7 @@ void OakdXlinkFullReader::NextFrame() {
 
                 // Now we add the device_id to all the detection structs in recent_detections from detections_frame_struct.device_id
                 for (auto& detection : recent_detections) {
-                    detection.device_id = detections_frame_struct->sensor_id;
+                    detection.device_id = detections_frame_struct->device_id;
                 }
                 
                 // We make the frame the size of the number of detections and an int to hold the number of detections
