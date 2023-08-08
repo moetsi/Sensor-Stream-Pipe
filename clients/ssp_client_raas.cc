@@ -56,6 +56,7 @@ void start_ssp_client_raas(const std::string& ip_address) {
         if (f.frame_type == FrameType::FrameTypeDetection)
         {
           int device_id = f.device_id;
+          int64_t timestamp = f.frame_device_timestamp
 
           int32_t bodyCount;
           memcpy(&bodyCount, &f.frame[0], sizeof(int32_t));
