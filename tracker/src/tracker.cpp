@@ -86,14 +86,14 @@ std::vector<cv::Scalar> GenRandomColors(int colors_num) {
 }  // anonymous namespace
 
 TrackerParams::TrackerParams()
-    : min_track_duration(1000),
+    : min_track_duration(0),
       forget_delay(150),
       aff_thr_fast(0.8f),
       aff_thr_strong(0.75f),
       shape_affinity_w(0.5f),
       motion_affinity_w(0.2f),
       time_affinity_w(0.0f),
-      min_det_conf(0.65f),
+      min_det_conf(0.62f),
       bbox_aspect_ratios_range(0.666f, 5.0f),
       bbox_heights_range(40, 1000),
       predict(25),
@@ -103,7 +103,7 @@ TrackerParams::TrackerParams()
       max_num_objects_in_track(300) {}
 
 void ValidateParams(const TrackerParams& p) {
-    PT_CHECK_GE(p.min_track_duration, static_cast<size_t>(500));
+    PT_CHECK_GE(p.min_track_duration, static_cast<size_t>(0));
     PT_CHECK_LE(p.min_track_duration, static_cast<size_t>(10000));
 
     PT_CHECK_LE(p.forget_delay, static_cast<size_t>(10000));

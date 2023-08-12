@@ -45,7 +45,7 @@ void NetworkReader::init() {
 void NetworkReader::init(std::string hostname) {
 
   context_ = std::unique_ptr<zmq::context_t>(new zmq::context_t(1));
-  socket_ = std::unique_ptr<zmq::socket_t>(new zmq::socket_t(*context_, ZMQ_PULL));
+  socket_ = std::unique_ptr<zmq::socket_t>(new zmq::socket_t(*context_, ZMQ_SUB));
   // Do not accumulate packets if no client is connected
   socket_->set(zmq::sockopt::immediate, true);
   // Do not keep packets if there is network congestion
@@ -56,6 +56,10 @@ void NetworkReader::init(std::string hostname) {
       zmq::event_flags::pollin);
 
 #endif
+
+
+  // Subscribe to all messages
+  socket_->set(zmq::sockopt::subscribe, "");
 
   //context = zmq_ctx_new();
   //responder = zmq_socket(context, ZMQ_PULL);
