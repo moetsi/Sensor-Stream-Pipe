@@ -144,7 +144,7 @@ extern "C" {
   }
 
   DLL_EXPORT int return_four() {
-    return 11;
+    return 14;
 }
 
   DLL_EXPORT int raasclUpdatesForDevice(int64_t device_id)
