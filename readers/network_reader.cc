@@ -58,9 +58,6 @@ void NetworkReader::init(std::string hostname) {
 #endif
 
 
-  // Subscribe to all messages
-  socket_->set(zmq::sockopt::subscribe, "");
-
   //context = zmq_ctx_new();
   //responder = zmq_socket(context, ZMQ_PULL);
   //auto bind_str = "tcp://*:" + std::to_string(port_);               
@@ -69,6 +66,8 @@ void NetworkReader::init(std::string hostname) {
   hostname_ = hostname;
 
   socket_->connect("tcp://" + hostname_ + ":" + std::to_string(port_));
+  // Subscribe to all messages
+  socket_->set(zmq::sockopt::subscribe, "");
   
 }
 

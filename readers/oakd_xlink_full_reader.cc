@@ -862,54 +862,58 @@ void OakdXlinkFullReader::NextFrame() {
 
             auto recent_detections = tracker->GetMostRecentDetections();
 
-            // Drawing colored "worms" (tracks).
-            frame = tracker->DrawActiveTracks(frame);
+            if (true)
+            {
+                // Drawing colored "worms" (tracks).
+                frame = tracker->DrawActiveTracks(frame);
 
-            // Drawing all detected objects on a frame by BLUE COLOR
-            for (const auto& detection : detections) {
-                cv::rectangle(frame, detection.rect, cv::Scalar(255, 0, 0), 3);
-                // Now we put the confidence label on the bounding box with same information as below
-                std::string text =
-                    std::to_string(detection.object_id) + " conf: " + std::to_string(detection.confidence);
-                putHighlightedText(frame,
-                                   text,
-                                   detection.rect.tl() - cv::Point{10, 10},
-                                   cv::FONT_HERSHEY_COMPLEX,
-                                   0.65,
-                                   cv::Scalar(255, 0, 0),
-                                   2);
-            }
+                // Drawing all detected objects on a frame by BLUE COLOR
+                for (const auto& detection : detections) {
+                    cv::rectangle(frame, detection.rect, cv::Scalar(255, 0, 0), 3);
+                    // Now we put the confidence label on the bounding box with same information as below
+                    std::string text =
+                        std::to_string(detection.object_id) + " conf: " + std::to_string(detection.confidence);
+                    putHighlightedText(frame,
+                                    text,
+                                    detection.rect.tl() - cv::Point{10, 10},
+                                    cv::FONT_HERSHEY_COMPLEX,
+                                    0.65,
+                                    cv::Scalar(255, 0, 0),
+                                    2);
+                }
 
-            // Drawing tracked detections only by RED color and print ID and detection
-            // confidence level.
-            for (const auto& detection : tracker->TrackedDetections()) {
-                cv::rectangle(frame, detection.rect, cv::Scalar(0, 0, 255), 3);
-                // std::string text =
-                //     std::to_string(detection.object_id) + " conf: " + std::to_string(detection.confidence);
-                // putHighlightedText(frame,
-                //                    text,
-                //                    detection.rect.tl() - cv::Point{10, 10},
-                //                    cv::FONT_HERSHEY_COMPLEX,
-                //                    0.65,
-                //                    cv::Scalar(0, 0, 255),
-                //                    2);
-            }
-            // presenter.drawGraphs(frame);
-            // metrics.update(startTime, frame, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                // Drawing tracked detections only by RED color and print ID and detection
+                // confidence level.
+                for (const auto& detection : tracker->TrackedDetections()) {
+                    cv::rectangle(frame, detection.rect, cv::Scalar(0, 0, 255), 3);
+                    // std::string text =
+                    //     std::to_string(detection.object_id) + " conf: " + std::to_string(detection.confidence);
+                    // putHighlightedText(frame,
+                    //                    text,
+                    //                    detection.rect.tl() - cv::Point{10, 10},
+                    //                    cv::FONT_HERSHEY_COMPLEX,
+                    //                    0.65,
+                    //                    cv::Scalar(0, 0, 255),
+                    //                    2);
+                }
+                // presenter.drawGraphs(frame);
+                // metrics.update(startTime, frame, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
-            videoWriter.write(frame);
-            if (true) {
-                cv::namedWindow("dbg", cv::WINDOW_NORMAL);
-                cv::imshow("dbg", frame);
-                char k = cv::waitKey(1);
-                if (k == 27)
-                    break;
-                // presenter.handleKey(k);
-            }
+                videoWriter.write(frame);
+                if (true) {
+                    cv::namedWindow("dbg", cv::WINDOW_NORMAL);
+                    cv::imshow("dbg", frame);
+                    char k = cv::waitKey(1);
+                    if (k == 27)
+                        break;
+                    // presenter.handleKey(k);
+                }
 
-            if (true && (seq_num % 100 == 0)) {
-                DetectionLog log = tracker->GetDetectionLog(true);
-                // SaveDetectionLogToTrajFile(detlog_out, log);
+                if (true && (seq_num % 100 == 0)) {
+                    DetectionLog log = tracker->GetDetectionLog(true);
+                    // SaveDetectionLogToTrajFile(detlog_out, log);
+                }
+
             }
             startTime = std::chrono::steady_clock::now();
 
