@@ -44,7 +44,7 @@ std::mutex staging_dictionary_mutex;
 void start_ssp_client_raas(const std::string& ip_address) {
   try {
     // Connect to port 9002 on local host which is the RaaS consumer port
-    NetworkReader reader(10200);
+    NetworkReader reader(9002);
     reader.init(ip_address);  // Initialize the reader with the provided IP address
 
     while (!kill_thread && reader.HasNextFrame()) {
