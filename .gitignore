@@ -43,3 +43,5 @@ build_release2
 build_release3
 build_asan
 build_debug
+
+3rdparty/*/

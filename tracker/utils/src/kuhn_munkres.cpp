@@ -68,9 +68,6 @@ std::vector<size_t> KuhnMunkres::Solve(const cv::Mat& dissimilarity_matrix) {
             // to an unmarked cell. This situation is not rare and can frequently occur in dynamic environments where new objects enter the scene,
             // or existing objects leave the scene, creating discrepancies between the number of tracks and detections. The algorithm's ability
             // to adapt and find new assignments as the scene evolves is crucial for maintaining accurate tracking over time.
-            else {
-                std::cerr << "!!!!!!Unmarked cell found in kuhn_munkres algo!" << std::endl;
-            }
         }
     }
     // Return the vector of assignments. If there is no assignment for a particular row, its value remains -1.

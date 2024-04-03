@@ -1,3 +1,4 @@
 tmp/
 *.tar.gz
+*.gz
 *.zip

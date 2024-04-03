@@ -292,6 +292,11 @@ struct FrameStruct {
    */
   std::string scene_desc;
 
+    /**
+   * Optional: client_key
+   */
+  std::string client_key;
+
   /**
    * Sensor id
    */
