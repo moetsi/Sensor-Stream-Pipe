@@ -55,7 +55,7 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
             seq = std::static_pointer_cast<dai::SpatialImgDetections>(msg)->getSequenceNum();
         } else if (name == "face_detection") {
             seq = std::static_pointer_cast<dai::NNData>(msg)->getSequenceNum();
-        } else if (name == "recognition") {
+        } else if (name == "recognition") { 
             seq = std::static_pointer_cast<dai::NNData>(msg)->getSequenceNum();
         } else if (name == "fast_desc") {
             seq = std::static_pointer_cast<dai::ImgFrame>(msg)->getSequenceNum();
@@ -831,6 +831,7 @@ void OakdXlinkFullReader::NextFrame() {
 
                 // We set the frame_idx to the seq number of the person detection
                 obj.frame_idx = seq_num;
+                obj.timestamp = detection_epoch_time;
 
                 // We set the confidence of the TrackedObject
                 obj.confidence = detection.confidence;
@@ -856,11 +857,14 @@ void OakdXlinkFullReader::NextFrame() {
                     detections.emplace_back(obj);
                 }
             }
-            // std:cerr << "Detections size: " << detections.size() << std::endl << std::flush;
+            std:cerr << "RAW detections size: " << detections.size() << std::endl << std::flush;
             
             tracker->Process(frame, detections, epoch_time);
 
             auto recent_detections = tracker->GetMostRecentDetections();
+
+            // We print the number of detections
+            std::cerr << "PROCESSED detection size: " << recent_detections.size() << std::endl << std::flush;
 
             if (true)
             {

@@ -386,13 +386,10 @@ private:
                                     const std::vector<cv::Mat>& fast_descriptors,
                                     cv::Mat* dissimilarity_matrix);
 
-    std::vector<float> ComputeDistances(const cv::Mat& frame,
-                                        const TrackedObjects& detections,
-                                        const std::vector<std::pair<size_t, size_t>>& track_and_det_ids,
-                                        std::map<size_t, cv::Mat>* det_id_to_descriptor);
+    std::vector<float> ComputeDistances(const TrackedObjects& detections,
+                                        const std::vector<std::pair<size_t, size_t>>& track_and_det_ids);
 
     std::map<size_t, std::pair<bool, cv::Mat>> StrongMatching(
-        const cv::Mat& frame,
         const TrackedObjects& detections,
         const std::vector<std::pair<size_t, size_t>>& track_and_det_ids);
 

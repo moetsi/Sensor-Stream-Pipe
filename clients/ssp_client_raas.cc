@@ -144,42 +144,59 @@ extern "C" {
   }
 
   DLL_EXPORT int return_four() {
-    return 14;
+    return 15;
 }
 
+  // This function updates the device information in the staging area and returns the number of updates.
   DLL_EXPORT int raasclUpdatesForDevice(int64_t device_id)
   {
+    // Lock the mutex to ensure thread-safe access to the device_message_dictionary.
     std::unique_lock<std::mutex> lock(device_message_dictionary_mutex);
+    // Attempt to find the device by its ID in the device_message_dictionary.
     auto it = device_message_dictionary.find(device_id);
+    // If the device is not found, unlock the mutex and return 0 to indicate no updates.
     if (it == device_message_dictionary.end())
     {
       lock.unlock();
       return 0;
     }
 
-    // Move the data to the staging area
+    // If the device is found, proceed to move its data to the staging area.
+    // Lock the mutex for the staging_dictionary to ensure thread-safe access.
     std::unique_lock<std::mutex> staging_lock(staging_dictionary_mutex);
+    // Copy the device's data from the device_message_dictionary to the staging_dictionary.
     staging_dictionary[device_id] = it->second;
+    // Unlock the staging_dictionary mutex as the data has been successfully copied.
     staging_lock.unlock();
 
-    // Remove the entry from the original dictionary
+    // Now that the data is safely copied to the staging area, remove the original entry from the device_message_dictionary.
     device_message_dictionary.erase(it);
+    // Unlock the device_message_dictionary mutex as we're done modifying it.
     lock.unlock();
 
-    return it->second.second; // Return the number of detections
+    // Return the number of detections for this device, which is stored in the second element of the pair.
+    return it->second.second;
   }
 
+  // This function retrieves the last update for a specific device and body number and stores it in the provided detection structure.
+  // TODO: This could be updated to return all the updates at once in 1 struct but have not made that update
   DLL_EXPORT void raasclGetLastUpdateOut(int64_t device_id, int bodyNumber, detection_struct_t& detection)
   {
+    // Lock the mutex for the staging_dictionary to ensure thread-safe access.
     std::unique_lock<std::mutex> staging_lock(staging_dictionary_mutex);
+    // Attempt to find the device by its ID in the staging_dictionary.
     auto it = staging_dictionary.find(device_id);
+    // Check if the device is not found or if the requested bodyNumber is out of range.
     if (it == staging_dictionary.end() || bodyNumber >= it->second.second)
     {
+      // If either condition is true, unlock the mutex and exit the function as there's no relevant data to return.
       staging_lock.unlock();
       return; // No data available for this device_id or bodyNumber
     }
 
+    // If the device and bodyNumber are valid, retrieve the detection data and store it in the provided detection structure.
     detection = it->second.first[bodyNumber];
+    // Unlock the staging_dictionary mutex as we're done accessing it.
     staging_lock.unlock();
   }
 }

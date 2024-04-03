@@ -210,9 +210,9 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
       {
         uint64_t sleep_time = frame_time - processing_time;
 
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+ 
         std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;        
+         
       }
 
       start_frame_time = CurrentTimeNs();
@@ -224,7 +224,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
 
       std::vector<FrameStruct> v;
       std::vector<std::shared_ptr<FrameStruct>> vO;
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
+  
       while (v.empty()) {
         std::vector<std::shared_ptr<FrameStruct>> frameStruct =
             reader->GetCurrentFrame();
@@ -248,24 +248,24 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
           }
         }
         if (reader->HasNextFrame()) {
-//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+//  
           reader->NextFrame();
         } else {
-//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+//  
           reader->Reset();
         }
       }
 
       if (!v.empty()) {
 
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;        
+         
         std::string message = CerealStructToString(v);
 
         zmq::message_t request(message.size());
         memcpy(request.data(), message.c_str(), message.size());
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;         
+          
         socket.send(request, zmq::send_flags::none);
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;         
+          
         //auto *buffer = &message[0];
         //auto length = message.size();
         //uint32_t l32 = length;
@@ -300,7 +300,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
             8 * (sent_kbytes * 1000000ULL / (CurrentTimeNs() - start_time)),
             8 * (sent_kbytes * reader->GetFps() / (sent_frames * 1000)));
 
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
+  
         for (unsigned int i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
           f.frame.clear();
@@ -309,7 +309,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
           vO.at(i)->frame.clear();
           vO.at(i) = nullptr;
         }
- std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;         
+          
       }
 
 #if 0
