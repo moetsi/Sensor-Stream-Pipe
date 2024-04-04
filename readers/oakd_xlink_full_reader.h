@@ -92,6 +92,10 @@ private:
 class OakdXlinkFullReader : public IReader {
 private:
 
+  std::string client_key_;
+  std::string environment_name_;
+  std::string sensor_name_;
+
   bool stream_rgb = false;
   bool stream_depth = false;
   bool stream_bodies = false;
@@ -110,8 +114,6 @@ private:
   unsigned int rgb_dai_preview_x;
 
   std::vector<std::shared_ptr<FrameStruct>> current_frame_;
-
-  const std::string device_name = "CPU";
 
   std::shared_ptr<dai::Pipeline> pipeline;
   std::shared_ptr<dai::node::ColorCamera> camRgb;
@@ -268,7 +270,7 @@ private:
   std::vector<std::vector<float>> reid_results;
 
 public:
-  OakdXlinkFullReader(YAML::Node config);
+  OakdXlinkFullReader(YAML::Node config, const char* client_key = nullptr, const char* environment_name = nullptr, const char* sensor_name = nullptr);
 
   ~OakdXlinkFullReader();
 

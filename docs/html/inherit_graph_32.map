@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classmoetsi_1_1ssp_1_1IEncoder.html" title="IEncoder abstract encoder class." alt="" coords="5,81,167,108"/>
-<area shape="rect" id="node2" href="$classmoetsi_1_1ssp_1_1LibAvEncoder.html" title="LibAV encoder for Jpeg/Mpeg." alt="" coords="221,5,413,32"/>
-<area shape="rect" id="node3" href="$classmoetsi_1_1ssp_1_1NullEncoder.html" title="Nullencoder Straight pipe encoder." alt="" coords="226,56,409,83"/>
-<area shape="rect" id="node4" href="$classmoetsi_1_1ssp_1_1NvEncoder.html" title="NvPipe encoder." alt="" coords="230,107,405,133"/>
-<area shape="rect" id="node5" href="$classmoetsi_1_1ssp_1_1ZDepthEncoder.html" title="ZDepth encoder." alt="" coords="215,157,420,184"/>
-</map>

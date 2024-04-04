@@ -140,11 +140,18 @@ MessageData TwoStageHostSeqSync::get_msgs() {
     return MessageData{}; // No synced messages
 }
 
-OakdXlinkFullReader::OakdXlinkFullReader(YAML::Node config) {
+OakdXlinkFullReader::OakdXlinkFullReader(YAML::Node config, const char* client_key, const char* environment_name, const char* sensor_name) {
+    // Convert const char* to std::string, using empty string if nullptr is passed
+    client_key_ = client_key ? client_key : "";
+    environment_name_ = environment_name ? environment_name : "";
+    sensor_name_ = sensor_name ? sensor_name : "";
 
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
+    frame_template_.client_key = client_key_;
+    frame_template_.environment_name = environment_name_;
+    frame_template_.sensor_name = sensor_name_;
+    frame_template_.static_sensor = true;
+
     spdlog::debug("Starting to open");
-    // std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
     
     // Pull variables from yaml
     stream_rgb = config["stream_color"].as<bool>();

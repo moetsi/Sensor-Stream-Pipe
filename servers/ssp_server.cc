@@ -56,7 +56,8 @@
 
 using namespace moetsi::ssp;
 
-extern "C" SSP_EXPORT int ssp_server(const char* filename)
+// Updated function signature to accept 4 arguments
+extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name)
 {
 
   av_log_set_level(AV_LOG_QUIET);
@@ -101,7 +102,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
     }
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
     else if (reader_type == "oakd_xlink_full") {
-      reader = std::unique_ptr<OakdXlinkFullReader>(new OakdXlinkFullReader(general_parameters["frame_source"]["parameters"]));
+        reader = std::unique_ptr<OakdXlinkFullReader>(new OakdXlinkFullReader(general_parameters["frame_source"]["parameters"], client_key, environment_name, sensor_name));
     }
 #endif
      else if (reader_type == "video") {
@@ -352,14 +353,21 @@ int main(int argc, char *argv[]) {
     return UIApplicationMain(argc, argv, nil, nil);
   }
 #else
-  if (argc < 2) {
-    std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
+  // Check number of arguments
+  if (argc == 2) {
+    filename = std::string(argv[1]);
+    return ssp_server(filename.c_str(), nullptr, nullptr, nullptr);
+  } else if (argc == 5) {
+    filename = std::string(argv[1]);
+    const char* client_key = argv[2];
+    const char* environment_name = argv[3];
+    const char* sensor_name = argv[4];
+    return ssp_server(filename.c_str(), client_key, environment_name, sensor_name);
+  } else {
+    std::cerr << "Usage: ssp_server <parameters_file> [client_key environment_name sensor_name]" << std::endl;
     return 1;
   }
-
-  filename = std::string(argv[1]);
 #endif
     
-  return ssp_server(filename.c_str());
 }
 #endif

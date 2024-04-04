@@ -1,8 +1,0 @@
-<map id="frame_struct.h" name="frame_struct.h">
-<area shape="rect" id="node1" title="Frame struct definition. &quot;Universal&quot; frame data type." alt="" coords="144,5,262,32"/>
-<area shape="rect" id="node2" href="$include_2decoders_2idecoder_8h.html" title="Frame decoder interface." alt="" coords="25,80,114,107"/>
-<area shape="rect" id="node3" href="$include_2ssp_8h.html" title=" " alt="" coords="175,229,231,256"/>
-<area shape="rect" id="node4" href="$include_2utils_2image__converter_8h.html" title="Image converter from frame struct to opencv." alt="" coords="22,155,165,181"/>
-<area shape="rect" id="node5" href="$include_2encoders_2iencoder_8h.html" title="IEncoder factory." alt="" coords="241,155,330,181"/>
-<area shape="rect" id="node6" href="$include_2readers_2ireader_8h.html" title="Reader interface to SSP." alt="" coords="318,80,397,107"/>
-</map>

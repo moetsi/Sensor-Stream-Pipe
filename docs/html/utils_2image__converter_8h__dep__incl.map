@@ -1,8 +1,0 @@
-<map id="image_converter.h" name="image_converter.h">
-<area shape="rect" id="node1" title="Image converter from frame struct to opencv." alt="" coords="340,5,483,32"/>
-<area shape="rect" id="node2" href="$ssp__client__opencv_8cc.html" title="OpenCV based ssp client client." alt="" coords="5,80,164,107"/>
-<area shape="rect" id="node3" href="$ssp__client__template_8cc.html" title="Template for an SSP client." alt="" coords="189,80,359,107"/>
-<area shape="rect" id="node4" href="$ssp_8h.html" title=" " alt="" coords="383,80,439,107"/>
-<area shape="rect" id="node5" href="$ssp__tester_8cc.html" title="SSP test program." alt="" coords="463,80,570,107"/>
-<area shape="rect" id="node6" href="$image__converter_8cc.html" title="Image converter from frame struct to opencv image." alt="" coords="594,80,743,107"/>
-</map>

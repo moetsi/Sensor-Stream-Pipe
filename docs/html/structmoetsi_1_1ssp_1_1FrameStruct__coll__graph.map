@@ -1,5 +1,0 @@
-<map id="moetsi::ssp::FrameStruct" name="moetsi::ssp::FrameStruct">
-<area shape="rect" id="node1" title="Frame struct: SSP frame." alt="" coords="127,109,311,136"/>
-<area shape="rect" id="node2" href="$structmoetsi_1_1ssp_1_1CodecParamsStruct.html" title="Codec parameters." alt="" coords="5,5,199,47"/>
-<area shape="rect" id="node3" href="$structmoetsi_1_1ssp_1_1CameraCalibrationStruct.html" title="Camera calibration data." alt="" coords="223,5,450,47"/>
-</map>
