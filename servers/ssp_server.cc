@@ -56,32 +56,29 @@
 
 using namespace moetsi::ssp;
 
-// Updated function signature to accept 4 arguments
-extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name)
-{
-
-  av_log_set_level(AV_LOG_QUIET);
-
-  try {
-    // Initialize the socket to communicate with the client
-    zmq::context_t context(1);
-    zmq::socket_t socket(context, ZMQ_PUSH);
-
-    // Do not accumulate packets if no client is connected
-    socket.set(zmq::sockopt::immediate, true);
-
-    // Do not keep packets if there is network congestion
-    // socket.set(zmq::sockopt::conflate, true);
+// now we make a function called initiaize that we call in ssp_server
+std::tuple<std::unique_ptr<zmq::socket_t>, std::unique_ptr<IReader>, std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>
+initialize(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name) {
 
     // Initialize the parameters of the codec
     std::string codec_parameters_file = std::string(filename);
     YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
+    std::string host = codec_parameters["general"]["host"].as<std::string>();
+    unsigned int port = codec_parameters["general"]["port"].as<unsigned int>();
+
+    // Initialize the context and socket to communicate with the client
+    static auto context = std::make_unique<zmq::context_t>(1);
+    auto socket = std::make_unique<zmq::socket_t>(*context, ZMQ_PUSH);
+
+    // Do not accumulate packets if no client is connected
+    socket->set(zmq::sockopt::immediate, true);
+
+    // Do not keep packets if there is network congestion
+    // socket->set(zmq::sockopt::conflate, true);
+    socket->connect("tcp://" + host + ":" + std::to_string(port));
 
     YAML::Node general_parameters = codec_parameters["general"];
     SetupLogging(general_parameters);
-
-    std::string host = codec_parameters["general"]["host"].as<std::string>();
-    unsigned int port = codec_parameters["general"]["port"].as<unsigned int>();
 
     std::unique_ptr<IReader> reader = nullptr;
 
@@ -119,7 +116,6 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_ke
         path = std::string([bundle_path UTF8String]);
 #endif
 
-        
       if (general_parameters["frame_source"]["parameters"]["streams"]
               .IsDefined()) {
         std::vector<unsigned int> streams =
@@ -137,19 +133,19 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_ke
           general_parameters["frame_source"]["parameters"]);
       reader = std::unique_ptr<KinectReader>(new KinectReader(0, c));
 #else
-      return 1;
+      throw std::runtime_error("SSP compiled without Kinect support");
 #endif
     } else if (reader_type == "iphone") {
 #if TARGET_OS_IOS
       reader = std::unique_ptr<iPhoneReader>(new iPhoneReader());
 #else
-      return 1;
+      throw std::runtime_error("SSP compiled without iPhone support");
 #endif
     } else {
       spdlog::error("Unknown reader type: \"{}\". Supported types are "
                     "\"frames\", \"video\" and \"kinect\"",
                     reader_type);
-      return 1;
+      throw std::runtime_error("Unknown reader type");
     }
 
     std::unordered_map<unsigned int, std::shared_ptr<IEncoder>> encoders;
@@ -169,7 +165,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_ke
 #else
         spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
                       "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
-        return 1;
+        throw std::runtime_error("SSP compiled without nvenc support");
 #endif
       } else if (encoder_type == "zdepth")
         fe =
@@ -180,145 +176,140 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_ke
         spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                       "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
                       encoder_type);
-        return 1;
+        throw std::runtime_error("Unknown encoder type");
       }
 
-      // std::cerr << encoder_type << " " << unsigned(type) << " " << (!!fe) << std::endl << std::flush;
       encoders[unsigned(type)] = fe;
     }
 
-    uint64_t last_time = CurrentTimeNs();
-    uint64_t start_time = last_time;
-    uint64_t start_frame_time = last_time;
-    uint64_t sent_frames = 0;
-    uint64_t processing_time = 0;
+    // Return the socket, reader and encoders so they can be used by other functions
+    return std::make_tuple(std::move(socket), std::move(reader), std::move(encoders));
+}
 
-    double sent_kbytes = 0;
+std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader, 
+                                               std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>& encoders)
+{
+  std::vector<FrameStruct> v;
+  std::vector<std::shared_ptr<FrameStruct>> vO;
 
-    double sent_latency = 0;
+  while (v.empty()) {
+    std::vector<std::shared_ptr<FrameStruct>> frameStruct =
+        reader->GetCurrentFrame();
+    for (std::shared_ptr<FrameStruct> frameStruct : frameStruct) {
 
-   socket.connect("tcp://" + host + ":" + std::to_string(port));
-   // auto cstr =  "tcp://" + host + ":" + std::to_string(port);
-   // auto rcc = zmq_connect(requester, cstr.c_str());
-
-    unsigned int fps = reader->GetFps();    
-    unsigned int frame_time = 1000000000ULL/fps;
-
-    int c = 0;
-    while (1) {
-
-      if (processing_time < frame_time)
-      {
-        uint64_t sleep_time = frame_time - processing_time;
-
- 
-        std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
-         
-      }
-
-      start_frame_time = CurrentTimeNs();
-
-      if (sent_frames == 0) {
-        last_time = CurrentTimeNs();
-        start_time = last_time;
-      }
-
-      std::vector<FrameStruct> v;
-      std::vector<std::shared_ptr<FrameStruct>> vO;
-  
-      while (v.empty()) {
-        std::vector<std::shared_ptr<FrameStruct>> frameStruct =
-            reader->GetCurrentFrame();
-        for (std::shared_ptr<FrameStruct> frameStruct : frameStruct) {
-
-
-          std::shared_ptr<IEncoder> frameEncoder =
-              encoders[unsigned(frameStruct->frame_type)];
-              // std::cerr << "ft = " << unsigned(frameStruct->frame_type) << std::endl << std::endl;
-          if (!!frameEncoder) {
-            frameEncoder->AddFrameStruct(frameStruct);
-            if (frameEncoder->HasNextPacket()) {
-              std::shared_ptr<FrameStruct> f =
-                  frameEncoder->CurrentFrameEncoded();
-              vO.push_back(f);
-              v.push_back(*f);
-              frameEncoder->NextPacket();
-            }
-          } else {
-            // std::cerr << "skip!" << std::endl << std::flush;
-          }
-        }
-        if (reader->HasNextFrame()) {
-//  
-          reader->NextFrame();
-        } else {
-//  
-          reader->Reset();
+      std::shared_ptr<IEncoder> frameEncoder =
+          encoders[unsigned(frameStruct->frame_type)];
+      if (!!frameEncoder) {
+        frameEncoder->AddFrameStruct(frameStruct);
+        if (frameEncoder->HasNextPacket()) {
+          std::shared_ptr<FrameStruct> f =
+              frameEncoder->CurrentFrameEncoded();
+          vO.push_back(f);
+          v.push_back(*f);
+          frameEncoder->NextPacket();
         }
       }
-
-      if (!v.empty()) {
-
-         
-        std::string message = CerealStructToString(v);
-
-        zmq::message_t request(message.size());
-        memcpy(request.data(), message.c_str(), message.size());
-          
-        socket.send(request, zmq::send_flags::none);
-          
-        //auto *buffer = &message[0];
-        //auto length = message.size();
-        //uint32_t l32 = length;
-        //std::cerr << "l32 = " << l32 << std::endl;
-        //auto rc0 = zmq_send(requester, &l32, 4, ZMQ_SNDMORE); 
-        //auto rc = zmq_send(requester, buffer, length, 0);
-
-        sent_frames += 1;
-        sent_kbytes += message.size() / 1000.0;
-
-        uint64_t diff_time = CurrentTimeNs() - last_time;
-
-        double diff_start_time = (CurrentTimeNs() - start_time);
-        int64_t avg_fps;
-        if (diff_start_time == 0)
-          avg_fps = -1;
-        else {
-          double avg_time_per_frame_sent_ms =
-              diff_start_time / (double)sent_frames;
-          avg_fps = 1000000000ULL / avg_time_per_frame_sent_ms;
-        }
-
-        last_time = CurrentTimeNs();
-        processing_time = last_time - start_frame_time;
-
-        sent_latency += diff_time;
-
-        spdlog::debug(
-            "Message sent, took {} ns (avg. {:3.2f}); packet size {}; avg {} fps; "
-            "{:3.2f} Mbps; {:3.2f} Mbps expected",
-            diff_time, sent_latency / sent_frames, message.size(), avg_fps,
-            8 * (sent_kbytes * 1000000ULL / (CurrentTimeNs() - start_time)),
-            8 * (sent_kbytes * reader->GetFps() / (sent_frames * 1000)));
-
-  
-        for (unsigned int i = 0; i < v.size(); i++) {
-          FrameStruct f = v.at(i);
-          f.frame.clear();
-          spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id,
-                        f.frame_id);
-          vO.at(i)->frame.clear();
-          vO.at(i) = nullptr;
-        }
-          
-      }
-
-#if 0
-      if (c++ > 200) {
-        break;
-      }
-#endif      
     }
+    if (reader->HasNextFrame()) {
+      reader->NextFrame();
+    } else {
+      reader->Reset();
+    }
+  }
+
+  for (unsigned int i = 0; i < vO.size(); i++) {
+    vO.at(i)->frame.clear();
+    vO.at(i) = nullptr;
+  }
+
+  return v;
+}
+
+// New function to send vector of frames
+void send_vector_of_frames(zmq::socket_t& socket, const std::vector<FrameStruct>& v)
+{
+  std::string message = CerealStructToString(v);
+
+  zmq::message_t request(message.size());
+  memcpy(request.data(), message.c_str(), message.size()); 
+  socket.send(request, zmq::send_flags::none);
+}
+
+void start_auto(zmq::socket_t* socket, std::unique_ptr<IReader>& reader, std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>& encoders)
+{
+  uint64_t last_time = CurrentTimeNs();
+  uint64_t start_time = last_time;
+  uint64_t start_frame_time = last_time;
+  uint64_t sent_frames = 0;
+  uint64_t processing_time = 0;
+
+  double sent_kbytes = 0;
+  double sent_latency = 0;
+
+  unsigned int fps = reader->GetFps();    
+  unsigned int frame_time = 1000000000ULL/fps;
+
+  int c = 0;
+  while (1) {
+
+    if (processing_time < frame_time)
+    {
+      uint64_t sleep_time = frame_time - processing_time;
+      std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
+    }
+
+    start_frame_time = CurrentTimeNs();
+
+    if (sent_frames == 0) {
+      last_time = CurrentTimeNs();
+      start_time = last_time;
+    }
+
+    std::vector<FrameStruct> v = pull_vector_of_frames(reader, encoders);
+
+    if (!v.empty()) {
+      send_vector_of_frames(*socket, v);
+
+      sent_frames += 1;
+
+      uint64_t diff_time = CurrentTimeNs() - last_time;
+
+      double diff_start_time = (CurrentTimeNs() - start_time);
+      int64_t avg_fps;
+      if (diff_start_time == 0)
+        avg_fps = -1;
+      else {
+        double avg_time_per_frame_sent_ms =
+            diff_start_time / (double)sent_frames;
+        avg_fps = 1000000000ULL / avg_time_per_frame_sent_ms;
+      }
+
+      last_time = CurrentTimeNs();
+      processing_time = last_time - start_frame_time;
+
+      sent_latency += diff_time;
+
+      for (unsigned int i = 0; i < v.size(); i++) {
+        FrameStruct f = v.at(i);
+        f.frame.clear();
+        spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id,
+                      f.frame_id);
+      }
+    }
+  }
+}
+
+// Updated function signature to accept 4 arguments
+extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name)
+{
+  av_log_set_level(AV_LOG_QUIET);
+
+  try {
+    std::cerr << "Initializing socket, reader and encoders" << std::endl;
+    auto [socket, reader, encoders] = initialize(filename, client_key, environment_name, sensor_name);
+    std::cerr << "Socket, reader and encoders initialized" << std::endl;
+
+    start_auto(socket.get(), reader, encoders);
   } catch (YAML::Exception &e) {
     spdlog::error("Error on the YAML configuration file");
     spdlog::error(e.what());
@@ -371,3 +362,4 @@ int main(int argc, char *argv[]) {
     
 }
 #endif
+
