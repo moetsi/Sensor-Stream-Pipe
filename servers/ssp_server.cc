@@ -8,6 +8,9 @@
 #define SSP_EXPORT __declspec(dllexport)
 #else
 #include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <signal.h>
 #define SSP_EXPORT
 #endif
 
@@ -17,8 +20,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #include "../readers/iphone_reader.h"
-￼
-
 #endif
 #endif
 
@@ -55,6 +56,38 @@
 #endif
 
 using namespace moetsi::ssp;
+
+//This is a global variable that will store a vector of string that describes what kind of frame types to pull for a single pull_vector_of_frames call
+std::vector<std::string> frame_types_to_pull;
+
+// Global variable to store original terminal settings (needed for hitting c)
+struct termios oldt;
+void setupNonBlockingInput() {
+    tcgetattr(STDIN_FILENO, &oldt); //get the current terminal I/O structure
+    struct termios newt = oldt;
+    newt.c_lflag &= ~(ICANON); //disable canonical mode
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt); //apply the new settings
+    fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK); //set non-block
+}
+
+void restoreInputSettings() {
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt); //restore old settings
+}
+
+volatile sig_atomic_t stop_flag = 0;
+
+void handle_signal(int signal) {
+    if (signal == SIGINT) {
+        if (stop_flag) {
+            restoreInputSettings(); // Restore the saved terminal settings
+            std::cerr << "Forced exit" << std::endl;
+            exit(signal);
+        } else {
+            stop_flag = 1;
+            std::cerr << "Exiting after current frame..." << std::endl;
+        }
+    }
+}
 
 // now we make a function called initiaize that we call in ssp_server
 std::tuple<std::unique_ptr<zmq::socket_t>, std::unique_ptr<IReader>, std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>
@@ -186,6 +219,12 @@ initialize(const char* filename, const char* client_key, const char* environment
     return std::make_tuple(std::move(socket), std::move(reader), std::move(encoders));
 }
 
+// This is a function that when called sets the frame_types_to_pull variable to <"rgb", "depth">
+void set_frame_types_to_pull_to_rgb_depth() {
+  frame_types_to_pull = {"rgb", "depth"};
+  std::cout << "Frame types to pull set to: " << frame_types_to_pull[0] << ", " << frame_types_to_pull[1] << std::endl;
+}
+
 std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader, 
                                                std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>& encoders)
 {
@@ -211,7 +250,13 @@ std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader,
       }
     }
     if (reader->HasNextFrame()) {
-      reader->NextFrame();
+      if (!frame_types_to_pull.empty()) {
+        reader->NextFrame();
+        frame_types_to_pull.clear();
+        std::cout << "frame_types_to_pull cleared" << std::endl;
+      } else {
+        reader->NextFrame();
+      }
     } else {
       reader->Reset();
     }
@@ -235,8 +280,13 @@ void send_vector_of_frames(zmq::socket_t& socket, const std::vector<FrameStruct>
   socket.send(request, zmq::send_flags::none);
 }
 
-void start_auto(zmq::socket_t* socket, std::unique_ptr<IReader>& reader, std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>& encoders)
+extern "C" void start_auto(zmq::socket_t* socket, std::unique_ptr<IReader>& reader, std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>& encoders)
 {
+
+  struct termios oldt;
+  tcgetattr(STDIN_FILENO, &oldt); // get current terminal settings for restoration
+  setupNonBlockingInput();
+
   uint64_t last_time = CurrentTimeNs();
   uint64_t start_time = last_time;
   uint64_t start_frame_time = last_time;
@@ -250,53 +300,70 @@ void start_auto(zmq::socket_t* socket, std::unique_ptr<IReader>& reader, std::un
   unsigned int frame_time = 1000000000ULL/fps;
 
   int c = 0;
-  while (1) {
+  try {
+    while (1) {
 
-    if (processing_time < frame_time)
-    {
-      uint64_t sleep_time = frame_time - processing_time;
-      std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
-    }
-
-    start_frame_time = CurrentTimeNs();
-
-    if (sent_frames == 0) {
-      last_time = CurrentTimeNs();
-      start_time = last_time;
-    }
-
-    std::vector<FrameStruct> v = pull_vector_of_frames(reader, encoders);
-
-    if (!v.empty()) {
-      send_vector_of_frames(*socket, v);
-
-      sent_frames += 1;
-
-      uint64_t diff_time = CurrentTimeNs() - last_time;
-
-      double diff_start_time = (CurrentTimeNs() - start_time);
-      int64_t avg_fps;
-      if (diff_start_time == 0)
-        avg_fps = -1;
-      else {
-        double avg_time_per_frame_sent_ms =
-            diff_start_time / (double)sent_frames;
-        avg_fps = 1000000000ULL / avg_time_per_frame_sent_ms;
+      // This is to trigger set_frame_types_to_pull_to_rgb_depth if the user presses 'c'
+      char ch;
+      if (read(STDIN_FILENO, &ch, 1) > 0 && ch == 'c') {
+          set_frame_types_to_pull_to_rgb_depth();
       }
 
-      last_time = CurrentTimeNs();
-      processing_time = last_time - start_frame_time;
+      //The remaining code is for pulling and sending frames
+      if (processing_time < frame_time)
+      {
+        uint64_t sleep_time = frame_time - processing_time;
+        std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
+      }
 
-      sent_latency += diff_time;
+      start_frame_time = CurrentTimeNs();
 
-      for (unsigned int i = 0; i < v.size(); i++) {
-        FrameStruct f = v.at(i);
-        f.frame.clear();
-        spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id,
-                      f.frame_id);
+      if (sent_frames == 0) {
+        last_time = CurrentTimeNs();
+        start_time = last_time;
+      }
+
+      std::vector<FrameStruct> v = pull_vector_of_frames(reader, encoders);
+
+      if (!v.empty()) {
+        send_vector_of_frames(*socket, v);
+
+        sent_frames += 1;
+
+        uint64_t diff_time = CurrentTimeNs() - last_time;
+
+        double diff_start_time = (CurrentTimeNs() - start_time);
+        int64_t avg_fps;
+        if (diff_start_time == 0)
+          avg_fps = -1;
+        else {
+          double avg_time_per_frame_sent_ms =
+              diff_start_time / (double)sent_frames;
+          avg_fps = 1000000000ULL / avg_time_per_frame_sent_ms;
+        }
+
+        last_time = CurrentTimeNs();
+        processing_time = last_time - start_frame_time;
+
+        sent_latency += diff_time;
+
+        for (unsigned int i = 0; i < v.size(); i++) {
+          FrameStruct f = v.at(i);
+          f.frame.clear();
+          spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id,
+                        f.frame_id);
+        }
+      }
+
+      if (stop_flag) {
+        break;
       }
     }
-  }
+  } catch (...) {
+        restoreInputSettings(); // ensure the settings are restored even if an error occurs
+        throw; // rethrow the exception to handle it outside
+    }
+    restoreInputSettings(); // restore terminal settings before exiting function
 }
 
 // Updated function signature to accept 4 arguments
@@ -318,11 +385,14 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_ke
     spdlog::error(e.what());
   }
 
+  restoreInputSettings(); // Restore terminal settings before exiting ssp_server
   return 0;
 }
 
 #ifndef SSP_PLUGIN
 int main(int argc, char *argv[]) {
+  signal(SIGINT, handle_signal); // Handle Ctrl-C and other relevant signals
+  setupNonBlockingInput(); // Setup non-blocking input for keyboard handling
 
   spdlog::set_level(spdlog::level::debug);
 
@@ -347,19 +417,22 @@ int main(int argc, char *argv[]) {
   // Check number of arguments
   if (argc == 2) {
     filename = std::string(argv[1]);
-    return ssp_server(filename.c_str(), nullptr, nullptr, nullptr);
+    int result = ssp_server(filename.c_str(), nullptr, nullptr, nullptr);
+    restoreInputSettings(); // Restore terminal settings after ssp_server returns
+    return result;
   } else if (argc == 5) {
     filename = std::string(argv[1]);
     const char* client_key = argv[2];
     const char* environment_name = argv[3];
     const char* sensor_name = argv[4];
-    return ssp_server(filename.c_str(), client_key, environment_name, sensor_name);
+    int result = ssp_server(filename.c_str(), client_key, environment_name, sensor_name);
+    restoreInputSettings(); // Restore terminal settings after ssp_server returns
+    return result;
   } else {
     std::cerr << "Usage: ssp_server <parameters_file> [client_key environment_name sensor_name]" << std::endl;
     return 1;
   }
 #endif
-    
+  restoreInputSettings(); // Restore terminal settings on normal exit
 }
 #endif
-
