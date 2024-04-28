@@ -74,6 +74,7 @@ namespace moetsi::ssp {
 // using namespace InferenceEngine;
 struct MessageData {
     std::shared_ptr<dai::ImgFrame> color;
+    std::shared_ptr<dai::ImgFrame> depth;
     std::shared_ptr<dai::SpatialImgDetections> person_detection;
     std::shared_ptr<void> face_detection;
     std::vector<std::shared_ptr<dai::NNData>> recognitions;
@@ -83,7 +84,7 @@ struct MessageData {
 class TwoStageHostSeqSync {
 public:
     void add_msg(const std::shared_ptr<void>& msg, const std::string& name);
-    MessageData get_msgs();
+    MessageData get_msgs(const std::string& sync_mode);
 
 private:
     std::unordered_map<int64_t, MessageData> msgs;
@@ -98,7 +99,7 @@ private:
 
   //This is used to set whether to pull RGB/Depth frames from the oakd device to the host for debug visualization
   bool send_rgb_to_host = true;
-  bool send_depth_to_host = false;
+  bool send_depth_to_host = true;
 
   // One time frame pull for frame and depth (oakd usually only send detections, but may be asked to send RGBD for calibration)
   bool pull_and_send_rgb_frame_once = false;

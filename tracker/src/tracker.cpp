@@ -152,12 +152,13 @@ void ValidateParams(const TrackerParams& p) {
     }
 }
 
-PedestrianTracker::PedestrianTracker(const TrackerParams& params)
+PedestrianTracker::PedestrianTracker(const TrackerParams& params, const cv::Size& frame_size)
     : params_(params),
       descriptor_strong_(nullptr),
       distance_strong_(nullptr),
       tracks_counter_(0),
-      frame_size_(0, 0),
+      frame_size_(frame_size),
+      prev_frame_size_(frame_size),
       prev_timestamp_(std::numeric_limits<uint64_t>::max()) {
     ValidateParams(params);
 }
@@ -548,7 +549,7 @@ void PedestrianTracker::ComputeStrongDescriptorsUsingAttachedDescriptors(const T
     }
 }
 
-void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& input_detections, uint64_t timestamp) {
+void PedestrianTracker::Process(const TrackedObjects& input_detections, uint64_t timestamp) {
     // Clearing detected track IDs for the current processing cycle
     detected_track_ids_.clear();
 
@@ -559,14 +560,8 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
         // PT_CHECK_LT(prev_timestamp_, timestamp);
     }
         
-    // Ensuring frame size is consistent across all processed frames
-    if (frame_size_ == cv::Size(0, 0)) {
-        // If this is the first frame, initialize frame_size_
-        frame_size_ = frame.size();
-    } else {
-        // For subsequent frames, check if the size matches the initial one
-        PT_CHECK_EQ(frame_size_, frame.size());
-    }
+    // FYI: We removed the frame size check Unnecessary and caused a frame requirement
+
 
     // Filtering detections based on predefined criteria. The filters applied include:
     // 1. Confidence threshold: Only detections with a confidence score higher than params_.min_det_conf are kept.
@@ -630,31 +625,26 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
 
             // If the match confidence is high enough, append the detection to the track
             if (conf > params_.aff_thr_fast) {
-                AppendToTrack(frame, track_id, detections[det_id], detections[det_id].fast_descriptor, detections[det_id].strong_descriptor);
+                AppendToTrack(track_id, detections[det_id], detections[det_id].fast_descriptor, detections[det_id].strong_descriptor);
                 unmatched_detections.erase(det_id);
             } else {
                 // For lower confidence, check if strong matching is applicable
                 if (conf > params_.strong_affinity_thr) {
                     if (distance_strong_ && is_matching_to_track[track_id].first) {
                         // If there's a strong match, append the detection with its strong descriptor
-                        AppendToTrack(frame,
-                                      track_id,
+                        AppendToTrack(track_id,
                                       detections[det_id],
                                       detections[det_id].fast_descriptor,
                                       detections[det_id].strong_descriptor);
                     } else {
                         // If no strong match, consider the track lost and start a new track
                         if (UpdateLostTrackAndEraseIfItsNeeded(track_id)) {
-                            AddNewTrack(frame,
-                                        detections[det_id],
+                            AddNewTrack(detections[det_id],
                                         detections[det_id].fast_descriptor,
                                         detections[det_id].strong_descriptor);
                         }
                         else {
-                            // TODO: This is the issue. There is 
-                            std::cerr << "!!!!Track lost and not forgotten. We still need to make a new track for the detection" << std::endl;
-                            AddNewTrack(frame,
-                                        detections[det_id],
+                            AddNewTrack(detections[det_id],
                                         detections[det_id].fast_descriptor,
                                         detections[det_id].strong_descriptor);
                         }
@@ -665,9 +655,7 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
                     // If the confidence is too low, mark the track as unmatched
                     unmatched_tracks.insert(track_id);
                     // The track <> detection that did not make the cutoff is now made to a new track
-                    std::cerr << "Making a new track for the detection that was not enough to meet the 'grey area' match cutoff and is seen as a false positive" << std::endl;
-                    AddNewTrack(frame,
-                                detections[det_id],
+                    AddNewTrack(detections[det_id],
                                 detections[det_id].fast_descriptor,
                                 detections[det_id].strong_descriptor);
                 }
@@ -675,7 +663,7 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
         }
 
         // Attempt to create new tracks for unmatched detections
-        AddNewTracks(frame, detections, descriptors_fast, unmatched_detections);
+        AddNewTracks(detections, descriptors_fast, unmatched_detections);
         // Update the status of tracks that were not matched to any detection (+1 for track.lost value)
         UpdateLostTracks(unmatched_tracks);
 
@@ -686,13 +674,13 @@ void PedestrianTracker::Process(const cv::Mat& frame, const TrackedObjects& inpu
         }
     } else {
         // If there are no active tracks and/or detections, attempt to create new tracks for all detections
-        AddNewTracks(frame, detections, descriptors_fast);
+        AddNewTracks(detections, descriptors_fast);
         // Update the status of all tracks that didn't have detections (+1 for track.lost value)
         UpdateLostTracks(active_tracks);
     }
 
     // Update the size of the previous frame for future checks
-    prev_frame_size_ = frame.size();
+    // prev_frame_size_ = frame.size();
     // Optionally drop tracks that have been lost for too long
     if (params_.drop_forgotten_tracks)
         DropForgottenTracks();
@@ -1020,12 +1008,11 @@ std::map<size_t, std::pair<bool, cv::Mat>> PedestrianTracker::StrongMatching(
  * @param detections A vector containing all detected objects in the frame.
  * @param descriptors_fast A vector containing the fast descriptors for each detection.
  */
-void PedestrianTracker::AddNewTracks(const cv::Mat& frame,
-                                     const TrackedObjects& detections,
+void PedestrianTracker::AddNewTracks(const TrackedObjects& detections,
                                      const std::vector<cv::Mat>& descriptors_fast) {
     PT_CHECK(detections.size() == descriptors_fast.size());
     for (size_t i = 0; i < detections.size(); i++) {
-        AddNewTrack(frame, detections[i], descriptors_fast[i]);
+        AddNewTrack(detections[i], descriptors_fast[i]);
     }
 }
 
@@ -1040,14 +1027,13 @@ void PedestrianTracker::AddNewTracks(const cv::Mat& frame,
  * @param descriptors_fast A vector containing the fast descriptors for each detection.
  * @param ids A set containing the indices of detections that are to be added as new tracks.
  */
-void PedestrianTracker::AddNewTracks(const cv::Mat& frame,
-                                     const TrackedObjects& detections,
+void PedestrianTracker::AddNewTracks(const TrackedObjects& detections,
                                      const std::vector<cv::Mat>& descriptors_fast,
                                      const std::set<size_t>& ids) {
     PT_CHECK(detections.size() == descriptors_fast.size());
     for (size_t i : ids) {
         PT_CHECK(i < detections.size());
-        AddNewTrack(frame, detections[i], descriptors_fast[i]);
+        AddNewTrack(detections[i], descriptors_fast[i]);
     }
 }
 
@@ -1077,8 +1063,7 @@ void PedestrianTracker::AddNewTracks(const cv::Mat& frame,
 //     tracks_counter_++;
 // }
 
-void PedestrianTracker::AddNewTrack(const cv::Mat& frame,
-                                    const TrackedObject& detection,
+void PedestrianTracker::AddNewTrack(const TrackedObject& detection,
                                     const cv::Mat& descriptor_fast,
                                     const cv::Mat& descriptor_strong) {
     // Create a copy of the detection and set the object_id
@@ -1087,7 +1072,6 @@ void PedestrianTracker::AddNewTrack(const cv::Mat& frame,
     
     // Create a new Track
     Track newTrack({detection_with_id}, 
-                   frame(detection.rect).clone(), 
                    descriptor_fast.clone(), 
                    detection.strong_descriptor.clone());
     
@@ -1108,8 +1092,7 @@ void PedestrianTracker::AddNewTrack(const cv::Mat& frame,
     tracks_counter_++;
 }
 
-void PedestrianTracker::AppendToTrack(const cv::Mat& frame,
-                                      size_t track_id,
+void PedestrianTracker::AppendToTrack(size_t track_id,
                                       const TrackedObject& detection,
                                       const cv::Mat& descriptor_fast,
                                       const cv::Mat& descriptor_strong) {
@@ -1135,7 +1118,8 @@ void PedestrianTracker::AppendToTrack(const cv::Mat& frame,
     cur_track.lost = 0;
 
     // Update the last image of the track with the current frame's relevant section.
-    cur_track.last_image = frame(detection.rect).clone();
+    // FYI: commented out saving last image because it required the frame and doesn't seem to do anything
+    // cur_track.last_image = frame(detection.rect).clone();
     // Update the fast descriptor with the current detection's descriptor.
     cur_track.descriptor_fast = descriptor_fast.clone();
     // Increment the length of the track to reflect the addition of a new detection.
@@ -1147,6 +1131,7 @@ void PedestrianTracker::AppendToTrack(const cv::Mat& frame,
     if (cur_track.descriptor_strong.empty()) {
         cur_track.descriptor_strong = descriptor_strong.clone();
     } else if (!descriptor_strong.empty()) {
+        // TODO: See if there is a better way to update descriptor_strong
         cur_track.descriptor_strong = 0.5 * (descriptor_strong + cur_track.descriptor_strong);
     }
 

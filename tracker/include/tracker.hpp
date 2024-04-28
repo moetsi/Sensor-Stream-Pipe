@@ -85,17 +85,14 @@ struct Track {
     ///
     /// \brief Track constructor.
     /// \param objs Detected objects sequence.
-    /// \param last_image Image of last image in the detected object sequence.
     /// \param descriptor_fast Fast descriptor.
     /// \param descriptor_strong Strong descriptor (reid embedding).
     ///
     Track(const TrackedObjects& objs,
-          const cv::Mat& last_image,
           const cv::Mat& descriptor_fast,
           const cv::Mat& descriptor_strong)
         : objects(objs),
           predicted_rect(!objs.empty() ? objs.back().rect : cv::Rect()),
-          last_image(last_image),
           descriptor_fast(descriptor_fast),
           descriptor_strong(descriptor_strong),
           lost(0),
@@ -170,7 +167,6 @@ struct Track {
     size_t length;  ///< Length of a track including number of objects that were
                     /// removed from track in order to avoid memory usage growth.
 };
-
 ///
 /// \brief Online pedestrian tracker algorithm implementation.
 ///
@@ -197,8 +193,9 @@ public:
     /// \brief Constructor that creates an instance of the pedestrian tracker with
     /// parameters.
     /// \param[in] params - the pedestrian tracker parameters.
+    /// \param[in] frame_size - the initial frame size.
     ///
-    explicit PedestrianTracker(const TrackerParams& params = TrackerParams());
+    explicit PedestrianTracker(const TrackerParams& params = TrackerParams(), const cv::Size& frame_size = cv::Size());
     virtual ~PedestrianTracker() {}
 
     ///
@@ -208,7 +205,7 @@ public:
     /// \param[in] timestamp Timestamp must be positive and measured in
     /// milliseconds
     ///
-    void Process(const cv::Mat& frame, const TrackedObjects& detections, uint64_t timestamp);
+    void Process(const TrackedObjects& detections, uint64_t timestamp);
 
     ///
     /// \brief Pipeline parameters getter.
@@ -403,22 +400,18 @@ private:
 
     float Affinity(const TrackedObject& obj1, const TrackedObject& obj2);
 
-    void AddNewTrack(const cv::Mat& frame,
-                     const TrackedObject& detection,
+    void AddNewTrack(const TrackedObject& detection,
                      const cv::Mat& fast_descriptor,
                      const cv::Mat& descriptor_strong = cv::Mat());
 
-    void AddNewTracks(const cv::Mat& frame,
-                      const TrackedObjects& detections,
+    void AddNewTracks(const TrackedObjects& detections,
                       const std::vector<cv::Mat>& descriptors_fast);
 
-    void AddNewTracks(const cv::Mat& frame,
-                      const TrackedObjects& detections,
+    void AddNewTracks(const TrackedObjects& detections,
                       const std::vector<cv::Mat>& descriptors_fast,
                       const std::set<size_t>& ids);
 
-    void AppendToTrack(const cv::Mat& frame,
-                       size_t track_id,
+    void AppendToTrack(size_t track_id,
                        const TrackedObject& detection,
                        const cv::Mat& descriptor_fast,
                        const cv::Mat& descriptor_strong);
@@ -460,7 +453,7 @@ private:
     // Detected tracks from last processed frame.
     std::vector<size_t> detected_track_ids_;
 
-    // Previous frame image.
+    // Previous frame image size.
     cv::Size prev_frame_size_;
 
     struct pair_hash {

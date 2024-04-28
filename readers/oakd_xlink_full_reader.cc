@@ -51,6 +51,8 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
         int64_t seq;
         if (name == "color") {
             seq = std::static_pointer_cast<dai::ImgFrame>(msg)->getSequenceNum();
+        } else if (name == "depth") {
+            seq = std::static_pointer_cast<dai::ImgFrame>(msg)->getSequenceNum();
         } else if (name == "person_detection") {
             seq = std::static_pointer_cast<dai::SpatialImgDetections>(msg)->getSequenceNum();
         } else if (name == "face_detection") {
@@ -76,6 +78,8 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
         } else {
             if(name == "color") {
                 msgData.color = std::static_pointer_cast<dai::ImgFrame>(msg);
+            } else if(name == "depth") {
+                msgData.depth = std::static_pointer_cast<dai::ImgFrame>(msg);
             } else if(name == "person_detection") {
                 msgData.person_detection = std::static_pointer_cast<dai::SpatialImgDetections>(msg);
             } else if(name == "face_detection") {
@@ -89,49 +93,80 @@ void TwoStageHostSeqSync::add_msg(const std::shared_ptr<void>& msg, const std::s
     }
 }
 
-MessageData TwoStageHostSeqSync::get_msgs() {
+/**
+ * @brief Retrieves synchronized messages from the msgs map based on the specified sync_mode.
+ *
+ * This function iterates over the msgs map to find the maximum sequence number that has synchronized messages.
+ * The criteria for a message to be considered synchronized depends on the sync_mode argument:
+ *   - color_and_detections (default): It must have both color and person_detection data, and the number of person detections must match the number of recognitions and fast_descriptions.
+ *   - color_depth_and_detections: In addition to the color_and_detections criteria, it must also have a synchronized depth frame.
+ *   - detections: It must have person_detection data, and the number of person detections must match the number of recognitions and fast_descriptions. Color data is not required.
+ *
+ * If a synchronized message is found, the function returns the MessageData for the maximum synchronized sequence number.
+ * Messages with sequence numbers less than the maximum synchronized sequence are erased from the map.
+ * If no synchronized messages are found, an empty MessageData is returned.
+ *
+ * @param sync_mode The synchronization mode to use for determining message synchronization criteria.
+ * @return The synchronized MessageData if found, otherwise an empty MessageData.
+ */
+MessageData TwoStageHostSeqSync::get_msgs(const std::string& sync_mode) {
     try {
         int64_t maxSyncSeq = INT64_MIN;   // Store max seq number having synchronized messages
         std::unordered_map<int64_t, MessageData>::iterator maxSyncSeqIt;
 
-        // std::cout << "Iterating over msgs map to find max synced seq" << std::endl << std::flush;
         // Iterate over the container and identify the maximum synchronized sequence.
         for (auto it = msgs.begin(); it != msgs.end();) {
-            // std::cout << "Checking seq: " << it->first << std::endl << std::flush;
-            // std::cout << "  color exists: " << (it->second.color ? "true" : "false") << std::endl << std::flush;
-            // std::cout << "  person_detection exists: " << (it->second.person_detection ? "true" : "false") << std::endl << std::flush;
-            
-            if (!it->second.color || !it->second.person_detection) {
-                // std::cout << "  color or person_detection missing, skipping seq: " << it->first << std::endl << std::flush;
-                ++it;
-                continue;
+            bool is_synced = false;
+
+            // Check synchronization criteria based on the sync_mode
+            if (sync_mode == "color_and_detections" || sync_mode == "color_depth_and_detections") {
+                // Check if both color and person_detection data exist
+                if (it->second.color && it->second.person_detection) {
+                    // Cast person_detection to SpatialImgDetections
+                    auto spatialImgDetPtr = std::static_pointer_cast<dai::SpatialImgDetections>(it->second.person_detection);
+                    if (!spatialImgDetPtr) throw std::runtime_error("Failed to cast message to SpatialImgDetections");
+
+                    // Check if the number of detections matches the number of recognitions and fast_descriptions
+                    if (spatialImgDetPtr->detections.size() == 0 ||
+                        (spatialImgDetPtr->detections.size() ==  it->second.recognitions.size() &&
+                         spatialImgDetPtr->detections.size() == it->second.fast_descriptions.size())) {
+                        
+                        // For color_depth_and_detections mode, also check if depth data exists
+                        if (sync_mode == "color_depth_and_detections") {
+                            is_synced = it->second.depth != nullptr;
+                        } else {
+                            is_synced = true;
+                        }
+                    }
+                }
+            } else if (sync_mode == "detections") {
+                // Check if person_detection data exists
+                if (it->second.person_detection) {
+                    // Cast person_detection to SpatialImgDetections
+                    auto spatialImgDetPtr = std::static_pointer_cast<dai::SpatialImgDetections>(it->second.person_detection);
+                    if (!spatialImgDetPtr) throw std::runtime_error("Failed to cast message to SpatialImgDetections");
+
+                    // Check if the number of detections matches the number of recognitions and fast_descriptions
+                    if (spatialImgDetPtr->detections.size() == 0 ||
+                        (spatialImgDetPtr->detections.size() ==  it->second.recognitions.size() &&
+                         spatialImgDetPtr->detections.size() == it->second.fast_descriptions.size())) {
+                        is_synced = true;
+                    }
+                }
+            } else {
+                throw std::runtime_error("Invalid sync_mode: " + sync_mode);
             }
 
-            auto spatialImgDetPtr = std::static_pointer_cast<dai::SpatialImgDetections>(it->second.person_detection);
-            if (!spatialImgDetPtr) throw std::runtime_error("Failed to cast message to SpatialImgDetections");
-
-            // std::cout << "  num detections: " << spatialImgDetPtr->detections.size() << std::endl << std::flush; 
-            // std::cout << "  num recognitions: " << it->second.recognitions.size() << std::endl << std::flush;
-            // std::cout << "  num fast_descriptions: " << it->second.fast_descriptions.size() << std::endl << std::flush;
-
-            if (spatialImgDetPtr->detections.size() == 0 ||
-                (spatialImgDetPtr->detections.size() ==  it->second.recognitions.size() &&
-                 spatialImgDetPtr->detections.size() == it->second.fast_descriptions.size())) {
-                
-                // std::cout << "  seq " << it->first << " is synced" << std::endl << std::flush;
+            // Update the maximum synchronized sequence if the current message is synced
+            if (is_synced) {
                 if (it->first > maxSyncSeq) {
-                    // std::cout << "    new max synced seq found: " << it->first << std::endl << std::flush;
                     maxSyncSeq = it->first;
                     maxSyncSeqIt = it;
                 }
             }
-            else {
-                // std::cout << "  seq " << it->first << " is not synced" << std::endl << std::flush;
-            }
 
-            // Check if current sequence number is less than maxSyncSeq, if yes erase it.
+            // Erase messages with sequence numbers less than the maximum synchronized sequence
             if (it->first < maxSyncSeq) {
-                // std::cout << "  erasing seq " << it->first << " since it's less than max synced seq " << maxSyncSeq << std::endl << std::flush;
                 it = msgs.erase(it);
             } else {
                 ++it;
@@ -140,16 +175,12 @@ MessageData TwoStageHostSeqSync::get_msgs() {
 
         // If no synced messages were found, return an empty MessageData
         if (maxSyncSeq == INT64_MIN) {
-            // std::cout << "!!! no synced messages found" << std::endl << std::flush;
             return MessageData{};
         }
-
-        // std::cout << "Max synced seq: " << maxSyncSeq << std::endl << std::flush;
         
         // Extract the synced messages and erase the entry from the container
         MessageData synced_msgs = std::move(maxSyncSeqIt->second);
         msgs.erase(maxSyncSeqIt);
-        // std::cout << "!!! get_msgs returning synced messages for seq: " << maxSyncSeq << std::endl << std::flush;
         return synced_msgs;
     } catch (const std::exception &e) {
         std::cerr << "Error in get_msgs: " << e.what() << std::endl;
@@ -306,7 +337,7 @@ void OakdXlinkFullReader::SetOrReset() {
     params.max_num_objects_in_track = -1;
 
     // Initialize tracker with the set params
-    tracker = std::make_unique<PedestrianTracker>(params);
+    tracker = std::make_unique<PedestrianTracker>(params, cv::Size(rgb_person_det_nn_in_x_res, rgb_person_det_nn_in_y_res));
     // The tracker currently uses "fast descriptors" of a cropped detection resized to 16x32 and
     // "strong descriptors" which are the cropped detections being resized and put through a ML algo
     // We then also set the distance algorithms to use for fast and for strong
@@ -684,11 +715,20 @@ void OakdXlinkFullReader::SetOrReset() {
     }
 
     control_queue =  device->getInputQueue("control");
-    nlohmann::json dict{{"message", "send_rgb_as_they_come"}};
-    auto buf = dai::Buffer();
-    auto data = dict.dump();
-    buf.setData({data.begin(), data.end()});
-    control_queue->send(buf);
+    if (send_rgb_to_host || stream_rgb) {
+        nlohmann::json dict{{"message", "send_rgb_as_they_come"}};
+        auto buf = dai::Buffer();
+        auto data = dict.dump();
+        buf.setData({data.begin(), data.end()});
+        control_queue->send(buf);
+    }
+    if (send_depth_to_host || stream_depth) {
+        nlohmann::json dict{{"message", "send_depth_as_they_come"}};
+        auto buf = dai::Buffer();
+        auto data = dict.dump();
+        buf.setData({data.begin(), data.end()});
+        control_queue->send(buf);
+    }
     spdlog::debug("Done opening");
 
 }
@@ -756,10 +796,18 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
 
+            // Oakd reader must be able to respond to a "c" input from keyboard which would request a rgb and depth frame to be returned
+            // This will cause frame_types_to_pull to be populated with "rgb" and "depth"
+
             bool message_pulled = false; //we will set this to true if we pull a message (so we don't call get_msgs unnecessarily)
             if (queues["rgb"]->has()) {
                 auto rgb_message = queues["rgb"]->get();
                 sync.add_msg(rgb_message, "color");
+                message_pulled = true;
+            }
+            if (queues["depth"]->has()) {
+                auto depth_message = queues["depth"]->get();
+                sync.add_msg(depth_message, "depth");
                 message_pulled = true;
             }
             if (queues["person_detection"]->has()) {
@@ -781,7 +829,7 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
             MessageData msgs;
             // Now we check if all messages have come in for a given color (it checks if all messages have the same sequence number)
             if (message_pulled) {
-                msgs = sync.get_msgs();
+                msgs = sync.get_msgs("color_and_detections");
             }
             if (!msgs.color) {
                 // If we don't have a color message returned in the sync, we don't have all the messages
@@ -847,7 +895,7 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
             }
             std:cerr << "RAW detections size: " << detections.size() << std::endl << std::flush;
             
-            tracker->Process(frame, detections, epoch_time);
+            tracker->Process(detections, epoch_time);
 
             auto recent_detections = tracker->GetMostRecentDetections();
 
