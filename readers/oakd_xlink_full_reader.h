@@ -96,6 +96,15 @@ private:
   std::string environment_name_;
   std::string sensor_name_;
 
+  //This is used to set whether to pull RGB/Depth frames from the oakd device to the host for debug visualization
+  bool send_rgb_to_host = true;
+  bool send_depth_to_host = false;
+
+  // One time frame pull for frame and depth (oakd usually only send detections, but may be asked to send RGBD for calibration)
+  bool pull_and_send_rgb_frame_once = false;
+  bool pull_and_send_depth_frame_once = false;
+
+
   bool stream_rgb = false;
   bool stream_depth = false;
   bool stream_bodies = false;
@@ -117,24 +126,9 @@ private:
 
   std::shared_ptr<dai::Pipeline> pipeline;
   std::shared_ptr<dai::node::ColorCamera> camRgb;
-  std::shared_ptr<dai::node::XLinkOut> rgbOut;
   std::shared_ptr<dai::node::MonoCamera> left;
   std::shared_ptr<dai::node::MonoCamera> right;
   std::shared_ptr<dai::node::StereoDepth> stereo;
-
-  // FACE DETECTION
-  unsigned int rgb_face_det_nn_in_x_res = 640;
-  unsigned int rgb_face_det_nn_in_y_res = 360;
-  std::shared_ptr<dai::node::ImageManip> face_det_manip;
-  std::shared_ptr<dai::node::NeuralNetwork> face_nn;
-  std::shared_ptr<dai::node::NeuralNetwork> face_post_proc_nn;
-  std::shared_ptr<dai::node::XLinkOut> face_det_xout;
-
-  // Testing for sequence numbers
-  std::shared_ptr<dai::node::Script> log_image_manip_input_script;
-  std::shared_ptr<dai::node::Script> log_person_nn_input_script;
-  std::shared_ptr<dai::node::Script> log_person_nn_input_depth_script;
-  std::shared_ptr<dai::node::Script> log_person_nn_output_script;
 
   // PERSON DETECTION
   unsigned int rgb_person_det_nn_in_x_res = 544;
@@ -142,6 +136,14 @@ private:
   std::shared_ptr<dai::node::ImageManip> person_det_manip;
   std::shared_ptr<dai::node::MobileNetSpatialDetectionNetwork> person_nn;
   std::shared_ptr<dai::node::XLinkOut> person_det_xout;
+
+  // RGB AND DEPTH OUTPUT
+  std::shared_ptr<dai::node::Script> rgb_and_depth_out_script;
+  std::shared_ptr<dai::node::XLinkOut> rgbOut;
+  std::shared_ptr<dai::node::XLinkOut> depthOut;
+  std::shared_ptr<dai::node::XLinkIn> control_xlinkin;
+  std::shared_ptr<dai::node::Script> control_script;
+
   // Strong Recognition
   cv::Size strong_descriptor_size = cv::Size(1,256);
   unsigned int rgb_person_reid_strong_nn_in_x_res = 128;
@@ -161,15 +163,11 @@ private:
   // Visualization
   LazyVideoWriter videoWriter{"", 7.0, 4294967295};
 
-  // DEPTH DIFF SECTION
-  std::shared_ptr<dai::node::Script> depth_control_script;
-  std::shared_ptr<dai::node::NeuralNetwork> depth_diff_nn;
-  std::shared_ptr<dai::node::XLinkOut> depth_diff_xout;
-
   std::shared_ptr<dai::DeviceInfo> device_info;
   std::shared_ptr<dai::Device> device;
 
   std::unordered_map<std::string, std::shared_ptr<dai::DataOutputQueue>> queues;
+  std::shared_ptr<dai::DataInputQueue> control_queue;
 
   TwoStageHostSeqSync sync;
   std::vector<std::vector<float>> results;
@@ -278,7 +276,7 @@ public:
 
   bool HasNextFrame();
 
-  void NextFrame();
+  void NextFrame(const std::vector<std::string> frame_types_to_pull = {});
 
   std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame();
 

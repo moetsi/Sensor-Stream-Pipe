@@ -124,7 +124,7 @@ std::vector<std::shared_ptr<FrameStruct>> ImageReader::GetCurrentFrame() {
   return v;
 }
 
-void ImageReader::NextFrame() {
+void ImageReader::NextFrame(const std::vector<std::string> frame_types_to_pull) {
   frame_counter_ += 1;
   current_frame_internal_ = CreateFrameStruct(frame_counter_);
 }

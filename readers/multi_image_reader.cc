@@ -28,7 +28,7 @@ std::vector<std::shared_ptr<FrameStruct>> MultiImageReader::GetCurrentFrame() {
   return current_frame_internal_;
 }
 
-void MultiImageReader::NextFrame() {
+void MultiImageReader::NextFrame(const std::vector<std::string> frame_types_to_pull) {
   frame_counter_ += 1;
   current_frame_internal_.clear();
   for(auto reader: readers_){

@@ -52,7 +52,7 @@ public:
 
   bool HasNextFrame();
 
-  void NextFrame();
+  void NextFrame(const std::vector<std::string> frame_types_to_pull = {});
 
   std::shared_ptr<std::string> GetCurrentSerializedMessage();
 

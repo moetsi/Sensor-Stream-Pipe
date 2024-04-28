@@ -94,7 +94,7 @@ unsigned long elapsed(unsigned long start, unsigned long end)
     return end - start;
 }
 
-void NetworkReader::NextFrame() {
+void NetworkReader::NextFrame(const std::vector<std::string> frame_types_to_pull) {
 
 // std::cerr << __FILE__ << ":" << __LINE__<< std::endl << std::flush;
   zmq::message_t request;

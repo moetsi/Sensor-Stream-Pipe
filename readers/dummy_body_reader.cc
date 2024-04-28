@@ -32,7 +32,7 @@ DummyBodyReader::DummyBodyReader(YAML::Node config) {
 DummyBodyReader::~DummyBodyReader() {
 }
 
-void DummyBodyReader::NextFrame() {
+void DummyBodyReader::NextFrame(const std::vector<std::string> frame_types_to_pull) {
   std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush;
   std::this_thread::sleep_for(std::chrono::milliseconds(100)); // 10 fps
   current_frame_.clear();

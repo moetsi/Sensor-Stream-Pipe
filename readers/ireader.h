@@ -57,7 +57,7 @@ public:
   virtual bool HasNextFrame() = 0;
 
   /** @brief Go to next frame */
-  virtual void NextFrame() = 0;
+  virtual void NextFrame(const std::vector<std::string> frame_types_to_pull = {}) = 0;
 
   /** @brief Reset this reader */
   virtual void Reset() = 0;

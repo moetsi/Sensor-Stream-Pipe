@@ -251,7 +251,7 @@ std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader,
     }
     if (reader->HasNextFrame()) {
       if (!frame_types_to_pull.empty()) {
-        reader->NextFrame();
+        reader->NextFrame(frame_types_to_pull);
         frame_types_to_pull.clear();
         std::cout << "frame_types_to_pull cleared" << std::endl;
       } else {

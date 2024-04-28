@@ -215,7 +215,7 @@ bool iPhoneReader::HasNextFrame()
   return true;
 }
 
-void iPhoneReader::NextFrame()
+void iPhoneReader::NextFrame(const std::vector<std::string> frame_types_to_pull)
 {
 }
 

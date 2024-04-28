@@ -207,7 +207,7 @@ unsigned int VideoFileReader::GetCurrentFrameId() {
   return current_frame_counter_;
 }
 
-void VideoFileReader::NextFrame() {
+void VideoFileReader::NextFrame(const std::vector<std::string> frame_types_to_pull) {
   if (!libav_ready_)
     Init(this->filename_);
 

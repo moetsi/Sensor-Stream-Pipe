@@ -21,7 +21,7 @@ public:
 
   void Reset() override;
   bool HasNextFrame() override;
-  void NextFrame() override;
+  void NextFrame(const std::vector<std::string> frame_types_to_pull = {}) override;
   std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame() override;
   unsigned int GetCurrentFrameId() override;
   void GoToFrame(unsigned int frame_id) override;
