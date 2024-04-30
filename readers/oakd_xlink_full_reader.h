@@ -98,13 +98,8 @@ private:
   std::string sensor_name_;
 
   //This is used to set whether to pull RGB/Depth frames from the oakd device to the host for debug visualization
-  bool send_rgb_to_host = true;
-  bool send_depth_to_host = true;
-
-  // One time frame pull for frame and depth (oakd usually only send detections, but may be asked to send RGBD for calibration)
-  bool pull_and_send_rgb_frame_once = false;
-  bool pull_and_send_depth_frame_once = false;
-
+  bool send_rgb_to_host_and_visualize = false;
+  bool send_depth_to_host_and_visualize = false;
 
   bool stream_rgb = false;
   bool stream_depth = false;
@@ -267,6 +262,211 @@ private:
   std::string model_reid_path2;
 
   std::vector<std::vector<float>> reid_results;
+
+  std::string rgb_and_depth_out_script_string = R"(
+        import time
+        import json
+
+        send_rgb_as_they_come = False
+        send_depth_as_they_come = False
+        send_a_depth = False
+        send_a_rgb = False
+        send_a_depth_and_rgb_pair = False
+
+        frames = dict()
+
+        while True:
+            time.sleep(0.001)
+            command = node.io['commands'].tryGet()
+            if command is not None:
+                node.warn('rgb_and_depth_out_script received command')
+                data = command.getData()
+                jsonStr = str(data, 'utf-8')
+                dict = json.loads(jsonStr)
+                commandString = dict['message']
+                node.warn('message was: ' + commandString)
+                if commandString == "send_rgb_as_they_come":
+                    send_rgb_as_they_come = True
+                elif commandString == "send_depth_as_they_come":
+                    send_depth_as_they_come = True  
+                elif commandString == "send_a_depth":
+                    send_a_depth = True
+                elif commandString == "send_a_rgb":
+                    send_a_rgb = True
+                elif commandString == "send_a_depth_and_rgb_pair":
+                    send_a_depth_and_rgb_pair = True
+
+            rgb_frame = node.io['rgb'].tryGet()
+            if rgb_frame is not None:
+                seq = rgb_frame.getSequenceNum()
+                if seq not in frames:
+                    frames[seq] = {}
+                frames[seq]["rgb"] = rgb_frame
+                if send_rgb_as_they_come:
+                    node.io['rgb_out'].send(rgb_frame)
+
+            depth_frame = node.io['depth'].tryGet()  
+            if depth_frame is not None:
+                seq = depth_frame.getSequenceNum()
+                if seq not in frames:
+                    frames[seq] = {}
+                frames[seq]["depth"] = depth_frame
+                if send_depth_as_they_come:
+                    node.io['depth_out'].send(depth_frame)
+                    
+            if len(frames) > 5:
+                min_seq = min(frames.keys())
+                del frames[min_seq]
+
+            if send_a_rgb:
+                if len(frames) > 0:
+                    seq, data = frames.popitem()
+                    if "rgb" in data:
+                        node.io['rgb_out'].send(data["rgb"])
+                send_a_rgb = False
+
+            if send_a_depth:  
+                if len(frames) > 0:
+                    seq, data = frames.popitem()
+                    if "depth" in data:
+                        node.io['depth_out'].send(data["depth"])
+                send_a_depth = False
+
+            if send_a_depth_and_rgb_pair:
+                if len(frames) > 0:  
+                    seq, data = frames.popitem()
+                    if "rgb" in data and "depth" in data:
+                        node.io['rgb_out'].send(data["rgb"])
+                        node.io['depth_out'].send(data["depth"])
+                send_a_depth_and_rgb_pair = False
+    )";
+
+  std::string createReidConfigScript() {
+    std::ostringstream reid_config_script;
+        reid_config_script << R"(
+        import time
+        msgs = dict()
+        def add_msg(msg, name, seq = None):
+            global msgs
+            if seq is None:
+                seq = msg.getSequenceNum()
+            seq = str(seq)
+            if seq not in msgs:
+                # node.warn(f"Recving image seq num: {seq}")
+                msgs[seq] = dict()
+            msgs[seq][name] = msg
+            if 15 < len(msgs):
+                # node.warn(f"Removing first element! len {len(msgs)}")
+                # Check all items in msgs and print incomplete ones
+                for seq, syncMsgs in msgs.items():
+                    if len(syncMsgs) != 2:
+                        missing = 'preview' if 'dets' in syncMsgs else 'dets'
+                        # node.warn(f"Incomplete set in seq {seq}: missing {missing}")
+                # Pop the item and print its sequence number
+                popped_item = msgs.popitem()
+                # node.warn(f"                       Removed seq: {popped_item[0]}")
+        def get_msgs():
+            global msgs
+            for seq, syncMsgs in msgs.items():
+                if len(syncMsgs) == 2:
+                    result = syncMsgs
+                    del msgs[seq]
+                    return result
+            return None
+        def correct_bb(bb):
+            if bb.xmin < 0: bb.xmin = 0.001
+            if bb.ymin < 0: bb.ymin = 0.001
+            if bb.xmax > 1: bb.xmax = 0.999
+            if bb.ymax > 1: bb.ymax = 0.999
+            return bb
+        while True:
+            time.sleep(0.001)
+            preview = node.io['preview'].tryGet()
+            if preview is not None:
+                add_msg(preview, 'preview')
+            dets = node.io['person_dets_in'].tryGet()
+            if dets is not None:
+                seq = dets.getSequenceNum()
+                add_msg(dets, 'dets', seq)
+            sync_msgs = get_msgs()
+            if sync_msgs is not None:
+                img = sync_msgs['preview']
+                dets = sync_msgs['dets']
+                dets_seq = dets.getSequenceNum()
+                img_seq = img.getSequenceNum()
+                # node.warn(f"   Sending image seq num: {img_seq}")
+                for i, det in enumerate(dets.detections):
+                    cfg = ImageManipConfig()
+                    correct_bb(det)
+                    cfg.setCropRect(det.xmin, det.ymin, det.xmax, det.ymax)
+                    cfg.setResize()";
+        reid_config_script << std::to_string(rgb_person_reid_strong_nn_in_x_res) << ", " << std::to_string(rgb_person_reid_strong_nn_in_y_res) << ")";
+        reid_config_script << R"(
+                    cfg.setKeepAspectRatio(False)
+                    node.io['manip_cfg'].send(cfg)
+                    node.io['manip_img'].send(img))";
+    return reid_config_script.str();
+  };
+
+    std::string createFastDescConfigScript() {
+      std::ostringstream fast_desc_script;
+          fast_desc_script << R"(
+          import time
+          msgs = dict()
+          def add_msg(msg, name, seq = None):
+              global msgs
+              if seq is None:
+                  seq = msg.getSequenceNum()
+              seq = str(seq)
+              if seq not in msgs:
+                  msgs[seq] = dict()
+              msgs[seq][name] = msg
+              if 15 < len(msgs):
+                  # node.warn(f"Removing first element! len {len(msgs)}")
+                  msgs.popitem()
+          def get_msgs():
+              global msgs
+              seq_remove = []
+              for seq, syncMsgs in msgs.items():
+                  seq_remove.append(seq)
+                  if len(syncMsgs) == 2:
+                      for rm in seq_remove:
+                          del msgs[rm]
+                      return syncMsgs
+              return None
+          def correct_bb(bb):
+              if bb.xmin < 0: bb.xmin = 0.001
+              if bb.ymin < 0: bb.ymin = 0.001
+              if bb.xmax > 1: bb.xmax = 0.999
+              if bb.ymax > 1: bb.ymax = 0.999
+              return bb
+          while True:
+              time.sleep(0.001)
+              preview = node.io['preview'].tryGet()
+              if preview is not None:
+                  add_msg(preview, 'preview')
+              dets = node.io['person_dets_in'].tryGet()
+              if dets is not None:
+                  seq = dets.getSequenceNum()
+                  add_msg(dets, 'dets', seq)
+              sync_msgs = get_msgs()
+              if sync_msgs is not None:
+                  img = sync_msgs['preview']
+                  dets = sync_msgs['dets']
+                  dets_seq = dets.getSequenceNum()
+                  img_seq = img.getSequenceNum()
+                  for i, det in enumerate(dets.detections):
+                      cfg = ImageManipConfig()
+                      correct_bb(det)
+                      cfg.setCropRect(det.xmin, det.ymin, det.xmax, det.ymax)
+                      cfg.setResize()";
+          fast_desc_script << std::to_string(rgb_person_reid_fast_nn_in_x_res) << ", " << std::to_string(rgb_person_reid_fast_nn_in_y_res) << ")";
+          fast_desc_script << R"(
+                      cfg.setKeepAspectRatio(False)
+                      node.io['manip_cfg'].send(cfg)
+                      node.io['manip_img'].send(img))";
+    return fast_desc_script.str();
+  };
 
 public:
   OakdXlinkFullReader(YAML::Node config, const char* client_key = nullptr, const char* environment_name = nullptr, const char* sensor_name = nullptr);

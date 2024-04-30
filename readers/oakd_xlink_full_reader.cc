@@ -6,12 +6,6 @@
 #include "oakd_xlink_full_reader.h"
 #include "human_poses.h"
 
-// Closer-in minimum depth, disparity range is doubled (from 95 to 190):
-// static std::atomic<bool> extended_disparity{false};
-// // Better accuracy for longer distance, fractional disparity 32-levels:
-// static std::atomic<bool> subpixel{false};
-// // Better handling for occlusions:
-// static std::atomic<bool> lr_check{false};
 using namespace std;
 using namespace InferenceEngine;
 
@@ -22,19 +16,6 @@ using namespace InferenceEngine;
 
 namespace moetsi::ssp {
 using namespace human_pose_estimation;
-
-// Calculate cosine distance between two vectors
-float cos_dist(const std::vector<float>& a, const std::vector<float>& b) {
-    float dotProduct = 0.0;
-    float normA = 0.0;
-    float normB = 0.0;
-    for (size_t i = 0; i < a.size(); ++i) {
-        dotProduct += a[i] * b[i];
-        normA += a[i] * a[i];
-        normB += b[i] * b[i];
-    }
-    return dotProduct / (sqrt(normA) * sqrt(normB));
-}
 
 // Normalize frame and bounding box
 cv::Rect frame_norm(const int frame_cols, const int frame_rows, const std::vector<float>& bbox) {
@@ -207,6 +188,8 @@ OakdXlinkFullReader::OakdXlinkFullReader(YAML::Node config, const char* client_k
     stream_rgb = config["stream_color"].as<bool>();
     stream_depth = config["stream_depth"].as<bool>();
     stream_bodies = config["stream_bodies"].as<bool>();
+    send_rgb_to_host_and_visualize = config["send_rgb_to_host_and_visualize"].as<bool>();
+    send_depth_to_host_and_visualize = config["send_depth_to_host_and_visualize"].as<bool>();
     fps = config["streaming_rate"].as<unsigned int>();
 
     Init(config, states[0], 0);
@@ -318,20 +301,6 @@ void OakdXlinkFullReader::SetOrReset() {
     ResetVino();
     auto st = states[0];
 
-    // 0. We initialize the tracker
-    // 1. The pipeline is created and the nodes are added to it.
-    // 2. The properties of the nodes are set.
-    // 3. The nodes are linked.
-    // 4. The device is opened with the pipeline.
-    // 5. The output queue is created to receive the frames from the output.
-    // 6. The input queue is created to send the control messages.
-    // 7. The focus is set to manual and the value is set to 130.
-    // 8. The control message is sent to the input queue.
-
-    // 
-    // Tracker set up
-    //
-
     // We set the tracker to not drop forgotten tracks and to not limit the number of objects in a track
     params.drop_forgotten_tracks = false;
     params.max_num_objects_in_track = -1;
@@ -439,83 +408,7 @@ void OakdXlinkFullReader::SetOrReset() {
     person_nn->passthrough.link(rgb_and_depth_out_script->inputs["rgb"]);
     person_nn->passthroughDepth.link(rgb_and_depth_out_script->inputs["depth"]);
 
-    rgb_and_depth_out_script->setScript(R"(
-        import time
-        import json
-
-        send_rgb_as_they_come = False
-        send_depth_as_they_come = False
-        send_a_depth = False
-        send_a_rgb = False
-        send_a_depth_and_rgb_pair = False
-
-        frames = dict()
-
-        while True:
-            time.sleep(0.001)
-            command = node.io['commands'].tryGet()
-            if command is not None:
-                node.warn('rgb_and_depth_out_script received command')
-                data = command.getData()
-                jsonStr = str(data, 'utf-8')
-                dict = json.loads(jsonStr)
-                commandString = dict['message']
-                node.warn('message was: ' + commandString)
-                if commandString == "send_rgb_as_they_come":
-                    send_rgb_as_they_come = True
-                elif commandString == "send_depth_as_they_come":
-                    send_depth_as_they_come = True  
-                elif commandString == "send_a_depth":
-                    send_a_depth = True
-                elif commandString == "send_a_rgb":
-                    send_a_rgb = True
-                elif commandString == "send_a_depth_and_rgb_pair":
-                    send_a_depth_and_rgb_pair = True
-
-            rgb_frame = node.io['rgb'].tryGet()
-            if rgb_frame is not None:
-                seq = rgb_frame.getSequenceNum()
-                if seq not in frames:
-                    frames[seq] = {}
-                frames[seq]["rgb"] = rgb_frame
-                if send_rgb_as_they_come:
-                    node.io['rgb_out'].send(rgb_frame)
-
-            depth_frame = node.io['depth'].tryGet()  
-            if depth_frame is not None:
-                seq = depth_frame.getSequenceNum()
-                if seq not in frames:
-                    frames[seq] = {}
-                frames[seq]["depth"] = depth_frame
-                if send_depth_as_they_come:
-                    node.io['depth_out'].send(depth_frame)
-                    
-            if len(frames) > 5:
-                min_seq = min(frames.keys())
-                del frames[min_seq]
-
-            if send_a_rgb:
-                if len(frames) > 0:
-                    seq, data = frames.popitem()
-                    if "rgb" in data:
-                        node.io['rgb_out'].send(data["rgb"])
-                send_a_rgb = False
-
-            if send_a_depth:  
-                if len(frames) > 0:
-                    seq, data = frames.popitem()
-                    if "depth" in data:
-                        node.io['depth_out'].send(data["depth"])
-                send_a_depth = False
-
-            if send_a_depth_and_rgb_pair:
-                if len(frames) > 0:  
-                    seq, data = frames.popitem()
-                    if "rgb" in data and "depth" in data:
-                        node.io['rgb_out'].send(data["rgb"])
-                        node.io['depth_out'].send(data["depth"])
-                send_a_depth_and_rgb_pair = False
-    )");
+    rgb_and_depth_out_script->setScript(rgb_and_depth_out_script_string);
 
     rgbOut = pipeline->create<dai::node::XLinkOut>();
     rgbOut->setStreamName("rgb");
@@ -538,70 +431,7 @@ void OakdXlinkFullReader::SetOrReset() {
     person_nn->passthrough.link(person_config_manip_for_reid_nn_script->inputs["preview"]);
     person_nn->out.link(person_config_manip_for_reid_nn_script->inputs["person_dets_in"]);
     // We create the script including the variables we need for reid size
-    std::ostringstream reid_config_script;
-    reid_config_script << R"(
-    import time
-    msgs = dict()
-    def add_msg(msg, name, seq = None):
-        global msgs
-        if seq is None:
-            seq = msg.getSequenceNum()
-        seq = str(seq)
-        if seq not in msgs:
-            # node.warn(f"Recving image seq num: {seq}")
-            msgs[seq] = dict()
-        msgs[seq][name] = msg
-        if 15 < len(msgs):
-            # node.warn(f"Removing first element! len {len(msgs)}")
-            # Check all items in msgs and print incomplete ones
-            for seq, syncMsgs in msgs.items():
-                if len(syncMsgs) != 2:
-                    missing = 'preview' if 'dets' in syncMsgs else 'dets'
-                    # node.warn(f"Incomplete set in seq {seq}: missing {missing}")
-            # Pop the item and print its sequence number
-            popped_item = msgs.popitem()
-            # node.warn(f"                       Removed seq: {popped_item[0]}")
-    def get_msgs():
-        global msgs
-        for seq, syncMsgs in msgs.items():
-            if len(syncMsgs) == 2:
-                result = syncMsgs
-                del msgs[seq]
-                return result
-        return None
-    def correct_bb(bb):
-        if bb.xmin < 0: bb.xmin = 0.001
-        if bb.ymin < 0: bb.ymin = 0.001
-        if bb.xmax > 1: bb.xmax = 0.999
-        if bb.ymax > 1: bb.ymax = 0.999
-        return bb
-    while True:
-        time.sleep(0.001)
-        preview = node.io['preview'].tryGet()
-        if preview is not None:
-            add_msg(preview, 'preview')
-        dets = node.io['person_dets_in'].tryGet()
-        if dets is not None:
-            seq = dets.getSequenceNum()
-            add_msg(dets, 'dets', seq)
-        sync_msgs = get_msgs()
-        if sync_msgs is not None:
-            img = sync_msgs['preview']
-            dets = sync_msgs['dets']
-            dets_seq = dets.getSequenceNum()
-            img_seq = img.getSequenceNum()
-            # node.warn(f"   Sending image seq num: {img_seq}")
-            for i, det in enumerate(dets.detections):
-                cfg = ImageManipConfig()
-                correct_bb(det)
-                cfg.setCropRect(det.xmin, det.ymin, det.xmax, det.ymax)
-                cfg.setResize()";
-    reid_config_script << std::to_string(rgb_person_reid_strong_nn_in_x_res) << ", " << std::to_string(rgb_person_reid_strong_nn_in_y_res) << ")";
-    reid_config_script << R"(
-                cfg.setKeepAspectRatio(False)
-                node.io['manip_cfg'].send(cfg)
-                node.io['manip_img'].send(img))";
-    person_config_manip_for_reid_nn_script->setScript(reid_config_script.str());
+    person_config_manip_for_reid_nn_script->setScript(createReidConfigScript());
 
     // Take in the configs from the person strong reid config manip node
     recognition_manip = pipeline->create<dai::node::ImageManip>();
@@ -625,63 +455,7 @@ void OakdXlinkFullReader::SetOrReset() {
     person_nn->passthrough.link(person_config_manip_for_fast_desc_script->inputs["preview"]);
     person_nn->out.link(person_config_manip_for_fast_desc_script->inputs["person_dets_in"]);
     // We create the script including the variables we need for reid size
-    std::ostringstream fast_desc_script;
-    fast_desc_script << R"(
-    import time
-    msgs = dict()
-    def add_msg(msg, name, seq = None):
-        global msgs
-        if seq is None:
-            seq = msg.getSequenceNum()
-        seq = str(seq)
-        if seq not in msgs:
-            msgs[seq] = dict()
-        msgs[seq][name] = msg
-        if 15 < len(msgs):
-            # node.warn(f"Removing first element! len {len(msgs)}")
-            msgs.popitem()
-    def get_msgs():
-        global msgs
-        seq_remove = []
-        for seq, syncMsgs in msgs.items():
-            seq_remove.append(seq)
-            if len(syncMsgs) == 2:
-                for rm in seq_remove:
-                    del msgs[rm]
-                return syncMsgs
-        return None
-    def correct_bb(bb):
-        if bb.xmin < 0: bb.xmin = 0.001
-        if bb.ymin < 0: bb.ymin = 0.001
-        if bb.xmax > 1: bb.xmax = 0.999
-        if bb.ymax > 1: bb.ymax = 0.999
-        return bb
-    while True:
-        time.sleep(0.001)
-        preview = node.io['preview'].tryGet()
-        if preview is not None:
-            add_msg(preview, 'preview')
-        dets = node.io['person_dets_in'].tryGet()
-        if dets is not None:
-            seq = dets.getSequenceNum()
-            add_msg(dets, 'dets', seq)
-        sync_msgs = get_msgs()
-        if sync_msgs is not None:
-            img = sync_msgs['preview']
-            dets = sync_msgs['dets']
-            dets_seq = dets.getSequenceNum()
-            img_seq = img.getSequenceNum()
-            for i, det in enumerate(dets.detections):
-                cfg = ImageManipConfig()
-                correct_bb(det)
-                cfg.setCropRect(det.xmin, det.ymin, det.xmax, det.ymax)
-                cfg.setResize()";
-    fast_desc_script << std::to_string(rgb_person_reid_fast_nn_in_x_res) << ", " << std::to_string(rgb_person_reid_fast_nn_in_y_res) << ")";
-    fast_desc_script << R"(
-                cfg.setKeepAspectRatio(False)
-                node.io['manip_cfg'].send(cfg)
-                node.io['manip_img'].send(img))";
-    person_config_manip_for_fast_desc_script->setScript(fast_desc_script.str());
+    person_config_manip_for_fast_desc_script->setScript(createFastDescConfigScript());
 
     // Take in the configs from the config manip node
     fast_desc_manip = pipeline->create<dai::node::ImageManip>();
@@ -715,14 +489,14 @@ void OakdXlinkFullReader::SetOrReset() {
     }
 
     control_queue =  device->getInputQueue("control");
-    if (send_rgb_to_host || stream_rgb) {
+    if (send_rgb_to_host_and_visualize || stream_rgb) {
         nlohmann::json dict{{"message", "send_rgb_as_they_come"}};
         auto buf = dai::Buffer();
         auto data = dict.dump();
         buf.setData({data.begin(), data.end()});
         control_queue->send(buf);
     }
-    if (send_depth_to_host || stream_depth) {
+    if (send_depth_to_host_and_visualize || stream_depth) {
         nlohmann::json dict{{"message", "send_depth_as_they_come"}};
         auto buf = dai::Buffer();
         auto data = dict.dump();
@@ -739,43 +513,6 @@ void OakdXlinkFullReader::SetOrResetState(const std::shared_ptr<State> &st, int 
 
 OakdXlinkFullReader::~OakdXlinkFullReader() {
 
-}
-
-// Function to process the inference output
-std::vector<std::vector<float>> postprocess(const dai::NNData& inference, int x_width, int y_width) {
-
-    // Get inference results as a 1D float vector
-    std::vector<float> dets = inference.getLayerFp16("dets");
-
-    // Get number of valid faces
-    int nb_valid_faces = inference.getLayerInt32("dets@shape")[0];
-    // std::cerr << "nb_valid_faces: " << nb_valid_faces << std::endl << std::flush;
-
-    // Convert the 1D float vector to a 2D float vector
-    std::vector<std::vector<float>> faces(nb_valid_faces, std::vector<float>(15));
-    for(int i = 0; i < nb_valid_faces; ++i) {
-        for(int j = 0; j < 15; ++j) {
-            faces[i][j] = dets[i*15+j];
-        }
-    }
-
-    // Replace (x2,y2) by (w,h)
-    for(auto& face : faces) {
-        face[2] -= face[0];
-        face[3] -= face[1];
-    }
-
-    // Scale the coordinates with the padded size
-    // This is not working correctly, as you move to edges of rgb the face is off
-    // TODO: This is probably because of the thumbnail resize imagemanip performed for the face detection nnf
-    // TODO: We are not scaling back to the original image size correctly 
-    for(auto& face : faces) {
-        for(int i = 0; i < 14; ++i) {
-            face[i] *= ((i % 2 == 0) ? x_width : y_width);
-        }
-    }
-
-    return faces;
 }
 
 void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_to_pull) {
@@ -796,8 +533,9 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
 
-            // Oakd reader must be able to respond to a "c" input from keyboard which would request a rgb and depth frame to be returned
-            // This will cause frame_types_to_pull to be populated with "rgb" and "depth"
+            if (frame_types_to_pull == std::vector<std::string>{"rgb", "depth"}) {
+                std::cerr << "Pulling rgb and depth" << std::endl << std::flush;
+            }
 
             bool message_pulled = false; //we will set this to true if we pull a message (so we don't call get_msgs unnecessarily)
             if (queues["rgb"]->has()) {
@@ -829,24 +567,33 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
             MessageData msgs;
             // Now we check if all messages have come in for a given color (it checks if all messages have the same sequence number)
             if (message_pulled) {
-                msgs = sync.get_msgs("color_and_detections");
+                // First we check if we should be pulling both depth and color along with detections
+                if ((send_rgb_to_host_and_visualize || stream_rgb) && (send_depth_to_host_and_visualize || stream_depth)) {
+                    // This means we need both depth and color
+                    msgs = sync.get_msgs("color_depth_and_detections");
+                }
+                // Next we check if we only need color and detections
+                else if (send_rgb_to_host_and_visualize || stream_rgb) {
+                    msgs = sync.get_msgs("color_and_detections");
+                }
+                // If the above is not true (don't need color and depth, or don't need color) then we only need detections
+                // TODO: This isn't fully configurable, it assumes that we always need at least detections
+                else if (stream_bodies) {
+                    msgs = sync.get_msgs("detections");
+                }
             }
-            if (!msgs.color) {
-                // If we don't have a color message returned in the sync, we don't have all the messages
+            if (!msgs.person_detection) {
+                // It is assumed that the message always has at least detections run, so if it doesn't exist it means it is empty
                 return;
             }
 
-            // Now that we have the messages for a given rgb frame, we can process them for the tracker algo
-            // We grab the rgb frame as a cv::Mat
-            auto frame = msgs.color->getCvFrame();
-            // std::cerr << "RGB Synched Seq Num: " << msgs.color->getSequenceNum() << std::endl << std::flush;
-            // First we grab the timestamp of the rgb frame
-            auto timestamp = msgs.color->getTimestamp();
+            // STREAMING BODIES (DETECTIONS) SECTION
+            // First we do person detection and tracking no matter what (we assume Oakd will always be at least providing detections)
+            auto timestamp = msgs.person_detection->getTimestamp();
             uint64_t epoch_time = std::chrono::duration_cast<std::chrono::milliseconds>(timestamp.time_since_epoch()).count();
             
             // This will store all the TrackedObject detections
             TrackedObjects detections;
-
             // We grab the detections that we must turn into TrackedObject as well as fast and strong descriptors
             std::vector<dai::SpatialImgDetection> person_detections = msgs.person_detection->detections;
             std::vector<std::shared_ptr<dai::NNData>>& recognitions = msgs.recognitions;
@@ -893,69 +640,12 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
                     detections.emplace_back(obj);
                 }
             }
+
             std:cerr << "RAW detections size: " << detections.size() << std::endl << std::flush;
-            
             tracker->Process(detections, epoch_time);
-
             auto recent_detections = tracker->GetMostRecentDetections();
-
             // We print the number of detections
             std::cerr << "PROCESSED detection size: " << recent_detections.size() << std::endl << std::flush;
-
-            if (true)
-            {
-                // Drawing colored "worms" (tracks).
-                frame = tracker->DrawActiveTracks(frame);
-
-                // Drawing all detected objects on a frame by BLUE COLOR
-                for (const auto& detection : detections) {
-                    cv::rectangle(frame, detection.rect, cv::Scalar(255, 0, 0), 3);
-                    // Now we put the confidence label on the bounding box with same information as below
-                    std::string text =
-                        std::to_string(detection.object_id) + " conf: " + std::to_string(detection.confidence);
-                    putHighlightedText(frame,
-                                    text,
-                                    detection.rect.tl() - cv::Point{10, 10},
-                                    cv::FONT_HERSHEY_COMPLEX,
-                                    0.65,
-                                    cv::Scalar(255, 0, 0),
-                                    2);
-                }
-
-                // Drawing tracked detections only by RED color and print ID and detection
-                // confidence level.
-                for (const auto& detection : tracker->TrackedDetections()) {
-                    cv::rectangle(frame, detection.rect, cv::Scalar(0, 0, 255), 3);
-                    // std::string text =
-                    //     std::to_string(detection.object_id) + " conf: " + std::to_string(detection.confidence);
-                    // putHighlightedText(frame,
-                    //                    text,
-                    //                    detection.rect.tl() - cv::Point{10, 10},
-                    //                    cv::FONT_HERSHEY_COMPLEX,
-                    //                    0.65,
-                    //                    cv::Scalar(0, 0, 255),
-                    //                    2);
-                }
-                // presenter.drawGraphs(frame);
-                // metrics.update(startTime, frame, {10, 22}, cv::FONT_HERSHEY_COMPLEX, 0.65);
-
-                videoWriter.write(frame);
-                if (true) {
-                    cv::namedWindow("dbg", cv::WINDOW_NORMAL);
-                    cv::imshow("dbg", frame);
-                    char k = cv::waitKey(1);
-                    if (k == 27)
-                        break;
-                    // presenter.handleKey(k);
-                }
-
-                if (true && (seq_num % 100 == 0)) {
-                    DetectionLog log = tracker->GetDetectionLog(true);
-                    // SaveDetectionLogToTrajFile(detlog_out, log);
-                }
-
-            }
-            startTime = std::chrono::steady_clock::now();
 
             if (stream_bodies)
             {
@@ -987,119 +677,121 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
                 // Now we push the frame into the current frame
                 current_frame_.push_back(detections_frame_struct);
             }
+            
+            if (send_rgb_to_host_and_visualize)
+            {
+                auto frame = msgs.color->getCvFrame();
+                // Drawing colored "worms" (tracks).
+                frame = tracker->DrawActiveTracks(frame);
 
+                // Drawing all detected objects on a frame by BLUE COLOR
+                for (const auto& detection : detections) {
+                    cv::rectangle(frame, detection.rect, cv::Scalar(255, 0, 0), 3);
+                    // Now we put the confidence label on the bounding box with same information as below
+                    std::string text =
+                        std::to_string(detection.object_id) + " conf: " + std::to_string(detection.confidence);
+                    putHighlightedText(frame,
+                                    text,
+                                    detection.rect.tl() - cv::Point{10, 10},
+                                    cv::FONT_HERSHEY_COMPLEX,
+                                    0.65,
+                                    cv::Scalar(255, 0, 0),
+                                    2);
+                }
 
-        // //    THIS IS ALL COMMENTED OUT STARTS
-        //       //Increment counter and grab time
-        //     current_frame_counter_++;
-        //     uint64_t capture_timestamp = CurrentTimeMs();
-        //     auto framesASecond = (float)current_frame_counter_/((float)(capture_timestamp - start_time)*.001);
-        //     auto fps_string = std::to_string(framesASecond);
+                // Drawing tracked detections only by RED color and print ID and detection
+                // confidence level.
+                for (const auto& detection : tracker->TrackedDetections()) {
+                    cv::rectangle(frame, detection.rect, cv::Scalar(0, 0, 255), 3);
+                }
 
-        //     cv::Mat frameRgbOpenCv = std::static_pointer_cast<dai::ImgFrame>(msgs.color)->getCvFrame();
-        //     // resizing frames
-        //     cv::Mat resizedFrame;
-        //     cv::Size size(1632, 960); 
-        //     cv::resize(frameRgbOpenCv, resizedFrame, size); // resize image
+                videoWriter.write(frame);
+                if (true) {
+                    cv::namedWindow("dbg", cv::WINDOW_NORMAL);
+                    cv::imshow("dbg", frame);
+                    char k = cv::waitKey(1);
+                    if (k == 27)
+                        break;
+                    // presenter.handleKey(k);
+                }
 
-        //     // commented out because already done above
-        //     // auto person_detections = std::static_pointer_cast<dai::SpatialImgDetections>(msgs.person_detection)->detections;
-        //     auto face_detections = std::static_pointer_cast<dai::NNData>(msgs.face_detection);
-        //     auto faces = postprocess(*face_detections, resizedFrame.cols, resizedFrame.rows);
+                if (true && (seq_num % 100 == 0)) {
+                    DetectionLog log = tracker->GetDetectionLog(true);
+                    // SaveDetectionLogToTrajFile(detlog_out, log);
+                }
 
-        //     cv::putText(resizedFrame, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 0, 0), 8);
-        //     cv::putText(resizedFrame, fps_string, cv::Point(10, 30), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(255, 255, 255), 2);
+            }
+            startTime = std::chrono::steady_clock::now();
 
-        //     // Person detections bounding boxes, depth and reid labeling
-        //     for (size_t i = 0; i < person_detections.size(); ++i) {
-        //         auto detection = person_detections[i];
-        //         auto bbox = frame_norm(1632, 960, {detection.xmin, detection.ymin, detection.xmax, detection.ymax});
+            // Nowe we send the rgb frame to the host if it is set to stream
+            if (stream_rgb)
+            {
+                auto frame = msgs.color->getCvFrame();
+                std::shared_ptr<FrameStruct> rgbFrame =
+                    std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+                    rgbFrame->sensor_id = 0; 
+                rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
+                rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
+                rgbFrame->frame_id = current_frame_counter_;
+                rgbFrame->timestamps.push_back(capture_timestamp);
 
-        //         auto reid_result = (recognitions)[i]->getFirstLayerFp16();
+                // convert the raw buffer to cv::Mat
+                int32_t colorCols = frame.cols;                                                        
+                int32_t colorRows = frame.rows;                                                        
+                size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
 
-        //         bool found = false;
-        //         int reid_id;
-        //         for (size_t j = 0; j < reid_results.size(); ++j) {
-        //             auto dist = cos_dist(reid_result, reid_results[j]);
-        //             if (dist > 0.7) {
-        //                 reid_results[j] = reid_result;
-        //                 reid_id = j;
-        //                 found = true;
-        //                 break;
-        //             }
-        //         }
+                rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        
 
-        //         if (!found) {
-        //             reid_results.push_back(reid_result);
-        //             reid_id = reid_results.size() - 1;
-        //         }
+                memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       
+                memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       
+                memcpy(&rgbFrame->frame[8], (unsigned char*)(frame.data), colorSize);
 
-        //         cv::rectangle(resizedFrame, cv::Point(bbox.x, bbox.y), cv::Point(bbox.x + bbox.width, bbox.y + bbox.height), cv::Scalar(10, 245, 10), 2);
-        //         int y = (bbox.y + bbox.y + bbox.height) / 2;
-        //         auto depth_x = std::to_string(detection.spatialCoordinates.x/1000.0f);
-        //         auto depth_y = std::to_string(detection.spatialCoordinates.y/1000.0fdetections_frame_struct cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(0, 0, 0), 8);
-        //         cv::putText(resizedFrame, depth_text, cv::Point(bbox.x, y + 30), cv::FONT_HERSHEY_TRIPLEX, 1.5, cv::Scalar(255, 255, 255), 2);
-        //     }
+                current_frame_.push_back(rgbFrame);
 
-        //     // Face detections bounding boxes
-        //     for(const auto &face : faces) {
-        //         // Extract bounding box coordinates
-        //         int x = static_cast<int>(face[0]);
-        //         int y = static_cast<int>(face[1]);
-        //         int w = static_cast<int>(face[2]);
-        //         int h = static_cast<int>(face[3]);
+            }
 
-        //         // Draw bounding box for each face
-        //         cv::rectangle(resizedFrame, cv::Point(x, y), cv::Point(x + w, y + h), cv::Scalar(0, 255, 0), 2);
-        //     }
+            //Depth frame
+            if (send_depth_to_host_and_visualize || stream_depth)
+            {
+                auto depth_frame_mat = msgs.depth->getCvFrame();
 
-        //     cv::imshow("Camera", resizedFrame);
-        //     cv::waitKey(1);
+                // Normalize the depth frame for better visualization
+                cv::Mat depth_frame_normalized;
+                cv::normalize(depth_frame_mat, depth_frame_normalized, 0, 255, cv::NORM_MINMAX, CV_8U);
+                
+                // Apply a colormap for better visualization
+                cv::Mat depth_frame_colorized;
+                cv::applyColorMap(depth_frame_normalized, depth_frame_colorized, cv::COLORMAP_JET);
 
-        //     // Color frame
-        //     std::shared_ptr<FrameStruct> rgbFrame =
-        //         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-        //         rgbFrame->sensor_id = 0; 
-        //     rgbFrame->frame_type = FrameType::FrameTypeColor; // 0;
-        //     rgbFrame->frame_data_type = FrameDataType::FrameDataTypeCvMat; // 9;
-        //     rgbFrame->frame_id = current_frame_counter_;
-        //     rgbFrame->timestamps.push_back(capture_timestamp);
+                if (send_depth_to_host_and_visualize) {
+                    cv::imshow("Depth Frame", depth_frame_colorized);
+                    cv::waitKey(1);
+                }
 
-        //     // convert the raw buffer to cv::Mat
-        //     int32_t colorCols = resizedFrame.cols;                                                        
-        //     int32_t colorRows = resizedFrame.rows;                                                        
-        //     size_t colorSize = colorCols*colorRows*3*sizeof(uchar); //This assumes that oakd color always returns CV_8UC3
+                if (stream_depth)
+                {
+                    std::shared_ptr<FrameStruct> depthFrameStruct =
+                        std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
+                    depthFrameStruct->sensor_id = 1;
+                    depthFrameStruct->frame_type = FrameType::FrameTypeDepth; // 1;
+                    depthFrameStruct->frame_data_type = FrameDataType::FrameDataTypeDepthAIStereoDepth; // 11; It is not when not subpixel
+                    depthFrameStruct->frame_id = current_frame_counter_;
+                    depthFrameStruct->timestamps.push_back(capture_timestamp);
 
-        //     rgbFrame->frame.resize(colorSize + 2 * sizeof(int32_t));                                        
+                    // convert the raw buffer to cv::Mat
+                    int32_t depthCols = depth_frame_mat.cols;                                                        
+                    int32_t depthRows = depth_frame_mat.rows;                                                        
+                    size_t depthSize = depthCols*depthRows*sizeof(uint16_t); // DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
 
-        //     memcpy(&rgbFrame->frame[0], &colorCols, sizeof(int32_t));                                       
-        //     memcpy(&rgbFrame->frame[4], &colorRows, sizeof(int32_t));                                       
-        //     memcpy(&rgbFrame->frame[8], (unsigned char*)(resizedFrame.data), colorSize);
+                    depthFrameStruct->frame.resize(depthSize + 2 * sizeof(int32_t));                                        
 
-        //     //Depth frame
-        //     // std::shared_ptr<FrameStruct> depthFrame =
-        //     //     std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
-        //     // depthFrame->sensor_id = 1;
-        //     // depthFrame->frame_type = FrameType::FrameTypeDepth; // 1;
-        //     // depthFrame->frame_data_type = FrameDataType::FrameDataTypeDepthAIStereoDepth; // 11; It is not when not subpixel
-        //     // depthFrame->frame_id = current_frame_counter_;
-        //     // depthFrame->timestamps.push_back(capture_timestamp);
+                    memcpy(&depthFrameStruct->frame[0], &depthCols, sizeof(int32_t));                                       
+                    memcpy(&depthFrameStruct->frame[4], &depthRows, sizeof(int32_t));                                       
+                    memcpy(&depthFrameStruct->frame[8], (unsigned char*)(depth_frame_mat.data), depthSize);              
 
-        //     // // convert the raw buffer to cv::Mat
-        //     // int32_t depthCols = frameDepthMat.cols;                                                        
-        //     // int32_t depthRows = frameDepthMat.rows;                                                        
-        //     // size_t depthSize = depthCols*depthRows*sizeof(uint16_t); // DepthAI StereoDepth outputs ImgFrame message that carries RAW16 encoded (0..65535) depth data in millimeters.
-
-        //     // depthFrame->frame.resize(depthSize + 2 * sizeof(int32_t));                                        
-
-        //     // memcpy(&depthFrame->frame[0], &depthCols, sizeof(int32_t));                                       
-        //     // memcpy(&depthFrame->frame[4], &depthRows, sizeof(int32_t));                                       
-        //     // memcpy(&depthFrame->frame[8], (unsigned char*)(frameDepthMat.data), depthSize);              
-
-        //     // if (stream_depth)
-        //     //     current_frame_.push_back(depthFrame);
-
-        // // THIS IS WEHRE ALL COMENTED OUT ENDS
+                    current_frame_.push_back(depthFrameStruct);
+                }
+            }
 
         } catch(std::exception &e) {
             std::cerr << "FAILED ON NEXTFRAME" << std::endl;
