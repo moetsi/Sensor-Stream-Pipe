@@ -227,21 +227,6 @@ OakdXlinkFullReader::OakdXlinkFullReader(YAML::Node config, const char* client_k
     std::cerr << "reid path is " << model_reid_path << std::endl << std::flush;
     model_reid_path2 = model_reid_path;
 
-    model_face_detection_path = config["model_face_detection"].as<std::string>();
-    model_face_detection_path = StringInterpolation(env, model_face_detection_path);
-    std::cerr << "face detection path is " << model_face_detection_path << std::endl << std::flush;
-    model_face_detection_path2 = model_face_detection_path;
-
-    model_face_detection_proc_path = config["model_face_detection_proc"].as<std::string>();
-    model_face_detection_proc_path = StringInterpolation(env, model_face_detection_proc_path);
-    std::cerr << "face detection processing path is " << model_face_detection_proc_path << std::endl << std::flush;
-    model_face_detection_proc_path2 = model_face_detection_proc_path;
-
-    model_depth_diff_path = config["model_depth_diff"].as<std::string>();
-    model_depth_diff_path = StringInterpolation(env, model_depth_diff_path);
-    std::cerr << "face detection processing path is " << model_depth_diff_path << std::endl << std::flush;
-    model_depth_diff_path2 = model_depth_diff_path;
-
     try {
         failed = true;
         SetOrReset();
@@ -533,59 +518,150 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
             current_frame_counter_++;
             uint64_t capture_timestamp = CurrentTimeMs();
 
-            if (frame_types_to_pull == std::vector<std::string>{"rgb", "depth"}) {
-                std::cerr << "Pulling rgb and depth" << std::endl << std::flush;
-            }
-
-            bool message_pulled = false; //we will set this to true if we pull a message (so we don't call get_msgs unnecessarily)
-            if (queues["rgb"]->has()) {
-                auto rgb_message = queues["rgb"]->get();
-                sync.add_msg(rgb_message, "color");
-                message_pulled = true;
-            }
-            if (queues["depth"]->has()) {
-                auto depth_message = queues["depth"]->get();
-                sync.add_msg(depth_message, "depth");
-                message_pulled = true;
-            }
-            if (queues["person_detection"]->has()) {
-                auto det_message = queues["person_detection"]->get();
-                sync.add_msg(det_message, "person_detection");
-                message_pulled = true;
-            }
-            if (queues["recognition"]->has()) {
-                auto rec_message = queues["recognition"]->get();
-                sync.add_msg(rec_message, "recognition");
-                message_pulled = true;
-            }
-            if (queues["fast_desc"]->has()) {
-                auto det_fast_desc_message = queues["fast_desc"]->get();
-                sync.add_msg(det_fast_desc_message, "fast_desc");
-                message_pulled = true;
-            }
             // Declare msgs to make it available downstream
             MessageData msgs;
-            // Now we check if all messages have come in for a given color (it checks if all messages have the same sequence number)
-            if (message_pulled) {
-                // First we check if we should be pulling both depth and color along with detections
-                if ((send_rgb_to_host_and_visualize || stream_rgb) && (send_depth_to_host_and_visualize || stream_depth)) {
-                    // This means we need both depth and color
-                    msgs = sync.get_msgs("color_depth_and_detections");
+            bool requested_rgb_and_depth_frame = false;
+
+            // This is if it has been requested to send rgb and depth
+            if (frame_types_to_pull == std::vector<std::string>{"rgb", "depth"}) {
+                requested_rgb_and_depth_frame = true;
+            }
+
+            // We check if a rgb and depth frame were requested and rgb and depth are not being received at the host (if not we need to call them)
+            if (requested_rgb_and_depth_frame &&
+            ((!send_rgb_to_host_and_visualize && !stream_rgb) || (!send_depth_to_host_and_visualize && !stream_depth))) {
+                // This means rgb and depth was requested but either rgb or depth wasn't being sent to host
+                std::cerr << "Pulling rgb and depth" << std::endl << std::flush;
+                requested_rgb_and_depth_frame = true;
+                bool previous_rgb_send_state = true;
+                bool previous_depth_send_state = true;
+                // We check if rgb and depth are already being sent to the host
+                if (!send_rgb_to_host_and_visualize && !stream_rgb) {
+                    previous_rgb_send_state = false;
+                    // This means we need to send a rgb on command
+                    nlohmann::json dict{{"message", "send_rgb_as_they_come"}};
+                    auto buf = dai::Buffer();
+                    auto data = dict.dump();
+                    buf.setData({data.begin(), data.end()});
+                    control_queue->send(buf);
                 }
-                // Next we check if we only need color and detections
-                else if (send_rgb_to_host_and_visualize || stream_rgb) {
-                    msgs = sync.get_msgs("color_and_detections");
+                if (!send_depth_to_host_and_visualize && !stream_depth) {
+                    previous_depth_send_state = false;
+                    //This means we need to send a depth command
+                    nlohmann::json dict{{"message", "send_depth_as_they_come"}};
+                    auto buf = dai::Buffer();
+                    auto data = dict.dump();
+                    buf.setData({data.begin(), data.end()});
+                    control_queue->send(buf);
                 }
-                // If the above is not true (don't need color and depth, or don't need color) then we only need detections
-                // TODO: This isn't fully configurable, it assumes that we always need at least detections
-                else if (stream_bodies) {
-                    msgs = sync.get_msgs("detections");
+                // Now we pull from all the queues and add_msg until sync.get_msgs("color_depth_and_detections") doesn't return an empty msgs.person_detection 
+                bool empty_message_response = true;
+                while (empty_message_response) {
+                    bool message_pulled = false;
+                    if (queues["rgb"]->has()) {
+                        std::cerr << "Pulled rgb from queue" << std::endl << std::flush;
+                        auto rgb_message = queues["rgb"]->get();
+                        sync.add_msg(rgb_message, "color");
+                        message_pulled = true;
+                    }
+                    if (queues["depth"]->has()) {
+                        std::cerr << "Pulled depth from queue" << std::endl << std::flush;
+                        auto depth_message = queues["depth"]->get();
+                        sync.add_msg(depth_message, "depth");
+                        message_pulled = true;
+                    }
+                    if (queues["person_detection"]->has()) {
+                        auto det_message = queues["person_detection"]->get();
+                        sync.add_msg(det_message, "person_detection");
+                        message_pulled = true;
+                    }
+                    if (queues["recognition"]->has()) {
+                        auto rec_message = queues["recognition"]->get();
+                        sync.add_msg(rec_message, "recognition");
+                        message_pulled = true; 
+                    }
+                    if (queues["fast_desc"]->has()) {
+                        auto det_fast_desc_message = queues["fast_desc"]->get();
+                        sync.add_msg(det_fast_desc_message, "fast_desc");
+                        message_pulled = true;
+                    }
+                    if (message_pulled) {
+                            // We check if we have a synched rgb and depth
+                            auto message_response = sync.get_msgs("color_depth_and_detections");
+                            if (message_response.person_detection) {
+                                // This means we now have a synched message because it did not return an empty message resposne
+                                empty_message_response = false;
+                                // We now set this as the msg that will be sent
+                                msgs = message_response;
+                            }
+                    }
+                }
+                // Now we check the previous send state and send commands to the device to stop sending if it was sending
+                if (!previous_rgb_send_state) {
+                    nlohmann::json dict{{"message", "stop_send_rgb"}};
+                    auto buf = dai::Buffer();
+                    auto data = dict.dump();
+                    buf.setData({data.begin(), data.end()});
+                    control_queue->send(buf);
+                }
+                if (!previous_depth_send_state) {
+                    nlohmann::json dict{{"message", "stop_send_depth"}};
+                    auto buf = dai::Buffer();
+                    auto data = dict.dump();
+                    buf.setData({data.begin(), data.end()});
+                    control_queue->send(buf);
+                }
+            } else {
+                bool message_pulled = false; //we will set this to true if we pull a message (so we don't call get_msgs unnecessarily)
+                if (queues["rgb"]->has()) {
+                    auto rgb_message = queues["rgb"]->get();
+                    sync.add_msg(rgb_message, "color");
+                    message_pulled = true;
+                }
+                if (queues["depth"]->has()) {
+                    auto depth_message = queues["depth"]->get();
+                    sync.add_msg(depth_message, "depth");
+                    message_pulled = true;
+                }
+                if (queues["person_detection"]->has()) {
+                    auto det_message = queues["person_detection"]->get();
+                    sync.add_msg(det_message, "person_detection");
+                    message_pulled = true;
+                }
+                if (queues["recognition"]->has()) {
+                    auto rec_message = queues["recognition"]->get();
+                    sync.add_msg(rec_message, "recognition");
+                    message_pulled = true;
+                }
+                if (queues["fast_desc"]->has()) {
+                    auto det_fast_desc_message = queues["fast_desc"]->get();
+                    sync.add_msg(det_fast_desc_message, "fast_desc");
+                    message_pulled = true;
+                }
+                // Now we check if all messages have come in for a given color (it checks if all messages have the same sequence number)
+                if (message_pulled) {
+                    // First we check if we should be pulling both depth and color along with detections
+                    // We check about visualization and streaming combos, as well as if we have requested_rgb_and_depth_frame
+                    if (((send_rgb_to_host_and_visualize || stream_rgb) && (send_depth_to_host_and_visualize || stream_depth)) || requested_rgb_and_depth_frame) {
+                        // This means we need both depth and color
+                        msgs = sync.get_msgs("color_depth_and_detections");
+                    }
+                    // Next we check if we only need color and detections
+                    else if (send_rgb_to_host_and_visualize || stream_rgb) {
+                        msgs = sync.get_msgs("color_and_detections");
+                    }
+                    // If the above is not true (don't need color and depth, or don't need color) then we only need detections
+                    // TODO: This isn't fully configurable, it assumes that we always need at least detections
+                    else if (stream_bodies) {
+                        msgs = sync.get_msgs("detections");
+                    }
+                }
+                if (!msgs.person_detection) {
+                    // It is assumed that the message always has at least detections run, so if it doesn't exist it means it is empty
+                    return;
                 }
             }
-            if (!msgs.person_detection) {
-                // It is assumed that the message always has at least detections run, so if it doesn't exist it means it is empty
-                return;
-            }
+
 
             // STREAMING BODIES (DETECTIONS) SECTION
             // First we do person detection and tracking no matter what (we assume Oakd will always be at least providing detections)
@@ -724,8 +800,9 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
             startTime = std::chrono::steady_clock::now();
 
             // Nowe we send the rgb frame to the host if it is set to stream
-            if (stream_rgb)
+            if (stream_rgb || requested_rgb_and_depth_frame)
             {
+                std::cerr << "Triggered pushing rgb frame struct to be sent" << std::endl << std::flush;
                 auto frame = msgs.color->getCvFrame();
                 std::shared_ptr<FrameStruct> rgbFrame =
                     std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
@@ -751,7 +828,7 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
             }
 
             //Depth frame
-            if (send_depth_to_host_and_visualize || stream_depth)
+            if (send_depth_to_host_and_visualize || stream_depth || requested_rgb_and_depth_frame)
             {
                 auto depth_frame_mat = msgs.depth->getCvFrame();
 
@@ -768,7 +845,7 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
                     cv::waitKey(1);
                 }
 
-                if (stream_depth)
+                if (stream_depth || requested_rgb_and_depth_frame)
                 {
                     std::shared_ptr<FrameStruct> depthFrameStruct =
                         std::shared_ptr<FrameStruct>(new FrameStruct(frame_template_));
@@ -792,7 +869,6 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
                     current_frame_.push_back(depthFrameStruct);
                 }
             }
-
         } catch(std::exception &e) {
             std::cerr << "FAILED ON NEXTFRAME" << std::endl;
             std::cerr << "TRY/CATCH CATCH " << e.what() << std::endl << std::flush;

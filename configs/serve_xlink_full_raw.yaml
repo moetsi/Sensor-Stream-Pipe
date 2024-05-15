@@ -11,7 +11,7 @@ general:
       stream_color: False
       stream_depth: False
       stream_bodies: True
-      send_rgb_to_host_and_visualize: True
+      send_rgb_to_host_and_visualize: False
       send_depth_to_host_and_visualize: False
       rgb_resolution: 1080
       rgb_preview_size_y: 960

@@ -222,7 +222,7 @@ initialize(const char* filename, const char* client_key, const char* environment
 // This is a function that when called sets the frame_types_to_pull variable to <"rgb", "depth">
 void set_frame_types_to_pull_to_rgb_depth() {
   frame_types_to_pull = {"rgb", "depth"};
-  std::cout << "Frame types to pull set to: " << frame_types_to_pull[0] << ", " << frame_types_to_pull[1] << std::endl;
+  std::cerr << "!!! Frame types to pull set to: " << frame_types_to_pull[0] << ", " << frame_types_to_pull[1] << std::endl;
 }
 
 std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader, 
@@ -248,18 +248,33 @@ std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader,
           frameEncoder->NextPacket();
         }
       }
+      // If there isn't an encoder for the frame type it is because it wasn't initialized with it in config, but a request was made
+      // So we will instantiate a null encoder for this frame and perform the same process on the frame
+      // (really only occurs for oakd devices when they are configured to send bodies but then "c" is hit to request a rgb and depth frame)
+      else {
+        std::shared_ptr<IEncoder> nullEncoder = std::shared_ptr<NullEncoder>(new NullEncoder(reader->GetFps()));
+        nullEncoder->AddFrameStruct(frameStruct);
+        if (nullEncoder->HasNextPacket()) {
+          std::shared_ptr<FrameStruct> f = nullEncoder->CurrentFrameEncoded();
+          vO.push_back(f);
+          v.push_back(*f);
+          nullEncoder->NextPacket();
+        }
+      }
     }
     if (reader->HasNextFrame()) {
       if (!frame_types_to_pull.empty()) {
         reader->NextFrame(frame_types_to_pull);
-        frame_types_to_pull.clear();
-        std::cout << "frame_types_to_pull cleared" << std::endl;
       } else {
         reader->NextFrame();
       }
     } else {
       reader->Reset();
     }
+  }
+  if (!frame_types_to_pull.empty()) {
+    frame_types_to_pull.clear();
+    std::cerr << "!!! frame_types_to_pull cleared" << std::endl;
   }
 
   for (unsigned int i = 0; i < vO.size(); i++) {

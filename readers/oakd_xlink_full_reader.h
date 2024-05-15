@@ -269,11 +269,6 @@ private:
 
         send_rgb_as_they_come = False
         send_depth_as_they_come = False
-        send_a_depth = False
-        send_a_rgb = False
-        send_a_depth_and_rgb_pair = False
-
-        frames = dict()
 
         while True:
             time.sleep(0.001)
@@ -289,56 +284,20 @@ private:
                     send_rgb_as_they_come = True
                 elif commandString == "send_depth_as_they_come":
                     send_depth_as_they_come = True  
-                elif commandString == "send_a_depth":
-                    send_a_depth = True
-                elif commandString == "send_a_rgb":
-                    send_a_rgb = True
-                elif commandString == "send_a_depth_and_rgb_pair":
-                    send_a_depth_and_rgb_pair = True
+                elif commandString == "stop_send_rgb":
+                    send_rgb_as_they_come = False
+                elif commandString == "stop_send_depth":
+                    send_depth_as_they_come = False
 
             rgb_frame = node.io['rgb'].tryGet()
             if rgb_frame is not None:
-                seq = rgb_frame.getSequenceNum()
-                if seq not in frames:
-                    frames[seq] = {}
-                frames[seq]["rgb"] = rgb_frame
                 if send_rgb_as_they_come:
                     node.io['rgb_out'].send(rgb_frame)
 
             depth_frame = node.io['depth'].tryGet()  
             if depth_frame is not None:
-                seq = depth_frame.getSequenceNum()
-                if seq not in frames:
-                    frames[seq] = {}
-                frames[seq]["depth"] = depth_frame
                 if send_depth_as_they_come:
                     node.io['depth_out'].send(depth_frame)
-                    
-            if len(frames) > 5:
-                min_seq = min(frames.keys())
-                del frames[min_seq]
-
-            if send_a_rgb:
-                if len(frames) > 0:
-                    seq, data = frames.popitem()
-                    if "rgb" in data:
-                        node.io['rgb_out'].send(data["rgb"])
-                send_a_rgb = False
-
-            if send_a_depth:  
-                if len(frames) > 0:
-                    seq, data = frames.popitem()
-                    if "depth" in data:
-                        node.io['depth_out'].send(data["depth"])
-                send_a_depth = False
-
-            if send_a_depth_and_rgb_pair:
-                if len(frames) > 0:  
-                    seq, data = frames.popitem()
-                    if "rgb" in data and "depth" in data:
-                        node.io['rgb_out'].send(data["rgb"])
-                        node.io['depth_out'].send(data["depth"])
-                send_a_depth_and_rgb_pair = False
     )";
 
   std::string createReidConfigScript() {
