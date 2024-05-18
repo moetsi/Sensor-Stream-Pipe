@@ -4,6 +4,8 @@ general:
   port: 9999
   frame_source:
     type: "iphone"
+    parameters:
+      fps: 10
 video_encoder:
   0: #color
     type: "libav"

@@ -16,7 +16,7 @@ class iPhoneReaderImpl;
 
 class iPhoneReader : public IReader {
 public:
-  iPhoneReader();
+  iPhoneReader(unsigned int fps); // Constructor with fps parameter
   ~iPhoneReader();
 
   void Reset() override;
@@ -29,6 +29,7 @@ public:
   std::vector<FrameType> GetType() override;
     
 private:
+  unsigned int fps_;
   iPhoneReaderImpl* pImpl;
   FrameStruct frame_template_;
 };

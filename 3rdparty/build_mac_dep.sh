@@ -192,7 +192,7 @@ function build_yaml_cpp {
 # https://github.com/zeromq/libzmq
 function build_libzmq {
     echo "Building libzmq"
-    git clone --depth 1 --branch v4.3.4 \
+    git clone --depth 1 --branch v4.3.5 \
         https://github.com/zeromq/libzmq.git
     pushd libzmq
     mkdir build && cd build

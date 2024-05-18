@@ -128,7 +128,9 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
 #endif
     } else if (reader_type == "iphone") {
 #if TARGET_OS_IOS
-      reader = std::unique_ptr<iPhoneReader>(new iPhoneReader());
+      auto fps_value = general_parameters["frame_source"]["parameters"]["fps"].as<unsigned int>();
+      unsigned int fps = static_cast<unsigned int>(fps_value);
+      reader = std::unique_ptr<iPhoneReader>(new iPhoneReader(fps));
 #else
       return 1;
 #endif

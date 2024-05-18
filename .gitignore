@@ -36,3 +36,4 @@ cmake-*/
 .idea/
 build
 build_release
+build-ios
