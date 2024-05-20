@@ -37,3 +37,4 @@ cmake-*/
 build
 build_release
 build-ios
+.DS_Store

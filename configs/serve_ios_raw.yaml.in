@@ -5,7 +5,7 @@ general:
   frame_source:
     type: "iphone"
     parameters:
-      fps: 10
+      fps: 5
 video_encoder:
   0: #color
     type: "libav"
