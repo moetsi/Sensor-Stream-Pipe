@@ -16,7 +16,7 @@ class iPhoneReaderImpl;
 
 class iPhoneReader : public IReader {
 public:
-  iPhoneReader(unsigned int fps = 5); // Constructor with fps parameter
+  iPhoneReader(unsigned int fps = 5, const char* client_key = nullptr, const char* environment_name = nullptr, const char* sensor_name = nullptr); // Constructor with fps parameter
   ~iPhoneReader();
 
   void Reset() override;
@@ -32,6 +32,9 @@ private:
   unsigned int fps_;
   iPhoneReaderImpl* pImpl;
   FrameStruct frame_template_;
+  std::string client_key_;
+  std::string environment_name_;
+  std::string sensor_name_;
 };
 
 }

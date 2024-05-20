@@ -170,7 +170,9 @@ initialize(const char* filename, const char* client_key, const char* environment
 #endif
     } else if (reader_type == "iphone") {
 #if TARGET_OS_IOS
-      reader = std::unique_ptr<iPhoneReader>(new iPhoneReader());
+      auto fps_value = general_parameters["frame_source"]["parameters"]["fps"].as<unsigned int>();
+      unsigned int fps = static_cast<unsigned int>(fps_value);
+      reader = std::unique_ptr<iPhoneReader>(new iPhoneReader(fps, client_key, environment_name, sensor_name));
 #else
       throw std::runtime_error("SSP compiled without iPhone support");
 #endif
@@ -425,10 +427,14 @@ int main(int argc, char *argv[]) {
   const char* environment_name = nullptr;
   const char* sensor_name = nullptr;
 
-  if (argc == 5) {
-    client_key = argv[2];
-    environment_name = argv[3];
-    sensor_name = argv[4];
+  for (int i = 0; i < argc; ++i) {
+    std::cerr << "Argument " << i << ": " << argv[i] << std::endl;
+  }
+
+  if (argc == 4) {
+    client_key = argv[1];
+    environment_name = argv[2];
+    sensor_name = argv[3];
   }
 
   // Launch ssp_server in a background queue
