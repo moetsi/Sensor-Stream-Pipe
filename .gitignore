@@ -34,6 +34,11 @@ bin/
 
 cmake-*/
 .idea/
+.idea/
+build
+build_release
+build-ios
+.DS_Store
 
 ./vscode
 .vscode

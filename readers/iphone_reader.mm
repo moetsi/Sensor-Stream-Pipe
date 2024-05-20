@@ -106,7 +106,7 @@ public:
   std::shared_ptr<FrameStruct> confidence;
 };
 
-iPhoneReader::iPhoneReader()
+iPhoneReader::iPhoneReader(unsigned int fps)
 {
   pImpl = new iPhoneReaderImpl;
   
@@ -175,6 +175,7 @@ iPhoneReader::iPhoneReader()
     pImpl->session.delegate = pImpl->delegate;
 
     pImpl->fps = 60;
+    fps_ = fps;
     
     if (@available(iOS 11.3, *))
         pImpl->fps = (unsigned int)configuration.videoFormat.framesPerSecond;
@@ -328,7 +329,7 @@ void iPhoneReader::GoToFrame(unsigned int frame_id)
 
 unsigned int iPhoneReader::GetFps()
 {
-  return pImpl->fps;
+  return fps_;
 }
 
 vector<FrameType> iPhoneReader::GetType()

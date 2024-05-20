@@ -45,11 +45,27 @@ if (IOS)
     URL_HASH MD5=89578a5752c950f983b570b0b9a602b5
   )
 elseif (APPLE)
-  FetchContent_Declare(
-    ssp_dep
-    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103161130__ssp_macdep.tar.gz
-    URL_HASH MD5=8cdef0d14b1ef3be77f2a023fd399ee0
-  )
+  if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    message(STATUS "Detected Apple Intel CPU")
+    FetchContent_Declare(
+      ssp_dep
+      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103161130__ssp_macdep_intel.tar.gz
+      URL_HASH MD5=8cdef0d14b1ef3be77f2a023fd399ee0
+    )
+  elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    message(STATUS "Detected Apple Silicon CPU")
+    execute_process(
+      COMMAND ${CMAKE_SOURCE_DIR}/3rdparty/build_mac_dep.sh
+      RESULT_VARIABLE script_result
+    )
+    if(script_result AND NOT script_result STREQUAL "0")
+      message(FATAL_ERROR "Failed to run build_mac_dep.sh")
+    endif()
+    FetchContent_Declare(
+      ssp_dep
+      SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/tmp/local.ssp
+    )
+  endif()
 elseif (WIN32)
   if (LOCAL_DEP_BUILD_WINDOWS)
   message(STATUS "please make sure you have gone to 3rdpary and run build_win_dep.sh")
@@ -538,8 +554,8 @@ target_link_libraries(ssp_client_template ssp)
 add_executable(ssp_server servers/ssp_server.cc)
 target_link_libraries(ssp_server ssp)
 
-# add_executable(ssp_tester testers/ssp_tester.cc)
-# target_link_libraries(ssp_tester ssp)
+add_executable(ssp_tester testers/ssp_tester.cc)
+target_link_libraries(ssp_tester ssp)
 
 if (IOS)
     set_source_files_properties(servers/ssp_server.cc PROPERTIES

@@ -421,9 +421,21 @@ int main(int argc, char *argv[]) {
   if (path != nil)
     filename = std::string([path UTF8String]);
 
+  const char* client_key = nullptr;
+  const char* environment_name = nullptr;
+  const char* sensor_name = nullptr;
+
+  if (argc == 5) {
+    client_key = argv[2];
+    environment_name = argv[3];
+    sensor_name = argv[4];
+  }
+
   // Launch ssp_server in a background queue
   dispatch_queue_t aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-  dispatch_async(aQueue, ^{ ssp_server(filename.c_str()); });
+  dispatch_async(aQueue, ^{
+    ssp_server(filename.c_str(), client_key, environment_name, sensor_name);
+  });
 
   @autoreleasepool {
     return UIApplicationMain(argc, argv, nil, nil);
