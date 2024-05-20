@@ -3,6 +3,18 @@ project(ssp)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=1)
+# add_compile_options("-Wall" "-Wextra" "-Wshadow" "-Wno-unused-result" "-Wabi-tag")
+
+option(LIBOPENH264_ENABLED "Enable libh264 codec" ON)
+
+# Check if looking for oakd+openvino dependencies (for oakd_xlink_reader.cc)
+SET(XLINK_ENABLED FALSE CACHE BOOL "xlink enabled")
+message(STATUS "XLINK_ENABLED ${XLINK_ENABLED}")
+
+# Check if looking for k4a dependencies (for kinect_reader.cc)
+SET(K4A_ENABLED FALSE CACHE BOOL "kinect enabled")
+message(STATUS "K4A_ENABLED ${K4A_ENABLED}")
 
 # Set default build type to Release if none is defined
 set(default_build_type "Release")
@@ -16,6 +28,10 @@ endif()
 
 option(LOCAL_DEP_BUILD_LINUX "Build deps locally on linux with some options" OFF)
 if (LOCAL_DEP_BUILD_LINUX)
+# add script here?
+endif()
+option(LOCAL_DEP_BUILD_WINDOWS "Build deps locally on windows with some options" OFF)
+if (LOCAL_DEP_BUILD_WINDOWS)
 # add script here?
 endif()
 
@@ -51,11 +67,50 @@ elseif (APPLE)
     )
   endif()
 elseif (WIN32)
+  if (LOCAL_DEP_BUILD_WINDOWS)
+  message(STATUS "please make sure you have gone to 3rdpary and run build_win_dep.sh")
+  if (WIN32)
+    message("Windows use this and download 2022.3: https://docs.openvino.ai/2023.0/openvino_docs_install_guides_installing_openvino_from_archive_windows.html")
+    message("You will need to run C:/Program Files (x86)/Intel/openvino_2022/setupvars.bat")
+    message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
+  endif ()
   FetchContent_Declare(
     ssp_dep
-    URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103181613__ssp_windep.tar.gz
-    URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
+    SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/tmp/local.ssp
   )
+  else ()
+    if (XLINK_ENABLED)
+      if (WIN32)
+        message("Windows use this and download 2022.3: https://docs.openvino.ai/2023.0/openvino_docs_install_guides_installing_openvino_from_archive_windows.html")
+        message("You will need to run C:/Program Files (x86)/Intel/openvino_2022/setupvars.bat")
+        message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
+      endif ()
+        FetchContent_Declare(
+        ssp_dep
+        # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161452_ssp_windep_xlink_enabled.tar.gz
+        # URL_HASH MD5=fe027d0a694c2c0447d8f29ea2812362
+
+        # new with release config
+        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110181158_ssp_windep_xlink_enabled.tar.gz
+        URL_HASH MD5=f57eb06fd32d7ab47221854dbda0365e
+        
+        # rebuilding using Visual Studio 16 2019
+        # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110162220_ssp_windep_xlink_enabled.tar.gz
+        # URL_HASH MD5=dc804195928ac3f36d93d28664d024f1
+    )
+    else ()
+      FetchContent_Declare(
+        ssp_dep
+        # old
+        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202103181613__ssp_windep.tar.gz
+        URL_HASH MD5=c228bcad89609f7fdec0b7b8f65d10bb
+
+        # # new checking if works
+        # URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202110161442_ssp_windep.tar.gz
+        # URL_HASH MD5=da1888c4d931ac15750afeabac6eb6ce
+    )
+    endif()
+  endif()
 elseif (UNIX)
   if (LOCAL_DEP_BUILD_LINUX)
     message(STATUS "please make sure you have gone to 3rdpary and run build_lin_dep.sh")
@@ -64,11 +119,21 @@ elseif (UNIX)
       SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/tmp/local.ssp
     )
   else ()
-    FetchContent_Declare(
-      ssp_dep
-      URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
-      URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
-    )
+    if (XLINK_ENABLED)
+      message("Remember to compile with OpenVINO you will need to run [setupvars.sh] in opt/intel/openvino_2021/bin (or where ever you installed openvino and that script landed) to get OpenVINO environment initialized. See OpenVINO documentation if confused about this setupvars.sh message.")
+      message("You will get an error like: || By not providing Findngraph.cmake in CMAKE_MODULE_PATH this project || if you do not have OpenVINO installed nor run setupvars.sh")
+      FetchContent_Declare(
+        ssp_dep
+        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202201211927__ssp_lindep.tar.gz
+        URL_HASH MD5=3b931ec54c5d377b8ef4466903339bb6
+      )
+    else ()
+      FetchContent_Declare(
+        ssp_dep
+        URL https://moetsiblob.blob.core.windows.net/binaries-ssp/202104061701__ssp_lindep.tar.gz
+        URL_HASH MD5=4e6d2610a90874ec14a103eb57820626
+      )
+    endif()
   endif()
 endif()
 
@@ -88,20 +153,27 @@ if (ssp_dep_POPULATED)
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/CMake CACHE PATH "yaml-cpp installation path")
     set(k4a_DIR ${ssp_dep_SOURCE_DIR}/k4a/lib/cmake/k4a CACHE PATH "k4a installation path")
   else()
-    set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV CACHE PATH "OpenCV installation path")
+    set(OpenCV_DIR ${ssp_dep_SOURCE_DIR}/opencv/lib/cmake/opencv4 CACHE PATH "OpenCV installation path")
     set(ZeroMQ_DIR ${ssp_dep_SOURCE_DIR}/libzmq/lib/cmake/ZeroMQ CACHE PATH "ZeroMQ installation path")
     set(yaml-cpp_DIR ${ssp_dep_SOURCE_DIR}/yaml-cpp/lib/cmake/yaml-cpp CACHE PATH "yaml-cpp installation path")
+    set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "depthai installation path")
   endif()
   set(spdlog_DIR ${ssp_dep_SOURCE_DIR}/spdlog/lib/cmake/spdlog CACHE PATH "spdlog installation path")
   set(cppzmq_DIR ${ssp_dep_SOURCE_DIR}/cppzmq/share/cmake/cppzmq CACHE PATH "cppzmq installation path")
   set(FFMPEG_ROOT ${ssp_dep_SOURCE_DIR}/ffmpeg CACHE PATH "ffmpeg installation path")
   set(zdepth_DIR ${ssp_dep_SOURCE_DIR}/zdepth/lib/cmake/zdepth CACHE PATH "Zdepth installation path")
   if (LOCAL_DEP_BUILD_LINUX)
-  message(STATUS " searching for openh264 in " ${ssp_dep_SOURCE_DIR}/openh264/)
-    set(openh264_INCLUDE_DIR ${ssp_dep_SOURCE_DIR}/openh264/include)
-    set(openh264_DIR ${ssp_dep_SOURCE_DIR}/openh264)
-    set(openh264_LIBRARY ${ssp_dep_SOURCE_DIR}/openh264/lib/libopenh264.so.6) # yes this is linux for now
+    if (LIBOPENH264_ENABLED)
+      message(STATUS " searching for openh264 in " ${ssp_dep_SOURCE_DIR}/openh264/)
+      set(openh264_INCLUDE_DIR ${ssp_dep_SOURCE_DIR}/openh264/include)
+      set(openh264_DIR ${ssp_dep_SOURCE_DIR}/openh264)
+      set(openh264_LIBRARY ${ssp_dep_SOURCE_DIR}/openh264/lib/libopenh264.so.6) # yes this is linux for now
+    endif()
   endif()
+endif()
+
+if (LIBOPENH264_ENABLED)
+add_definitions(-DLIBOPENH264_ENABLED)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -130,8 +202,12 @@ find_package(cppzmq REQUIRED)
 find_package(zdepth REQUIRED)
 
 if (LOCAL_DEP_BUILD_LINUX)
-  find_package(openh264 REQUIRED)
+  if (LIBOPENH264_ENABLED)
+    find_package(openh264 REQUIRED)
+  endif()
 endif()
+
+option(SSP_WITH_DEPTHAI_SUPPORT "Compile with DepthAI support" OFF)
 
 if (IOS)
   add_definitions(-DFFMPEG_AS_FRAMEWORK)
@@ -149,8 +225,18 @@ if (IOS)
   set(OpenCV_LIBS ${ssp_dep_SOURCE_DIR}/lib/opencv2.framework)
 else()
   find_package(FFmpeg COMPONENTS AVCODEC AVUTIL AVFORMAT SWSCALE SWRESAMPLE REQUIRED)
-  find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED)
+  if (SSP_WITH_DEPTHAI_SUPPORT)
+    find_package(depthai CONFIG REQUIRED)
+  endif()
+  find_package(OpenCV COMPONENTS core imgproc highgui REQUIRED PATHS ${ssp_dep_SOURCE_DIR}/opencv/share/OpenCV NO_DEFAULT_PATH)
 endif()
+
+if(OpenCV_FOUND)
+  message(STATUS "Found OpenCV")
+  message(STATUS "Includes: " ${OpenCV_INCLUDE_DIRS})
+else(OpenCV_FOUND)
+  message(STATUS "Cannot find OpenCV")
+endif(OpenCV_FOUND)
 
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBRARY_OUTPUT_PATH lib)
@@ -158,6 +244,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # TODO: modify FindFFmpeg to add this automatically
 include_directories(${FFMPEG_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
+message(STATUS "OpenCV_DIR = " ${OpenCV_DIR})
 
 if (WIN32)
     file(COPY ${FFMPEG_INCLUDE_DIRS}/../bin/
@@ -168,11 +256,17 @@ endif ()
 if (APPLE)
     option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" OFF)
     option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" OFF)
+    SET(K4A_ENABLED FALSE)
     option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
 else()
-    option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" ON)
-    option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" ON)
-    option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" ON)
+
+    option(SSP_WITH_KINECT_SUPPORT "Compile with Kinect support" OFF)
+    option(SSP_WITH_K4A_BODYTRACK "Compile with Body Tracking" OFF)
+    if (NOT K4A_ENABLED)
+      set(SSP_WITH_KINECT_SUPPORT OFF)
+      set(SSP_WITH_K4A_BODYTRACK OFF)
+    endif()
+    option(SSP_WITH_NVPIPE_SUPPORT "Compile with NvPipe" OFF)
 endif()
 option(SSP_WITH_ZMQ_POLLING "Compile with ZeroMQ polling" OFF)
 
@@ -193,7 +287,6 @@ if (SSP_WITH_KINECT_SUPPORT)
 
     if (k4a_FOUND)
         add_definitions(-DSSP_WITH_KINECT_SUPPORT=1)
-
         if (WIN32)
             file(COPY ${k4a_DIR}/../../../bin/
                  DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
@@ -210,12 +303,12 @@ if (SSP_WITH_K4A_BODYTRACK)
 
     if (k4abt_FOUND)
         add_definitions(-DSSP_WITH_K4A_BODYTRACK=1)
-
         if (WIN32)
             message(STATUS "Found Kinect Body Tracking: ${k4abt_ROOT}")
             file(COPY ${k4abt_ROOT}/windows-desktop/amd64/release/bin/
                  DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
                  FILES_MATCHING PATTERN "*.dll")
+            include_directories(${k4abt_ROOT}/include)
         endif ()
     else()
         set(SSP_WITH_K4A_BODYTRACK OFF)
@@ -227,6 +320,40 @@ if (SSP_WITH_ZMQ_POLLING)
     add_definitions(-DSSP_WITH_ZMQ_POLLING=1)
 endif ()
 
+if (XLINK_ENABLED)
+    set(depthai_DIR ${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai CACHE PATH "DepthAI installation path")
+    find_package(depthai CONFIG)
+    # If not found disable DepthAI support
+    if (depthai_FOUND)
+        message(STATUS "Setting SSP_WITH_DEPTHAI_SUPPORT to ON")
+        # This is the new OpenVINO API approach that we have not converted to
+
+        # We have to define where to look for the OPENVINO package on windows (C:/Intel/openvino_NAMEOFFOLDER)
+        if (WIN32)
+          set(OpenVINO_DIR "C:/Program Files (x86)/Intel/openvino_2022/runtime/cmake")
+        endif()
+        find_package(OpenVINO REQUIRED)
+        message(STATUS "Found OpenVINO: ${OpenVINO_DIR}")
+        # This is the old OpenVINO API approach
+        # find_package(ngraph REQUIRED)
+        # find_package(InferenceEngine CONFIG REQUIRED)
+        # include_directories(${InferenceEngine_INCLUDE_DIRS})
+        # message(STATUS "Found InferenceEngine: ${InferenceEngine_INCLUDE_DIRS}")
+        add_definitions(-DSSP_WITH_DEPTHAI_SUPPORT=1)
+        include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include)
+        include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/include/depthai-shared/3rdparty)
+        include_directories(${ssp_dep_SOURCE_DIR}/depthai-core/lib/cmake/depthai/dependencies/include)
+        add_definitions(-D'DEPTHAI_TARGET_OPENCV')
+        add_definitions(-D'DEPTHAI_TARGET_CORE')
+        add_definitions(-D'JSON_USE_IMPLICIT_CONVERSIONS=1')
+        add_definitions(-D'__PC__')
+        add_definitions(-D'XLINK_USE_MX_ID_NAME=ON')
+    else()
+        set(SSP_WITH_DEPTHAI_SUPPORT OFF)
+        message(STATUS "Setting SSP_WITH_DEPTHAI_SUPPORT to OFF")
+    endif()
+endif()
+
 #########################
 ### Build the library
 #########################
@@ -237,6 +364,9 @@ set(SOURCE_FILES
     readers/multi_image_reader.cc
     readers/multi_image_reader.h
     structs/frame_struct.h
+    structs/body_struct.h
+    structs/detection_struct.h
+
     utils/image_converter.cc
     utils/image_converter.h
     utils/image_decoder.cc
@@ -269,9 +399,56 @@ set(SOURCE_FILES
     readers/video_file_reader.h
     readers/image_reader.cc
     readers/image_reader.h
+    readers/dummy_body_reader.cc
+    readers/dummy_body_reader.h
     readers/network_reader.cc
     readers/network_reader.h
 )
+
+# Checking for XLINK_ENABLED and if exists adding readers
+if (UNIX)
+  if (XLINK_ENABLED)
+    list(APPEND SOURCE_FILES
+      readers/oakd_xlink_full_reader.cc
+      readers/oakd_xlink_full_reader.h
+      readers/human_poses.cpp
+      readers/human_poses.h
+      
+    )
+    file(GLOB_RECURSE TRACKER_FILES tracker/*.cc tracker/*.cpp tracker/*.h tracker/*.hpp)
+    list(APPEND SOURCE_FILES ${TRACKER_FILES})
+    # Search for tracker header files in these folders
+    include_directories(tracker/include)
+    include_directories(tracker/utils/include)
+  endif ()
+endif ()
+
+if (WIN32)
+  if (XLINK_ENABLED)
+    list(APPEND SOURCE_FILES
+      readers/oakd_xlink_full_reader.cc
+      readers/oakd_xlink_full_reader.h
+      readers/human_poses.cpp
+      readers/human_poses.h
+      
+    )
+    file(GLOB_RECURSE TRACKER_FILES tracker/*.cc tracker/*.cpp tracker/*.h tracker/*.hpp)
+    list(APPEND SOURCE_FILES ${TRACKER_FILES})
+    # Search for tracker header files in these folders
+    include_directories(tracker/include)
+    include_directories(tracker/utils/include)
+    # We have to use exact includes in windows
+    include_directories("C:/Program Files (x86)/Intel/openvino_2022/runtime/include/ie")
+    include_directories("C:/Program Files (x86)/Intel/openvino_2022/runtime/include")
+    # We need to copy the dll in windows
+    file(GLOB OPENVINO_DLLS
+         "C:/Program Files (x86)/Intel/openvino_2022/runtime/bin/intel64/Release/*.dll")
+    file(COPY ${OPENVINO_DLLS}
+         DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
+    add_compile_options("/Zc:preprocessor") 
+  endif ()
+endif ()
+# Done with adjusting for XLINK_ENABLED
 
 if (SSP_WITH_NVPIPE_SUPPORT)
     list(APPEND SOURCE_FILES encoders/nv_encoder.cc encoders/nv_encoder.h decoders/nv_decoder.cc decoders/nv_decoder.h)
@@ -285,13 +462,13 @@ add_library(ssp STATIC ${SOURCE_FILES})
 target_link_libraries(ssp PRIVATE ${FFMPEG_LIBRARIES})
 
 target_link_libraries(ssp PUBLIC
-    cereal
-    ${OpenCV_LIBS}
-    spdlog::spdlog
-    libzmq-static
-    cppzmq-static
-    ${YAML_CPP_LIBRARIES}
-    zdepth::zdepth
+  cereal
+  ${OpenCV_LIBS}
+  spdlog::spdlog
+  libzmq-static
+  cppzmq-static
+  ${YAML_CPP_LIBRARIES}
+  zdepth::zdepth
 )
 
 if (openh264_FOUND)
@@ -300,22 +477,27 @@ if (openh264_FOUND)
 endif()
 
 if (IOS)
-    target_sources(ssp PRIVATE readers/iphone_reader.mm readers/iphone_reader.h)
-    target_link_libraries(ssp PRIVATE "-framework ARKit")
+target_sources(ssp PRIVATE readers/iphone_reader.mm readers/iphone_reader.h)
+target_link_libraries(ssp PRIVATE "-framework ARKit")
 endif ()
 
 if (SSP_WITH_NVPIPE_SUPPORT)
-    target_link_libraries(ssp PUBLIC NvPipe)
+target_link_libraries(ssp PUBLIC NvPipe)
 endif ()
 
 if (SSP_WITH_KINECT_SUPPORT)
-    target_link_libraries(ssp PUBLIC k4a::k4a)
+target_link_libraries(ssp PUBLIC k4a::k4a)
 endif ()
 
 if (SSP_WITH_K4A_BODYTRACK)
-    target_link_libraries(ssp PUBLIC k4a::k4abt)
+target_link_libraries(ssp PUBLIC k4a::k4abt)
 endif ()
 
+if (XLINK_ENABLED)
+  target_link_libraries(ssp PRIVATE depthai::opencv)
+  target_link_libraries(ssp PRIVATE ${InferenceEngine_LIBRARIES} ${NGRAPH_LIBRARIES})
+  target_link_libraries(ssp PRIVATE openvino::runtime)
+endif ()
 
 #############################
 ### Build the applications
@@ -335,6 +517,18 @@ add_library(ssp_plugin ${PLUGIN_TYPE}
 target_compile_definitions(ssp_plugin PRIVATE SSP_PLUGIN)
 target_link_libraries(ssp_plugin ssp)
 
+add_library(raas_plugin SHARED
+    clients/ssp_client_raas.cc
+)
+target_link_libraries(raas_plugin ssp)
+add_custom_command(
+  TARGET raas_plugin
+  POST_BUILD
+  COMMAND ${CMAKE_SOURCE_DIR}/cmake/raas_package_for_unity.sh "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}"
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMENT "Packaging libraries for Unity3D RaaS usage"
+)
+
 if (IOS)
   # Pack all the needed libraries for Unity3D iOS usage
   # Usage:
@@ -347,6 +541,12 @@ endif()
 
 add_executable(ssp_client_opencv clients/ssp_client_opencv.cc)
 target_link_libraries(ssp_client_opencv ssp)
+
+add_executable(ssp_client_raas_playground clients/ssp_client_raas_playground.cc)
+target_link_libraries(ssp_client_raas_playground ssp)
+
+add_executable(ssp_client_body_logger clients/ssp_client_body_logger.cc)
+target_link_libraries(ssp_client_body_logger ssp)
 
 add_executable(ssp_client_template clients/ssp_client_template.cc)
 target_link_libraries(ssp_client_template ssp)

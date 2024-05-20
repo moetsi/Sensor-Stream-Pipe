@@ -40,7 +40,9 @@ enum class FrameType: short {
     /** Confidence levels */
     FrameTypeConfidence = 3,
     /** Human pose */
-    FrameTypeHumanPose = 4
+    FrameTypeHumanPose = 4,
+    //** Detection */
+    FrameTypeDetection = 5
 };
 
 /**
@@ -107,7 +109,32 @@ enum class FrameDataType: short {
     // 7 for raw U8C1 data
     
     /** U8C1 data */
-    FrameDataTypeU8C1 = 7
+    FrameDataTypeU8C1 = 7,
+
+    // 8 for object-human data
+
+    /** Human Data */
+    FrameDataTypeObjectHumanData = 8,
+
+    // 9 for OAKD cv::Mat
+
+    /** OAKD cv::Mat */
+    FrameDataTypeCvMat = 9,
+
+    // 10 for OAKD cv::Mat, disparity
+
+    /** OAKD cv::Mat, disparity */
+    FrameDataTypeCvDisparity = 10,
+
+    // 11 for OAKD cv::Mat StereoDepth sub-pixel
+
+    //OAKD cv::Mat StereoDepth sub-pixel
+    FrameDataTypeDepthAIStereoDepth = 11,
+
+    // 12 for Spatial Detections
+
+    /** Spatial Detections */
+    FrameDataTypeTrackedObjects = 12
 }; 
 
 /**
@@ -163,6 +190,14 @@ struct CameraCalibrationStruct {
       : type(t), data(d), extra_data(ed) {}
 
 #ifndef __MOETSI_RAAS__
+  /**
+   * Serialize method for the CameraCalibrationStruct.
+   * This method is used by the Cereal library to serialize the struct into a binary format.
+   * It is called when the struct needs to be sent over the network or saved to disk.
+   * The method takes an Archive object as a parameter, which is provided by Cereal.
+   * It serializes the struct's members (type, data, extra_data) using the archive.
+   * This allows the struct to be easily reconstructed later from the serialized data.
+   */
   template <class Archive> void serialize(Archive &ar) {
     ar(type, data, extra_data);
   }
@@ -201,6 +236,13 @@ struct CodecParamsStruct {
       : type(t), data(d), extra_data(ed) {}
 
 #ifndef __MOETSI_RAAS__
+  /**
+   * Serialize method for the CodecParamsStruct.
+   * This method serves the same purpose as the serialize method in CameraCalibrationStruct.
+   * It uses Cereal to serialize the struct's members (type, data, extra_data) into a binary format.
+   * This allows the codec parameters to be easily sent over the network or saved to disk,
+   * and later reconstructed from the serialized data.
+   */
   template <class Archive> void serialize(Archive &ar) {
     ar(type, data, extra_data);
   }
@@ -211,6 +253,26 @@ struct CodecParamsStruct {
  * @brief Frame struct: SSP frame.
  */ 
 struct FrameStruct {
+
+    /**
+   * Optional: client_key
+   */
+  std::string client_key;
+
+    /**
+   * Optional: environment_name
+   */
+  std::string environment_name;
+
+    /**
+   * Optional: sensor_name
+   */
+  std::string sensor_name;
+
+    /**
+   * Optional: static
+   */
+  bool static_sensor = false;
 
   // message id, currenly set to 0
   // This is to be used as "versioning", so if how messages are updated so that Sensor Stream Client
@@ -282,6 +344,13 @@ struct FrameStruct {
    */
   unsigned int frame_id;
 
+
+  /**
+   * Tiemstamp on the device when the frame of data was taken (would be of rgb capture not of spatial detectin time)
+   * Currently impelementing to work with Depthai device
+   */
+  uint64_t frame_device_timestamp;
+
   /** 
    * Use for logging and timing to understand processing speeds.
    * Times are in ns
@@ -289,9 +358,33 @@ struct FrameStruct {
   std::vector<uint64_t> timestamps;
 
 #ifndef __MOETSI_RAAS__
-  // Serialize method (not used by Server but is available)
+  /**
+   * Serialize method for the FrameStruct.
+   * This method is similar to the serialize methods in CameraCalibrationStruct and CodecParamsStruct.
+   * It uses Cereal to serialize all the members of the FrameStruct into a binary format.
+   * This allows the entire frame data to be easily sent over the network or saved to disk,
+   * and later reconstructed from the serialized data.
+   * The method is marked with a comment saying it's not used by the Server but is available.
+   * This suggests that serialization is mainly used for sending data to clients or for storage,
+   * rather than within the server itself.
+   */
+  /**
+   * This template function is a part of the serialization mechanism provided by the Cereal library.
+   * It allows an instance of FrameStruct to be serialized (converted to a format suitable for storage or transmission)
+   * or deserialized (reconstructed from the serialized format) by specifying an Archive type.
+   * The Archive type can be a binary archive, a JSON archive, etc., depending on the needs of the application.
+   * 
+   * The function takes a reference to an archive object as its parameter. The 'ar' function call within the body
+   * lists all the member variables of FrameStruct that need to be serialized or deserialized. This includes
+   * identifiers like client_key, environment_name, sensor_name, etc., and other properties such as frame_id and timestamps.
+   * 
+   * This serialization function is closely related to the FrameStructToString function, which utilizes this template
+   * to serialize a FrameStruct object into a string format. The FrameStructToString function creates an output archive,
+   * serializes the FrameStruct into it, and then converts the archive to a string, effectively leveraging the serialize
+   * template to prepare FrameStruct data for storage or network transmission.
+   */
   template <class Archive> void serialize(Archive &ar) {
-    ar(message_type, frame_type, frame_data_type, stream_id, frame, codec_data,
+    ar(client_key, environment_name, sensor_name, static_sensor, message_type, frame_type, frame_data_type, stream_id, frame, codec_data,
        camera_calibration_data, scene_desc, sensor_id, device_id, frame_id,
        timestamps);
   }

@@ -144,4 +144,3 @@ int main(int argc, char *argv[]) {
   return ssp_client_opencv(port);
 }
 #endif
-

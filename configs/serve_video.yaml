@@ -11,7 +11,7 @@ general:
 video_encoder:
   0: #color
     type: "null"
-    codec_name: "libx265"
+    codec_name: "libx264"
     pix_fmt: "yuv420p"
     bit_rate: 8000000
     options:
@@ -24,4 +24,3 @@ video_encoder:
     codec_name: "NVPIPE_HEVC"
     input_format: "NVPIPE_UINT16"
     bit_rate: 40000000
-    

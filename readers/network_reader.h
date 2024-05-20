@@ -27,11 +27,14 @@ private:
 
   std::unordered_map<std::string, double> rec_mbytes_per_stream_;
   std::vector<FrameStruct> current_frame_internal_;
+  std::shared_ptr<std::string> current_serialized_message_;
 
   // void *context = nullptr;
   // void *responder = nullptr;
 
+  std::string hostname_;
   int port_;
+  bool connect_ = false;
   std::unique_ptr<zmq::context_t> context_;
   std::unique_ptr<zmq::socket_t> socket_;
 
@@ -43,11 +46,15 @@ public:
   NetworkReader(int port);
   void init();
 
+  void init(std::string hostname);
+
   ~NetworkReader();
 
   bool HasNextFrame();
 
-  void NextFrame();
+  void NextFrame(const std::vector<std::string> frame_types_to_pull = {});
+
+  std::shared_ptr<std::string> GetCurrentSerializedMessage();
 
   std::vector<FrameStruct> GetCurrentFrame();
 

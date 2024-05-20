@@ -162,7 +162,7 @@ KinectReader::~KinectReader() {
   k4a_device_close(device_);
 }
 
-void KinectReader::NextFrame() {
+void KinectReader::NextFrame(const std::vector<std::string> frame_types_to_pull) {
 
   current_frame_.clear();
 

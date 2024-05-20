@@ -17,9 +17,6 @@
 
 #include <opencv2/imgproc.hpp>
 #include <yaml-cpp/yaml.h>
-
-//#include <opencv2/imgproc.hpp>
-
 #include "nv_encoder.h"
 
 namespace moetsi::ssp {

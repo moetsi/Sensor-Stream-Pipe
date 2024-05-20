@@ -17,8 +17,14 @@ NetworkReader::NetworkReader(int port) {
 }
 
 void NetworkReader::init() {
+
   context_ = std::unique_ptr<zmq::context_t>(new zmq::context_t(1));
   socket_ = std::unique_ptr<zmq::socket_t>(new zmq::socket_t(*context_, ZMQ_PULL));
+  // Do not accumulate packets if no client is connected
+  socket_->set(zmq::sockopt::immediate, true);
+  // Do not keep packets if there is network congestion
+  socket_->set(zmq::sockopt::conflate, true);
+
 #ifdef SSP_WITH_ZMQ_POLLING
   poller_.add(zmq::socket_ref(zmq::from_handle, socket_.get()->handle()),
       zmq::event_flags::pollin);
@@ -32,6 +38,37 @@ void NetworkReader::init() {
   //std::cerr << "rc = " << rc << std::endl << std::flush;
 
   socket_->bind("tcp://*:" + std::to_string(port_));
+  
+
+}
+
+void NetworkReader::init(std::string hostname) {
+
+  context_ = std::unique_ptr<zmq::context_t>(new zmq::context_t(1));
+  socket_ = std::unique_ptr<zmq::socket_t>(new zmq::socket_t(*context_, ZMQ_SUB));
+  // Do not accumulate packets if no client is connected
+  socket_->set(zmq::sockopt::immediate, true);
+  // Do not keep packets if there is network congestion
+  socket_->set(zmq::sockopt::conflate, true);
+
+#ifdef SSP_WITH_ZMQ_POLLING
+  poller_.add(zmq::socket_ref(zmq::from_handle, socket_.get()->handle()),
+      zmq::event_flags::pollin);
+
+#endif
+
+
+  //context = zmq_ctx_new();
+  //responder = zmq_socket(context, ZMQ_PULL);
+  //auto bind_str = "tcp://*:" + std::to_string(port_);               
+  //auto rc = zmq_bind(responder, bind_str.c_str());
+  //std::cerr << "rc = " << rc << std::endl << std::flush;
+  hostname_ = hostname;
+
+  socket_->connect("tcp://" + hostname_ + ":" + std::to_string(port_));
+  // Subscribe to all messages
+  socket_->set(zmq::sockopt::subscribe, "");
+  
 }
 
 NetworkReader::~NetworkReader() {
@@ -57,12 +94,12 @@ unsigned long elapsed(unsigned long start, unsigned long end)
     return end - start;
 }
 
-void NetworkReader::NextFrame() {
+void NetworkReader::NextFrame(const std::vector<std::string> frame_types_to_pull) {
 
-std::cerr << __FILE__ << ":" << __LINE__<< std::endl << std::flush;
+// std::cerr << __FILE__ << ":" << __LINE__<< std::endl << std::flush;
   zmq::message_t request;
   socket_->recv(&request);
-
+//  std::cerr << __FILE__ << ":" << __LINE__ << std::endl << std::flush; 
   //uint32_t l32 = 0;
   //auto rc = zmq_recv(responder, &l32, 4, 0);
   //std::cerr << "l32 = " << l32 << std::endl;
@@ -92,6 +129,8 @@ std::cerr << __FILE__ << ":" << __LINE__<< std::endl << std::flush;
 
   std::string result =
       std::string(static_cast<char *>(request.data()), request.size());
+    
+  current_serialized_message_ = std::make_shared<std::string>(result);
 
   //std::string result =
   //    std::string(static_cast<char *>(&buffer_[0]), buffer_.size());
@@ -128,6 +167,10 @@ std::cerr << __FILE__ << ":" << __LINE__<< std::endl << std::flush;
                   elapsed(f.timestamps.back(), f.timestamps.at(1)));
   }
 
+}
+
+std::shared_ptr<std::string> NetworkReader::GetCurrentSerializedMessage() {
+  return current_serialized_message_;
 }
 
 std::vector<FrameStruct> NetworkReader::GetCurrentFrame() {

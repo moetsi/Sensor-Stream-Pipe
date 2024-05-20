@@ -106,10 +106,18 @@ public:
   std::shared_ptr<FrameStruct> confidence;
 };
 
-iPhoneReader::iPhoneReader(unsigned int fps)
+iPhoneReader::iPhoneReader(unsigned int fps, const char* client_key, const char* environment_name, const char* sensor_name)
 {
+
+  client_key_ = client_key ? client_key : "";
+  environment_name_ = environment_name ? environment_name : "";
+  sensor_name_ = sensor_name ? sensor_name : "";
+
   pImpl = new iPhoneReaderImpl;
   
+  frame_template_.client_key = client_key_;
+  frame_template_.environment_name = environment_name_;
+  frame_template_.sensor_name = sensor_name_;
   frame_template_.frame_id = 0;
   frame_template_.device_id = 0;
   
@@ -174,7 +182,7 @@ iPhoneReader::iPhoneReader(unsigned int fps)
     pImpl->delegate = [[SessionDelegate alloc] init:gSession];
     pImpl->session.delegate = pImpl->delegate;
 
-    pImpl->fps = fps;
+    pImpl->fps = 60;
     fps_ = fps;
     
     if (@available(iOS 11.3, *))
@@ -216,7 +224,7 @@ bool iPhoneReader::HasNextFrame()
   return true;
 }
 
-void iPhoneReader::NextFrame()
+void iPhoneReader::NextFrame(const std::vector<std::string> frame_types_to_pull)
 {
 }
 

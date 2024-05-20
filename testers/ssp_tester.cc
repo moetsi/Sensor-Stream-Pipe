@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
   std::unordered_map<std::string, unsigned int> types_map;
   std::unordered_map<std::string, unsigned int> fps;
 
-  av_register_all();
+  //av_register_all();
 
   if (argc < 3) {
     std::cerr << "Usage: ssp_tester <codec parameters> <time in seconds>"

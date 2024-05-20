@@ -12,10 +12,10 @@ LibAvDecoder::LibAvDecoder() {}
 LibAvDecoder::~LibAvDecoder() {}
 
 void LibAvDecoder::Init(AVCodecParameters *codec_parameters) {
-  av_register_all();
+  //av_register_all();
 
   codec_ = std::unique_ptr<AVCodec, AVCodecDeleter>(
-      avcodec_find_decoder(codec_parameters->codec_id));
+      const_cast<AVCodec *>(avcodec_find_decoder(codec_parameters->codec_id)));
   codec_context_ = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>(avcodec_alloc_context3(codec_.get()));
   if (!codec_context_) {
     spdlog::error("Failed to allocated memory for AVCodecContext.");
@@ -43,6 +43,8 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
   packet_av->size = frame_struct.frame.size();
 
   cv::Mat img;
+  //assert(!!codec_context_);
+  //assert(!!packet_av);
   int response = avcodec_send_packet(codec_context_.get(), packet_av.get());
   if (response >= 0) {
     // Return decoded output data (into a frame) from a decoder
@@ -58,7 +60,7 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
           AVFrameToMatGray(frame_av, img);
         } else if (codec_context_->pix_fmt == AV_PIX_FMT_YUV420P) {
           AVFrameToMatYUV(frame_av, img);
-          cv::cvtColor(img, img, CV_BGR2GRAY);
+          cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
           img.convertTo(img, CV_16UC1);
           img *= (MAX_DEPTH_VALUE_12_BITS / MAX_DEPTH_VALUE_8_BITS);
         }
@@ -72,7 +74,7 @@ cv::Mat LibAvDecoder::Decode(FrameStruct& frame_struct) {
 }
 
 AVFrameSharedP LibAvDecoder::DecodeFrame(FrameStruct &frame_struct) {
-  AVPacketSharedP packet_av = std::shared_ptr<AVPacket>(av_packet_alloc());
+  AVPacketSharedP packet_av = std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket *p){ free(p); });
   AVFrameSharedP frame_av =
       std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameSharedDeleter);
 

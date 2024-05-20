@@ -2,13 +2,15 @@
  * \file ssp_server.cc @brief SSP, server side.
  */
 // Created by amourao on 26-06-2019.
-
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
 #define SSP_EXPORT __declspec(dllexport)
 #else
 #include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <signal.h>
 #define SSP_EXPORT
 #endif
 
@@ -37,6 +39,12 @@
 #include "../encoders/zdepth_encoder.h"
 #include "../readers/video_file_reader.h"
 #include "../readers/multi_image_reader.h"
+#include "../readers/dummy_body_reader.h"
+
+#ifdef SSP_WITH_DEPTHAI_SUPPORT
+#include "../readers/oakd_xlink_full_reader.h"
+#include "depthai/depthai.hpp"
+#endif
 
 #ifdef SSP_WITH_NVPIPE_SUPPORT
 #include "../encoders/nv_encoder.h"
@@ -49,33 +57,61 @@
 
 using namespace moetsi::ssp;
 
-extern "C" SSP_EXPORT int ssp_server(const char* filename)
-{
-  av_log_set_level(AV_LOG_QUIET);
+//This is a global variable that will store a vector of string that describes what kind of frame types to pull for a single pull_vector_of_frames call
+std::vector<std::string> frame_types_to_pull;
 
-  try {
-    zmq::context_t context(1);
-    zmq::socket_t socket(context, ZMQ_PUSH);
+// Global variable to store original terminal settings (needed for hitting c)
+struct termios oldt;
+void setupNonBlockingInput() {
+    tcgetattr(STDIN_FILENO, &oldt); //get the current terminal I/O structure
+    struct termios newt = oldt;
+    newt.c_lflag &= ~(ICANON); //disable canonical mode
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt); //apply the new settings
+    fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK); //set non-block
+}
 
-    //void *context = nullptr;
-    //void *requester = nullptr;
-    //context = zmq_ctx_new();
-    //requester = zmq_socket(context, ZMQ_PUSH);
+void restoreInputSettings() {
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt); //restore old settings
+}
+
+volatile sig_atomic_t stop_flag = 0;
+
+void handle_signal(int signal) {
+    if (signal == SIGINT) {
+        if (stop_flag) {
+            restoreInputSettings(); // Restore the saved terminal settings
+            std::cerr << "Forced exit" << std::endl;
+            exit(signal);
+        } else {
+            stop_flag = 1;
+            std::cerr << "Exiting after current frame..." << std::endl;
+        }
+    }
+}
+
+// now we make a function called initiaize that we call in ssp_server
+std::tuple<std::unique_ptr<zmq::socket_t>, std::unique_ptr<IReader>, std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>
+initialize(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name) {
+
+    // Initialize the parameters of the codec
+    std::string codec_parameters_file = std::string(filename);
+    YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
+    std::string host = codec_parameters["general"]["host"].as<std::string>();
+    unsigned int port = codec_parameters["general"]["port"].as<unsigned int>();
+
+    // Initialize the context and socket to communicate with the client
+    static auto context = std::make_unique<zmq::context_t>(1);
+    auto socket = std::make_unique<zmq::socket_t>(*context, ZMQ_PUSH);
+
     // Do not accumulate packets if no client is connected
-    socket.set(zmq::sockopt::immediate, true);
+    socket->set(zmq::sockopt::immediate, true);
 
     // Do not keep packets if there is network congestion
-    // socket.set(zmq::sockopt::conflate, true);
-
-    std::string codec_parameters_file = std::string(filename);
-
-    YAML::Node codec_parameters = YAML::LoadFile(codec_parameters_file);
+    // socket->set(zmq::sockopt::conflate, true);
+    socket->connect("tcp://" + host + ":" + std::to_string(port));
 
     YAML::Node general_parameters = codec_parameters["general"];
     SetupLogging(general_parameters);
-
-    std::string host = codec_parameters["general"]["host"].as<std::string>();
-    unsigned int port = codec_parameters["general"]["port"].as<unsigned int>();
 
     std::unique_ptr<IReader> reader = nullptr;
 
@@ -91,11 +127,18 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
             general_parameters["frame_source"]["parameters"]["path"]
                 .as<std::string>()));
 
-    } else if (reader_type == "video") {
+    } else if (reader_type == "dummybody") {
+      reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader(general_parameters["frame_source"]["parameters"]));
+    }
+#ifdef SSP_WITH_DEPTHAI_SUPPORT
+    else if (reader_type == "oakd_xlink_full") {
+        reader = std::unique_ptr<OakdXlinkFullReader>(new OakdXlinkFullReader(general_parameters["frame_source"]["parameters"], client_key, environment_name, sensor_name));
+    }
+#endif
+     else if (reader_type == "video") {
       std::string path =
           general_parameters["frame_source"]["parameters"]["path"]
               .as<std::string>();
-
 #if TARGET_OS_IOS
       // Find the corresponding path in the application bundle
       NSString* file_path = [NSString stringWithCString:path.c_str()
@@ -106,7 +149,6 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
         path = std::string([bundle_path UTF8String]);
 #endif
 
-        
       if (general_parameters["frame_source"]["parameters"]["streams"]
               .IsDefined()) {
         std::vector<unsigned int> streams =
@@ -124,21 +166,21 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
           general_parameters["frame_source"]["parameters"]);
       reader = std::unique_ptr<KinectReader>(new KinectReader(0, c));
 #else
-      return 1;
+      throw std::runtime_error("SSP compiled without Kinect support");
 #endif
     } else if (reader_type == "iphone") {
 #if TARGET_OS_IOS
       auto fps_value = general_parameters["frame_source"]["parameters"]["fps"].as<unsigned int>();
       unsigned int fps = static_cast<unsigned int>(fps_value);
-      reader = std::unique_ptr<iPhoneReader>(new iPhoneReader(fps));
+      reader = std::unique_ptr<iPhoneReader>(new iPhoneReader(fps, client_key, environment_name, sensor_name));
 #else
-      return 1;
+      throw std::runtime_error("SSP compiled without iPhone support");
 #endif
     } else {
       spdlog::error("Unknown reader type: \"{}\". Supported types are "
                     "\"frames\", \"video\" and \"kinect\"",
                     reader_type);
-      return 1;
+      throw std::runtime_error("Unknown reader type");
     }
 
     std::unordered_map<unsigned int, std::shared_ptr<IEncoder>> encoders;
@@ -158,7 +200,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
 #else
         spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
                       "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
-        return 1;
+        throw std::runtime_error("SSP compiled without nvenc support");
 #endif
       } else if (encoder_type == "zdepth")
         fe =
@@ -169,32 +211,122 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
         spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                       "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
                       encoder_type);
-        return 1;
+        throw std::runtime_error("Unknown encoder type");
       }
 
-      // std::cerr << encoder_type << " " << unsigned(type) << " " << (!!fe) << std::endl << std::flush;
       encoders[unsigned(type)] = fe;
     }
 
-    uint64_t last_time = CurrentTimeNs();
-    uint64_t start_time = last_time;
-    uint64_t start_frame_time = last_time;
-    uint64_t sent_frames = 0;
-    uint64_t processing_time = 0;
+    // Return the socket, reader and encoders so they can be used by other functions
+    return std::make_tuple(std::move(socket), std::move(reader), std::move(encoders));
+}
 
-    double sent_kbytes = 0;
+// This is a function that when called sets the frame_types_to_pull variable to <"rgb", "depth">
+void set_frame_types_to_pull_to_rgb_depth() {
+  frame_types_to_pull = {"rgb", "depth"};
+  std::cerr << "!!! Frame types to pull set to: " << frame_types_to_pull[0] << ", " << frame_types_to_pull[1] << std::endl;
+}
 
-    double sent_latency = 0;
+std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader, 
+                                               std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>& encoders)
+{
+  std::vector<FrameStruct> v;
+  std::vector<std::shared_ptr<FrameStruct>> vO;
 
-   socket.connect("tcp://" + host + ":" + std::to_string(port));
-   // auto cstr =  "tcp://" + host + ":" + std::to_string(port);
-   // auto rcc = zmq_connect(requester, cstr.c_str());
+  while (v.empty()) {
+    std::vector<std::shared_ptr<FrameStruct>> frameStruct =
+        reader->GetCurrentFrame();
+    for (std::shared_ptr<FrameStruct> frameStruct : frameStruct) {
 
-    unsigned int fps = reader->GetFps();    
-    unsigned int frame_time = 1000000000ULL/fps;
+      std::shared_ptr<IEncoder> frameEncoder =
+          encoders[unsigned(frameStruct->frame_type)];
+      if (!!frameEncoder) {
+        frameEncoder->AddFrameStruct(frameStruct);
+        if (frameEncoder->HasNextPacket()) {
+          std::shared_ptr<FrameStruct> f =
+              frameEncoder->CurrentFrameEncoded();
+          vO.push_back(f);
+          v.push_back(*f);
+          frameEncoder->NextPacket();
+        }
+      }
+      // If there isn't an encoder for the frame type it is because it wasn't initialized with it in config, but a request was made
+      // So we will instantiate a null encoder for this frame and perform the same process on the frame
+      // (really only occurs for oakd devices when they are configured to send bodies but then "c" is hit to request a rgb and depth frame)
+      else {
+        std::shared_ptr<IEncoder> nullEncoder = std::shared_ptr<NullEncoder>(new NullEncoder(reader->GetFps()));
+        nullEncoder->AddFrameStruct(frameStruct);
+        if (nullEncoder->HasNextPacket()) {
+          std::shared_ptr<FrameStruct> f = nullEncoder->CurrentFrameEncoded();
+          vO.push_back(f);
+          v.push_back(*f);
+          nullEncoder->NextPacket();
+        }
+      }
+    }
+    if (reader->HasNextFrame()) {
+      if (!frame_types_to_pull.empty()) {
+        reader->NextFrame(frame_types_to_pull);
+      } else {
+        reader->NextFrame();
+      }
+    } else {
+      reader->Reset();
+    }
+  }
+  if (!frame_types_to_pull.empty()) {
+    frame_types_to_pull.clear();
+    std::cerr << "!!! frame_types_to_pull cleared" << std::endl;
+  }
 
+  for (unsigned int i = 0; i < vO.size(); i++) {
+    vO.at(i)->frame.clear();
+    vO.at(i) = nullptr;
+  }
+
+  return v;
+}
+
+// New function to send vector of frames
+void send_vector_of_frames(zmq::socket_t& socket, const std::vector<FrameStruct>& v)
+{
+  std::string message = CerealStructToString(v);
+
+  zmq::message_t request(message.size());
+  memcpy(request.data(), message.c_str(), message.size()); 
+  socket.send(request, zmq::send_flags::none);
+}
+
+extern "C" void start_auto(zmq::socket_t* socket, std::unique_ptr<IReader>& reader, std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>& encoders)
+{
+
+  struct termios oldt;
+  tcgetattr(STDIN_FILENO, &oldt); // get current terminal settings for restoration
+  setupNonBlockingInput();
+
+  uint64_t last_time = CurrentTimeNs();
+  uint64_t start_time = last_time;
+  uint64_t start_frame_time = last_time;
+  uint64_t sent_frames = 0;
+  uint64_t processing_time = 0;
+
+  double sent_kbytes = 0;
+  double sent_latency = 0;
+
+  unsigned int fps = reader->GetFps();    
+  unsigned int frame_time = 1000000000ULL/fps;
+
+  int c = 0;
+  try {
     while (1) {
 
+      // This is to trigger set_frame_types_to_pull_to_rgb_depth if the user presses 'c'
+      char ch;
+      if (read(STDIN_FILENO, &ch, 1) > 0 && ch == 'c') {
+          set_frame_types_to_pull_to_rgb_depth();
+      }
+
+      //The remaining code is for pulling and sending frames
       if (processing_time < frame_time)
       {
         uint64_t sleep_time = frame_time - processing_time;
@@ -208,55 +340,12 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
         start_time = last_time;
       }
 
-      std::vector<FrameStruct> v;
-      std::vector<std::shared_ptr<FrameStruct>> vO;
-
-      while (v.empty()) {
-        std::vector<std::shared_ptr<FrameStruct>> frameStruct =
-            reader->GetCurrentFrame();
-        for (std::shared_ptr<FrameStruct> frameStruct : frameStruct) {
-
-
-          std::shared_ptr<IEncoder> frameEncoder =
-              encoders[unsigned(frameStruct->frame_type)];
-              // std::cerr << "ft = " << unsigned(frameStruct->frame_type) << std::endl << std::endl;
-          if (!!frameEncoder) {
-            frameEncoder->AddFrameStruct(frameStruct);
-            if (frameEncoder->HasNextPacket()) {
-              std::shared_ptr<FrameStruct> f =
-                  frameEncoder->CurrentFrameEncoded();
-              vO.push_back(f);
-              v.push_back(*f);
-              frameEncoder->NextPacket();
-            }
-          } else {
-            // std::cerr << "skip!" << std::endl << std::flush;
-          }
-        }
-        if (reader->HasNextFrame())
-          reader->NextFrame();
-        else {
-          reader->Reset();
-        }
-      }
+      std::vector<FrameStruct> v = pull_vector_of_frames(reader, encoders);
 
       if (!v.empty()) {
-
-       
-        std::string message = CerealStructToString(v);
-
-        zmq::message_t request(message.size());
-        memcpy(request.data(), message.c_str(), message.size());
-        socket.send(request, zmq::send_flags::none);
-        //auto *buffer = &message[0];
-        //auto length = message.size();
-        //uint32_t l32 = length;
-        //std::cerr << "l32 = " << l32 << std::endl;
-        //auto rc0 = zmq_send(requester, &l32, 4, ZMQ_SNDMORE); 
-        //auto rc = zmq_send(requester, buffer, length, 0);
+        send_vector_of_frames(*socket, v);
 
         sent_frames += 1;
-        sent_kbytes += message.size() / 1000.0;
 
         uint64_t diff_time = CurrentTimeNs() - last_time;
 
@@ -275,23 +364,36 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
 
         sent_latency += diff_time;
 
-        spdlog::debug(
-            "Message sent, took {} ns (avg. {:3.2f}); packet size {}; avg {} fps; "
-            "{:3.2f} Mbps; {:3.2f} Mbps expected",
-            diff_time, sent_latency / sent_frames, message.size(), avg_fps,
-            8 * (sent_kbytes * 1000000ULL / (CurrentTimeNs() - start_time)),
-            8 * (sent_kbytes * reader->GetFps() / (sent_frames * 1000)));
-
         for (unsigned int i = 0; i < v.size(); i++) {
           FrameStruct f = v.at(i);
           f.frame.clear();
           spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id,
                         f.frame_id);
-          vO.at(i)->frame.clear();
-          vO.at(i) = nullptr;
         }
       }
+
+      if (stop_flag) {
+        break;
+      }
     }
+  } catch (...) {
+        restoreInputSettings(); // ensure the settings are restored even if an error occurs
+        throw; // rethrow the exception to handle it outside
+    }
+    restoreInputSettings(); // restore terminal settings before exiting function
+}
+
+// Updated function signature to accept 4 arguments
+extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name)
+{
+  av_log_set_level(AV_LOG_QUIET);
+
+  try {
+    std::cerr << "Initializing socket, reader and encoders" << std::endl;
+    auto [socket, reader, encoders] = initialize(filename, client_key, environment_name, sensor_name);
+    std::cerr << "Socket, reader and encoders initialized" << std::endl;
+
+    start_auto(socket.get(), reader, encoders);
   } catch (YAML::Exception &e) {
     spdlog::error("Error on the YAML configuration file");
     spdlog::error(e.what());
@@ -300,11 +402,14 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename)
     spdlog::error(e.what());
   }
 
+  restoreInputSettings(); // Restore terminal settings before exiting ssp_server
   return 0;
 }
 
 #ifndef SSP_PLUGIN
 int main(int argc, char *argv[]) {
+  signal(SIGINT, handle_signal); // Handle Ctrl-C and other relevant signals
+  setupNonBlockingInput(); // Setup non-blocking input for keyboard handling
 
   spdlog::set_level(spdlog::level::debug);
 
@@ -318,22 +423,49 @@ int main(int argc, char *argv[]) {
   if (path != nil)
     filename = std::string([path UTF8String]);
 
+  const char* client_key = nullptr;
+  const char* environment_name = nullptr;
+  const char* sensor_name = nullptr;
+
+  for (int i = 0; i < argc; ++i) {
+    std::cerr << "Argument " << i << ": " << argv[i] << std::endl;
+  }
+
+  if (argc == 4) {
+    client_key = argv[1];
+    environment_name = argv[2];
+    sensor_name = argv[3];
+  }
+
   // Launch ssp_server in a background queue
   dispatch_queue_t aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-  dispatch_async(aQueue, ^{ ssp_server(filename.c_str()); });
+  dispatch_async(aQueue, ^{
+    ssp_server(filename.c_str(), client_key, environment_name, sensor_name);
+  });
 
   @autoreleasepool {
     return UIApplicationMain(argc, argv, nil, nil);
   }
 #else
-  if (argc < 2) {
-    std::cerr << "Usage: ssp_server <parameters_file>" << std::endl;
+  // Check number of arguments
+  if (argc == 2) {
+    filename = std::string(argv[1]);
+    int result = ssp_server(filename.c_str(), nullptr, nullptr, nullptr);
+    restoreInputSettings(); // Restore terminal settings after ssp_server returns
+    return result;
+  } else if (argc == 5) {
+    filename = std::string(argv[1]);
+    const char* client_key = argv[2];
+    const char* environment_name = argv[3];
+    const char* sensor_name = argv[4];
+    int result = ssp_server(filename.c_str(), client_key, environment_name, sensor_name);
+    restoreInputSettings(); // Restore terminal settings after ssp_server returns
+    return result;
+  } else {
+    std::cerr << "Usage: ssp_server <parameters_file> [client_key environment_name sensor_name]" << std::endl;
     return 1;
   }
-
-  filename = std::string(argv[1]);
 #endif
-    
-  return ssp_server(filename.c_str());
+  restoreInputSettings(); // Restore terminal settings on normal exit
 }
 #endif

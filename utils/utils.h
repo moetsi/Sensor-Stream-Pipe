@@ -53,19 +53,21 @@ void SetupLogging(YAML::Node &general_parameters);
  */
 void SetupLogging(std::string &level, std::string &file);
 
-#ifdef av_err2str
-#undef av_err2str
+#ifdef _av_err2str
+#undef _av_err2str
 #endif 
 
 #ifdef _WIN32
 
-#define av_err2str(errnum)                                                     \
+#define _av_err2str(errnum)                                                     \
   av_make_error_string((char *)_malloca(AV_ERROR_MAX_STRING_SIZE),             \
                        AV_ERROR_MAX_STRING_SIZE, errnum)
 #else
-#define av_err2str(errnum)                                                     \
+#define _av_err2str(errnum)                                                     \
   av_make_error_string((char *)__builtin_alloca(AV_ERROR_MAX_STRING_SIZE),     \
                        AV_ERROR_MAX_STRING_SIZE, errnum)
 #endif
+
+/// *** #error TODO load yaml from string or path ~ LoadFile -> Load
 
 }

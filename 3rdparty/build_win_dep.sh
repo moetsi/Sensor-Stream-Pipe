@@ -20,17 +20,32 @@ function install_yasm {
 
 function build_ffmpeg {
     echo "Building ffmpeg"
-
-    export FFMPEG_NAME=ffmpeg-n4.3.2-160-gfbb9368226-win64-lgpl-shared-4.3
-    curl -L -O \
-      https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-03-12-12-32/${FFMPEG_NAME}.zip
-    unzip -d ${LOCAL_DIR} ${FFMPEG_NAME}.zip
-
-    mv ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
+    #https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared.zip
+    #export FFMPEG_NAME=ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared
+    #curl -L -O \
+    #  https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-18-12-22/${FFMPEG_NAME}.zip
+    export FFMPEG_NAME=ffmpeg-n4.4-188-g404c9331dd-win64-lgpl-shared-4.4
+    cp ../$FFMPEG_NAME.zip .
+    pwd
+    FFMPEG_ZIP=$PWD/$FFMPEG_NAME.zip
+    pushd ${LOCAL_DIR}
+    pwd
+    rm -Rvf ffmpeg-n4.4-188-g404c9331dd-win64-lgpl-shared-4.4/
+    jar xvf $FFMPEG_ZIP
+    pwd
+    ls 
+    popd
+    unzip -uod ${LOCAL_DIR} ${FFMPEG_NAME}.zip 
+    #unzip dll boom with cygwin libraries versions
+    # /d/a/RaaSCL/RaaSCL/3rdparty/tmp/Sensor-Stream-Pipe/3rdparty
+    # ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared/
+    # => /d/a/RaaSCL/RaaSCL/3rdparty/tmp/Sensor-Stream-Pipe/3rdparty/tmp/local.ssp/ffmpeg-N-103679-g7bbad32d5a-win64-lgpl-shared    
+    mv -v ${LOCAL_DIR}/${FFMPEG_NAME} ${LOCAL_DIR}/ffmpeg
     return
 
+    # a path of pain below ~
     git clone --depth 1 --branch release/4.3 \
-         https://git.ffmpeg.org/ffmpeg.git ffmpeg
+         https://git.ffmpeg.org/ffmpeg.git ffmpeg 
     pushd ffmpeg
 
     ./configure --prefix=${LOCAL_DIR}/ffmpeg \
@@ -41,8 +56,8 @@ function build_ffmpeg {
          --enable-asm \
          --enable-w32threads \
          --disable-programs \
-         --disable-ffserver \
          --disable-ffmpeg \
+         --disable-ffserver \
          --disable-ffplay \
          --disable-ffprobe
     make -j12
@@ -50,16 +65,21 @@ function build_ffmpeg {
     popd
 }
 
+
 # Build minimal OpenCV : core imgproc
 function build_opencv {
     echo "Building opencv"
-    git clone --depth 1 --branch 3.4.13 \
-        https://github.com/opencv/opencv.git
-    pushd opencv
+    curl -L -O \
+      https://github.com/opencv/opencv/archive/refs/tags/4.5.4.zip
+    unzip 4.5.4.zip
+        mv opencv-4.5.4 opencv
+
+    pushd  opencv
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -A x64  \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
+        -DOPENCV_GENERATE_PKGCONFIG=YES \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_WITH_STATIC_CRT=OFF \
@@ -106,14 +126,14 @@ function build_opencv {
 function build_cereal {
     echo "Building Cereal"
     git clone --depth 1 --branch v1.3.0 \
-        https://github.com/USCiLab/cereal.git
+        https://github.com/USCiLab/cereal.git || exit -1
     pushd cereal
     mkdir build && cd build
-    cmake -G "Visual Studio 15 2017 Win64" \
+    cmake -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cereal \
         -DJUST_INSTALL_CEREAL=ON \
-        ..
-    cmake --build . --config Release --target install
+        .. || exit -1
+    cmake --build . --config Release --target install || exit -1
     cd ..
     popd
 }
@@ -122,14 +142,14 @@ function build_cereal {
 function build_spdlog {
     echo "Building spdlog"
     git clone --depth 1 --branch v1.8.2 \
-        https://github.com/gabime/spdlog.git
+        https://github.com/gabime/spdlog.git || exit -1
     pushd spdlog
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/spdlog \
         -DSPDLOG_BUILD_SHARED=OFF \
-        ..
+        .. || exit -=1
     cmake --build . --config Release --target install
     [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
     cd ..
@@ -139,18 +159,18 @@ function build_spdlog {
 # https://github.com/catid/Zdepth
 function build_zdepth {
     echo "Building zdepth"
-    git clone https://github.com/catid/Zdepth.git
+    git clone https://github.com/catid/Zdepth.git || exit -1
     pushd Zdepth
 
     # Commit including our cmake patch
-    git checkout 9b333d9aec520
+    git checkout 9b333d9aec520 || exit -1
 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/zdepth \
         -DCMAKE_DEBUG_POSTFIX=d \
-        ..
+        .. || exit -1
     cmake --build . --config Release --target install
     [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
     cd ..
@@ -161,20 +181,20 @@ function build_zdepth {
 function build_yaml_cpp {
     echo "Building yaml cpp"
     git clone --depth 1 --branch yaml-cpp-0.6.3 \
-        https://github.com/jbeder/yaml-cpp.git
+        https://github.com/jbeder/yaml-cpp.git || exit -1
     pushd yaml-cpp
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/yaml-cpp \
         -DYAML_BUILD_SHARED_LIBS=OFF \
         -DYAML_CPP_BUILD_CONTRIB=OFF \
         -DYAML_CPP_BUILD_TESTS=OFF \
         -DYAML_CPP_BUILD_TOOLS=OFF \
         -DYAML_CPP_INSTALL=ON \
-        ..
-    cmake --build . --config Release --target install
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
+        .. || exit -1
+    cmake --build . --config Release --target install 
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install 
     cd ..
     popd
 }
@@ -184,18 +204,19 @@ function build_libzmq {
     echo "Building libzmq"
     git clone --depth 1 --branch v4.3.4 \
         https://github.com/zeromq/libzmq.git
+    #git clone https://github.com/zeromq/libzmq.git        
     pushd libzmq
+    #git checkout f13f891c911b4e007efd0bf5bd1412874aebd24a 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/libzmq \
-        -DBUILD_SHARED=OFF -DBUILD_STATIC=ON \
-        -DBUILD_TESTS=OFF -DWITH_TLS=OFF \
+        -DBUILD_SHARED=OFF -DBUILD_STATIC=ON -DZMQ_HAVE_IPC=OFF \
+        -DBUILD_TESTS=OFF \
         -DWITH_LIBSODIUM=OFF \
-        -DWITH_LIBSODIUM_STATIC=OFF \
-        ..
-    cmake --build . --config Release --target install
-    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install
+        .. || exit -1
+    cmake --build . --config Release --target install 
+    [ ${BUILD_DEBUG} ]  && cmake --build . --config Debug --target install 
     cd ..
     popd
 }
@@ -204,16 +225,16 @@ function build_libzmq {
 function build_cppzmq {
     echo "Building cppzmq"
     git clone --depth 1 --branch v4.7.1 \
-        https://github.com/zeromq/cppzmq.git
+        https://github.com/zeromq/cppzmq.git || exit -1
     pushd cppzmq
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cppzmq \
         -DZeroMQ_DIR=${LOCAL_DIR}/libzmq/CMake \
         -DCPPZMQ_BUILD_TESTS=OFF \
-        ..
-    cmake --build . --config Release --target install
+        .. || exit -1
+    cmake --build . --config Release --target install 
     cd ..
     popd
 }
@@ -222,21 +243,22 @@ function build_cppzmq {
 function build_k4a {
     echo "Building Azure Kinect Sensor SDK"
     git clone --depth 1 --branch v1.4.1 \
-        https://github.com/microsoft/Azure-Kinect-Sensor-SDK.git
-    pushd Azure-Kinect-Sensor-SDK
+        https://github.com/microsoft/Azure-Kinect-Sensor-SDK.git k4a
+    pushd k4a
 
     # Use our version of spdlog
     patch -p1 < $SOURCE_DIR/k4a.patch
 
     mkdir build && cd build
     CFLAGS="-MP" CXXFLAGS="-MP" cmake \
-        -G "Visual Studio 15 2017 Win64" \
+        -G "Visual Studio 16 2019" -A "x64" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/k4a \
         -Dspdlog_DIR=${LOCAL_DIR}/spdlog/lib/cmake/spdlog \
         -DBUILD_TESTING=OFF \
         ..
     cmake --build . --config Release --target install
+    cmake --build . --target install
     cd ..
     popd
 }
@@ -260,30 +282,39 @@ mkdir -p ${LOCAL_DIR}
 
 [ ${BUILD_DEBUG} ] && echo "Build Release+Debug version" || echo "Build only Release version"
 
-#install_yasm
-build_ffmpeg
-build_opencv
-build_cereal
-build_spdlog
-build_zdepth
-build_yaml_cpp
-build_libzmq
-build_cppzmq
-build_k4a
+install_yasm || exit -1
+build_ffmpeg || exit -1
+build_opencv || exit -1
+build_cereal || exit -1
+build_spdlog || exit -1
+build_zdepth || exit -1
+build_yaml_cpp || exit -1
+build_libzmq || exit -1
+build_cppzmq || exit -1
+##build_k4a
 
-version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
 prefix=`date +%Y%m%d%H%M`
-filename=${prefix}_${version}_ssp_windep
+filename=${prefix}_ssp_windep
 
 echo "Packing ${LOCAL_DIR} to ${filename}.tar"
+#tar -C ${LOCAL_DIR} -cf ${filename}.tar \
+#  cereal \
+#  cppzmq \
+#  ffmpeg \
+#  k4a \
+#  libzmq \
+#  opencv \
+#  spdlog \
+#  yaml-cpp \
+#  zdepth
+
 tar -C ${LOCAL_DIR} -cf ${filename}.tar \
+  spdlog \
   cereal \
   cppzmq \
   ffmpeg \
-  k4a \
   libzmq \
   opencv \
-  spdlog \
   yaml-cpp \
   zdepth
 

@@ -1,9 +1,0 @@
-<map id="image_reader.cc" name="image_reader.cc">
-<area shape="rect" id="node2" href="$image__reader_8h.html" title="Image reader. " alt="" coords="1178,80,1289,107"/>
-<area shape="rect" id="node6" href="$structs_2frame__struct_8h_source.html" title="../structs/frame_struct.h" alt="" coords="680,229,843,256"/>
-<area shape="rect" id="node20" href="$image__decoder_8h.html" title="AV Image decoder. " alt="" coords="1210,155,1372,181"/>
-<area shape="rect" id="node31" href="$readers_2ireader_8h_source.html" title="ireader.h" alt="" coords="970,155,1042,181"/>
-<area shape="rect" id="node13" href="$utils_8h.html" title="Utilities. " alt="" coords="1105,304,1202,331"/>
-<area shape="rect" id="node16" href="$logger_8h.html" title="Logger header. " alt="" coords="921,386,989,413"/>
-<area shape="rect" id="node25" href="$libav__types_8h_source.html" title="libav_types.h" alt="" coords="1604,229,1703,256"/>
-</map>

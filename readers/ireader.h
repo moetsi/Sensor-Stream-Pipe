@@ -3,6 +3,7 @@
  */
 // Created by amourao on 14-08-2019.
 #pragma once
+#include <map>
 
 #include "../structs/frame_struct.h"
 
@@ -13,7 +14,19 @@ namespace moetsi::ssp {
  * \param level logging level
  * \param file logging file
  */
-void SetupLogging(std::string &level, std::string &file);
+void SetupLogging(const std::string &level, const std::string &file);
+
+/**
+ * @brief Magic string interpolation
+ * \param env environment
+ * \param str input
+ */
+std::string StringInterpolation(const std::map<std::string, std::string> &env, const std::string &s);
+/**
+ * @brief Magic string interpolation
+ * \param str input
+ */
+std::string StringInterpolation(const std::string &s);
 
 /**
  * @brief SSP reader interface - abstract class.
@@ -27,11 +40,15 @@ public:
   /** @brief Get current frame data */
   virtual std::vector<std::shared_ptr<FrameStruct>> GetCurrentFrame() = 0;
 
+#ifndef SWIG
   /** 
    * @brief Get frame types
    * \return a vector of FrameType, listing available data types 
    */
   virtual std::vector<FrameType> GetType() = 0;
+#endif
+
+  std::vector<FrameType> GetFrameType() { return GetType(); }
 
   /**
    * @brief Check if there is a next frame
@@ -40,7 +57,7 @@ public:
   virtual bool HasNextFrame() = 0;
 
   /** @brief Go to next frame */
-  virtual void NextFrame() = 0;
+  virtual void NextFrame(const std::vector<std::string> frame_types_to_pull = {}) = 0;
 
   /** @brief Reset this reader */
   virtual void Reset() = 0;

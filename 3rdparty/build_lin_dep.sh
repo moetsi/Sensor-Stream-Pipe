@@ -31,12 +31,12 @@ function install_nasm {
 function build_openh264 {
     # https://github.com/AkillesAILimited/openh264
     echo "building libopenh264"
-    git clone https://github.com/AkillesAILimited/openh264
+    git clone https://github.com/AkillesAILimited/openh264 || exit -1
     pushd openh264
     cp -fv ../../Makefile.libopenh264 Makefile
-    ( export PREFIX=${LOCAL_DIR}/openh264; make -j16 OS=linux )
+    ( export PREFIX=${LOCAL_DIR}/openh264; make -j16 OS=linux || exit -1)
     mkdir ${LOCAL_DIR}/openh264
-    ( export PREFIX=${LOCAL_DIR}/openh264; make install )
+    ( export PREFIX=${LOCAL_DIR}/openh264; make install || exit -1 )
     popd
 }
 
@@ -44,7 +44,7 @@ function build_openh264 {
 function build_ffmpeg {
     echo "Building ffmpeg"
     git clone --depth 1 --branch release/4.3 \
-         https://git.ffmpeg.org/ffmpeg.git ffmpeg
+         https://git.ffmpeg.org/ffmpeg.git ffmpeg || exit -1
     pushd ffmpeg
     ( export PKG_CONFIG_PATH=${LOCAL_DIR}/openh264/lib/pkgconfig; ./configure --prefix=${LOCAL_DIR}/ffmpeg \
         --disable-gpl \
@@ -59,24 +59,28 @@ function build_ffmpeg {
         --disable-ffmpeg \
         --disable-ffplay \
         --disable-ffprobe \
-        --disable-securetransport )
-    make -j16
-    make install
+        --disable-securetransport || exit -1 )
+    make -j16 || exit -1
+    make install || exit -1
     popd
 }
 
-# Build minimal OpenCV : core imgproc imgcodecs highgui
+# --exclude-libs
+# core gapi highgui imgcodecs imgproc
+# Build minimal OpenCV : core imgproc imgcodecs highgui 
+# opencv/include/opencv4/opencv2/imgcodecs.hpp
 function build_opencv {
     echo "Building opencv"
-    git clone --depth 1 --branch 3.4.13 \
-        https://github.com/opencv/opencv.git
-    pushd opencv
+    wget -O opencv-4.5.3.tar.gz https://github.com/opencv/opencv/archive/refs/tags/4.5.3.tar.gz
+    tar -xf opencv-4.5.3.tar.gz
+    pushd opencv-4.5.3
     mkdir build && cd build
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/opencv \
+        -DOPENCV_GENERATE_PKGCONFIG=YES \
         -DBUILD_EXAMPLES=OFF \
-        -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
         -DBUILD_opencv_apps:BOOL=ON \
         -DBUILD_opencv_calib3d:BOOL=OFF \
         -DBUILD_opencv_core:BOOL=ON \
@@ -122,15 +126,15 @@ function build_opencv {
 function build_cereal {
     echo "Building Cereal"
     git clone --depth 1 --branch v1.3.0 \
-        https://github.com/USCiLab/cereal.git
+        https://github.com/USCiLab/cereal.git || exit -1
     pushd cereal
     mkdir build && cd build
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cereal \
         -DJUST_INSTALL_CEREAL=ON \
-        ..
-    cmake --build . -j 16 --config Release --target install
+        .. || exit -1
+    cmake --build . -j 16 --config Release --target install || exit -1
     cd ..
     popd
 }
@@ -139,7 +143,7 @@ function build_cereal {
 function build_spdlog {
     echo "Building spdlog"
     git clone --depth 1 --branch v1.8.2 \
-        https://github.com/gabime/spdlog.git
+        https://github.com/gabime/spdlog.git || exit -1
     pushd spdlog
     mkdir build && cd build
     cmake \
@@ -147,8 +151,8 @@ function build_spdlog {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/spdlog \
         -DSPDLOG_BUILD_SHARED=OFF \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-        ..
-    cmake --build . -j 16 --config Release --target install
+        .. || exit -1
+    cmake --build . -j 16 --config Release --target install || exit -1
     cd ..
     popd
 }
@@ -156,7 +160,7 @@ function build_spdlog {
 # https://github.com/catid/Zdepth
 function build_zdepth {
     echo "Building zdepth"
-    git clone https://github.com/catid/Zdepth.git
+    git clone https://github.com/catid/Zdepth.git || exit -1
     pushd Zdepth
     # Commit including our cmake patch
     git checkout 9b333d9aec520
@@ -166,8 +170,8 @@ function build_zdepth {
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/zdepth \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-        ..
-    cmake --build . -j 16 --config Release --target install
+        .. || exit -1
+    cmake --build . -j 16 --config Release --target install || exit -1
     cd ..
     popd
 }
@@ -176,7 +180,7 @@ function build_zdepth {
 function build_yaml_cpp {
     echo "Building yaml cpp"
     git clone --depth 1 --branch yaml-cpp-0.6.3 \
-        https://github.com/jbeder/yaml-cpp.git
+        https://github.com/jbeder/yaml-cpp.git || exit -1
     pushd yaml-cpp
     mkdir build && cd build
     cmake \
@@ -189,8 +193,8 @@ function build_yaml_cpp {
         -DYAML_CPP_BUILD_TOOLS=OFF \
         -DYAML_CPP_INSTALL=ON \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-        ..
-    cmake --build . -j 16 --config Release --target install
+        .. || exit -1
+    cmake --build . -j 16 --config Release --target install || exit -1
     cd ..
     popd
 }
@@ -198,9 +202,11 @@ function build_yaml_cpp {
 # https://github.com/zeromq/libzmq
 function build_libzmq {
     echo "Building libzmq"
-    git clone --depth 1 --branch v4.3.4 \
-        https://github.com/zeromq/libzmq.git
+    #git clone --depth 1 --branch v4.3.4 \
+    #    https://github.com/zeromq/libzmq.git
+    git clone https://github.com/zeromq/libzmq.git        
     pushd libzmq
+    git checkout f13f891c911b4e007efd0bf5bd1412874aebd24a 
     mkdir build && cd build
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
@@ -209,9 +215,10 @@ function build_libzmq {
         -DBUILD_TESTS=OFF -DWITH_TLS=ON \
         -DWITH_LIBSODIUM=ON \
         -DWITH_LIBSODIUM_STATIC=ON \
+        -DENABLE_DRAFTS=ON \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-        ..
-    cmake --build . -j 16 --config Release --target install
+        .. || exit -1
+    cmake --build . -j 16 --config Release --target install || exit -1
     cd ..
     popd
 }
@@ -220,7 +227,7 @@ function build_libzmq {
 function build_cppzmq {
     echo "Building cppzmq"
     git clone --depth 1 --branch v4.7.1 \
-        https://github.com/zeromq/cppzmq.git
+        https://github.com/zeromq/cppzmq.git || exit -1
     pushd cppzmq
     mkdir build && cd build
     cmake \
@@ -228,8 +235,8 @@ function build_cppzmq {
         -DCMAKE_INSTALL_PREFIX=${LOCAL_DIR}/cppzmq \
         -DZeroMQ_DIR=${LOCAL_DIR}/libzmq/lib/cmake/ZeroMQ \
         -DCPPZMQ_BUILD_TESTS=OFF \
-        ..
-    cmake --build . -j 16 --config Release --target install
+        .. || exit -1
+    cmake --build . -j 16 --config Release --target install || exit -1
     cd ..
     popd
 }
@@ -271,18 +278,19 @@ pushd tmp
 export LOCAL_DIR=`pwd`/local.ssp
 mkdir -p ${LOCAL_DIR}
 
-install_nasm
-build_openh264
-build_ffmpeg
+install_nasm || exit -1
+build_openh264 || exit -1
+build_ffmpeg || exit -1
 
-build_opencv
-build_cereal
-build_spdlog
-build_zdepth
-build_yaml_cpp
-build_libzmq
-build_cppzmq
+build_opencv || exit -1
+build_cereal || exit -1
+build_spdlog || exit -1
+build_zdepth || exit -1
+build_yaml_cpp || exit -1
+build_libzmq || exit -1
+build_cppzmq || exit -1
 #build_k4a
+#build_depthai
 
 version=$(git describe --dirty | sed -e 's/^v//' -e 's/g//' -e 's/[[:space:]]//g')
 prefix=`date +%Y%m%d%H%M`
@@ -299,6 +307,8 @@ tar -C ${LOCAL_DIR} -cf ${filename}.tar \
   yaml-cpp \
   openh264 \
   zdepth
+
+##   depthai-core 
 
 echo "Compressing ${filename}.tar"
 gzip ${filename}.tar
