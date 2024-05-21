@@ -90,7 +90,7 @@ void handle_signal(int signal) {
 }
 
 // now we make a function called initiaize that we call in ssp_server
-std::tuple<std::unique_ptr<zmq::socket_t>, std::unique_ptr<IReader>, std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>
+extern "C" SSP_EXPORT std::tuple<std::unique_ptr<zmq::socket_t>, std::unique_ptr<IReader>, std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>>
 initialize(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name) {
 
     // Initialize the parameters of the codec
@@ -183,7 +183,7 @@ initialize(const char* filename, const char* client_key, const char* environment
       throw std::runtime_error("Unknown reader type");
     }
 
-    std::unordered_map<unsigned int, std::shared_ptr<IEncoder>> encoders;
+    auto encoders = std::make_unique<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>();
 
     std::vector<FrameType> types = reader->GetType();
 
@@ -214,7 +214,7 @@ initialize(const char* filename, const char* client_key, const char* environment
         throw std::runtime_error("Unknown encoder type");
       }
 
-      encoders[unsigned(type)] = fe;
+      (*encoders)[unsigned(type)] = fe;
     }
 
     // Return the socket, reader and encoders so they can be used by other functions
@@ -228,7 +228,7 @@ void set_frame_types_to_pull_to_rgb_depth() {
 }
 
 std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader, 
-                                               std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>& encoders)
+                                               std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>& encoders)
 {
   std::vector<FrameStruct> v;
   std::vector<std::shared_ptr<FrameStruct>> vO;
@@ -239,7 +239,7 @@ std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader,
     for (std::shared_ptr<FrameStruct> frameStruct : frameStruct) {
 
       std::shared_ptr<IEncoder> frameEncoder =
-          encoders[unsigned(frameStruct->frame_type)];
+          (*encoders)[unsigned(frameStruct->frame_type)];
       if (!!frameEncoder) {
         frameEncoder->AddFrameStruct(frameStruct);
         if (frameEncoder->HasNextPacket()) {
@@ -297,7 +297,13 @@ void send_vector_of_frames(zmq::socket_t& socket, const std::vector<FrameStruct>
   socket.send(request, zmq::send_flags::none);
 }
 
-extern "C" void start_auto(zmq::socket_t* socket, std::unique_ptr<IReader>& reader, std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>& encoders)
+extern "C" SSP_EXPORT void pull_and_send_frames(std::unique_ptr<zmq::socket_t>& socket, std::unique_ptr<IReader>& reader, std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>& encoders)
+{
+  std::vector<FrameStruct> v = pull_vector_of_frames(reader, encoders);
+  send_vector_of_frames(*socket, v);
+}
+
+extern "C" void start_auto(std::unique_ptr<zmq::socket_t>& socket, std::unique_ptr<IReader>& reader, std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>& encoders)
 {
 
   struct termios oldt;
@@ -384,7 +390,7 @@ extern "C" void start_auto(zmq::socket_t* socket, std::unique_ptr<IReader>& read
 }
 
 // Updated function signature to accept 4 arguments
-extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name)
+extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_key = nullptr, const char* environment_name = nullptr, const char* sensor_name = nullptr)
 {
   av_log_set_level(AV_LOG_QUIET);
 
@@ -393,7 +399,7 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_ke
     auto [socket, reader, encoders] = initialize(filename, client_key, environment_name, sensor_name);
     std::cerr << "Socket, reader and encoders initialized" << std::endl;
 
-    start_auto(socket.get(), reader, encoders);
+    start_auto(socket, reader, encoders);
   } catch (YAML::Exception &e) {
     spdlog::error("Error on the YAML configuration file");
     spdlog::error(e.what());
