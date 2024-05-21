@@ -89,9 +89,15 @@ void handle_signal(int signal) {
     }
 }
 
-// now we make a function called initiaize that we call in ssp_server
-extern "C" SSP_EXPORT std::tuple<std::unique_ptr<zmq::socket_t>, std::unique_ptr<IReader>, std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>>
-initialize(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name) {
+// Define a struct to hold the static variables
+struct SSPContext {
+    static inline std::unique_ptr<zmq::socket_t> socket;
+    static inline std::unique_ptr<IReader> reader;
+    static inline std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>> encoders;
+};
+
+// now we make a function called initialize that we call in ssp_server
+extern "C" SSP_EXPORT void initialize(const char* filename, const char* client_key, const char* environment_name, const char* sensor_name) {
 
     // Initialize the parameters of the codec
     std::string codec_parameters_file = std::string(filename);
@@ -101,38 +107,38 @@ initialize(const char* filename, const char* client_key, const char* environment
 
     // Initialize the context and socket to communicate with the client
     static auto context = std::make_unique<zmq::context_t>(1);
-    auto socket = std::make_unique<zmq::socket_t>(*context, ZMQ_PUSH);
+    SSPContext::socket = std::make_unique<zmq::socket_t>(*context, ZMQ_PUSH);
 
     // Do not accumulate packets if no client is connected
-    socket->set(zmq::sockopt::immediate, true);
+    SSPContext::socket->set(zmq::sockopt::immediate, true);
 
     // Do not keep packets if there is network congestion
-    // socket->set(zmq::sockopt::conflate, true);
-    socket->connect("tcp://" + host + ":" + std::to_string(port));
+    // SSPContext::socket->set(zmq::sockopt::conflate, true);
+    SSPContext::socket->connect("tcp://" + host + ":" + std::to_string(port));
 
     YAML::Node general_parameters = codec_parameters["general"];
     SetupLogging(general_parameters);
 
-    std::unique_ptr<IReader> reader = nullptr;
+    SSPContext::reader = nullptr;
 
     std::string reader_type =
         general_parameters["frame_source"]["type"].as<std::string>();
     if (reader_type == "frames") {
       if (general_parameters["frame_source"]["parameters"]["path"].IsSequence())
-        reader = std::unique_ptr<MultiImageReader>(new MultiImageReader(
+        SSPContext::reader = std::unique_ptr<MultiImageReader>(new MultiImageReader(
             general_parameters["frame_source"]["parameters"]["path"]
                 .as<std::vector<std::string>>()));
       else
-        reader = std::unique_ptr<ImageReader>(new ImageReader(
+        SSPContext::reader = std::unique_ptr<ImageReader>(new ImageReader(
             general_parameters["frame_source"]["parameters"]["path"]
                 .as<std::string>()));
 
     } else if (reader_type == "dummybody") {
-      reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader(general_parameters["frame_source"]["parameters"]));
+      SSPContext::reader = std::unique_ptr<DummyBodyReader>(new DummyBodyReader(general_parameters["frame_source"]["parameters"]));
     }
 #ifdef SSP_WITH_DEPTHAI_SUPPORT
     else if (reader_type == "oakd_xlink_full") {
-        reader = std::unique_ptr<OakdXlinkFullReader>(new OakdXlinkFullReader(general_parameters["frame_source"]["parameters"], client_key, environment_name, sensor_name));
+        SSPContext::reader = std::unique_ptr<OakdXlinkFullReader>(new OakdXlinkFullReader(general_parameters["frame_source"]["parameters"], client_key, environment_name, sensor_name));
     }
 #endif
      else if (reader_type == "video") {
@@ -154,17 +160,17 @@ initialize(const char* filename, const char* client_key, const char* environment
         std::vector<unsigned int> streams =
             general_parameters["frame_source"]["parameters"]["streams"]
                 .as<std::vector<unsigned int>>();
-        reader = std::unique_ptr<VideoFileReader>(
+        SSPContext::reader = std::unique_ptr<VideoFileReader>(
             new VideoFileReader(path, streams));
       } else {
-        reader = std::unique_ptr<VideoFileReader>(new VideoFileReader(path));
+        SSPContext::reader = std::unique_ptr<VideoFileReader>(new VideoFileReader(path));
       }
 
     } else if (reader_type == "kinect") {
 #ifdef SSP_WITH_KINECT_SUPPORT
       ExtendedAzureConfig c = BuildKinectConfigFromYAML(
           general_parameters["frame_source"]["parameters"]);
-      reader = std::unique_ptr<KinectReader>(new KinectReader(0, c));
+      SSPContext::reader = std::unique_ptr<KinectReader>(new KinectReader(0, c));
 #else
       throw std::runtime_error("SSP compiled without Kinect support");
 #endif
@@ -172,7 +178,7 @@ initialize(const char* filename, const char* client_key, const char* environment
 #if TARGET_OS_IOS
       auto fps_value = general_parameters["frame_source"]["parameters"]["fps"].as<unsigned int>();
       unsigned int fps = static_cast<unsigned int>(fps_value);
-      reader = std::unique_ptr<iPhoneReader>(new iPhoneReader(fps, client_key, environment_name, sensor_name));
+      SSPContext::reader = std::unique_ptr<iPhoneReader>(new iPhoneReader(fps, client_key, environment_name, sensor_name));
 #else
       throw std::runtime_error("SSP compiled without iPhone support");
 #endif
@@ -183,9 +189,9 @@ initialize(const char* filename, const char* client_key, const char* environment
       throw std::runtime_error("Unknown reader type");
     }
 
-    auto encoders = std::make_unique<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>();
+    SSPContext::encoders = std::make_unique<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>();
 
-    std::vector<FrameType> types = reader->GetType();
+    std::vector<FrameType> types = SSPContext::reader->GetType();
 
     for (FrameType type : types) {
       YAML::Node v = codec_parameters["video_encoder"][unsigned(type)];
@@ -193,10 +199,10 @@ initialize(const char* filename, const char* client_key, const char* environment
       std::shared_ptr<IEncoder> fe = nullptr;
       if (encoder_type == "libav")
         fe = std::shared_ptr<LibAvEncoder>(
-            new LibAvEncoder(v, reader->GetFps()));
+            new LibAvEncoder(v, SSPContext::reader->GetFps()));
       else if (encoder_type == "nvenc") {
 #ifdef SSP_WITH_NVPIPE_SUPPORT
-        fe = std::shared_ptr<NvEncoder>(new NvEncoder(v, reader->GetFps()));
+        fe = std::shared_ptr<NvEncoder>(new NvEncoder(v, SSPContext::reader->GetFps()));
 #else
         spdlog::error("SSP compiled without \"nvenc\" reader support. Set to "
                       "SSP_WITH_NVPIPE_SUPPORT=ON when configuring with cmake");
@@ -204,9 +210,9 @@ initialize(const char* filename, const char* client_key, const char* environment
 #endif
       } else if (encoder_type == "zdepth")
         fe =
-            std::shared_ptr<ZDepthEncoder>(new ZDepthEncoder(v, reader->GetFps()));
+            std::shared_ptr<ZDepthEncoder>(new ZDepthEncoder(v, SSPContext::reader->GetFps()));
       else if (encoder_type == "null")
-        fe = std::shared_ptr<NullEncoder>(new NullEncoder(reader->GetFps()));
+        fe = std::shared_ptr<NullEncoder>(new NullEncoder(SSPContext::reader->GetFps()));
       else {
         spdlog::error("Unknown encoder type: \"{}\". Supported types are "
                       "\"libav\", \"nvenc\", \"zdepth\" and \"null\"",
@@ -214,11 +220,8 @@ initialize(const char* filename, const char* client_key, const char* environment
         throw std::runtime_error("Unknown encoder type");
       }
 
-      (*encoders)[unsigned(type)] = fe;
+      (*SSPContext::encoders)[unsigned(type)] = fe;
     }
-
-    // Return the socket, reader and encoders so they can be used by other functions
-    return std::make_tuple(std::move(socket), std::move(reader), std::move(encoders));
 }
 
 // This is a function that when called sets the frame_types_to_pull variable to <"rgb", "depth">
@@ -227,19 +230,18 @@ void set_frame_types_to_pull_to_rgb_depth() {
   std::cerr << "!!! Frame types to pull set to: " << frame_types_to_pull[0] << ", " << frame_types_to_pull[1] << std::endl;
 }
 
-std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader, 
-                                               std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>& encoders)
+std::vector<FrameStruct> pull_vector_of_frames()
 {
   std::vector<FrameStruct> v;
   std::vector<std::shared_ptr<FrameStruct>> vO;
 
   while (v.empty()) {
     std::vector<std::shared_ptr<FrameStruct>> frameStruct =
-        reader->GetCurrentFrame();
+        SSPContext::reader->GetCurrentFrame();
     for (std::shared_ptr<FrameStruct> frameStruct : frameStruct) {
 
       std::shared_ptr<IEncoder> frameEncoder =
-          (*encoders)[unsigned(frameStruct->frame_type)];
+          (*SSPContext::encoders)[unsigned(frameStruct->frame_type)];
       if (!!frameEncoder) {
         frameEncoder->AddFrameStruct(frameStruct);
         if (frameEncoder->HasNextPacket()) {
@@ -254,7 +256,7 @@ std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader,
       // So we will instantiate a null encoder for this frame and perform the same process on the frame
       // (really only occurs for oakd devices when they are configured to send bodies but then "c" is hit to request a rgb and depth frame)
       else {
-        std::shared_ptr<IEncoder> nullEncoder = std::shared_ptr<NullEncoder>(new NullEncoder(reader->GetFps()));
+        std::shared_ptr<IEncoder> nullEncoder = std::shared_ptr<NullEncoder>(new NullEncoder(SSPContext::reader->GetFps()));
         nullEncoder->AddFrameStruct(frameStruct);
         if (nullEncoder->HasNextPacket()) {
           std::shared_ptr<FrameStruct> f = nullEncoder->CurrentFrameEncoded();
@@ -264,14 +266,14 @@ std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader,
         }
       }
     }
-    if (reader->HasNextFrame()) {
+    if (SSPContext::reader->HasNextFrame()) {
       if (!frame_types_to_pull.empty()) {
-        reader->NextFrame(frame_types_to_pull);
+        SSPContext::reader->NextFrame(frame_types_to_pull);
       } else {
-        reader->NextFrame();
+        SSPContext::reader->NextFrame();
       }
     } else {
-      reader->Reset();
+      SSPContext::reader->Reset();
     }
   }
   if (!frame_types_to_pull.empty()) {
@@ -288,22 +290,22 @@ std::vector<FrameStruct> pull_vector_of_frames(std::unique_ptr<IReader>& reader,
 }
 
 // New function to send vector of frames
-void send_vector_of_frames(zmq::socket_t& socket, const std::vector<FrameStruct>& v)
+void send_vector_of_frames(const std::vector<FrameStruct>& v)
 {
   std::string message = CerealStructToString(v);
 
   zmq::message_t request(message.size());
   memcpy(request.data(), message.c_str(), message.size()); 
-  socket.send(request, zmq::send_flags::none);
+  SSPContext::socket->send(request, zmq::send_flags::none);
 }
 
-extern "C" SSP_EXPORT void pull_and_send_frames(std::unique_ptr<zmq::socket_t>& socket, std::unique_ptr<IReader>& reader, std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>& encoders)
+extern "C" SSP_EXPORT void pull_and_send_frames()
 {
-  std::vector<FrameStruct> v = pull_vector_of_frames(reader, encoders);
-  send_vector_of_frames(*socket, v);
+  std::vector<FrameStruct> v = pull_vector_of_frames();
+  send_vector_of_frames(v);
 }
 
-extern "C" void start_auto(std::unique_ptr<zmq::socket_t>& socket, std::unique_ptr<IReader>& reader, std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>>& encoders)
+extern "C" void start_auto()
 {
 
   struct termios oldt;
@@ -319,7 +321,7 @@ extern "C" void start_auto(std::unique_ptr<zmq::socket_t>& socket, std::unique_p
   double sent_kbytes = 0;
   double sent_latency = 0;
 
-  unsigned int fps = reader->GetFps();    
+  unsigned int fps = SSPContext::reader->GetFps();    
   unsigned int frame_time = 1000000000ULL/fps;
 
   int c = 0;
@@ -346,10 +348,10 @@ extern "C" void start_auto(std::unique_ptr<zmq::socket_t>& socket, std::unique_p
         start_time = last_time;
       }
 
-      std::vector<FrameStruct> v = pull_vector_of_frames(reader, encoders);
+      std::vector<FrameStruct> v = pull_vector_of_frames();
 
       if (!v.empty()) {
-        send_vector_of_frames(*socket, v);
+        send_vector_of_frames(v);
 
         sent_frames += 1;
 
@@ -396,10 +398,10 @@ extern "C" SSP_EXPORT int ssp_server(const char* filename, const char* client_ke
 
   try {
     std::cerr << "Initializing socket, reader and encoders" << std::endl;
-    auto [socket, reader, encoders] = initialize(filename, client_key, environment_name, sensor_name);
+    initialize(filename, client_key, environment_name, sensor_name);
     std::cerr << "Socket, reader and encoders initialized" << std::endl;
 
-    start_auto(socket, reader, encoders);
+    start_auto();
   } catch (YAML::Exception &e) {
     spdlog::error("Error on the YAML configuration file");
     spdlog::error(e.what());
