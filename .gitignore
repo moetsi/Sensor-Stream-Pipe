@@ -50,3 +50,5 @@ build_asan
 build_debug
 
 3rdparty/*/
+
+configs/moetsi_lab

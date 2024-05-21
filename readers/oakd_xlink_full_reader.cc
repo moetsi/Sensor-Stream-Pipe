@@ -474,6 +474,40 @@ void OakdXlinkFullReader::SetOrReset() {
     }
 
     control_queue =  device->getInputQueue("control");
+
+    // Now we pull 5 seconds of frame so the rgb and depth frames are "preheated" and have gone through auto exposure and auto focus
+    // So if you take a snapshot by hitting "cntrl+c" the rgb and depth frames will be ready
+    nlohmann::json dictstartrgb{{"message", "send_rgb_as_they_come"}};
+    auto bufrgbstart = dai::Buffer();
+    auto datargbstart = dictstartrgb.dump();
+    bufrgbstart.setData({datargbstart.begin(), datargbstart.end()});
+    control_queue->send(bufrgbstart);
+
+
+    nlohmann::json dictstartdepth{{"message", "send_depth_as_they_come"}};
+    auto bufdepthstart = dai::Buffer();
+    auto datadepthstart = dictstartdepth.dump();
+    bufdepthstart.setData({datadepthstart.begin(), datadepthstart.end()});
+    control_queue->send(bufdepthstart);
+
+    // now we wait for 5 seconds
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+    // now we stop because we have been pulling
+    nlohmann::json dictstoprgb{{"message", "stop_send_rgb"}};
+    auto bufrgbstop = dai::Buffer();
+    auto datargbstop = dictstoprgb.dump();
+    bufrgbstop.setData({datargbstop.begin(), datargbstop.end()});
+    control_queue->send(bufrgbstop);
+
+
+    nlohmann::json dictstopdepth{{"message", "stop_send_depth"}};
+    auto bufdepthstop = dai::Buffer();
+    auto datadepthstop = dictstopdepth.dump();
+    bufdepthstop.setData({datadepthstop.begin(), datadepthstop.end()});
+    control_queue->send(bufdepthstop);
+
+
     if (send_rgb_to_host_and_visualize || stream_rgb) {
         nlohmann::json dict{{"message", "send_rgb_as_they_come"}};
         auto buf = dai::Buffer();
