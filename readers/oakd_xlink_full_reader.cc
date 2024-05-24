@@ -331,28 +331,28 @@ void OakdXlinkFullReader::SetOrReset() {
     right->setResolution(st->depth_dai_res);
     right->setBoardSocket(dai::CameraBoardSocket::RIGHT);
     right->setFps(st->depth_dai_fps);
-    stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_DENSITY);
+    stereo->setDefaultProfilePreset(dai::node::StereoDepth::PresetMode::HIGH_ACCURACY);
     // stereo->initialConfig.setConfidenceThreshold(250);
-    stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
+    // stereo->initialConfig.setMedianFilter(dai::MedianFilter::KERNEL_7x7);
     stereo->setSubpixel(true);
     stereo->setLeftRightCheck(true); // LR-check is required for depth alignment
     stereo->setDepthAlign(dai::CameraBoardSocket::RGB);
     stereo->setOutputSize(st->depth_dai_preview_x, st->depth_dai_preview_y);
-    auto oakdConfig = stereo->initialConfig.get();
-    oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
-    oakdConfig.postProcessing.speckleFilter.speckleRange = 60;
-    oakdConfig.postProcessing.temporalFilter.enable = true;
+    // auto oakdConfig = stereo->initialConfig.get();
+    // oakdConfig.postProcessing.spatialFilter.enable = st->depth_dai_sf;
+    // oakdConfig.postProcessing.speckleFilter.speckleRange = 60;
+    // oakdConfig.postProcessing.temporalFilter.enable = false;
 
-    oakdConfig.postProcessing.spatialFilter.holeFillingRadius = st->depth_dai_sf_hfr;
-    oakdConfig.postProcessing.spatialFilter.numIterations = st->depth_dai_sf_num_it;
-    oakdConfig.postProcessing.thresholdFilter.minRange = 700;
-    oakdConfig.postProcessing.thresholdFilter.maxRange = 12000;
-    oakdConfig.censusTransform.enableMeanMode = true;
-    oakdConfig.costMatching.linearEquationParameters.alpha = 0;
-    oakdConfig.costMatching.linearEquationParameters.beta = 2;
-    oakdConfig.postProcessing.decimationFilter.decimationFactor = st->depth_dai_df;
+    // oakdConfig.postProcessing.spatialFilter.holeFillingRadius = st->depth_dai_sf_hfr;
+    // oakdConfig.postProcessing.spatialFilter.numIterations = st->depth_dai_sf_num_it;
+    // oakdConfig.postProcessing.thresholdFilter.minRange = 700;
+    // oakdConfig.postProcessing.thresholdFilter.maxRange = 12000;
+    // oakdConfig.censusTransform.enableMeanMode = true;
+    // oakdConfig.costMatching.linearEquationParameters.alpha = 0;
+    // oakdConfig.costMatching.linearEquationParameters.beta = 2;
+    // oakdConfig.postProcessing.decimationFilter.decimationFactor = st->depth_dai_df;
 
-    stereo->initialConfig.set(oakdConfig);
+    // stereo->initialConfig.set(oakdConfig);
     stereo->setNumFramesPool(10);
 
     // PERSON DETECTION SECTION
@@ -367,11 +367,14 @@ void OakdXlinkFullReader::SetOrReset() {
     // Person detection spatial nn setup
     cout << "Creating Person Detection Spatial Neural Network..." << endl;
     person_nn = pipeline->create<dai::node::MobileNetSpatialDetectionNetwork>();
-    person_nn->setBoundingBoxScaleFactor(0.25);
-    person_nn->setDepthLowerThreshold(50);
+    person_nn->setSpatialCalculationAlgorithm(dai::SpatialLocationCalculatorAlgorithm::MIN);
+    person_nn->setBoundingBoxScaleFactor(0.5);
+    person_nn->setConfidenceThreshold(0.5);
+    person_nn->setDepthLowerThreshold(700);
     person_nn->setDepthUpperThreshold(12000);
     person_nn->setBlobPath(model_person_detection_path);
     person_nn->setNumPoolFrames(10);
+
     // Link the manip output and the depth output to the person detection nn
     person_det_manip->out.link(person_nn->input);
     stereo->depth.link(person_nn->inputDepth);
@@ -735,7 +738,7 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
                 obj.center_z = detection.spatialCoordinates.z;
 
                 // Now we set the strong and fast descriptors
-                std::vector<float> reid_result = (recognitions)[i]->getFirstLayerFp16();
+                std::vector<float> reid_result = (recognitions)[i]->getFirstLayerFp16(); ///256 length always
                 cv::Mat strong_desc(reid_result.size(), 1, CV_32F, reid_result.data());
                 obj.strong_descriptor = strong_desc;
                 std::shared_ptr<cv::Mat> fast_desc = fast_descs[i];
