@@ -122,7 +122,7 @@ extern "C" SSP_EXPORT int ssp_client_full(int port, std::string hostname)
             {
               memcpy(&bodyStruct, &f.frame[4 + i * sizeof(detection_struct_t)], sizeof(detection_struct_t));
 
-              std::cerr << "bodyStruct (x,y,z): " << bodyStruct.center_x << ", " << bodyStruct.center_y << ", " << bodyStruct.center_z << std::endl << std::flush;
+              std::cerr << "bodyStruct (x,y,z): " << bodyStruct.sensor_center_x << ", " << bodyStruct.sensor_center_y << ", " << bodyStruct.sensor_center_z << std::endl << std::flush;
 
             }
 

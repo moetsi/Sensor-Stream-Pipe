@@ -249,10 +249,10 @@ std::vector<moetsi::ssp::detection_struct_t> PedestrianTracker_3d::GetMostRecent
             // Create a detection_struct_t object to represent the most recent detection.
             moetsi::ssp::detection_struct_t det;
             det.device_time = prev_timestamp_; // Set the timestamp of the detection to the previous frame's timestamp.
-            det.track_id = track_id; // Set the track ID.
-            det.center_x = last_det.center_x; // Set the center X coordinate of the detection.
-            det.center_y = last_det.center_y; // Set the center Y coordinate of the detection.
-            det.center_z = last_det.center_z; // Set the center Z coordinate of the detection.
+            det.global_track_id = track_id; // Set the track ID.
+            det.global_center_x = last_det.center_x; // Set the center X coordinate of the detection.
+            det.global_center_y = last_det.center_y; // Set the center Y coordinate of the detection.
+            det.global_center_z = last_det.center_z; // Set the center Z coordinate of the detection.
             det.detection_label = 1; // Set the detection label. Currently hardcoded as 1.
             
             // Add the constructed detection to the vector of most recent detections.

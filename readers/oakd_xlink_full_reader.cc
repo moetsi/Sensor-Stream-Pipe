@@ -775,6 +775,10 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
 
                 // Now we add the device_id to all the detection structs in recent_detections from detections_frame_struct.device_id
                 for (auto& detection : recent_detections) {
+                    // We add the sensor name
+                    strncpy(detection.sensor_name, sensor_name_.c_str(), sizeof(detection.sensor_name) - 1);
+                    detection.sensor_name[sizeof(detection.sensor_name) - 1] = '\0'; // Ensure null-termination
+                    //  We add the device id
                     detection.device_id = detections_frame_struct->device_id;
                 }
                 

@@ -243,20 +243,25 @@ std::vector<moetsi::ssp::detection_struct_t> PedestrianTracker::GetMostRecentDet
     for (auto track_id : detected_track_ids_) {
         // Check if the current track ID exists in the tracks_ map.
         if (tracks_.find(track_id) != tracks_.end()) {
-            // Retrieve the last detection (most recent) for the current track.
-            auto last_det = tracks_.at(track_id).objects.back();
-            
-            // Create a detection_struct_t object to represent the most recent detection.
-            moetsi::ssp::detection_struct_t det;
-            det.device_time = prev_timestamp_; // Set the timestamp of the detection to the previous frame's timestamp.
-            det.track_id = track_id; // Set the track ID.
-            det.center_x = last_det.center_x; // Set the center X coordinate of the detection.
-            det.center_y = last_det.center_y; // Set the center Y coordinate of the detection.
-            det.center_z = last_det.center_z; // Set the center Z coordinate of the detection.
-            det.detection_label = 1; // Set the detection label. Currently hardcoded as 1.
-            
-            // Add the constructed detection to the vector of most recent detections.
-            most_recent_detections.push_back(det);
+        // Retrieve the last detection (most recent) for the current track.
+        auto last_det = tracks_.at(track_id).objects.back();
+        
+        // Create a detection_struct_t object to represent the most recent detection.
+        moetsi::ssp::detection_struct_t det;
+        det.device_time = prev_timestamp_; // Set the timestamp of the detection to the previous frame's timestamp.
+        det.sensor_track_id = track_id; // Set the track ID.
+        det.sensor_center_x = last_det.center_x; // Set the center X coordinate of the detection.
+        det.sensor_center_y = last_det.center_y; // Set the center Y coordinate of the detection.
+        det.sensor_center_z = last_det.center_z; // Set the center Z coordinate of the detection.
+        det.detection_label = 1; // Set the detection label. Currently hardcoded as 1.
+        
+        // Set the sensor name
+        const char* sensor_name = "Your Sensor Name";
+        strncpy(det.sensor_name, sensor_name, sizeof(det.sensor_name) - 1);
+        det.sensor_name[sizeof(det.sensor_name) - 1] = '\0'; // Ensure null-termination
+        
+        // Add the constructed detection to the vector of most recent detections.
+        most_recent_detections.push_back(det);
         }
     }
     // Return the vector containing the most recent detections for the tracked objects.
