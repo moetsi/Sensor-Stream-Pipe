@@ -738,9 +738,19 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
                 obj.center_z = detection.spatialCoordinates.z;
 
                 // Now we set the strong and fast descriptors
-                std::vector<float> reid_result = (recognitions)[i]->getFirstLayerFp16(); ///256 length always
-                cv::Mat strong_desc(reid_result.size(), 1, CV_32F, reid_result.data());
-                obj.strong_descriptor = strong_desc;
+                // Assume recognitions[i]->getFirstLayerFp16() returns a std::vector<float> of length 256
+                std::vector<float> reid_result = recognitions[i]->getFirstLayerFp16();
+                assert(reid_result.size() == 256); // Verify the size
+
+                // Directly create a cv::Mat from the vector's data
+                cv::Mat strong_desc(1, reid_result.size(), CV_32F, reid_result.data());
+
+                // If you need obj.strong_descriptor to manage its own copy of the data, use .clone()
+                // This ensures only one copy operation
+                obj.strong_descriptor = strong_desc.clone();
+
+                std::cout << std::endl;
+
                 std::shared_ptr<cv::Mat> fast_desc = fast_descs[i];
                 obj.fast_descriptor = *fast_desc;
 
@@ -780,6 +790,7 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
                     detection.sensor_name[sizeof(detection.sensor_name) - 1] = '\0'; // Ensure null-termination
                     //  We add the device id
                     detection.device_id = detections_frame_struct->device_id;
+
                 }
                 
                 // We make the frame the size of the number of detections and an int to hold the number of detections

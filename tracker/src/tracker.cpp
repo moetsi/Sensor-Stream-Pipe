@@ -243,25 +243,30 @@ std::vector<moetsi::ssp::detection_struct_t> PedestrianTracker::GetMostRecentDet
     for (auto track_id : detected_track_ids_) {
         // Check if the current track ID exists in the tracks_ map.
         if (tracks_.find(track_id) != tracks_.end()) {
-        // Retrieve the last detection (most recent) for the current track.
-        auto last_det = tracks_.at(track_id).objects.back();
-        
-        // Create a detection_struct_t object to represent the most recent detection.
-        moetsi::ssp::detection_struct_t det;
-        det.device_time = prev_timestamp_; // Set the timestamp of the detection to the previous frame's timestamp.
-        det.sensor_track_id = track_id; // Set the track ID.
-        det.sensor_center_x = last_det.center_x; // Set the center X coordinate of the detection.
-        det.sensor_center_y = last_det.center_y; // Set the center Y coordinate of the detection.
-        det.sensor_center_z = last_det.center_z; // Set the center Z coordinate of the detection.
-        det.detection_label = 1; // Set the detection label. Currently hardcoded as 1.
-        
-        // Set the sensor name
-        const char* sensor_name = "Your Sensor Name";
-        strncpy(det.sensor_name, sensor_name, sizeof(det.sensor_name) - 1);
-        det.sensor_name[sizeof(det.sensor_name) - 1] = '\0'; // Ensure null-termination
-        
-        // Add the constructed detection to the vector of most recent detections.
-        most_recent_detections.push_back(det);
+            // Retrieve the last detection (most recent) for the current track.
+            auto last_det = tracks_.at(track_id).objects.back();
+            
+            // Create a detection_struct_t object to represent the most recent detection.
+            moetsi::ssp::detection_struct_t det;
+            det.device_time = prev_timestamp_; // Set the timestamp of the detection to the previous frame's timestamp.
+            det.sensor_track_id = track_id; // Set the track ID.
+            det.sensor_center_x = last_det.center_x; // Set the center X coordinate of the detection.
+            det.sensor_center_y = last_det.center_y; // Set the center Y coordinate of the detection.
+            det.sensor_center_z = last_det.center_z; // Set the center Z coordinate of the detection.
+            det.confidence = last_det.confidence; // Set the confidence of the detection.
+            det.detection_label = 1; // Set the detection label. Currently hardcoded as 1.
+
+            // Set the strong descriptor using a pointer for more efficient copying
+            std::memcpy(det.strong_descriptor, last_det.strong_descriptor.ptr<float>(), 256 * sizeof(float));
+
+            // Set the rect values
+            det.rect_x = last_det.rect.x;
+            det.rect_y = last_det.rect.y;
+            det.rect_width = last_det.rect.width;
+            det.rect_height = last_det.rect.height;
+            
+            // Add the constructed detection to the vector of most recent detections.
+            most_recent_detections.push_back(det);
         }
     }
     // Return the vector containing the most recent detections for the tracked objects.
@@ -564,19 +569,12 @@ void PedestrianTracker::Process(const TrackedObjects& input_detections, uint64_t
         // Ensuring the current timestamp is greater than the previous to maintain temporal order
         // PT_CHECK_LT(prev_timestamp_, timestamp);
     }
-        
-    // FYI: We removed the frame size check Unnecessary and caused a frame requirement
-
 
     // Filtering detections based on predefined criteria. The filters applied include:
     // 1. Confidence threshold: Only detections with a confidence score higher than params_.min_det_conf are kept.
     // 2. Aspect ratio filter: Detections are filtered based on their aspect ratio, which must fall within the range defined by params_.bbox_aspect_ratios_range.
     // 3. Height filter: The height of the detection's bounding box must fall within the range defined by params_.bbox_heights_range.
     TrackedObjects detections = FilterDetections(input_detections);
-    // Assigning the current timestamp to all detections
-    for (auto& obj : detections) {
-        obj.timestamp = timestamp;
-    }
 
     // Preparing fast descriptors for the detections
     std::vector<cv::Mat> descriptors_fast;
@@ -611,7 +609,7 @@ void PedestrianTracker::Process(const TrackedObjects& input_detections, uint64_t
 
         // If strong matching is enabled, perform additional matching based on strong descriptors
         if (distance_strong_) {
-            // TGet 
+            // Get the track to detection matches
             std::vector<std::pair<size_t, size_t>> grey_area_track_to_det_matches = GetTrackToDetectionIds(matches);
             if (grey_area_track_to_det_matches.size() > 0) {
                 is_matching_to_track = StrongMatching(detections, grey_area_track_to_det_matches);                

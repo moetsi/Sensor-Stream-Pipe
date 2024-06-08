@@ -141,7 +141,7 @@ private:
   std::shared_ptr<dai::node::Script> control_script;
 
   // Strong Recognition
-  cv::Size strong_descriptor_size = cv::Size(1,256);
+  cv::Size strong_descriptor_size = cv::Size(256,1);
   unsigned int rgb_person_reid_strong_nn_in_x_res = 128;
   unsigned int rgb_person_reid_strong_nn_in_y_res = 256;
   std::shared_ptr<dai::node::Script> person_config_manip_for_reid_nn_script;

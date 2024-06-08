@@ -24,12 +24,12 @@
 #include "../../structs/detection_struct.h"
 
 class IDescriptorDistance;
-class IImageDescriptor;
+class IImageDescriptor_3d;
 
 ///
-/// \brief The TrackerParams struct stores parameters of PedestrianTracker
+/// \brief The TrackerParams_3d struct stores parameters of PedestrianTracker
 ///
-struct TrackerParams {
+struct TrackerParams_3d {
     size_t min_track_duration;  ///< Min track duration in milliseconds.
 
     size_t forget_delay;  ///< Forget about track if the last bounding box in
@@ -40,15 +40,42 @@ struct TrackerParams {
                          /// tracklet and detection should be combined (fast
                          /// descriptor is used).
 
+    float aff_thr_fast_3d;  ///< Affinity threshold which is used to determine if
+                         /// tracklet and detection should be combined in 3d tracking (strong
+                         /// descriptor is used).
+
     float aff_thr_strong;  ///< Affinity threshold which is used to determine if
                            /// tracklet and detection should be combined(strong
-                           /// descriptor is used).
+                           /// descriptor is used) (only used in StrongMatching method).
 
     float shape_affinity_w;  ///< Shape affinity weight.
 
     float motion_affinity_w;  ///< Motion affinity weight.
 
     float time_affinity_w;  ///< Time affinity weight.
+
+    float distance_affinity_w;  ///< Distance affinity weight.
+                                // If weight is 0, the distance term will be 1 so the term has no affect on the overall affinity (because they are multiplied)
+                                // If weight is 1, it will follow gaussian distribution where distance of
+                                //  0 meters = 1.0
+                                //  .5 meters = 0.88
+                                //  1 meters = 0.61
+                                //  2 meters = 0.14
+                                //  3 meters = .011 
+                                // If weight is .75, it will follow gaussian distribution where distance of
+                                //  0 meters = 1.0
+                                //  .5 meters = 0.932
+                                //  1 meters = 0.755
+                                //  2 meters = 0.324
+                                //  3 meters = .094
+                                // If weight is .5, it will follow gaussian distribution where distance of
+                                //  0 meters = 1.0
+                                //  .5 meters = 0.97
+                                //  1 meters = 0.88
+                                //  2 meters = 0.61
+                                //  3 meters = .324
+                                // So the smaller the weight, the more bigger distances are closer to 1, which means the term has less weight, because it doesn't affect it as negatively
+                                // It seems currently that between .5 and 1 is where it is needed based on the values and depth accuracy of the sensors.
 
     float min_det_conf;  ///< Min confidence of detection.
 
@@ -75,7 +102,7 @@ struct TrackerParams {
     ///
     /// Default constructor.
     ///
-    TrackerParams();
+    TrackerParams_3d();
 };
 
 ///
@@ -85,15 +112,11 @@ struct Track {
     ///
     /// \brief Track constructor.
     /// \param objs Detected objects sequence.
-    /// \param descriptor_fast Fast descriptor.
     /// \param descriptor_strong Strong descriptor (reid embedding).
     ///
     Track(const TrackedObjects& objs,
-          const cv::Mat& descriptor_fast,
           const cv::Mat& descriptor_strong)
         : objects(objs),
-          predicted_rect(!objs.empty() ? objs.back().rect : cv::Rect()),
-          descriptor_fast(descriptor_fast),
           descriptor_strong(descriptor_strong),
           lost(0),
           length(1) {
@@ -186,7 +209,7 @@ struct Track {
 ///
 class PedestrianTracker_3d {
 public:
-    using Descriptor = std::shared_ptr<IImageDescriptor>;
+    using Descriptor = std::shared_ptr<IImageDescriptor_3d>;
     using Distance = std::shared_ptr<IDescriptorDistance>;
 
     ///
@@ -195,7 +218,7 @@ public:
     /// \param[in] params - the pedestrian tracker parameters.
     /// \param[in] frame_size - the initial frame size.
     ///
-    explicit PedestrianTracker_3d(const TrackerParams& params = TrackerParams(), const cv::Size& frame_size = cv::Size());
+    explicit PedestrianTracker_3d(const TrackerParams_3d& params = TrackerParams_3d(), const cv::Size& frame_size = cv::Size());
     virtual ~PedestrianTracker_3d() {}
 
     ///
@@ -211,7 +234,7 @@ public:
     /// \brief Pipeline parameters getter.
     /// \return Parameters of pipeline.
     ///
-    const TrackerParams& params() const;
+    const TrackerParams_3d& params() const;
 
     ///
     /// \brief Fast descriptor getter.
@@ -354,15 +377,17 @@ private:
     // Returns time affinity.
     static float TimeAffinity(float w, const float& trk, const float& det);
 
+    // Returns distance affinity.
+    float DistanceAffinity(float w, const cv::Point3f& pt1, const cv::Point3f& pt2);
+
     cv::Rect PredictRect(size_t id, size_t k, size_t s) const;
 
     cv::Rect PredictRectSmoothed(size_t id, size_t k, size_t s) const;
 
     cv::Rect PredictRectSimple(size_t id, size_t k, size_t s) const;
 
-    void SolveAssignmentProblem(const std::set<size_t>& track_ids,
+    void SolveAssignmentProblem_3d(const std::set<size_t>& track_ids,
                                 const TrackedObjects& detections,
-                                const std::vector<cv::Mat>& descriptors,
                                 float thr,
                                 std::set<size_t>* unmatched_tracks,
                                 std::set<size_t>* unmatched_detections,
@@ -378,9 +403,8 @@ private:
                                const TrackedObjects& detections,
                                std::vector<cv::Mat>* descriptors);
 
-    void ComputeDissimilarityMatrix(const std::set<size_t>& active_track_ids,
+    void ComputeDissimilarityMatrix_3d(const std::set<size_t>& active_track_ids,
                                     const TrackedObjects& detections,
-                                    const std::vector<cv::Mat>& fast_descriptors,
                                     cv::Mat* dissimilarity_matrix);
 
     std::vector<float> ComputeDistances(const TrackedObjects& detections,
@@ -393,28 +417,22 @@ private:
     std::vector<std::pair<size_t, size_t>> GetTrackToDetectionIds(
         const std::set<std::tuple<size_t, size_t, float>>& matches);
 
-    float AffinityFast(const cv::Mat& descriptor1,
+    float AffinityFast_3d(size_t id, const cv::Mat& descriptor1,
                        const TrackedObject& obj1,
                        const cv::Mat& descriptor2,
                        const TrackedObject& obj2);
 
     float Affinity(const TrackedObject& obj1, const TrackedObject& obj2);
 
-    void AddNewTrack(const TrackedObject& detection,
-                     const cv::Mat& fast_descriptor,
-                     const cv::Mat& descriptor_strong = cv::Mat());
+    void AddNewTrack(const TrackedObject& detection);
+
+    void AddNewTracks(const TrackedObjects& detections);
 
     void AddNewTracks(const TrackedObjects& detections,
-                      const std::vector<cv::Mat>& descriptors_fast);
-
-    void AddNewTracks(const TrackedObjects& detections,
-                      const std::vector<cv::Mat>& descriptors_fast,
                       const std::set<size_t>& ids);
 
     void AppendToTrack(size_t track_id,
-                       const TrackedObject& detection,
-                       const cv::Mat& descriptor_fast,
-                       const cv::Mat& descriptor_strong);
+                       const TrackedObject& detection);
 
     bool EraseTrackIfBBoxIsOutOfFrame(size_t track_id);
 
@@ -430,7 +448,7 @@ private:
     bool IsTrackForgotten(const Track& track) const;
 
     // Parameters of the pipeline.
-    TrackerParams params_;
+    TrackerParams_3d params_;
 
     // Indexes of active tracks.
     std::set<size_t> active_track_ids_;

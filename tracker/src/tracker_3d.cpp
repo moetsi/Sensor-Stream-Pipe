@@ -21,10 +21,9 @@
 #include <opencv2/imgproc.hpp>
 
 #include "../utils/include/utils/kuhn_munkres.hpp"
-#include "../utils/include/utils/ocv_common.hpp"
 
 #include "../include/core.hpp"
-#include "../include/descriptor.hpp"
+#include "../include/descriptor_3d.hpp"
 #include "../include/distance.hpp"
 #include "../include/utils.hpp"
 
@@ -33,12 +32,37 @@ cv::Point Center(const cv::Rect& rect) {
     return cv::Point(static_cast<int>(rect.x + rect.width * 0.5), static_cast<int>(rect.y + rect.height * 0.5));
 }
 
+cv::Point3f Center3D(const TrackedObject& obj) {
+    return cv::Point3f(obj.center_x, obj.center_y, obj.center_z);
+}
+
 std::vector<cv::Point> Centers(const TrackedObjects& detections) {
     std::vector<cv::Point> centers(detections.size());
     for (size_t i = 0; i < detections.size(); i++) {
         centers[i] = Center(detections[i].rect);
     }
     return centers;
+}
+
+// Compute the cosine distance between two descriptors.
+// A high return value (close to 1) indicates that the descriptors are very different.
+// A low return value (close to 0) indicates that the descriptors are very similar.
+float ComputeCosDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
+    // Ensure the descriptors are not empty and match the expected size.
+    PT_CHECK(!descr1.empty());
+    PT_CHECK(!descr2.empty());
+    PT_CHECK(descr1.size() == descr2.size());
+
+    // Calculate the dot products and norms.
+    double xy = descr1.dot(descr2);
+    double xx = descr1.dot(descr1);
+    double yy = descr2.dot(descr2);
+    double norm = sqrt(xx * yy) + 1e-6; // Add a small value to avoid division by zero.
+
+    // Return the cosine distance.
+    // A high value (close to 1) means the vectors are dissimilar.
+    // A low value (close to 0) means the vectors are similar.
+    return 0.5f * static_cast<float>(1.0 - xy / norm);
 }
 
 DetectionLog ConvertTracksToDetectionLog(const ObjectTracks& tracks) {
@@ -85,26 +109,28 @@ std::vector<cv::Scalar> GenRandomColors(int colors_num) {
 
 }  // anonymous namespace
 
-TrackerParams::TrackerParams()
+TrackerParams_3d::TrackerParams_3d()
     : min_track_duration(0),
       forget_delay(150),
       aff_thr_fast(0.8f),
-    //   aff_thr_strong(0.75f),
+      aff_thr_fast_3d(0.8f),
+    //   aff_thr_strong(0.75f), //This is what must be the combined motion/time/shape affinity * reid threshold be over in addition to reid threshold for Strong Matching
       aff_thr_strong(0.0f),
       shape_affinity_w(0.5f),
       motion_affinity_w(0.2f),
       time_affinity_w(0.0f),
+      distance_affinity_w(0.75f),
       min_det_conf(0.62f),
       bbox_aspect_ratios_range(0.666f, 5.0f),
       bbox_heights_range(40, 1000),
       predict(25),
     //   strong_affinity_thr(0.2805f),
-      strong_affinity_thr(0.0f),
+      strong_affinity_thr(0.0f), //Confidence must be over this value for it to go through strong matching process (weaker than this means don't even try it)
       reid_thr(0.61f),
       drop_forgotten_tracks(true),
       max_num_objects_in_track(300) {}
 
-void ValidateParams(const TrackerParams& p) {
+void ValidateParams(const TrackerParams_3d& p) {
     PT_CHECK_GE(p.min_track_duration, static_cast<size_t>(0));
     PT_CHECK_LE(p.min_track_duration, static_cast<size_t>(10000));
 
@@ -124,6 +150,9 @@ void ValidateParams(const TrackerParams& p) {
 
     PT_CHECK_GE(p.time_affinity_w, 0.0f);
     PT_CHECK_LE(p.time_affinity_w, 100.0f);
+
+    PT_CHECK_GE(p.distance_affinity_w, 0.0f);
+    PT_CHECK_LE(p.distance_affinity_w, 100.0f);
 
     PT_CHECK_GE(p.min_det_conf, 0.0f);
     PT_CHECK_LE(p.min_det_conf, 1.0f);
@@ -152,7 +181,7 @@ void ValidateParams(const TrackerParams& p) {
     }
 }
 
-PedestrianTracker_3d::PedestrianTracker_3d(const TrackerParams& params, const cv::Size& frame_size)
+PedestrianTracker_3d::PedestrianTracker_3d(const TrackerParams_3d& params, const cv::Size& frame_size)
     : params_(params),
       descriptor_strong_(nullptr),
       distance_strong_(nullptr),
@@ -164,7 +193,7 @@ PedestrianTracker_3d::PedestrianTracker_3d(const TrackerParams& params, const cv
 }
 
 // Pipeline parameters getter.
-const TrackerParams& PedestrianTracker_3d::params() const {
+const TrackerParams_3d& PedestrianTracker_3d::params() const {
     return params_;
 }
 
@@ -321,9 +350,8 @@ TrackedObjects PedestrianTracker_3d::FilterDetections(const TrackedObjects& dete
  * @param unmatched_detections Output parameter to hold the set of detection indices that couldn't be matched with any track. These are new detections in the scene that do not closely match any existing tracks based on the dissimilarity scores, indicating potential new objects that have not been tracked previously.
  * @param matches Output parameter to hold the set of matches found. Each match is a tuple containing track ID, detection index, and match score. The match score is derived from the dissimilarity matrix, with the Kuhn-Munkres algorithm determining the optimal pairing between tracks and detections. A match is made when the dissimilarity score is sufficiently low, indicating a high degree of similarity between a track and a detection.
  */
-void PedestrianTracker_3d::SolveAssignmentProblem(const std::set<size_t>& track_ids,
+void PedestrianTracker_3d::SolveAssignmentProblem_3d(const std::set<size_t>& track_ids,
                                                const TrackedObjects& detections,
-                                               const std::vector<cv::Mat>& descriptors,
                                                float thr,
                                                std::set<size_t>* unmatched_tracks,
                                                std::set<size_t>* unmatched_detections,
@@ -341,7 +369,6 @@ void PedestrianTracker_3d::SolveAssignmentProblem(const std::set<size_t>& track_
     // Check the preconditions for the assignment problem.
     PT_CHECK(!track_ids.empty());
     PT_CHECK(!detections.empty());
-    PT_CHECK(descriptors.size() == detections.size());
 
     // First, we compute the dissimilarity matrix between tracks and detections to understand how similar or different they are.
     // The ComputeDissimilarityMatrix function is tasked with this calculation. It iterates over each pair of track and detection,
@@ -349,7 +376,7 @@ void PedestrianTracker_3d::SolveAssignmentProblem(const std::set<size_t>& track_
     // between the i-th track and the j-th detection. In this matrix, a lower score signifies a higher similarity, suggesting a potential match.
     // For example, if the score at [2, 3] is 0.1, it means the third detection is very similar to the second track.
     cv::Mat dissimilarity;
-    ComputeDissimilarityMatrix(track_ids, detections, descriptors, &dissimilarity);
+    ComputeDissimilarityMatrix_3d(track_ids, detections, &dissimilarity);
 
 
     // The KuhnMunkres().Solve Rturns a vector of indices, where each index corresponds to a track.
@@ -454,48 +481,6 @@ cv::Rect PedestrianTracker_3d::PredictRect(size_t id, size_t k, size_t s) const 
                     static_cast<int>(height));
 }
 
-/**
- * @brief Erases a track if its bounding box is out of the frame boundaries.
- * 
- * This function checks if the predicted bounding box of a track, identified by track_id,
- * is outside the boundaries of the previous frame. If it is, the track is marked as lost
- * by setting its 'lost' status to a value greater than the forget delay, effectively
- * scheduling it for deletion. It also cleans up any distance measurements related to this
- * track from the global distance map and removes the track ID from the list of active track IDs.
- * CURRENTLY THIS MEANS THAT TRACKS THAT MOVE OUT OF FRAME ARE NOT SEARCHED AGAINST AGAIN
- * 
- * @param track_id The unique identifier of the track to potentially erase.
- * @return true if the track was erased because its bounding box is out of frame, false otherwise.
- */
-bool PedestrianTracker_3d::EraseTrackIfBBoxIsOutOfFrame(size_t track_id) {
-    // Check if the track exists in the tracks_ map.
-    if (tracks_.find(track_id) == tracks_.end())
-        return true; // Return true indicating the track is considered erased/non-existent.
-    
-    // Calculate the center of the predicted bounding box for the track.
-    auto c = Center(tracks_.at(track_id).predicted_rect);
-    
-    // Check if the center of the bounding box is outside the previous frame's boundaries.
-    if (!isSizeEmpty(prev_frame_size_) &&
-        (c.x < 0 || c.y < 0 || c.x > prev_frame_size_.width || c.y > prev_frame_size_.height)) {
-        // Mark the track as lost by setting its 'lost' status beyond the forget delay.
-        tracks_.at(track_id).lost = params_.forget_delay + 1; // Global variable 'tracks_' is modified here.
-        
-        // Erase distance measurements related to this track from the global distance map.
-        for (auto id : active_track_ids()) {
-            size_t min_id = std::min(id, track_id);
-            size_t max_id = std::max(id, track_id);
-            tracks_dists_.erase(std::pair<size_t, size_t>(min_id, max_id)); // Global variable 'tracks_dists_' is modified here.
-        }
-        
-        // Remove the track ID from the list of active track IDs.
-        active_track_ids_.erase(track_id); // Global variable 'active_track_ids_' is modified here.
-        
-        return true; // Return true indicating the track was erased.
-    }
-    return false; // Return false if the track's bounding box is within frame boundaries.
-}
-
 bool PedestrianTracker_3d::EraseTrackIfItWasLostTooManyFramesAgo(size_t track_id) {
     if (tracks_.find(track_id) == tracks_.end())
         return true;
@@ -512,13 +497,34 @@ bool PedestrianTracker_3d::EraseTrackIfItWasLostTooManyFramesAgo(size_t track_id
     return false;
 }
 
+/**
+ * @brief Updates the status of a lost track and erases it if necessary.
+ *
+ * This function is responsible for handling tracks that have been lost, meaning they have not been matched with any detections
+ * for a certain number of frames. It performs the following steps:
+ * 
+ * 1. Increments the 'lost' counter for the specified track. This counter keeps track of how many frames have passed since the track was last matched with a detection.
+ * 2. Updates the predicted bounding box for the track using the `PredictRect` function. This prediction helps in estimating the track's position in the current frame.
+ * 3. If the track was not erased in the previous step, it checks if the track has been lost for too many frames using the `EraseTrackIfItWasLostTooManyFramesAgo` function. If the track has been lost for too many frames, it is erased.
+ * 
+ * @param track_id The unique identifier of the track to be updated and potentially erased.
+ * @return true if the track was erased, false otherwise.
+ */
 bool PedestrianTracker_3d::UpdateLostTrackAndEraseIfItsNeeded(size_t track_id) {
+    // Increment the 'lost' counter for the track.
     tracks_.at(track_id).lost++;
+    
+    // Update the predicted bounding box for the track.
     tracks_.at(track_id).predicted_rect = PredictRect(track_id, params().predict, tracks_.at(track_id).lost);
 
-    bool erased = EraseTrackIfBBoxIsOutOfFrame(track_id);
+    // Check if the track's bounding box is out of the frame and erase the track if it is.
+    bool erased = false;
+    
+    // If the track was not erased, check if it has been lost for too many frames and erase it if necessary.
     if (!erased)
         erased = EraseTrackIfItWasLostTooManyFramesAgo(track_id);
+    
+    // Return true if the track was erased, false otherwise.
     return erased;
 }
 
@@ -562,7 +568,6 @@ void PedestrianTracker_3d::Process(const TrackedObjects& input_detections, uint6
         
     // FYI: We removed the frame size check Unnecessary and caused a frame requirement
 
-
     // Filtering detections based on predefined criteria. The filters applied include:
     // 1. Confidence threshold: Only detections with a confidence score higher than params_.min_det_conf are kept.
     // 2. Aspect ratio filter: Detections are filtered based on their aspect ratio, which must fall within the range defined by params_.bbox_aspect_ratios_range.
@@ -593,9 +598,8 @@ void PedestrianTracker_3d::Process(const TrackedObjects& input_detections, uint6
         std::set<std::tuple<size_t, size_t, float>> matches;
 
         // Solving the assignment problem to find matches between active tracks and new detections
-        SolveAssignmentProblem(active_tracks,
+        SolveAssignmentProblem_3d(active_tracks,
                                detections,
-                               descriptors_fast,
                                params_.aff_thr_fast,
                                &unmatched_tracks,
                                &unmatched_detections,
@@ -615,55 +619,53 @@ void PedestrianTracker_3d::Process(const TrackedObjects& input_detections, uint6
 
         // Processing matches to update tracks or create new ones
         for (const auto& match : matches) {
-            size_t track_id = std::get<0>(match);
-            size_t det_id = std::get<1>(match);
-            float conf = std::get<2>(match);
+            size_t track_id = std::get<0>(match); // Get the track ID from the match tuple
+            size_t det_id = std::get<1>(match);   // Get the detection ID from the match tuple
+            float conf = std::get<2>(match);      // Get the confidence score from the match tuple
 
-            // Updating the last detected object in the track with the predicted position
+            // Retrieve the last detected object in the track. This object represents the most recent detection
+            // associated with the track, which is crucial for maintaining the continuity of the track.
             auto last_det = tracks_.at(track_id).objects.back();
+            
+            // Update the bounding box of the last detected object with the predicted position.
+            // This step is essential for ensuring that the track's position is accurately reflected
+            // based on the prediction model. The predicted position helps in maintaining the track's
+            // trajectory and is used downstream in the matching process to compare with new detections.
             last_det.rect = tracks_.at(track_id).predicted_rect;
 
             // If the match confidence is high enough, append the detection to the track
-            if (conf > params_.aff_thr_fast) {
-                AppendToTrack(track_id, detections[det_id], detections[det_id].fast_descriptor, detections[det_id].strong_descriptor);
-                unmatched_detections.erase(det_id);
+            if (conf > params_.aff_thr_fast_3d) {
+                AppendToTrack(track_id, detections[det_id]);
+                unmatched_detections.erase(det_id); // Remove the detection from unmatched detections
             } else {
                 // For lower confidence, check if strong matching is applicable
                 if (conf > params_.strong_affinity_thr) {
                     if (distance_strong_ && is_matching_to_track[track_id].first) {
                         // If there's a strong match, append the detection with its strong descriptor
                         AppendToTrack(track_id,
-                                      detections[det_id],
-                                      detections[det_id].fast_descriptor,
-                                      detections[det_id].strong_descriptor);
+                                      detections[det_id]);
                     } else {
                         // If no strong match, consider the track lost and start a new track
                         if (UpdateLostTrackAndEraseIfItsNeeded(track_id)) {
-                            AddNewTrack(detections[det_id],
-                                        detections[det_id].fast_descriptor,
-                                        detections[det_id].strong_descriptor);
+                            AddNewTrack(detections[det_id]);
                         }
                         else {
-                            AddNewTrack(detections[det_id],
-                                        detections[det_id].fast_descriptor,
-                                        detections[det_id].strong_descriptor);
+                            AddNewTrack(detections[det_id]);
                         }
                     }
 
-                    unmatched_detections.erase(det_id);
+                    unmatched_detections.erase(det_id); // Remove the detection from unmatched detections
                 } else {
                     // If the confidence is too low, mark the track as unmatched
                     unmatched_tracks.insert(track_id);
                     // The track <> detection that did not make the cutoff is now made to a new track
-                    AddNewTrack(detections[det_id],
-                                detections[det_id].fast_descriptor,
-                                detections[det_id].strong_descriptor);
+                    AddNewTrack(detections[det_id]);
                 }
             }
         }
 
         // Attempt to create new tracks for unmatched detections
-        AddNewTracks(detections, descriptors_fast, unmatched_detections);
+        AddNewTracks(detections, unmatched_detections);
         // Update the status of tracks that were not matched to any detection (+1 for track.lost value)
         UpdateLostTracks(unmatched_tracks);
 
@@ -674,7 +676,7 @@ void PedestrianTracker_3d::Process(const TrackedObjects& input_detections, uint6
         }
     } else {
         // If there are no active tracks and/or detections, attempt to create new tracks for all detections
-        AddNewTracks(detections, descriptors_fast);
+        AddNewTracks(detections);
         // Update the status of all tracks that didn't have detections (+1 for track.lost value)
         UpdateLostTracks(active_tracks);
     }
@@ -744,6 +746,12 @@ float PedestrianTracker_3d::TimeAffinity(float weight, const float& trk_time, co
     return static_cast<float>(exp(static_cast<double>(-weight * std::fabs(trk_time - det_time))));
 }
 
+float PedestrianTracker_3d::DistanceAffinity(float weight, const cv::Point3f& pt1, const cv::Point3f& pt2) {
+    float distance = cv::norm(pt1 - pt2);
+    return exp(-0.5 * (weight * distance) * (weight * distance)); // Scaled Gaussian distance affinity with weight
+}
+
+
 void PedestrianTracker_3d::ComputeFastDesciptors(const cv::Mat& frame,
                                               const TrackedObjects& detections,
                                               std::vector<cv::Mat>* descriptors) {
@@ -753,24 +761,41 @@ void PedestrianTracker_3d::ComputeFastDesciptors(const cv::Mat& frame,
     }
 }
 
-void PedestrianTracker_3d::ComputeDissimilarityMatrix(const std::set<size_t>& active_tracks,
+void PedestrianTracker_3d::ComputeDissimilarityMatrix_3d(const std::set<size_t>& active_tracks,
                                                    const TrackedObjects& detections,
-                                                   const std::vector<cv::Mat>& descriptors_fast,
                                                    cv::Mat* dissimilarity_matrix) {
-    cv::Mat am(active_tracks.size(), detections.size(), CV_32F, cv::Scalar(0));
+    // Initialize a matrix to store the dissimilarity values between active tracks and detections.
+    // The matrix has dimensions [number of active tracks] (rows) x [number of detections] (columns), and is initialized to zero.
+    cv::Mat affinity_matrix(active_tracks.size(), detections.size(), CV_32F, cv::Scalar(0));
+
+    // Index to keep track of the current row in the dissimilarity matrix.
     size_t i = 0;
+
+    // Iterate through each active track ID.
     for (auto id : active_tracks) {
-        auto ptr = am.ptr<float>(i);
-        for (size_t j = 0; j < descriptors_fast.size(); j++) {
+        // Get a pointer to the current row in the dissimilarity matrix.
+        // This pointer allows direct access to the elements of the row, which will be filled with dissimilarity values.
+        auto ptr = affinity_matrix.ptr<float>(i);
+
+        // Iterate through each descriptor in the descriptors_fast vector.
+        // Note: We iterate through descriptors_fast instead of detections because descriptors_fast contains the precomputed descriptors for the detections.
+        for (size_t j = 0; j < detections.size(); j++) {
+            // Get the last detected object for the current track.
             auto last_det = tracks_.at(id).objects.back();
-            last_det.rect = tracks_.at(id).predicted_rect;
-            ptr[j] = AffinityFast(tracks_.at(id).descriptor_fast, last_det, descriptors_fast[j], detections[j]);
+
+            // Compute the affinity (similarity) between the track's descriptor and the detection's descriptor.
+            // The affinity value is stored in the current row (ptr) at column j.
+            // A high affinity value indicates a high similarity between the track and the detection, while a low affinity value indicates a low similarity.
+            ptr[j] = AffinityFast_3d(id, tracks_.at(id).descriptor_strong, last_det, detections[j].strong_descriptor, detections[j]);
         }
+        // Move to the next row in the dissimilarity matrix.
         i++;
     }
-    *dissimilarity_matrix = 1.0 - am;
-}
 
+    // Convert the affinity matrix to a dissimilarity matrix.
+    // Dissimilarity is calculated as 1.0 - affinity, where a low dissimilarity value indicates high similarity, and a high dissimilarity value indicates low similarity.
+    *dissimilarity_matrix = 1.0 - affinity_matrix;
+}
 std::vector<float> PedestrianTracker_3d::ComputeDistances(const TrackedObjects& detections,
                                                        const std::vector<std::pair<size_t, size_t>>& track_and_det_ids) {
 
@@ -1006,11 +1031,9 @@ std::map<size_t, std::pair<bool, cv::Mat>> PedestrianTracker_3d::StrongMatching(
   * @param detections A vector containing all detected objects in the frame.
  * @param descriptors_fast A vector containing the fast descriptors for each detection.
  */
-void PedestrianTracker_3d::AddNewTracks(const TrackedObjects& detections,
-                                     const std::vector<cv::Mat>& descriptors_fast) {
-    PT_CHECK(detections.size() == descriptors_fast.size());
+void PedestrianTracker_3d::AddNewTracks(const TrackedObjects& detections) {
     for (size_t i = 0; i < detections.size(); i++) {
-        AddNewTrack(detections[i], descriptors_fast[i]);
+        AddNewTrack(detections[i]);
     }
 }
 
@@ -1025,12 +1048,10 @@ void PedestrianTracker_3d::AddNewTracks(const TrackedObjects& detections,
  * @param ids A set containing the indices of detections that are to be added as new tracks.
  */
 void PedestrianTracker_3d::AddNewTracks(const TrackedObjects& detections,
-                                     const std::vector<cv::Mat>& descriptors_fast,
                                      const std::set<size_t>& ids) {
-    PT_CHECK(detections.size() == descriptors_fast.size());
     for (size_t i : ids) {
         PT_CHECK(i < detections.size());
-        AddNewTrack(detections[i], descriptors_fast[i]);
+        AddNewTrack(detections[i]);
     }
 }
 
@@ -1060,16 +1081,13 @@ void PedestrianTracker_3d::AddNewTracks(const TrackedObjects& detections,
 //     tracks_counter_++;
 // }
 
-void PedestrianTracker_3d::AddNewTrack(const TrackedObject& detection,
-                                    const cv::Mat& descriptor_fast,
-                                    const cv::Mat& descriptor_strong) {
+void PedestrianTracker_3d::AddNewTrack(const TrackedObject& detection) {
     // Create a copy of the detection and set the object_id
     auto detection_with_id = detection;
     detection_with_id.object_id = tracks_counter_;
     
     // Create a new Track
-    Track newTrack({detection_with_id}, 
-                   descriptor_fast.clone(), 
+    Track newTrack({detection_with_id},
                    detection.strong_descriptor.clone());
     
     // Add the new Track to the tracks_ map
@@ -1090,9 +1108,7 @@ void PedestrianTracker_3d::AddNewTrack(const TrackedObject& detection,
 }
 
 void PedestrianTracker_3d::AppendToTrack(size_t track_id,
-                                      const TrackedObject& detection,
-                                      const cv::Mat& descriptor_fast,
-                                      const cv::Mat& descriptor_strong) {
+                                      const TrackedObject& detection) {
     // Ensure the track is not already forgotten (i.e., removed after being lost for too long)
     PT_CHECK(!IsTrackForgotten(track_id));
 
@@ -1109,16 +1125,11 @@ void PedestrianTracker_3d::AppendToTrack(size_t track_id,
     auto& cur_track = tracks_.at(track_id);
     // Add the updated detection to the track's list of objects.
     cur_track.objects.emplace_back(detection_with_id);
-    // Update the track's predicted rectangle to the current detection's rectangle.
-    cur_track.predicted_rect = detection.rect;
     // Reset the 'lost' counter since the track has been updated with a new detection.
     cur_track.lost = 0;
 
     // Update the last image of the track with the current frame's relevant section.
     // FYI: commented out saving last image because it required the frame and doesn't seem to do anything
-    // cur_track.last_image = frame(detection.rect).clone();
-    // Update the fast descriptor with the current detection's descriptor.
-    cur_track.descriptor_fast = descriptor_fast.clone();
     // Increment the length of the track to reflect the addition of a new detection.
     cur_track.length++;
 
@@ -1126,10 +1137,10 @@ void PedestrianTracker_3d::AppendToTrack(size_t track_id,
     // Otherwise, if the current detection's strong descriptor is not empty, update the track's strong descriptor
     // by averaging it with the current detection's strong descriptor.
     if (cur_track.descriptor_strong.empty()) {
-        cur_track.descriptor_strong = descriptor_strong.clone();
-    } else if (!descriptor_strong.empty()) {
+        cur_track.descriptor_strong = detection.strong_descriptor.clone();
+    } else {
         // TODO: See if there is a better way to update descriptor_strong
-        cur_track.descriptor_strong = 0.5 * (descriptor_strong + cur_track.descriptor_strong);
+        cur_track.descriptor_strong = 0.5 * (detection.strong_descriptor + cur_track.descriptor_strong);
     }
 
     // If there's a limit on the number of objects a track can contain, enforce this limit.
@@ -1141,27 +1152,27 @@ void PedestrianTracker_3d::AppendToTrack(size_t track_id,
     }
 }
 
-float PedestrianTracker_3d::AffinityFast(const cv::Mat& descriptor1,
-                                      const TrackedObject& obj1,
-                                      const cv::Mat& descriptor2,
-                                      const TrackedObject& obj2) {
+float PedestrianTracker_3d::AffinityFast_3d(size_t id, const cv::Mat& descriptor1,
+                                            const TrackedObject& obj1,
+                                            const cv::Mat& descriptor2,
+                                            const TrackedObject& obj2) {
     const float eps = 1e-6f;
-    float shp_aff = ShapeAffinity(params_.shape_affinity_w, obj1.rect, obj2.rect);
-    if (shp_aff < eps)
-        return 0.0f;
-
-    float mot_aff = MotionAffinity(params_.motion_affinity_w, obj1.rect, obj2.rect);
-    if (mot_aff < eps)
-        return 0.0f;
+    
     float time_aff =
         TimeAffinity(params_.time_affinity_w, static_cast<float>(obj1.frame_idx), static_cast<float>(obj2.frame_idx));
-
     if (time_aff < eps)
         return 0.0f;
 
-    float app_aff = 1.0f - distance_fast_->Compute(descriptor1, descriptor2);
+    // Calculate distance affinity (convert distance to similarity)
+    float dist_aff = DistanceAffinity(params_.distance_affinity_w, Center3D(obj1), Center3D(obj2));
+    if (dist_aff < eps)
+        return 0.0f;
 
-    return shp_aff * mot_aff * app_aff * time_aff;
+    float app_aff = 1.0f - ComputeCosDistance(descriptor1, descriptor2);
+
+    std::cout << "Tracked Object ID: " << id << ", Time Affinity: " << time_aff << ", Distance Affinity: " << dist_aff << ", Appearance Affinity: " << app_aff << ", Total Affinity: " << (app_aff * time_aff * dist_aff) << std::endl;
+
+    return app_aff * time_aff * dist_aff;
 }
 
 float PedestrianTracker_3d::Affinity(const TrackedObject& obj1, const TrackedObject& obj2) {
@@ -1212,6 +1223,29 @@ TrackedObjects PedestrianTracker_3d::TrackedDetections() const {
         }
     }
     return detections;
+}
+
+// USED TO BE PART OF OCV_COMMON BUT REMOVED BECAUSE OF OPENVINO DEPENDENCIES
+/**
+ * @brief Puts text message on the frame, highlights the text with a white border to make it distinguishable from
+ *        the background.
+ * @param frame - frame to put the text on.
+ * @param message - text of the message.
+ * @param position - bottom-left corner of the text string in the image.
+ * @param fontFace - font type.
+ * @param fontScale - font scale factor that is multiplied by the font-specific base size.
+ * @param color - text color.
+ * @param thickness - thickness of the lines used to draw a text.
+ */
+inline void putHighlightedText(const cv::Mat& frame,
+                               const std::string& message,
+                               cv::Point position,
+                               int fontFace,
+                               double fontScale,
+                               cv::Scalar color,
+                               int thickness) {
+    cv::putText(frame, message, position, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1);
+    cv::putText(frame, message, position, fontFace, fontScale, color, thickness);
 }
 
 cv::Mat PedestrianTracker_3d::DrawActiveTracks(const cv::Mat& frame) {
