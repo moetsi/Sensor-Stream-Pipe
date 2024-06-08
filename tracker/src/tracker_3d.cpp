@@ -113,7 +113,7 @@ TrackerParams_3d::TrackerParams_3d()
     : min_track_duration(0),
       forget_delay(150),
       aff_thr_fast(0.8f),
-      aff_thr_fast_3d(0.8f),
+      aff_thr_fast_3d(0.65f), //this is the total amount of matching to associate with a track instead of making a new track
     //   aff_thr_strong(0.75f), //This is what must be the combined motion/time/shape affinity * reid threshold be over in addition to reid threshold for Strong Matching
       aff_thr_strong(0.0f),
       shape_affinity_w(0.5f),
