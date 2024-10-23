@@ -248,7 +248,7 @@ std::vector<moetsi::ssp::detection_struct_t> PedestrianTracker::GetMostRecentDet
             
             // Create a detection_struct_t object to represent the most recent detection.
             moetsi::ssp::detection_struct_t det;
-            det.device_time = prev_timestamp_; // Set the timestamp of the detection to the previous frame's timestamp.
+            det.device_time = last_det.timestamp; // Set the timestamp of the detection to the last detection's timestamp.
             det.sensor_track_id = track_id; // Set the track ID.
             det.sensor_center_x = last_det.center_x; // Set the center X coordinate of the detection.
             det.sensor_center_y = last_det.center_y; // Set the center Y coordinate of the detection.
@@ -304,15 +304,15 @@ TrackedObjects PedestrianTracker::FilterDetections(const TrackedObjects& detecti
                     filtered_detections.emplace_back(det);
                 } else {
                     // Print a message if the detection's height is out of the specified range, including expected and actual values.
-                    std::cerr << "Detection filtered out due to height not in range. Expected: " << params_.bbox_heights_range[0] << " to " << params_.bbox_heights_range[1] << ", Actual: " << det.rect.height << std::endl;
+                    // std::cerr << "Detection filtered out due to height not in range. Expected: " << params_.bbox_heights_range[0] << " to " << params_.bbox_heights_range[1] << ", Actual: " << det.rect.height << std::endl;
                 }
             } else {
                 // Print a message if the detection's aspect ratio is out of the specified range, including expected and actual values.
-                std::cerr << "Detection filtered out due to aspect ratio not in range. Expected: " << params_.bbox_aspect_ratios_range[0] << " to " << params_.bbox_aspect_ratios_range[1] << ", Actual: " << aspect_ratio << std::endl;
+                // std::cerr << "Detection filtered out due to aspect ratio not in range. Expected: " << params_.bbox_aspect_ratios_range[0] << " to " << params_.bbox_aspect_ratios_range[1] << ", Actual: " << aspect_ratio << std::endl;
             }
         } else {
             // Print a message if the detection's confidence is below the minimum, including expected and actual values.
-            std::cerr << "Detection filtered out due to low confidence. Expected: >" << params_.min_det_conf << ", Actual: " << det.confidence << std::endl;
+            // std::cerr << "Detection filtered out due to low confidence. Expected: >" << params_.min_det_conf << ", Actual: " << det.confidence << std::endl;
         }
     }
     return filtered_detections;
@@ -396,9 +396,9 @@ void PedestrianTracker::SolveAssignmentProblem(const std::set<size_t>& track_ids
         i++;
     }
     //We print the size of matches we have
-    std::cerr << "We have " << matches->size() << " matches" << std::endl;
+    // std::cerr << "We have " << matches->size() << " matches" << std::endl;
     // Now we print the amount of unmatched detections and the amount of unmatched tracks
-    std::cerr << "We have " << unmatched_detections->size() << " unmatched DETECTIONS and " << unmatched_tracks->size() << " unmatched TRACKS" << std::endl;
+    // std::cerr << "We have " << unmatched_detections->size() << " unmatched DETECTIONS and " << unmatched_tracks->size() << " unmatched TRACKS" << std::endl;
 }
 
 const ObjectTracks PedestrianTracker::all_tracks(bool valid_only) const {
@@ -915,18 +915,18 @@ std::vector<std::pair<size_t, size_t>> PedestrianTracker::GetTrackToDetectionIds
         // Now we print whether this match was above the fast threshold, below the fast threshold but above the strong threshold, or below the strong threshold
         if (conf > params_.aff_thr_fast)
         {
-            std::cerr << "a match is above the fast threshold" << std::endl;
+            // std::cerr << "a match is above the fast threshold" << std::endl;
         }
         // Include matches where the confidence score is below the fast matching threshold but above the strong affinity threshold.
         // This filters out matches that are too weak for any reliable matching, focusing on those that are in the 'gray zone'.
         else if (conf < params_.aff_thr_fast && conf > params_.strong_affinity_thr) {
             track_and_det_ids.emplace_back(track_id, det_id);
-            std::cerr << "a match is below the fast threshold but above the strong threshold" << std::endl;
+            // std::cerr << "a match is below the fast threshold but above the strong threshold" << std::endl;
         }
         else if (conf < params_.strong_affinity_thr) {
             // TODO: This doesn't mean we can't still try the strong_affinity because it is already calculated. We can just reduce the strong_affinity_thr to 0
             // and then we can try to match the detections to the tracks.
-            std::cerr << "a match is below the strong threshold" << std::endl;
+            // std::cerr << "a match is below the strong threshold" << std::endl;
         }
     }
     return track_and_det_ids;

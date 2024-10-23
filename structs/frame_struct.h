@@ -283,9 +283,9 @@ struct FrameStruct {
    */
   SSPMessageType message_type;
 
-  // 0 for color, 1 for depth, 2 for ir, 3 for confidence
+  // 
   /**
-   * Frame type
+   * Frame type, 0 for color, 1 for depth, 2 for ir, 3 for confidence, 5 for detection
    */
   FrameType frame_type;
 
@@ -328,7 +328,7 @@ struct FrameStruct {
   std::string scene_desc;
 
   /**
-   * Sensor id
+   * Sensor id, this is meant to describe the sensor on the device, but is not used in any meaninful way
    */
   unsigned int sensor_id;
 
@@ -336,7 +336,7 @@ struct FrameStruct {
    * Integer device id: distingish between devices in the same scene
    * Can be set by user.
    */
-  unsigned int device_id;
+  uint64_t device_id;
 
   /**
    * Current frame number (increases over time)

@@ -25,7 +25,8 @@ struct TrackedObject {
     float center_x; // this is the x coordinate of the center of the detection
     float center_y; // this is the y coordinate of the center of the detection
     float center_z; // this is the z coordinate of the center of the detection
-
+    int32_t device_id; // this is the device id that made the detection (only needed for global)
+    size_t device_id_detection_index; // This is the index position of the detection received by the producer (only needed for global)
     ///
     /// \brief Default constructor.
     ///

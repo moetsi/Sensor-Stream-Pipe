@@ -764,11 +764,11 @@ void OakdXlinkFullReader::NextFrame(const std::vector<std::string> frame_types_t
                 }
             }
 
-            std:cerr << "RAW detections size: " << detections.size() << std::endl << std::flush;
+            // std:cerr << "RAW detections size: " << detections.size() << std::endl << std::flush;
             tracker->Process(detections, epoch_time);
             auto recent_detections = tracker->GetMostRecentDetections();
             // We print the number of detections
-            std::cerr << "PROCESSED detection size: " << recent_detections.size() << std::endl << std::flush;
+            // std::cerr << "PROCESSED detection size: " << recent_detections.size() << std::endl << std::flush;
 
             if (stream_bodies)
             {

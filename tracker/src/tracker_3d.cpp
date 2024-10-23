@@ -44,27 +44,6 @@ std::vector<cv::Point> Centers(const TrackedObjects& detections) {
     return centers;
 }
 
-// Compute the cosine distance between two descriptors.
-// A high return value (close to 1) indicates that the descriptors are very different.
-// A low return value (close to 0) indicates that the descriptors are very similar.
-float ComputeCosDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
-    // Ensure the descriptors are not empty and match the expected size.
-    PT_CHECK(!descr1.empty());
-    PT_CHECK(!descr2.empty());
-    PT_CHECK(descr1.size() == descr2.size());
-
-    // Calculate the dot products and norms.
-    double xy = descr1.dot(descr2);
-    double xx = descr1.dot(descr1);
-    double yy = descr2.dot(descr2);
-    double norm = sqrt(xx * yy) + 1e-6; // Add a small value to avoid division by zero.
-
-    // Return the cosine distance.
-    // A high value (close to 1) means the vectors are dissimilar.
-    // A low value (close to 0) means the vectors are similar.
-    return 0.5f * static_cast<float>(1.0 - xy / norm);
-}
-
 DetectionLog ConvertTracksToDetectionLog(const ObjectTracks& tracks) {
     DetectionLog log;
 
@@ -111,14 +90,14 @@ std::vector<cv::Scalar> GenRandomColors(int colors_num) {
 
 TrackerParams_3d::TrackerParams_3d()
     : min_track_duration(0),
-      forget_delay(150),
+      forget_delay(20),
       aff_thr_fast(0.8f),
-      aff_thr_fast_3d(0.65f), //this is the total amount of matching to associate with a track instead of making a new track
+      aff_thr_fast_3d(0.2f), //this is the total amount of matching to associate with a track instead of making a new track
     //   aff_thr_strong(0.75f), //This is what must be the combined motion/time/shape affinity * reid threshold be over in addition to reid threshold for Strong Matching
       aff_thr_strong(0.0f),
       shape_affinity_w(0.5f),
       motion_affinity_w(0.2f),
-      time_affinity_w(0.0f),
+      time_affinity_w(0.0f), //Currently ignoring how long since it has seen the track, need to change to use seconds, right now it is frame index which isn't current measure of time
       distance_affinity_w(0.75f),
       min_det_conf(0.62f),
       bbox_aspect_ratios_range(0.666f, 5.0f),
@@ -277,13 +256,12 @@ std::vector<moetsi::ssp::detection_struct_t> PedestrianTracker_3d::GetMostRecent
             
             // Create a detection_struct_t object to represent the most recent detection.
             moetsi::ssp::detection_struct_t det;
-            det.device_time = prev_timestamp_; // Set the timestamp of the detection to the previous frame's timestamp.
             det.global_track_id = track_id; // Set the track ID.
             det.global_center_x = last_det.center_x; // Set the center X coordinate of the detection.
             det.global_center_y = last_det.center_y; // Set the center Y coordinate of the detection.
             det.global_center_z = last_det.center_z; // Set the center Z coordinate of the detection.
-            det.detection_label = 1; // Set the detection label. Currently hardcoded as 1.
-            
+            det.device_id_detection_index = last_det.device_id_detection_index; // This is used to match the received detection with this detection
+            det.device_id = last_det.device_id; // This is the device id that made the detection
             // Add the constructed detection to the vector of most recent detections.
             most_recent_detections.push_back(det);
         }
@@ -375,47 +353,58 @@ void PedestrianTracker_3d::SolveAssignmentProblem_3d(const std::set<size_t>& tra
     // computing a score that quantifies their dissimilarity. The function fills a matrix where each cell [i, j] contains the dissimilarity score
     // between the i-th track and the j-th detection. In this matrix, a lower score signifies a higher similarity, suggesting a potential match.
     // For example, if the score at [2, 3] is 0.1, it means the third detection is very similar to the second track.
+    // Rows are tracks, columns are detections
     cv::Mat dissimilarity;
     ComputeDissimilarityMatrix_3d(track_ids, detections, &dissimilarity);
 
 
-    // The KuhnMunkres().Solve Rturns a vector of indices, where each index corresponds to a track.
+    // The KuhnMunkres().Solve Rturns a vector of indices, where **each index corresponds to a track**.
     // The value at each index is the index of the matched detection r a special value (such as -1) for no assignment
     // For instance, if the result vector is [2, 0, -1, 3], it means:
     // - The first track is best matched with the third detection.
     // - The second track is best matched with the first detection.
     // - The third track has no suitable match (assuming -1 indicates no match).
     // - The fourth track is best matched with the fourth detection.
-    std::vector<size_t> res = KuhnMunkres().Solve(dissimilarity);
+    std::vector<size_t> vector_where_each_index_is_a_track_id_and_its_value_is_a_detection_index = KuhnMunkres().Solve(dissimilarity);
+
+    // If there are more tracks than detections
+    // (which should happen most of the time in production because a single sensor may only get a handful of detections)
+    // (and if it has been running for a while a lot of tracks will be made so there should be hundreds)
+    // Then that means every detection will ALWAYS be assigned a track
+    // It is up to downstream thresholds whether to actually associated with that track based on the affinity
 
     // Mark all detections as initially unmatched by inserting their indices into the unmatched_detections set.
     for (size_t i = 0; i < detections.size(); i++) {
+        // This is very important variable
+        // This variable only has data at the end of the process if there are more detections than tracks
         unmatched_detections->insert(i);
     }
     // Iterate over each track ID to process the assignment results from the Kuhn-Munkres algorithm.
     size_t i = 0;
     for (size_t id : track_ids) {
         // If the result index is within the range of detections, it means a match has been found.
-        if (res[i] < detections.size()) {
-            // Calculate the match score as 1 minus the dissimilarity value.
-            // A match is found when the algorithm assigns a detection to a track with a dissimilarity score that is not the special "no match" value.
+        // If res[i] is greater than or equal to detections.size()
+        // It means the track is either assigned to a dummy detection (with index >= detections.size()) or unassigned (if res[i] == size_t(-1)).
+        // This value wraps around to std::numeric_limits<size_t>::max() due to unsigned integer underflow.
+        if (vector_where_each_index_is_a_track_id_and_its_value_is_a_detection_index[i] < detections.size()) {
             // The match score is calculated as 1 minus the dissimilarity to convert it into a similarity score (higher is better).
-            float match_score = 1 - dissimilarity.at<float>(i, res[i]);
+            float match_score = 1 - dissimilarity.at<float>(i, vector_where_each_index_is_a_track_id_and_its_value_is_a_detection_index[i]);
             // Record the match by adding it to the matches set, including the track ID, detection index, and match score.
-            matches->emplace(id, res[i], match_score);
+            matches->emplace(id, vector_where_each_index_is_a_track_id_and_its_value_is_a_detection_index[i], match_score);
             // Remove the matched detection from the set of unmatched detections, as it has now been assigned to a track.
-            unmatched_detections->erase(res[i]);
+            unmatched_detections->erase(vector_where_each_index_is_a_track_id_and_its_value_is_a_detection_index[i]);
         } else {
-            // If the result index is not within the range of detections, mark the track as unmatched.
-            // A track is considered unmatched if the algorithm assigns the special "no match" value to it, indicating no suitable detection was found.
+            // This only happens if there are more tracks than detections
+            // Kuhn Munkers will always assign assign to as many tracks as there are detections
+            // If there are less detections than tracks, then some will be unassigned
             unmatched_tracks->insert(id);
         }
         i++;
     }
     //We print the size of matches we have
-    std::cerr << "We have " << matches->size() << " matches" << std::endl;
+    // std::cerr << "We have " << matches->size() << " matches" << std::endl;
     // Now we print the amount of unmatched detections and the amount of unmatched tracks
-    std::cerr << "We have " << unmatched_detections->size() << " unmatched DETECTIONS and " << unmatched_tracks->size() << " unmatched TRACKS" << std::endl;
+    // std::cerr << "We have " << unmatched_detections->size() << " unmatched DETECTIONS and " << unmatched_tracks->size() << " unmatched TRACKS" << std::endl;
 }
 
 const ObjectTracks PedestrianTracker_3d::all_tracks(bool valid_only) const {
@@ -491,6 +480,7 @@ bool PedestrianTracker_3d::EraseTrackIfItWasLostTooManyFramesAgo(size_t track_id
             tracks_dists_.erase(std::pair<size_t, size_t>(min_id, max_id));
         }
         active_track_ids_.erase(track_id);
+        // std::cout << "Erased track ID: " << track_id << std::endl;
 
         return true;
     }
@@ -608,29 +598,16 @@ void PedestrianTracker_3d::Process(const TrackedObjects& input_detections, uint6
         // Map to keep track of whether a track has a strong match with a detection
         std::map<size_t, std::pair<bool, cv::Mat>> is_matching_to_track;
 
-        // If strong matching is enabled, perform additional matching based on strong descriptors
-        if (distance_strong_) {
-            // TGet 
-            std::vector<std::pair<size_t, size_t>> grey_area_track_to_det_matches = GetTrackToDetectionIds(matches);
-            if (grey_area_track_to_det_matches.size() > 0) {
-                is_matching_to_track = StrongMatching(detections, grey_area_track_to_det_matches);                
-            }
-        }
-
-        // Processing matches to update tracks or create new ones
+        // Processing matches to update tracks or create new ones if the affinity isn't high enough
         for (const auto& match : matches) {
             size_t track_id = std::get<0>(match); // Get the track ID from the match tuple
             size_t det_id = std::get<1>(match);   // Get the detection ID from the match tuple
             float conf = std::get<2>(match);      // Get the confidence score from the match tuple
 
-            // Retrieve the last detected object in the track. This object represents the most recent detection
-            // associated with the track, which is crucial for maintaining the continuity of the track.
+            // Retrieve the last detected object in the track.
             auto last_det = tracks_.at(track_id).objects.back();
             
             // Update the bounding box of the last detected object with the predicted position.
-            // This step is essential for ensuring that the track's position is accurately reflected
-            // based on the prediction model. The predicted position helps in maintaining the track's
-            // trajectory and is used downstream in the matching process to compare with new detections.
             last_det.rect = tracks_.at(track_id).predicted_rect;
 
             // If the match confidence is high enough, append the detection to the track
@@ -638,34 +615,20 @@ void PedestrianTracker_3d::Process(const TrackedObjects& input_detections, uint6
                 AppendToTrack(track_id, detections[det_id]);
                 unmatched_detections.erase(det_id); // Remove the detection from unmatched detections
             } else {
-                // For lower confidence, check if strong matching is applicable
-                if (conf > params_.strong_affinity_thr) {
-                    if (distance_strong_ && is_matching_to_track[track_id].first) {
-                        // If there's a strong match, append the detection with its strong descriptor
-                        AppendToTrack(track_id,
-                                      detections[det_id]);
-                    } else {
-                        // If no strong match, consider the track lost and start a new track
-                        if (UpdateLostTrackAndEraseIfItsNeeded(track_id)) {
-                            AddNewTrack(detections[det_id]);
-                        }
-                        else {
-                            AddNewTrack(detections[det_id]);
-                        }
-                    }
+                // The confidence is too low, update the lost status of the track
+                bool track_erased = UpdateLostTrackAndEraseIfItsNeeded(track_id);
 
-                    unmatched_detections.erase(det_id); // Remove the detection from unmatched detections
-                } else {
-                    // If the confidence is too low, mark the track as unmatched
-                    unmatched_tracks.insert(track_id);
-                    // The track <> detection that did not make the cutoff is now made to a new track
-                    AddNewTrack(detections[det_id]);
-                }
+                // Create a new track for the detection
+                AddNewTrack(detections[det_id]);
+
+                // Remove the detection from unmatched detections
+                unmatched_detections.erase(det_id);
             }
         }
 
         // Attempt to create new tracks for unmatched detections
         AddNewTracks(detections, unmatched_detections);
+
         // Update the status of tracks that were not matched to any detection (+1 for track.lost value)
         UpdateLostTracks(unmatched_tracks);
 
@@ -699,35 +662,47 @@ void PedestrianTracker_3d::Process(const TrackedObjects& input_detections, uint6
  * If the maximum track ID exceeds a certain threshold, it reassigns IDs to all remaining tracks starting from 0 to keep the IDs compact.
  */
 void PedestrianTracker_3d::DropForgottenTracks() {
-    std::unordered_map<size_t, Track> new_tracks; // Temporary storage for tracks that are not forgotten
-    std::set<size_t> new_active_tracks; // Temporary storage for IDs of active tracks
+    std::unordered_map<size_t, Track> new_tracks;
+    std::set<size_t> new_active_tracks;
+    std::vector<size_t> new_detected_track_ids_; // Temporary vector for updated detected track IDs
 
-    size_t max_id = 0; // Holds the maximum track ID encountered
-    // Find the maximum track ID if there are any active tracks
+    size_t max_id = 0;
     if (!active_track_ids_.empty())
         max_id = *std::max_element(active_track_ids_.begin(), active_track_ids_.end());
 
-    const size_t kMaxTrackID = 10000; // Threshold for maximum track ID
-    bool reassign_id = max_id > kMaxTrackID; // Determine if ID reassignment is necessary
+    const size_t kMaxTrackID = 10000;
+    bool reassign_id = max_id > kMaxTrackID;
 
-    size_t counter = 0; // Counter for reassigning track IDs
-    // Iterate through all tracks to filter out forgotten ones and potentially reassign IDs
+    size_t counter = 0;
+    std::unordered_map<size_t, size_t> id_mapping; // Map from old IDs to new IDs
+
     for (const auto& pair : tracks_) {
-        // Check if the track is not forgotten
         if (!IsTrackForgotten(pair.first)) {
-            // Add the track to new_tracks with either a new ID or its original ID
-            new_tracks.emplace(reassign_id ? counter : pair.first, pair.second);
-            // Similarly, add the track ID to new_active_tracks
-            new_active_tracks.emplace(reassign_id ? counter : pair.first);
-            counter++; // Increment counter for the next potential ID reassignment
+            size_t new_id = reassign_id ? counter : pair.first;
+            new_tracks.emplace(new_id, pair.second);
+            new_active_tracks.emplace(new_id);
+
+            if (reassign_id) {
+                id_mapping[pair.first] = new_id;
+            }
+
+            counter++;
         }
     }
-    // Replace the current tracks and active track IDs with the filtered and potentially reassigned ones
+
     tracks_.swap(new_tracks);
     active_track_ids_.swap(new_active_tracks);
-
-    // Update the global track counter based on whether IDs were reassigned
     tracks_counter_ = reassign_id ? counter : tracks_counter_;
+
+    // Update detected_track_ids_ if IDs were reassigned
+    if (reassign_id) {
+        for (auto old_id : detected_track_ids_) {
+            if (id_mapping.find(old_id) != id_mapping.end()) {
+                new_detected_track_ids_.push_back(id_mapping[old_id]);
+            }
+        }
+        detected_track_ids_.swap(new_detected_track_ids_);
+    }
 }
 
 float PedestrianTracker_3d::ShapeAffinity(float weight, const cv::Rect& trk, const cv::Rect& det) {
@@ -741,16 +716,6 @@ float PedestrianTracker_3d::MotionAffinity(float weight, const cv::Rect& trk, co
     float y_dist = static_cast<float>(trk.y - det.y) * (trk.y - det.y) / (det.height * det.height);
     return static_cast<float>(exp(static_cast<double>(-weight * (x_dist + y_dist))));
 }
-
-float PedestrianTracker_3d::TimeAffinity(float weight, const float& trk_time, const float& det_time) {
-    return static_cast<float>(exp(static_cast<double>(-weight * std::fabs(trk_time - det_time))));
-}
-
-float PedestrianTracker_3d::DistanceAffinity(float weight, const cv::Point3f& pt1, const cv::Point3f& pt2) {
-    float distance = cv::norm(pt1 - pt2);
-    return exp(-0.5 * (weight * distance) * (weight * distance)); // Scaled Gaussian distance affinity with weight
-}
-
 
 void PedestrianTracker_3d::ComputeFastDesciptors(const cv::Mat& frame,
                                               const TrackedObjects& detections,
@@ -1008,12 +973,12 @@ std::map<size_t, std::pair<bool, cv::Mat>> PedestrianTracker_3d::StrongMatching(
 
         // Compute the overall affinity score by combining ReID affinity with spatial affinity. This score determines the strength of the match.
         float affinity = static_cast<float>(reid_affinity) * Affinity(last_det, detection);
-        std::cerr << "Affinity: " << Affinity(last_det, detection) << std::endl;
+        // std::cerr << "Affinity: " << Affinity(last_det, detection) << std::endl;
 
         // Determine if the detection matches the track based on affinity thresholds. A match is considered strong if it surpasses both thresholds.
         bool is_detection_matching = reid_affinity > params_.reid_thr && affinity > params_.aff_thr_strong;
         // We print reid_thr and reid_affinity
-        std::cerr << "reid_thr: " << params_.reid_thr << ", reid_affinity: " << reid_affinity << ", aff_thr_strong: " << params_.aff_thr_strong << ", affinity: " << affinity << std::endl;
+        // std::cerr << "reid_thr: " << params_.reid_thr << ", reid_affinity: " << reid_affinity << ", aff_thr_strong: " << params_.aff_thr_strong << ", affinity: " << affinity << std::endl;
 
         // Store the matching result and the detection's descriptor in the map. If a strong match is found, the detection's descriptor
         // is used to update the track or for further processing.
@@ -1152,6 +1117,41 @@ void PedestrianTracker_3d::AppendToTrack(size_t track_id,
     }
 }
 
+float PedestrianTracker_3d::TimeAffinity(float weight, const float& trk_time, const float& det_time) {
+    return static_cast<float>(exp(static_cast<double>(-weight * std::fabs(trk_time - det_time))));
+}
+
+float PedestrianTracker_3d::DistanceAffinity(float weight, const cv::Point3f& pt1, const cv::Point3f& pt2) {
+    float distance = cv::norm(pt1 - pt2);
+    return exp(-0.5 * (weight * distance) * (weight * distance)); // Scaled Gaussian distance affinity with weight
+}
+// Compute the cosine distance between two descriptors.
+// A high return value (close to 1) indicates that the descriptors are very different.
+// A low return value (close to 0) indicates that the descriptors are very similar.
+float ComputeCosDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
+    // Ensure the descriptors are not empty and match the expected size.
+    PT_CHECK(!descr1.empty());
+    PT_CHECK(!descr2.empty());
+    PT_CHECK(descr1.size() == descr2.size());
+
+    // Calculate the dot products and norms.
+    double xy = descr1.dot(descr2);
+    double xx = descr1.dot(descr1);
+    double yy = descr2.dot(descr2);
+    double norm = sqrt(xx * yy) + 1e-6; // Add a small value to avoid division by zero.
+
+    // Return the cosine distance.
+    // A high value (close to 1) means the vectors are dissimilar.
+    // A low value (close to 0) means the vectors are similar.
+    // Cosine similarity (xy / norm) ranges between -1 and 1
+    // 1.0 - (xy / norm) shifts this cosine similarity range to between 0 and 2
+    // The multiplication by 0.5 scales this result down to the range [0, 1]
+    // It is a linear relationship
+    // TODO: Maybe there is a better curve than linear
+    // (maybe between 1 and .9 should still be extremely high instead of dropping off linearly, and anything below .4 is unlikely)
+    return 0.5f * static_cast<float>(1.0 - xy / norm);
+}
+
 float PedestrianTracker_3d::AffinityFast_3d(size_t id, const cv::Mat& descriptor1,
                                             const TrackedObject& obj1,
                                             const cv::Mat& descriptor2,
@@ -1168,10 +1168,17 @@ float PedestrianTracker_3d::AffinityFast_3d(size_t id, const cv::Mat& descriptor
     if (dist_aff < eps)
         return 0.0f;
 
+    // Larger cosine distance means it is more different. So distance of 1 means it is extremely difference, and affinity will be 0
     float app_aff = 1.0f - ComputeCosDistance(descriptor1, descriptor2);
 
-    std::cout << "Tracked Object ID: " << id << ", Time Affinity: " << time_aff << ", Distance Affinity: " << dist_aff << ", Appearance Affinity: " << app_aff << ", Total Affinity: " << (app_aff * time_aff * dist_aff) << std::endl;
-
+    // if (obj1.device_id == obj2.device_id) {
+    //     std::cout << "SAME DEVICE COMPARISON" << std::endl;
+    // } else {
+    //     std::cout << "DIFFERENT DEVICE COMPARISON" << std::endl;
+    // }
+    
+    // std::cout << "Tracked Object ID: " << id << ", Time Affinity: " << time_aff << ", Distance Affinity: " << dist_aff << ", Appearance Affinity: " << app_aff << ", Total Affinity: " << (app_aff * time_aff * dist_aff) << std::endl;
+    // std::cout << "Difference from aff_thr_fast_3d: " << (app_aff * time_aff * dist_aff) - params_.aff_thr_fast_3d << std::endl;
     return app_aff * time_aff * dist_aff;
 }
 

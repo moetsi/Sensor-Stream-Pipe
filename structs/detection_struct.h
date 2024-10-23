@@ -29,6 +29,7 @@ struct detection_struct_t
     float sensor_center_x;
     float sensor_center_y;
     float sensor_center_z;
+    size_t device_id_detection_index;
     size_t global_track_id;
     float global_center_x;
     float global_center_y;

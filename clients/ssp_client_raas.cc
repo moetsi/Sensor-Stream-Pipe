@@ -41,6 +41,14 @@ std::mutex device_message_dictionary_mutex;
 std::unordered_map<int, std::pair<std::shared_ptr<detection_struct_t[]>, int>> staging_dictionary;
 std::mutex staging_dictionary_mutex;
 
+// Map to store the latest detection for each global_track_id
+std::unordered_map<size_t, detection_struct_t> latest_global_detections;
+std::mutex latest_global_detections_mutex;
+
+// Staging area to hold detections when Unity requests them
+std::unordered_map<size_t, detection_struct_t> staging_global_detections;
+std::mutex staging_global_detections_mutex;
+
 void start_ssp_client_raas(const std::string& ip_address) {
   try {
     // Connect to port 9002 on local host which is the RaaS consumer port
@@ -71,6 +79,13 @@ void start_ssp_client_raas(const std::string& ip_address) {
             detection_struct_t detection;
             memcpy(&detection, &f.frame[4 + i * sizeof(detection_struct_t)], sizeof(detection_struct_t));
             detection_array.get()[i] = detection;
+
+            // New code to update latest detections per global_track_id
+            {
+                std::unique_lock<std::mutex> lock(latest_global_detections_mutex);
+                size_t global_track_id = detection.global_track_id;
+                latest_global_detections[global_track_id] = detection; // Update or insert the detection
+            }
           }
 
           std::unique_lock<std::mutex> lock(device_message_dictionary_mutex);
@@ -144,7 +159,7 @@ extern "C" {
   }
 
   DLL_EXPORT int return_four() {
-    return 15;
+    return 4;
 }
 
   // This function updates the device information in the staging area and returns the number of updates.
@@ -198,5 +213,54 @@ extern "C" {
     detection = it->second.first[bodyNumber];
     // Unlock the staging_dictionary mutex as we're done accessing it.
     staging_lock.unlock();
+  }
+
+  // Function to get the number of unique global tracks available
+  DLL_EXPORT int getNumberOfLatestGlobalDetections()
+  {
+      std::unique_lock<std::mutex> lock(latest_global_detections_mutex);
+      return latest_global_detections.size();
+  }
+
+  // Function to move detections to the staging area
+  DLL_EXPORT void prepareLatestGlobalDetections()
+  {
+      // Lock both mutexes to prevent deadlock
+      std::unique_lock<std::mutex> lock1(latest_global_detections_mutex, std::defer_lock);
+      std::unique_lock<std::mutex> lock2(staging_global_detections_mutex, std::defer_lock);
+      std::lock(lock1, lock2);
+
+      // Move detections to the staging area
+      staging_global_detections = std::move(latest_global_detections);
+      latest_global_detections.clear();
+  }
+
+  // Function to retrieve all latest detections at once
+  DLL_EXPORT int getAllLatestGlobalDetections(detection_struct_t* detections_array, int max_size)
+  {
+      std::unique_lock<std::mutex> lock(staging_global_detections_mutex);
+
+      int num_detections = static_cast<int>(staging_global_detections.size());
+      int detections_to_copy = std::min(num_detections, max_size);
+
+      int index = 0;
+      for (const auto& pair : staging_global_detections)
+      {
+          if (index >= detections_to_copy)
+              break;
+          detections_array[index++] = pair.second;
+      }
+
+      // Clear the staging area after retrieval
+      staging_global_detections.clear();
+
+      return detections_to_copy; // Return the number of detections filled
+  }
+
+  // Optional: Function to clear the staging area explicitly
+  DLL_EXPORT void clearStagingGlobalDetections()
+  {
+      std::unique_lock<std::mutex> lock(staging_global_detections_mutex);
+      staging_global_detections.clear();
   }
 }

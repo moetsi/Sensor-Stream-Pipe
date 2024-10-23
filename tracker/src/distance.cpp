@@ -25,9 +25,9 @@ float CosDistance::Compute(const cv::Mat& descr1, const cv::Mat& descr2) {
     PT_CHECK(!descr1.empty());
     PT_CHECK(!descr2.empty());
     // Print the size of descr1 and descr2
-    std::cout << "descr1.size(): " << descr1.size() << ", descriptor_size_: " << descriptor_size_ << std::endl;
-    std::cout << "descr2.size(): " << descr2.size() << ", descriptor_size_: " << descriptor_size_ << std::endl;
-    std::cout << "descriptor_size_: " << descriptor_size_ << std::endl;
+    // std::cout << "descr1.size(): " << descr1.size() << ", descriptor_size_: " << descriptor_size_ << std::endl;
+    // std::cout << "descr2.size(): " << descr2.size() << ", descriptor_size_: " << descriptor_size_ << std::endl;
+    // std::cout << "descriptor_size_: " << descriptor_size_ << std::endl;
     PT_CHECK(descr1.size() == descriptor_size_);
     PT_CHECK(descr2.size() == descriptor_size_);
 
