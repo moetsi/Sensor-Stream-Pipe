@@ -52,3 +52,4 @@ build_debug
 3rdparty/*/
 
 configs/moetsi_lab
+configs/shop
