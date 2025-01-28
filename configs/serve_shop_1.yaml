@@ -3,17 +3,20 @@ general:
   host: "localhost"
   port: 9001
   log_level: "debug"
+  listen_for_send_frame_messages: True
   frame_source:
     type: "oakd_xlink_full"
     parameters:
       ip: "192.168.10.42"
       deviceid: 1
-      stream_color: True
+      stream_color: False
       stream_depth: False
       stream_bodies: True
+      send_rgb_to_host_and_visualize: True
+      send_depth_to_host_and_visualize: False
       rgb_resolution: 1080
       rgb_preview_size_y: 960
-      rgb_preview_size_x: 1632 
+      rgb_preview_size_x: 1632
       rgb_fps: 7
       depth_resolution: 720
       depth_preview_size_y: 320
