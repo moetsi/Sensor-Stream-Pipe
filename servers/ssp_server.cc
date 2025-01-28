@@ -94,6 +94,7 @@ struct SSPContext {
     static inline std::unique_ptr<zmq::socket_t> socket;
     static inline std::unique_ptr<IReader> reader;
     static inline std::unique_ptr<std::unordered_map<unsigned int, std::shared_ptr<IEncoder>>> encoders;
+    static inline std::unique_ptr<zmq::socket_t> frame_trigger_subscriber;
 };
 
 // now we make a function called initialize that we call in ssp_server
@@ -115,6 +116,16 @@ extern "C" SSP_EXPORT void initialize(const char* filename, const char* client_k
     // Do not keep packets if there is network congestion
     // SSPContext::socket->set(zmq::sockopt::conflate, true);
     SSPContext::socket->connect("tcp://" + host + ":" + std::to_string(port));
+
+    // Only set up subscriber if configured
+    if (codec_parameters["general"]["listen_for_send_frame_messages"] && 
+        codec_parameters["general"]["listen_for_send_frame_messages"].as<bool>()) {
+        SSPContext::frame_trigger_subscriber = std::make_unique<zmq::socket_t>(*context, ZMQ_SUB);
+        SSPContext::frame_trigger_subscriber->set(zmq::sockopt::rcvtimeo, 0);
+        SSPContext::frame_trigger_subscriber->connect("tcp://localhost:5557");
+        SSPContext::frame_trigger_subscriber->set(zmq::sockopt::subscribe, "");
+        spdlog::info("Listening for frame trigger messages on port 5557");
+    }
 
     YAML::Node general_parameters = codec_parameters["general"];
     SetupLogging(general_parameters);
@@ -307,88 +318,83 @@ extern "C" SSP_EXPORT void pull_and_send_frames()
 
 extern "C" void start_auto()
 {
+    struct termios oldt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    setupNonBlockingInput();
 
-  struct termios oldt;
-  tcgetattr(STDIN_FILENO, &oldt); // get current terminal settings for restoration
-  setupNonBlockingInput();
+    uint64_t last_time = CurrentTimeNs();
+    uint64_t start_time = last_time;
+    uint64_t start_frame_time = last_time;
+    uint64_t sent_frames = 0;
+    uint64_t processing_time = 0;
 
-  uint64_t last_time = CurrentTimeNs();
-  uint64_t start_time = last_time;
-  uint64_t start_frame_time = last_time;
-  uint64_t sent_frames = 0;
-  uint64_t processing_time = 0;
+    double sent_kbytes = 0;
+    double sent_latency = 0;
 
-  double sent_kbytes = 0;
-  double sent_latency = 0;
+    unsigned int fps = SSPContext::reader->GetFps();    
+    unsigned int frame_time = 1000000000ULL/fps;
 
-  unsigned int fps = SSPContext::reader->GetFps();    
-  unsigned int frame_time = 1000000000ULL/fps;
+    try {
+        while (!stop_flag) {
+            if (processing_time < frame_time) {
 
-  int c = 0;
-  try {
-    while (1) {
+                uint64_t sleep_time = frame_time - processing_time;
+                std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
+            }
+            start_frame_time = CurrentTimeNs();
+            // Check for keyboard input
+            char ch;
+            if (read(STDIN_FILENO, &ch, 1) > 0 && ch == 'c') {
+                set_frame_types_to_pull_to_rgb_depth();
+            }
 
-      // This is to trigger set_frame_types_to_pull_to_rgb_depth if the user presses 'c'
-      char ch;
-      if (read(STDIN_FILENO, &ch, 1) > 0 && ch == 'c') {
-          set_frame_types_to_pull_to_rgb_depth();
-      }
+            // Check for broadcast message if subscriber exists
+            if (SSPContext::frame_trigger_subscriber) {
+                zmq::message_t message;
+                if (SSPContext::frame_trigger_subscriber->recv(message, zmq::recv_flags::dontwait)) {
+                    set_frame_types_to_pull_to_rgb_depth();
+                }
+            }
 
-      //The remaining code is for pulling and sending frames
-      if (processing_time < frame_time)
-      {
-        uint64_t sleep_time = frame_time - processing_time;
-        std::this_thread::sleep_for(std::chrono::nanoseconds(sleep_time));
-      }
 
-      start_frame_time = CurrentTimeNs();
+            if (sent_frames == 0) {
+                last_time = CurrentTimeNs();
+                start_time = last_time;
+            }
 
-      if (sent_frames == 0) {
-        last_time = CurrentTimeNs();
-        start_time = last_time;
-      }
+            std::vector<FrameStruct> v = pull_vector_of_frames();
 
-      std::vector<FrameStruct> v = pull_vector_of_frames();
+            if (!v.empty()) {
+                send_vector_of_frames(v);
+                sent_frames += 1;
 
-      if (!v.empty()) {
-        send_vector_of_frames(v);
+                uint64_t diff_time = CurrentTimeNs() - last_time;
+                double diff_start_time = (CurrentTimeNs() - start_time);
+                
+                int64_t avg_fps;
+                if (diff_start_time == 0)
+                    avg_fps = -1;
+                else {
+                    double avg_time_per_frame_sent_ms = diff_start_time / (double)sent_frames;
+                    avg_fps = 1000000000ULL / avg_time_per_frame_sent_ms;
+                }
 
-        sent_frames += 1;
+                last_time = CurrentTimeNs();
+                processing_time = last_time - start_frame_time;
+                sent_latency += diff_time;
 
-        uint64_t diff_time = CurrentTimeNs() - last_time;
-
-        double diff_start_time = (CurrentTimeNs() - start_time);
-        int64_t avg_fps;
-        if (diff_start_time == 0)
-          avg_fps = -1;
-        else {
-          double avg_time_per_frame_sent_ms =
-              diff_start_time / (double)sent_frames;
-          avg_fps = 1000000000ULL / avg_time_per_frame_sent_ms;
+                for (unsigned int i = 0; i < v.size(); i++) {
+                    FrameStruct f = v.at(i);
+                    f.frame.clear();
+                    spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id, f.frame_id);
+                }
+            }
         }
-
-        last_time = CurrentTimeNs();
-        processing_time = last_time - start_frame_time;
-
-        sent_latency += diff_time;
-
-        for (unsigned int i = 0; i < v.size(); i++) {
-          FrameStruct f = v.at(i);
-          f.frame.clear();
-          spdlog::debug("\t{};{};{} sent", f.device_id, f.sensor_id,
-                        f.frame_id);
-        }
-      }
-
-      if (stop_flag) {
-        break;
-      }
+    } catch (...) {
+        restoreInputSettings();
+        throw;
     }
-  } catch (...) {
-        restoreInputSettings(); // ensure the settings are restored even if an error occurs
-        throw; // rethrow the exception to handle it outside
-    }
-    restoreInputSettings(); // restore terminal settings before exiting function
+    restoreInputSettings();
 }
 
 // Updated function signature to accept 4 arguments

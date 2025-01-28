@@ -336,7 +336,7 @@ struct FrameStruct {
    * Integer device id: distingish between devices in the same scene
    * Can be set by user.
    */
-  uint64_t device_id;
+  unsigned int device_id;
 
   /**
    * Current frame number (increases over time)

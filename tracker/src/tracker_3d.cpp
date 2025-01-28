@@ -590,7 +590,7 @@ void PedestrianTracker_3d::Process(const TrackedObjects& input_detections, uint6
         // Solving the assignment problem to find matches between active tracks and new detections
         SolveAssignmentProblem_3d(active_tracks,
                                detections,
-                               params_.aff_thr_fast,
+                               params_.aff_thr_fast_3d,
                                &unmatched_tracks,
                                &unmatched_detections,
                                &matches);
